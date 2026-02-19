@@ -103,30 +103,45 @@ const App: React.FC = () => {
   const [showInterstitial, setShowInterstitial] = useState(false);
   const [interstitialDuration, setInterstitialDuration] = useState(5);
   const [interstitialCallback, setInterstitialCallback] = useState<(() => void) | null>(null);
+  const [onAdCancel, setOnAdCancel] = useState<(() => void) | null>(null);
+  const [lastInterstitialTime, setLastInterstitialTime] = useState(0);
+  const [subscribedCategories, setSubscribedCategories] = useState<string[]>([]);
 
   // Simulação de Push Notification (Demo)
   useEffect(() => {
     const simulatePush = () => {
-      const isJob = Math.random() > 0.7;
-      const mockNotification: AppNotification = isJob ? {
-        id: Date.now().toString(),
-        title: 'Nova Vaga Premium',
-        message: 'A Sonangol E.P. acabou de publicar uma vaga para Engenheiro Sénior. Candidata-te agora!',
-        type: 'job',
-        timestamp: Date.now()
-      } : {
-        id: Date.now().toString(),
-        title: 'Alerta de Câmbio',
-        message: 'O Dólar teve uma ligeira queda no mercado informal. Melhor hora para comprar!',
-        type: 'market',
-        timestamp: Date.now()
-      };
+      const isJob = Math.random() > 0.6;
+      let mockNotification: AppNotification;
+
+      if (isJob) {
+        const category = subscribedCategories.length > 0 
+          ? subscribedCategories[Math.floor(Math.random() * subscribedCategories.length)]
+          : 'Premium';
+
+        mockNotification = {
+          id: Date.now().toString(),
+          title: `Nova Vaga: ${category}`,
+          message: `Há uma nova oportunidade para ${category} em Luanda. Candidata-te já!`,
+          type: 'job',
+          timestamp: Date.now()
+        };
+      } else {
+        mockNotification = {
+          id: Date.now().toString(),
+          title: 'Alerta de Câmbio',
+          message: 'O Dólar teve uma ligeira queda no mercado informal. Melhor hora para comprar!',
+          type: 'market',
+          timestamp: Date.now()
+        };
+      }
+      
       setActiveNotification(mockNotification);
       NotificationService.sendNativeNotification(mockNotification.title, mockNotification.message);
     };
-    const timer = setTimeout(simulatePush, 8000);
+    
+    const timer = setTimeout(simulatePush, 12000); // Slightly longer for better UX
     return () => clearTimeout(timer);
-  }, []);
+  }, [subscribedCategories]);
 
   const [showRewarded, setShowRewarded] = useState(false);
   const [pendingAdPage, setPendingAdPage] = useState<Page>('home'); 
@@ -142,7 +157,7 @@ const App: React.FC = () => {
       referralCount: 0,
       isPremium: false,
       referralCode: `ANGO-${Math.random().toString(36).substring(7).toUpperCase()}`,
-      isAdmin: email.toLowerCase() === 'admin@angolife.ao',
+      isAdmin: email.toLowerCase() === 'suedjosue@gmail.com',
       cvCredits: 0
     };
     setUser(mockUser);
@@ -197,16 +212,57 @@ const App: React.FC = () => {
       case 'home': return <HomePage onNavigate={handleNavigate} />;
       case 'jobs': return <JobsPage 
         isAuthenticated={!!user} 
+        isAdmin={user?.isAdmin}
+        onNavigate={handleNavigate}
         onRequireAuth={() => setIsAuthModalOpen(true)} 
+        onRequestReward={(onSuccess, onCancel) => {
+          setRewardCallback(() => onSuccess);
+          setOnAdCancel(() => onCancel);
+          setShowRewarded(true);
+        }}
         onShowInterstitial={(callback) => {
-          setInterstitialDuration(15);
-          setInterstitialCallback(() => callback);
-          setShowInterstitial(true);
+          const now = Date.now();
+          const FIVE_MINUTES = 5 * 60 * 1000;
+          
+          if (now - lastInterstitialTime < FIVE_MINUTES) {
+            // Capping: Skip ad and execute action immediately
+            callback();
+          } else {
+            // Show Ad
+            setInterstitialDuration(7); // Reduced duration for better UX
+            setInterstitialCallback(() => callback);
+            setShowInterstitial(true);
+          }
+        }}
+        subscribedCategories={subscribedCategories}
+        onToggleSubscription={(cat) => {
+          setSubscribedCategories(prev => 
+            prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+          );
         }}
       />;
       case 'exchange': return <ExchangePage isAuthenticated={!!user} userEmail={user?.email} onRequireAuth={() => setIsAuthModalOpen(true)} isDarkMode={isDarkMode} />;
       case 'deals': return <DealsPage isAuthenticated={!!user} onRequireAuth={() => setIsAuthModalOpen(true)} />;
-      case 'news': return <NewsPage isAuthenticated={!!user} onRequireAuth={() => setIsAuthModalOpen(true)} />;
+      case 'news': return <NewsPage 
+        isAuthenticated={!!user} 
+        onRequireAuth={() => setIsAuthModalOpen(true)}
+        onRequestReward={(onSuccess) => {
+          setRewardCallback(() => onSuccess);
+          setOnAdCancel(() => () => {});
+          setShowRewarded(true);
+        }}
+        onShowInterstitial={(callback) => {
+          const now = Date.now();
+          const FIVE_MINUTES = 5 * 60 * 1000;
+          if (now - lastInterstitialTime < FIVE_MINUTES) {
+            callback();
+          } else {
+            setInterstitialDuration(5);
+            setInterstitialCallback(() => callback);
+            setShowInterstitial(true);
+          }
+        }}
+      />;
       case 'cv-builder': return <CVBuilderPage 
         isAuthenticated={!!user} 
         userProfile={user || undefined}
@@ -214,7 +270,7 @@ const App: React.FC = () => {
         onUpgrade={handleUpgradeToPremium}
         onDecrementCredit={() => user && setUser({ ...user, cvCredits: Math.max(0, user.cvCredits - 1) })}
       />;
-      case 'admin': return <AdminPage />;
+      case 'admin': return <AdminPage user={user} onNavigate={handleNavigate} />;
       case 'profile': return user ? <ProfilePage user={user} onLogout={() => setUser(null)} /> : <HomePage onNavigate={handleNavigate} />;
       default: return <HomePage onNavigate={handleNavigate} />;
     }
@@ -308,6 +364,7 @@ const App: React.FC = () => {
               window.scrollTo(0,0); 
             }
             if (interstitialCallback) {
+              setLastInterstitialTime(Date.now());
               interstitialCallback();
               setInterstitialCallback(null);
             }
@@ -318,7 +375,7 @@ const App: React.FC = () => {
       {showRewarded && (
         <RewardedAd 
           onReward={() => { setShowRewarded(false); rewardCallback?.(); }} 
-          onClose={() => setShowRewarded(false)} 
+          onClose={() => { setShowRewarded(false); onAdCancel?.(); }} 
         />
       )}
     </div>

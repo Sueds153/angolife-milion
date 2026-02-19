@@ -1,11 +1,13 @@
-name: AngoNews Scraper
+name: AngoNews Scraper v2 — Motor de Agregação (12 Fontes)
 
 on:
   schedule:
-    # Executa todos os dias às 03:00 UTC (madrugada em Angola)
-    - cron: "0 3 * * *"
+    # 3x por dia para manter 12 fontes atualizadas
+    - cron: "0 6 * * *"   # 06:00 UTC — manhã
+    - cron: "0 12 * * *"  # 12:00 UTC — meio-dia
+    - cron: "0 18 * * *"  # 18:00 UTC — tarde
   workflow_dispatch:
-    # Permite execução manual pelo utilizador
+    # Permite execução manual pelo administrador
 
 jobs:
   scrape:
