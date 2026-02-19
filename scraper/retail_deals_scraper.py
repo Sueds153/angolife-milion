@@ -214,30 +214,63 @@ class AngoRetailScraper:
         log.info(f"🚀 Iniciando {store_name} ({cfg['promo_url']})...")
         try:
             session = requests.Session()
-            # Headers extras para evitar 403 (especialmente Shoprite)
+            
+            # PASSO STEALTH: Visita Home Primeiro para Cookies
+            try:
+                session.get(cfg["base_url"], headers=self.headers, timeout=15)
+            except:
+                pass
+
+            # Headers extras para evitar 403
             session.headers.update({
-                "User-Agent": self.headers["User-Agent"],
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
-                "Accept-Language": "pt-PT,pt;q=0.9,en-US;q=0.8,en;q=0.7",
                 "Referer": cfg["base_url"],
                 "Connection": "keep-alive",
-                "Upgrade-Insecure-Requests": "1"
             })
             
-            res = session.get(cfg["promo_url"], timeout=30)
+            res = session.get(cfg["promo_url"], headers=self.headers, timeout=30)
             
             if res.status_code != 200:
                 log.error(f"  ❌ Falha ao aceder {store_name}: {res.status_code}")
-                # Fallback: tenta sem www se falhar com www (ou vice-versa) se aplicável
                 return
 
             soup = BeautifulSoup(res.text, "html.parser")
             items = soup.select(cfg["item_selector"])
             
             if not items:
-                log.warning(f"  ⚠️ Nenhum item encontrado em {store_name}. Verifique os seletores.")
-                # Log snippet do HTML para debug se nada for encontrado
-                log.debug(f"  📄 HTML Snippet: {res.text[:500]}")
+                log.warning(f"  ⚠️ Sem produtos em {store_name}. Tentando localizar Folheto...")
+                # ESTRATÉGIA FLYER-FIRST (Fallback)
+                flyer_found = False
+                # Procura por keywords de folheto em links
+                keywords = ["folheto", "pdf", "promo", "catalogo", "ver ofertas"]
+                for link in soup.find_all("a", href=True):
+                    text = (link.get_text() or "").lower()
+                    href = link["href"].lower()
+                    if any(kw in text for kw in keywords) or ".pdf" in href:
+                        flyer_url = urljoin(cfg["base_url"], link["href"])
+                        log.info(f"  📖 Folheto detetado: {flyer_url}")
+                        
+                        # Verifica se já existe esse "Folheto" no dia
+                        today_folder = datetime.now().strftime("%Y-%m-%d")
+                        flyer_title = f"Folheto Digital: {store_name} ({today_folder})"
+                        
+                        if not self.db.product_exists(flyer_title, store_name):
+                            payload = {
+                                "title": flyer_title,
+                                "store": store_name,
+                                "url": flyer_url,
+                                "category": cfg["category"],
+                                "image_placeholder": "https://img.icons8.com/color/96/pdf.png", # Ícone padrão
+                                "status": "pending",
+                                "submitted_by": "scraper_flyer"
+                            }
+                            if self.db.insert("product_deals", payload):
+                                log.info(f"  ✅ Folheto guardado: {store_name}")
+                                self.stats["saved"] += 1
+                                flyer_found = True
+                        break
+                
+                if not flyer_found:
+                    log.debug(f"  📄 Snippet do HTML falhado: {res.text[:300]}")
                 return
 
             log.info(f"  📦 Encontrados {len(items)} potenciais itens.")
