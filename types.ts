@@ -39,6 +39,7 @@ export interface ProductDeal {
   location: string;
   description: string;
   imagePlaceholder: string;
+  category?: string;
   status: 'pending' | 'approved' | 'rejected';
   submittedBy: string;
   createdAt: string;

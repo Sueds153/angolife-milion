@@ -82,6 +82,7 @@ export const SupabaseService = {
       location: d.location,
       description: d.description,
       imagePlaceholder: d.image_placeholder,
+      category: d.category,
       status: d.status,
       submittedBy: d.submitted_by,
       createdAt: d.created_at
@@ -108,6 +109,7 @@ export const SupabaseService = {
       location: d.location,
       description: d.description,
       imagePlaceholder: d.image_placeholder,
+      category: d.category,
       status: d.status,
       submittedBy: d.submitted_by,
       createdAt: d.created_at
@@ -125,6 +127,7 @@ export const SupabaseService = {
         location: deal.location,
         description: deal.description,
         image_placeholder: deal.imagePlaceholder,
+        category: deal.category,
         submitted_by: deal.submittedBy,
         status: 'pending'
       }]);

@@ -151,15 +151,18 @@ class SupabaseRestClient:
     def insert(self, table: str, data: dict):
         try:
             res = requests.post(f"{self.base_url}/{table}", headers=self.headers, json=data)
-            return res.status_code in [200, 201]
+            if res.status_code not in [200, 201]:
+                log.error(f"  ❌ Erro Supabase ({res.status_code}): {res.text}")
+                return False
+            return True
         except Exception as e:
-            log.error(f"  ❌ Erro Supabase: {e}")
+            log.error(f"  ❌ Erro de Conexão Supabase: {e}")
             return False
 
     def product_exists(self, product_name: str, store: str):
         try:
-            # Check for duplication by product name and store
-            url = f"{self.base_url}/product_deals?product=eq.{product_name}&store=eq.{store}"
+            # Check for duplication by title (correct column) and store
+            url = f"{self.base_url}/product_deals?title=eq.{product_name}&store=eq.{store}"
             res = requests.get(url, headers=self.headers)
             if res.status_code == 200:
                 return len(res.json()) > 0
@@ -229,15 +232,16 @@ class AngoRetailScraper:
                         self.stats["skipped_dup"] += 1
                         continue
 
+                    # Alinhamento com Schema Real do Supabase
                     payload = {
-                        "product": product,
+                        "title": product,
                         "store": store_name,
-                        "current_price": current_price,
-                        "old_price": old_price,
-                        "image_url": img_url,
+                        "discount_price": current_price,
+                        "original_price": old_price,
+                        "image_placeholder": img_url,
                         "category": cfg["category"],
                         "status": "pending",
-                        "source": "scraper"
+                        "submitted_by": "scraper"
                     }
 
                     if self.db.insert("product_deals", payload):
