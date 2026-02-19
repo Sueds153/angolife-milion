@@ -320,7 +320,7 @@ class AngoNewsScraper:
                     return self.normalize_url(src, base_url)
 
         # Nível 3: Placeholder AngoLife (Tratamento de Nulos)
-        return image_url if image_url else ANGOLIFE_PLACEHOLDER
+        return ANGOLIFE_PLACEHOLDER
 
     # ── Classificação Inteligente ─────────────────────────────────────────
     def classify(self, title: str, fixed_category: str) -> tuple:
@@ -437,7 +437,7 @@ class AngoNewsScraper:
                     summary = self.get_summary(body_text)
 
                     # ── Classificação e Prioridade ────────────────────────
-                    category, is_priority = self.classify(final_title, cfg.get("fixed_category", "Geral"))
+                    categoria, is_priority = self.classify(final_title, cfg.get("fixed_category", "Geral"))
 
                     # ── Payload para Supabase (Check de Nulos e Colunas) ─────
                     payload = {
@@ -445,7 +445,7 @@ class AngoNewsScraper:
                         "resumo": (summary or "")[:1000],
                         "corpo": (body_html or "")[:50000],
                         "imagem_url": image_url or ANGOLIFE_PLACEHOLDER,
-                        "categoria": category or "Geral",
+                        "categoria": categoria or "Geral",
                         "fonte": site_name,
                         "url_origem": article_url,
                         "is_priority": bool(is_priority),
@@ -455,7 +455,7 @@ class AngoNewsScraper:
                     success = self.db.insert("news_articles", payload)
                     if success:
                         label = "🔴 URGENTE" if is_priority else "✅"
-                        log.info(f"    {label} Guardada | Cat: {category} | Prio: {is_priority}")
+                        log.info(f"    {label} Guardada | Cat: {categoria} | Prio: {is_priority}")
                         self.stats["saved"] += 1
                     else:
                         self.stats["errors"] += 1

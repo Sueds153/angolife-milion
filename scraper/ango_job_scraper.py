@@ -526,7 +526,7 @@ class AngoJobScraper:
 
                     success = self.db.insert("jobs", payload)
                     if success:
-                        log.info(f"  ✅ Guardada: [{category}] {title[:55]} @ {company}")
+                        log.info(f"  ✅ Guardada: [{categoria}] {title[:55]} @ {company}")
                         self.stats["saved"] += 1
                     else:
                         self.stats["errors"] += 1
