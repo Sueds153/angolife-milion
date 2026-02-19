@@ -1,11 +1,12 @@
-name: AngoJob Scraper
+name: AngoJob Scraper v2 — Super Motor de Empregos (8 Fontes)
 
 on:
   schedule:
-    # Executa todos os dias às 02:00 UTC (madrugada em Angola)
-    - cron: "0 2 * * *"
+    # 2x por dia para manter 8 fontes actualizadas
+    - cron: "0 7 * * *"   # 07:00 UTC — manhã
+    - cron: "0 14 * * *"  # 14:00 UTC — tarde
   workflow_dispatch:
-    # Permite execução manual pelo utilizador
+    # Permite execução manual pelo administrador
 
 jobs:
   scrape:

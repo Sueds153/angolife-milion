@@ -1,32 +1,43 @@
 """
-AngoJobScraper - Script Premium de Scraping de Vagas Angolanas
+AngoJobScraper v2 — Super Motor de Vagas de Emprego Angolanas
 =============================================================
-Alimenta automaticamente a tabela `jobs` no Supabase com vagas
-extraídas de sites angolanos REAIS.
+Arquitetura de 'Adaptadores' unificada com suporte a 8+ fontes.
 
-Sites configurados e testados:
-  1. AngoEmprego.com (WordPress + WP Job Manager)
-  2. AngoVagas.net (WordPress)
-  3. Careerjet.co.ao
+Fontes configuradas:
+  1. AngoEmprego.com     → Plataforma nacional líder
+  2. AngoVagas.net       → WordPress, volume médio
+  3. Emprega Angola      → Portal nacional moderno
+  4. INEFOP              → Concursos Públicos e Estado
+  5. Careerjet Angola    → Volume de vagas classe média
+  6. Mirantes            → Talatona / Luanda Sul
+  7. AngoJob.net         → Portal agregador angolano
+  8. LinkedIn (Público)  → Vagas públicas sem login
 
-Integração com Supabase via REST API direta (sem supabase-py),
-compatível com Python 3.14+.
+Funcionalidades:
+  ✅ JOBS_CONFIG — dicionário unificado de adaptadores
+  ✅ Chrome v122 User-Agent real (anti-403/bloqueios)
+  ✅ Deduplicação dupla: por source_url E por (title + company)
+  ✅ Categorização automática por palavras-chave no título
+  ✅ Extração de imagem: og:image → logo img → None
+  ✅ Extração de e-mail por regex na página de detalhe
+  ✅ 2-5s de delay aleatório entre requests (simulação humana)
+  ✅ Per-site try-except blindado — falha isolada por fonte
+  ✅ Log de estatísticas completo no final
 
-Uso:
-    python ango_job_scraper.py
-
-Dependências (apenas 3, sem compilação C++):
+Dependências:
     pip install requests beautifulsoup4 python-dotenv
 """
 
 import re
 import os
-import json
 import time
+import json
+import random
 import logging
 import unicodedata
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Optional, List, Dict
+from urllib.parse import urljoin, urlparse
 
 import requests
 from bs4 import BeautifulSoup
@@ -40,82 +51,199 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler("scraper.log", encoding="utf-8"),
+        logging.FileHandler("jobs_scraper.log", encoding="utf-8"),
     ],
 )
 log = logging.getLogger("AngoJobScraper")
 
-# ─────────────────────────────────────────────
-# CONFIGURAÇÃO DOS SITES ALVO (REAIS E TESTADOS)
-# ─────────────────────────────────────────────
-SITE_CONFIGS = [
-    # ── SITE 1: AngoEmprego.com ──────────────────────────────────────────
-    # WordPress com WP Job Manager. Estrutura confirmada via inspeção HTML.
-    {
-        "name": "AngoEmprego.com",
+# ─────────────────────────────────────────────────────────────────────────
+# INTELIGÊNCIA: Categorização automática de vagas por título
+# ─────────────────────────────────────────────────────────────────────────
+CATEGORY_MAP = {
+    "Tecnologia": [
+        "IT", "TI", "Informática", "Developer", "Desenvolvedor", "Programador",
+        "Software", "Sistemas", "Redes", "Cibersegurança", "Data", "Python", "Java",
+        "Frontend", "Backend", "Fullstack", "DevOps", "Cloud", "Suporte Técnico"
+    ],
+    "Gestão": [
+        "Gerente", "Gestor", "Director", "Diretor", "Manager", "Supervisor",
+        "Coordenador", "Coordenação", "CEO", "CFO", "COO", "Chefe", "Responsável"
+    ],
+    "Finanças": [
+        "Contabilista", "Contabilidade", "Financeiro", "Finanças", "Auditor",
+        "Auditoria", "Tesoureiro", "Economista", "Análise Financeira", "Fiscal"
+    ],
+    "Saúde": [
+        "Médico", "Enfermeiro", "Enfermeira", "Farmacêutico", "Técnico de Saúde",
+        "Saúde", "Clínica", "Hospital", "Dentista", "Fisioterapeuta"
+    ],
+    "Engenharia": [
+        "Engenheiro", "Engenharia", "Civil", "Mecânico", "Elétrico", "Topógrafo",
+        "Construção", "Estrutural", "Petróleo", "Petroquímica", "Minas"
+    ],
+    "Educação": [
+        "Professor", "Professora", "Docente", "Educador", "Formador",
+        "Tutor", "Ensino", "Escola", "Universidade", "Docência"
+    ],
+    "Logística": [
+        "Motorista", "Logística", "Armazém", "Transporte", "Estoca",
+        "Distribuição", "Supply Chain", "Compras", "Procurement", "Frota"
+    ],
+    "Limpeza & Serviços": [
+        "Limpeza", "Higiene", "Lavandaria", "Copeiro", "Cozinheiro",
+        "Segurança", "Porteiro", "Recepcionista", "Assistente"
+    ],
+    "Vendas & Marketing": [
+        "Vendedor", "Vendas", "Comercial", "Marketing", "Publicidade",
+        "Relações Públicas", "Social Media", "E-commerce", "Representante Comercial"
+    ],
+    "Concurso Público": [
+        "Concurso", "Estado", "Governo", "Ministério", "INEFOP", 
+        "Público", "Municipal", "Provincial", "Administração Pública"
+    ],
+}
+
+# ─────────────────────────────────────────────────────────────────────────
+# JOBS_CONFIG — Dicionário Unificado de Adaptadores
+# Cada chave é o nome do portal. Os valores são os seletores CSS específicos.
+# ─────────────────────────────────────────────────────────────────────────
+JOBS_CONFIG: Dict[str, dict] = {
+
+    # ── 1. ANGOEMPREGO.COM ────────────────────────────────────────────────
+    # WordPress WP Job Manager. Estrutura confirmada.
+    "AngoEmprego.com": {
         "base_url": "https://angoemprego.com",
         "list_url": "https://angoemprego.com/vagas",
         "job_card_selector": "li.job_listing, article.job_listing, .job_listing",
-        "fields": {
-            # Título: h3 é mais estável. Se houver link dentro, o .get_text() captura o texto.
-            "title": "h3.job-title, h3, .position, .title",
-            # Empresa: Seletores mais abrangentes
-            "company": ".company strong, .company-name, strong.company, .company, .employer",
-            # Localização
-            "location": ".location, .job-location, span.location, .city",
-            # Link principal do card
-            "link": "a",
-        },
-        "detail_page": {
-            "enabled": True,
-            "description": ".job_description, .single-job-description, .entry-content",
-            "requirements": ".job_description ul, .entry-content ul",
-        },
-        "request_delay": 1.5,
+        "title_selector": "h3.job-title, h3, .position, .title",
+        "company_selector": ".company strong, .company-name, strong.company, .company, .employer",
+        "location_selector": ".location, .job-location, span.location, .city",
+        "link_selector": "a",
+        "detail_enabled": True,
+        "detail_description_selector": ".job_description, .single-job-description, .entry-content",
+        "request_delay_range": (2, 4),
     },
 
-    # ── SITE 2: AngoVagas.net ─────────────────────────────────────────────
-    # WordPress simples. Posts de vagas como artigos.
-    {
-        "name": "AngoVagas.net",
+    # ── 2. ANGOVAGAS.NET ──────────────────────────────────────────────────
+    # WordPress simples, posts como artigos de vagas.
+    "AngoVagas.net": {
         "base_url": "https://angovagas.net",
-        "list_url": "https://angovagas.net",  # Fallback to homepage as category failed
+        "list_url": "https://angovagas.net",
         "job_card_selector": "article.post, article.type-post, .post",
-        "fields": {
-            "title": "h2.entry-title, h1.entry-title, .post-title, h2",
-            "company": ".company, .empresa, .entry-meta .author, .author",
-            "location": ".location, .cidade, .entry-meta",
-            "description": ".entry-summary, .excerpt, p",
-            "link": "a",
-        },
-        "detail_page": {
-            "enabled": True,
-            "description": ".entry-content, .post-content, article .content",
-            "requirements": ".entry-content ul, .post-content ul",
-        },
-        "request_delay": 1.0,
+        "title_selector": "h2.entry-title, h1.entry-title, .post-title, h2",
+        "company_selector": ".company, .empresa, .entry-meta .author, .author",
+        "location_selector": ".location, .cidade, .entry-meta",
+        "link_selector": "a",
+        "detail_enabled": True,
+        "detail_description_selector": ".entry-content, .post-content, article .content",
+        "request_delay_range": (2, 5),
     },
 
-    # ─── ADICIONE MAIS SITES AQUI ───
-    # {
-    #     "name": "Meu Site",
-    #     "base_url": "https://www.meusite.ao",
-    #     "list_url": "https://www.meusite.ao/empregos",
-    #     "job_card_selector": ".vaga-item",
-    #     "fields": { "title": "h2", "company": ".empresa", "location": ".cidade", "link": "a" },
-    #     "detail_page": { "enabled": False },
-    #     "request_delay": 1.0,
-    # },
-]
+    # ── 3. EMPREGA ANGOLA ─────────────────────────────────────────────────
+    # Portal moderno de vagas angolanas.
+    "Emprega Angola": {
+        "base_url": "https://www.empregaangola.com",
+        "list_url": "https://www.empregaangola.com/empregos",
+        "job_card_selector": ".job-item, .vacancy-item, article, .card",
+        "title_selector": "h2, h3, .job-title, .vacancy-title",
+        "company_selector": ".company, .empresa, .employer-name",
+        "location_selector": ".location, .cidade, .province",
+        "link_selector": "a",
+        "detail_enabled": True,
+        "detail_description_selector": ".job-description, .vacancy-body, .entry-content",
+        "request_delay_range": (2, 4),
+    },
+
+    # ── 4. INEFOP ─────────────────────────────────────────────────────────
+    # Instituto Nacional do Emprego e Formação Profissional.
+    # Foco total em Concursos Públicos e Vagas de Estado.
+    "INEFOP": {
+        "base_url": "https://www.inefop.gov.ao",
+        "list_url": "https://www.inefop.gov.ao/concursos",
+        "job_card_selector": "article, .concurso-item, .post, .entry",
+        "title_selector": "h1, h2, h3, .entry-title, .post-title",
+        "company_selector": None,  # Empresa fixa: Estado Angolano
+        "location_selector": ".location, .provincia, p",
+        "link_selector": "a",
+        "detail_enabled": True,
+        "detail_description_selector": ".entry-content, .post-content, article",
+        "fixed_company": "Estado Angolano (INEFOP)",
+        "fixed_category": "Concurso Público",
+        "request_delay_range": (3, 5),
+    },
+
+    # ── 5. CAREERJET ANGOLA ───────────────────────────────────────────────
+    # Agregador internacional com forte presença local. Grande volume de vagas.
+    "Careerjet Angola": {
+        "base_url": "https://www.careerjet.co.ao",
+        "list_url": "https://www.careerjet.co.ao/jobs.html?ISOCountry=AO&locale_code=pt_AO",
+        "job_card_selector": "li.job, article.job, .job_item",
+        "title_selector": "article h2.title, h2, .title, a[href*='job']",
+        "company_selector": ".company, p.company",
+        "location_selector": ".location, ul.tags li, .city",
+        "link_selector": "header a, h2 a, a.title",
+        "detail_enabled": False,  # Evitar bloqueios no Careerjet
+        "request_delay_range": (3, 5),
+    },
+
+    # ── 6. MIRANTES ───────────────────────────────────────────────────────
+    # Portal de vagas com foco em Talatona e Luanda Sul.
+    "Mirantes": {
+        "base_url": "https://www.mirantes.ao",
+        "list_url": "https://www.mirantes.ao/emprego",
+        "job_card_selector": ".job-listing, article, .post, .vacancy",
+        "title_selector": "h2, h3, .job-title, .entry-title",
+        "company_selector": ".company, .employer, .empresa",
+        "location_selector": ".location, .city, .province",
+        "link_selector": "a",
+        "detail_enabled": True,
+        "detail_description_selector": ".job-description, .entry-content",
+        "request_delay_range": (2, 4),
+    },
+
+    # ── 7. ANGOJOB.NET ────────────────────────────────────────────────────
+    # Portal agregador angolano com vagas de múltiplos sectores.
+    "AngoJob.net": {
+        "base_url": "https://angojob.net",
+        "list_url": "https://angojob.net/vagas",
+        "job_card_selector": ".job-item, .vaga-item, article.post, .post",
+        "title_selector": "h2, h3, .job-title",
+        "company_selector": ".company, .empresa",
+        "location_selector": ".location, .city",
+        "link_selector": "a",
+        "detail_enabled": True,
+        "detail_description_selector": ".entry-content, .post-content",
+        "request_delay_range": (2, 5),
+    },
+
+    # ── 8. LINKEDIN (VAGAS PÚBLICAS ANGOLA) ───────────────────────────────
+    # Apenas captura vagas públicas, sem login. Headers reforçados.
+    "LinkedIn": {
+        "base_url": "https://www.linkedin.com",
+        "list_url": "https://www.linkedin.com/jobs/search/?keywords=angola&location=Angola&f_TPR=r86400",
+        "job_card_selector": ".job-search-card, .base-card, li.jobs-search-results__list-item",
+        "title_selector": "h3.base-search-card__title, h3, .job-search-card__title",
+        "company_selector": "h4.base-search-card__subtitle, .job-search-card__company-name",
+        "location_selector": ".job-search-card__location, .base-search-card__metadata",
+        "link_selector": "a.base-card__full-link, a",
+        "detail_enabled": False,  # LinkedIn bloqueia rapidamente fetchs de detalhe
+        "request_delay_range": (4, 7),  # Delays mais longos para LinkedIn
+        # LinkedIn requer headers especiais
+        "extra_headers": {
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+            "Sec-Fetch-User": "?1",
+            "Upgrade-Insecure-Requests": "1",
+        },
+    },
+}
 
 
 # ─────────────────────────────────────────────
-# CLIENTE SUPABASE VIA REST API
-# (Sem supabase-py — compatível com Python 3.14+)
+# CLIENTE SUPABASE REST (SEM supabase-py)
 # ─────────────────────────────────────────────
 class SupabaseRestClient:
-    """Cliente leve para a REST API do Supabase usando apenas `requests`."""
-
     def __init__(self, url: str, key: str):
         self.base_url = url.rstrip("/")
         self.headers = {
@@ -126,7 +254,6 @@ class SupabaseRestClient:
         }
 
     def select(self, table: str, filters: dict = None, columns: str = "*") -> list:
-        """Faz um SELECT com filtros opcionais."""
         params = {"select": columns}
         if filters:
             params.update(filters)
@@ -140,7 +267,6 @@ class SupabaseRestClient:
         return resp.json()
 
     def insert(self, table: str, data: dict) -> bool:
-        """Insere um registo na tabela."""
         resp = requests.post(
             f"{self.base_url}/rest/v1/{table}",
             headers=self.headers,
@@ -148,312 +274,312 @@ class SupabaseRestClient:
             timeout=10,
         )
         if resp.status_code >= 400:
-            log.error(f"Erro na API Supabase ({resp.status_code}): {resp.text}")
-        resp.raise_for_status()
+            log.error(f"Erro Supabase ({resp.status_code}): {resp.text}")
+            log.error(f"Payload: {json.dumps(data, ensure_ascii=False)[:300]}")
+            return False
         return True
 
 
 # ─────────────────────────────────────────────
-# CLASSE PRINCIPAL
+# MOTOR PRINCIPAL — AngoJobScraper v2
 # ─────────────────────────────────────────────
 class AngoJobScraper:
-    """
-    Scraper modular para vagas de emprego angolanas.
-    Integra diretamente com o Supabase via REST API.
-    """
-
-    HEADERS = {
+    # Chrome v122 User-Agent — contorna a maioria dos bloqueios básicos
+    BASE_HEADERS = {
         "User-Agent": (
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
             "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/121.0.0.0 Safari/537.36"
+            "Chrome/122.0.0.0 Safari/537.36"
         ),
-        "Accept-Language": "pt-PT,pt;q=0.9,en;q=0.8",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "Accept-Language": "pt-AO,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Connection": "keep-alive",
         "Referer": "https://www.google.com/",
+        "Cache-Control": "no-cache",
     }
 
     EMAIL_REGEX = re.compile(
         r"[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}"
     )
 
-    def __init__(self, supabase_client: SupabaseRestClient):
-        self.supabase = supabase_client
+    def __init__(self, db: SupabaseRestClient):
+        self.db = db
         self.session = requests.Session()
-        self.session.headers.update(self.HEADERS)
+        self.session.headers.update(self.BASE_HEADERS)
+        self.stats = {"processed": 0, "saved": 0, "skipped_dup": 0, "errors": 0}
 
-    # ── Utilitários ──────────────────────────
-
-    def _clean_text(self, text: Optional[str]) -> str:
-        """Remove espaços extras, caracteres de controlo e normaliza Unicode."""
+    # ── Utilidades ────────────────────────────────────────────────────────
+    def _clean(self, text: Optional[str]) -> str:
         if not text:
             return ""
         text = unicodedata.normalize("NFKC", text)
         text = re.sub(r"[\x00-\x08\x0b-\x1f\x7f]", "", text)
-        text = re.sub(r"\s+", " ", text).strip()
-        return text
+        return re.sub(r"\s+", " ", text).strip()
+
+    def _normalize_url(self, url: str, base_url: str) -> str:
+        if not url:
+            return ""
+        if url.startswith("http"):
+            return url
+        return urljoin(base_url, url)
 
     def _extract_email(self, text: str) -> Optional[str]:
-        """Procura o primeiro e-mail válido num bloco de texto."""
         match = self.EMAIL_REGEX.search(text or "")
         return match.group(0) if match else None
 
-    def _extract_requirements(self, soup_element) -> list:
-        """
-        Extrai itens de listas <ul>/<ol> como array Python.
-        Compatível com a coluna `requisitos` (jsonb/text[]) do Supabase.
-        """
-        requirements = []
-        if not soup_element:
-            return requirements
-        for li in soup_element.find_all("li"):
-            text = self._clean_text(li.get_text())
-            if text and len(text) > 3:
-                requirements.append(text)
-        return requirements
+    def _human_delay(self, delay_range: tuple):
+        """Simula atraso humano aleatório entre requests."""
+        secs = random.uniform(*delay_range)
+        log.info(f"  ⏳ Aguardando {secs:.1f}s (simulação humana)...")
+        time.sleep(secs)
 
-    def _fetch_page(self, url: str, delay: float = 0) -> Optional[BeautifulSoup]:
-        """Faz o request HTTP e retorna um objeto BeautifulSoup."""
-        if delay > 0:
-            time.sleep(delay)
+    def _fetch(self, url: str, extra_headers: dict = None) -> Optional[BeautifulSoup]:
+        """Faz o request e retorna BeautifulSoup, ou None se falhar."""
+        headers = {}
+        if extra_headers:
+            headers.update(extra_headers)
         try:
-            response = self.session.get(url, timeout=20)
-            response.raise_for_status()
-            response.encoding = response.apparent_encoding or "utf-8"
-            return BeautifulSoup(response.text, "html.parser")
+            resp = self.session.get(url, headers=headers, timeout=20)
+            resp.raise_for_status()
+            resp.encoding = resp.apparent_encoding or "utf-8"
+            return BeautifulSoup(resp.text, "html.parser")
         except requests.RequestException as e:
-            log.error(f"Erro ao aceder {url}: {e}")
+            log.warning(f"  ⚠️  Falha no request para {url}: {e}")
             return None
 
+    # ── Extração de Imagem ────────────────────────────────────────────────
+    def _extract_image(self, soup: BeautifulSoup, base_url: str) -> Optional[str]:
+        """Extrai imagem: og:image → primeira img relevante → None."""
+        og = soup.find("meta", property="og:image")
+        if og and og.get("content"):
+            return og["content"]
+        # Procura logo da empresa em imagens
+        for img in soup.find_all("img")[:5]:
+            src = img.get("src") or img.get("data-src")
+            if src and any(kw in src.lower() for kw in ["logo", "company", "employer", "brand"]):
+                return self._normalize_url(src, base_url)
+        return None
+
+    # ── Categorização Automática ──────────────────────────────────────────
+    def _categorize(self, title: str, fixed_category: str = None) -> str:
+        """Atribui categoria com base em palavras-chave no título."""
+        if fixed_category:
+            return fixed_category
+        title_lower = title.lower()
+        for category, keywords in CATEGORY_MAP.items():
+            if any(kw.lower() in title_lower for kw in keywords):
+                return category
+        return "Geral"
+
+    # ── Deduplicação Dupla ────────────────────────────────────────────────
+    def _is_duplicate_url(self, source_url: str) -> bool:
+        """Verifica se a URL de origem já existe."""
+        try:
+            res = self.db.select("jobs", filters={"source_url": f"eq.{source_url}"}, columns="id")
+            return len(res) > 0
+        except Exception:
+            return False
+
+    def _is_duplicate_composite(self, title: str, company: str) -> bool:
+        """
+        Deduplicação inteligente: mesma vaga publicada em múltiplos sites.
+        Se título E empresa forem idênticos, é considerado duplicado.
+        """
+        if not title or not company or company == "Empresa Confidencial":
+            return False
+        try:
+            res = self.db.select(
+                "jobs",
+                filters={"title": f"eq.{title}", "company": f"eq.{company}"},
+                columns="id",
+            )
+            return len(res) > 0
+        except Exception:
+            return False
+
+    # ── Auto-Detecção de Seletor ──────────────────────────────────────────
     def _auto_detect_selector(self, soup: BeautifulSoup) -> Optional[str]:
-        """
-        Tenta auto-detectar o seletor CSS de cards de vagas.
-        Útil quando o seletor configurado não encontra nada.
-        """
-        # Seletores comuns em job boards WordPress e outros CMS
         candidates = [
-            "li.job_listing",
-            "article.job_listing",
-            ".job-listing",
-            ".job_listing",
-            "article.post",
-            ".job-card",
-            ".vaga-item",
-            ".job-item",
-            ".listing-item",
-            "article",
+            "li.job_listing", "article.job_listing", ".job-listing",
+            ".job-item", ".vacancy-item", "li.job", ".job_item",
+            ".base-card", "article.post", ".post", "article",
         ]
         for sel in candidates:
             items = soup.select(sel)
-            if len(items) >= 2:  # Pelo menos 2 para confirmar que é uma listagem
-                log.info(f"  🔍 Auto-detectado seletor: '{sel}' ({len(items)} items)")
+            if len(items) >= 2:
+                log.info(f"  🔍 Seletor auto-detectado: '{sel}' ({len(items)} itens)")
                 return sel
         return None
 
-    # ── Lógica de Duplicação ─────────────────
-
-    def _url_already_exists(self, source_url: str) -> bool:
-        """Verifica no Supabase se a URL de origem já foi inserida."""
-        try:
-            results = self.supabase.select(
-                "jobs",
-                filters={"source_url": f"eq.{source_url}"},
-                columns="id",
-            )
-            return len(results) > 0
-        except Exception as e:
-            log.warning(f"Erro ao verificar duplicado para {source_url}: {e}")
-            return False
-
-    # ── Inserção no Supabase ─────────────────
-
-    def _insert_job(self, job_data: dict) -> bool:
-        """Insere uma vaga no Supabase com status 'pendente'."""
-        try:
-            payload = {
-                "title": job_data.get("title", "Sem Título"),
-                "company": job_data.get("company", "Empresa não informada"),
-                "location": job_data.get("location", "Angola"),
-                "description": job_data.get("description", ""),
-                "requirements": job_data.get("requirements", []),
-                "application_email": job_data.get("contact_email"),
-                "source_url": job_data.get("source_url"),
-                "status": "pending",  # Status default no SQL é 'pending'
-                "posted_at": datetime.now(timezone.utc).isoformat(),
-            }
-            self.supabase.insert("jobs", payload)
-            log.info(f"  ✅ Inserido: {payload['title']} @ {payload['company']}")
-            return True
-        except Exception as e:
-            log.error(f"  ❌ Erro ao inserir '{job_data.get('title')}': {e}")
-            return False
-
-    # ── Scraping de um Site ──────────────────
-
-    def scrape_site(self, config: dict) -> int:
+    # ── Scraper por Site ──────────────────────────────────────────────────
+    def scrape_site(self, site_name: str, cfg: dict):
         """
-        Processa um site completo com base na sua configuração.
-        Retorna o número de vagas inseridas com sucesso.
+        Processa um único site de forma isolada.
+        Falha no site → log de erro → salta para o próximo. Nunca para o motor todo.
         """
-        name = config["name"]
-        delay = config.get("request_delay", 1.0)
+        log.info(f"\n{'═' * 60}")
+        log.info(f"💼 FONTE: {site_name}")
+        log.info(f"   URL: {cfg['list_url']}")
+        log.info(f"{'═' * 60}")
 
-        log.info(f"\n{'='*55}")
-        log.info(f"🔍 A processar: {name}")
-        log.info(f"{'='*55}")
+        try:
+            soup = self._fetch(cfg["list_url"], extra_headers=cfg.get("extra_headers"))
+            if not soup:
+                log.error(f"❌ {site_name} inacessível. Saltando para o próximo...")
+                self.stats["errors"] += 1
+                return
 
-        soup = self._fetch_page(config["list_url"])
-        if not soup:
-            log.warning(f"Não foi possível carregar a página de {name}. A saltar.")
-            return 0
-
-        # Tentar seletor configurado, depois auto-detecção
-        job_cards = soup.select(config["job_card_selector"])
-        if not job_cards:
-            log.warning(
-                f"Seletor '{config['job_card_selector']}' não encontrou cards. "
-                f"A tentar auto-detecção..."
-            )
-            detected = self._auto_detect_selector(soup)
-            if detected:
-                job_cards = soup.select(detected)
-            else:
-                log.error(f"Não foi possível encontrar cards em {name}. A saltar.")
-                return 0
-
-        log.info(f"Encontrados {len(job_cards)} cards de vagas.")
-        inserted_count = 0
-        fields = config["fields"]
-
-        for i, card in enumerate(job_cards):
-            try:
-                # ── Extrair Link ──
-                link_sel = fields.get("link", "a")
-                link_tag = card.select_one(link_sel) or card.find("a")
-                href = link_tag.get("href", "") if link_tag else ""
-                if href and not href.startswith("http"):
-                    href = config["base_url"].rstrip("/") + "/" + href.lstrip("/")
-
-                # ── Verificar Duplicado ──
-                if href and self._url_already_exists(href):
-                    log.info(f"  ⏭️  Duplicado ignorado: {href}")
-                    continue
-
-                # ── Extrair Campos Básicos ──
-                title_el = card.select_one(fields.get("title", "h2 a, h3 a"))
-                company_el = card.select_one(fields.get("company", ".company"))
-                location_el = card.select_one(fields.get("location", ".location"))
-                desc_el = card.select_one(fields.get("description", "p"))
-
-                title = self._clean_text(title_el.get_text() if title_el else "")
-                company = self._clean_text(company_el.get_text() if company_el else "")
-                location = self._clean_text(location_el.get_text() if location_el else "Angola")
-                description = self._clean_text(desc_el.get_text() if desc_el else "")
-
-                # ── Página de Detalhe (Opcional) ──
-                requirements = []
-                if config.get("detail_page", {}).get("enabled") and href:
-                    log.info(f"  📄 A aceder à página de detalhe: {href}")
-                    detail_soup = self._fetch_page(href, delay=delay)
-                    if detail_soup:
-                        detail_cfg = config["detail_page"]
-                        full_desc_el = detail_soup.select_one(detail_cfg.get("description", ".content"))
-                        req_el = detail_soup.select_one(detail_cfg.get("requirements", "ul"))
-                        if full_desc_el:
-                            description = self._clean_text(full_desc_el.get_text())
-                        requirements = self._extract_requirements(req_el)
-                        # Procurar e-mail na página de detalhe também
-                        full_text = detail_soup.get_text()
-                    else:
-                        full_text = card.get_text()
+            # Tentar seletor configurado, depois auto-detecção
+            cards = soup.select(cfg["job_card_selector"])
+            if not cards:
+                log.warning(f"  ⚠️  Seletor '{cfg['job_card_selector']}' sem resultados. A tentar auto-detecção...")
+                detected = self._auto_detect_selector(soup)
+                if detected:
+                    cards = soup.select(detected)
                 else:
-                    req_el = card.find(["ul", "ol"])
-                    requirements = self._extract_requirements(req_el)
-                    full_text = card.get_text()
+                    log.error(f"  ❌ Não foi possível encontrar cards em {site_name}. Saltando.")
+                    self.stats["errors"] += 1
+                    return
 
-                # ── Extrair E-mail via Regex ──
-                contact_email = self._extract_email(full_text)
+            log.info(f"  📋 {len(cards)} cards encontrados. Processando...")
 
-                if not title:
-                    log.warning(f"  ⚠️  Card #{i+1} sem título. A saltar.")
+            for card in cards[:15]:  # Máx 15 por site por ciclo
+                self.stats["processed"] += 1
+                try:
+                    # ── Link ──────────────────────────────────────────────
+                    link_tag = card.select_one(cfg["link_selector"]) or card.find("a")
+                    raw_url = link_tag.get("href", "") if link_tag else ""
+                    job_url = self._normalize_url(raw_url, cfg["base_url"])
+
+                    # ── Deduplicação por URL ──────────────────────────────
+                    if job_url and self._is_duplicate_url(job_url):
+                        log.info(f"  ⏭️  Duplicado (URL): {job_url[:70]}")
+                        self.stats["skipped_dup"] += 1
+                        continue
+
+                    # ── Título ────────────────────────────────────────────
+                    title_tag = card.select_one(cfg["title_selector"])
+                    title = self._clean(title_tag.get_text() if title_tag else "")
+                    if not title or len(title) < 4:
+                        continue
+
+                    # ── Empresa ───────────────────────────────────────────
+                    company = cfg.get("fixed_company", "")
+                    if not company and cfg.get("company_selector"):
+                        company_tag = card.select_one(cfg["company_selector"])
+                        company = self._clean(company_tag.get_text() if company_tag else "")
+                    if not company:
+                        company = "Empresa Confidencial"
+
+                    # ── Deduplicação por (Título + Empresa) ───────────────
+                    if self._is_duplicate_composite(title, company):
+                        log.info(f"  ⏭️  Duplicado (título+empresa): {title[:50]} @ {company}")
+                        self.stats["skipped_dup"] += 1
+                        continue
+
+                    # ── Localização ───────────────────────────────────────
+                    location_tag = card.select_one(cfg["location_selector"]) if cfg.get("location_selector") else None
+                    location = self._clean(location_tag.get_text() if location_tag else "Angola")
+                    if not location:
+                        location = "Angola"
+
+                    # ── Detalhe da Vaga ───────────────────────────────────
+                    description = ""
+                    contact_email = None
+                    image_url = None
+
+                    if cfg.get("detail_enabled") and job_url:
+                        self._human_delay(cfg.get("request_delay_range", (2, 3)))
+                        log.info(f"  📄 Abrindo detalhe: {title[:50]}...")
+                        detail_soup = self._fetch(job_url, extra_headers=cfg.get("extra_headers"))
+                        if detail_soup:
+                            detail_sel = cfg.get("detail_description_selector", ".entry-content")
+                            body = detail_soup.select_one(detail_sel)
+                            if body:
+                                description = self._clean(body.get_text(separator=" "))[:3000]
+                            contact_email = self._extract_email(detail_soup.get_text())
+                            image_url = self._extract_image(detail_soup, cfg["base_url"])
+                    else:
+                        contact_email = self._extract_email(card.get_text())
+                        image_url = self._extract_image(card, cfg["base_url"])
+                        self._human_delay(cfg.get("request_delay_range", (2, 4)))
+
+                    # ── Categoria ─────────────────────────────────────────
+                    category = self._categorize(title, cfg.get("fixed_category"))
+
+                    # ── Payload Supabase ──────────────────────────────────
+                    payload = {
+                        "title": title[:255],
+                        "company": company[:255],
+                        "location": location[:255],
+                        "description": description,
+                        "application_email": contact_email,
+                        "logo_url": image_url,
+                        "source_url": job_url or None,
+                        "category": category,
+                        "status": "pendente",
+                        "posted_at": datetime.now(timezone.utc).isoformat(),
+                    }
+
+                    success = self.db.insert("jobs", payload)
+                    if success:
+                        log.info(f"  ✅ Guardada: [{category}] {title[:55]} @ {company}")
+                        self.stats["saved"] += 1
+                    else:
+                        self.stats["errors"] += 1
+
+                except Exception as card_err:
+                    log.warning(f"  ⚠️  Erro num card de {site_name}: {card_err}")
                     continue
 
-                job_data = {
-                    "title": title,
-                    "company": company or "Empresa não informada",
-                    "location": location or "Angola",
-                    "description": description,
-                    "requirements": requirements,
-                    "contact_email": contact_email,
-                    "source_url": href or None,
-                }
+            time.sleep(3)  # Pausa entre sites
 
-                if self._insert_job(job_data):
-                    inserted_count += 1
+        except Exception as site_err:
+            # Blindagem total — erro no site nunca para o motor
+            log.error(f"❌ SITE FALHADO: {site_name} — {site_err}")
+            log.error(f"   → A saltar para o próximo site...")
+            self.stats["errors"] += 1
 
-                # Delay entre cards para não sobrecarregar
-                if i < len(job_cards) - 1:
-                    time.sleep(delay * 0.5)
+    # ── Loop Principal ────────────────────────────────────────────────────
+    def run(self):
+        """Itera por todos os sites de forma independente."""
+        start = datetime.now(timezone.utc)
+        log.info(f"\n{'█' * 60}")
+        log.info(f"  AngoJobScraper v2 — SUPER MOTOR DE EMPREGOS")
+        log.info(f"  {len(JOBS_CONFIG)} fontes configuradas")
+        log.info(f"  {start.strftime('%Y-%m-%d %H:%M:%S UTC')}")
+        log.info(f"{'█' * 60}\n")
 
-            except Exception as e:
-                log.error(f"  ❌ Erro inesperado ao processar card #{i+1}: {e}", exc_info=True)
-                continue
+        for site_name, cfg in JOBS_CONFIG.items():
+            self.scrape_site(site_name, cfg)
 
-        log.info(f"\n✅ {name}: {inserted_count} vagas novas inseridas.")
-        return inserted_count
-
-    # ── Ponto de Entrada Principal ───────────
-
-    def run(self, site_configs: list) -> None:
-        """Executa o scraper para todos os sites configurados."""
-        log.info("\n🚀 AngoJobScraper iniciado!")
-        log.info(f"📅 Data/Hora: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")
-        log.info(f"📋 Sites configurados: {len(site_configs)}")
-
-        total_inserted = 0
-        total_errors = 0
-
-        for config in site_configs:
-            try:
-                count = self.scrape_site(config)
-                total_inserted += count
-            except Exception as e:
-                log.error(
-                    f"❌ Erro crítico ao processar '{config.get('name', 'Desconhecido')}': {e}",
-                    exc_info=True,
-                )
-                total_errors += 1
-                continue
-
-        log.info("\n" + "=" * 55)
-        log.info(f"🏁 Scraping concluído!")
-        log.info(f"   Total de vagas inseridas: {total_inserted}")
-        log.info(f"   Sites com erro: {total_errors}")
-        log.info("=" * 55)
+        elapsed = (datetime.now(timezone.utc) - start).seconds
+        log.info(f"\n{'█' * 60}")
+        log.info(f"  🏁 VARREDURA CONCLUÍDA em {elapsed}s")
+        log.info(f"  📊 Processados:  {self.stats['processed']}")
+        log.info(f"  💾 Guardados:    {self.stats['saved']}")
+        log.info(f"  ⏭️  Duplicados:   {self.stats['skipped_dup']}")
+        log.info(f"  ❌ Erros:        {self.stats['errors']}")
+        log.info(f"{'█' * 60}\n")
 
 
 # ─────────────────────────────────────────────
-# INICIALIZAÇÃO E EXECUÇÃO
+# PONTO DE ENTRADA
 # ─────────────────────────────────────────────
 if __name__ == "__main__":
-    # Carrega variáveis do .env.local do projeto Vite
     load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", ".env.local"))
-
     SUPABASE_URL = os.getenv("VITE_SUPABASE_URL")
     SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("VITE_SUPABASE_ANON_KEY")
 
     if not SUPABASE_URL or not SUPABASE_KEY:
         log.critical(
-            "❌ ERRO: Variáveis VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY "
-            "não encontradas no .env.local. Verifique o ficheiro."
+            "❌ Credenciais Supabase em falta. "
+            "Defina VITE_SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY no .env.local"
         )
         exit(1)
 
     log.info(f"🔗 Supabase: {SUPABASE_URL}")
-
-    # Inicializa cliente REST leve (sem supabase-py)
     db = SupabaseRestClient(url=SUPABASE_URL, key=SUPABASE_KEY)
-
-    # Cria e executa o scraper
-    scraper = AngoJobScraper(supabase_client=db)
-    scraper.run(SITE_CONFIGS)
+    scraper = AngoJobScraper(db=db)
+    scraper.run()
