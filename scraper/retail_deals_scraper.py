@@ -9,8 +9,8 @@ Redes Configuradas:
   - Locais: Novo São Paulo, Arreio
 """
 
-import re
 import os
+import sys
 import time
 import logging
 from datetime import datetime, timezone
@@ -40,9 +40,9 @@ log = logging.getLogger("RetailDealsScraper")
 RETAIL_CONFIG: Dict[str, dict] = {
     # ── GRANDES REDES ──────────────────────────────────────────────────
     "Kero": {
-        "base_url": "https://www.kero.ao",
-        "promo_url": "https://www.kero.ao/promocoes/",
-        "item_selector": ".product-item, .product-card, div[data-product-id]",
+        "base_url": "https://www.kero.co.ao",
+        "promo_url": "https://www.kero.co.ao/promocoes/",
+        "item_selector": ".product-item, .product-card, .item",
         "name_selector": ".product-title, .product-item-link, h3",
         "price_selector": ".price, .special-price, .current-price",
         "old_price_selector": ".old-price, .regular-price, .was-price",
@@ -316,17 +316,13 @@ if __name__ == "__main__":
     load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", ".env.local"))
     
     URL = os.getenv("VITE_SUPABASE_URL")
-    # Prioridade máxima para Service Role Key
-    KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("VITE_SUPABASE_ANON_KEY")
-
-    if not URL or not KEY:
-        log.error("❌ Erro: Credenciais Supabase (URL ou KEY) não encontradas no ambiente.")
-        exit(1)
-
-    log.info(f"📡 Conectando ao Supabase: {URL}")
-    if not os.getenv("SUPABASE_SERVICE_ROLE_KEY"):
-        log.warning("⚠️ Aviso: SUPABASE_SERVICE_ROLE_KEY não encontrada. Usando Anon Key (sujeito a RLS).")
-
     db = SupabaseRestClient(URL, KEY)
     scraper = AngoRetailScraper(db)
     scraper.run()
+    
+    # Se nada foi guardado, falha o Action para o utilizador ver a vermelho
+    if scraper.stats["saved"] == 0:
+        log.error("❌ Erro Final: Nenhum item foi guardado no Supabase. Verifique os logs acima para erros de rede ou seletores.")
+        sys.exit(1)
+    
+    log.info("🎯 Processo finalizado com sucesso e dados sincronizados.")
