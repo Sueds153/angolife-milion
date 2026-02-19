@@ -75,7 +75,7 @@ jobs:
 
 ## 📋 Fluxo de Trabalho
 
-```
+```text
 Sites Angolanos → AngoJobScraper → Supabase (status: pendente) → Admin aprova → App exibe
 ```
 

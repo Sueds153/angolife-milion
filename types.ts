@@ -12,6 +12,11 @@ export interface Job {
   sourceUrl?: string;
   applicationEmail?: string;
   status: 'pending' | 'published';
+  isVerified?: boolean;
+  imageUrl?: string;
+  category?: string;
+  reportCount?: number;
+  applicationCount?: number;
 }
 
 export interface ExchangeRate {
@@ -47,6 +52,7 @@ export interface NewsArticle {
   category: string;
   publishedAt: string;
   status: 'pending' | 'published';
+  imageUrl?: string;
 }
 
 export interface UserProfile {

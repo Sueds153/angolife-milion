@@ -128,8 +128,10 @@ export const RewardedAd: React.FC<RewardedAdProps> = ({ onReward, onClose }) => 
            <div className="w-full h-1.5 bg-white/10 rounded-full mx-auto overflow-hidden">
               <div 
                 className="h-full bg-brand-gold transition-all duration-1000 ease-linear shadow-[0_0_20px_rgba(245,158,11,0.5)]"
-                style={{ width: `${((DURATION - timeLeft) / DURATION) * 100}%` }}
-              ></div>
+                style={{ '--progress-width': `${((DURATION - timeLeft) / DURATION) * 100}%` } as React.CSSProperties}
+              >
+                 <div className="h-full w-[var(--progress-width)] bg-inherit"></div>
+              </div>
            </div>
         </div>
       </div>

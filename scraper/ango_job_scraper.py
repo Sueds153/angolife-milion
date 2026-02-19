@@ -109,126 +109,119 @@ CATEGORY_MAP = {
 # ─────────────────────────────────────────────────────────────────────────
 JOBS_CONFIG: Dict[str, dict] = {
 
-    # ── 1. ANGOEMPREGO.COM ────────────────────────────────────────────────
-    # WordPress WP Job Manager. Estrutura confirmada.
-    "AngoEmprego.com": {
-        "base_url": "https://angoemprego.com",
-        "list_url": "https://angoemprego.com/vagas",
-        "job_card_selector": "li.job_listing, article.job_listing, .job_listing",
-        "title_selector": "h3.job-title, h3, .position, .title",
-        "company_selector": ".company strong, .company-name, strong.company, .company, .employer",
-        "location_selector": ".location, .job-location, span.location, .city",
+    # ── 1. ANGOLA EMPREGO ──────────────────────────────────────────────────
+    # Principal portal local.
+    "Angola Emprego": {
+        "base_url": "https://www.angola-emprego.com",
+        "list_url": "https://www.angola-emprego.com",
+        "job_card_selector": ".job-item, .post-item, article",
+        "title_selector": ".job-title, h3, h2.entry-title",
+        "company_selector": ".company-name, .employer",
+        "location_selector": ".location, .city",
         "link_selector": "a",
         "detail_enabled": True,
-        "detail_description_selector": ".job_description, .single-job-description, .entry-content",
-        "request_delay_range": (2, 4),
+        "detail_description_selector": ".job-description, .entry-content",
+        "request_delay_range": (3, 5),
     },
 
-    # ── 2. ANGOVAGAS.NET ──────────────────────────────────────────────────
-    # WordPress simples, posts como artigos de vagas.
-    "AngoVagas.net": {
-        "base_url": "https://angovagas.net",
-        "list_url": "https://angovagas.net",
-        "job_card_selector": "article.post, article.type-post, .post",
-        "title_selector": "h2.entry-title, h1.entry-title, .post-title, h2",
-        "company_selector": ".company, .empresa, .entry-meta .author, .author",
-        "location_selector": ".location, .cidade, .entry-meta",
+    # ── 2. ANGO EMPREGO ────────────────────────────────────────────────────
+    "Ango Emprego": {
+        "base_url": "https://ango-emprego.com",
+        "list_url": "https://ango-emprego.com",
+        "job_card_selector": "article, .job_listing",
+        "title_selector": "h3, .title",
+        "company_selector": ".company, strong",
+        "location_selector": ".location",
         "link_selector": "a",
         "detail_enabled": True,
-        "detail_description_selector": ".entry-content, .post-content, article .content",
-        "request_delay_range": (2, 5),
+        "detail_description_selector": ".job_description, .content",
+        "request_delay_range": (2, 4),
     },
 
     # ── 3. EMPREGA ANGOLA ─────────────────────────────────────────────────
-    # Portal moderno de vagas angolanas.
     "Emprega Angola": {
         "base_url": "https://www.empregaangola.com",
         "list_url": "https://www.empregaangola.com/empregos",
-        "job_card_selector": ".job-item, .vacancy-item, article, .card",
-        "title_selector": "h2, h3, .job-title, .vacancy-title",
-        "company_selector": ".company, .empresa, .employer-name",
-        "location_selector": ".location, .cidade, .province",
+        "job_card_selector": ".job-item, article, .card",
+        "title_selector": "h2, h3, .job-title",
+        "company_selector": ".company, .employer-name",
+        "location_selector": ".location, .province",
         "link_selector": "a",
         "detail_enabled": True,
-        "detail_description_selector": ".job-description, .vacancy-body, .entry-content",
+        "detail_description_selector": ".job-description, .vacancy-body",
         "request_delay_range": (2, 4),
     },
 
-    # ── 4. INEFOP ─────────────────────────────────────────────────────────
+    # ── 4. ANGOVAGAS.NET ──────────────────────────────────────────────────
+    "AngoVagas": {
+        "base_url": "https://angovagas.net",
+        "list_url": "https://angovagas.net",
+        "job_card_selector": "article.post, .post",
+        "title_selector": "h2.entry-title, h2",
+        "company_selector": ".author, .company",
+        "location_selector": ".location, .entry-meta",
+        "link_selector": "a",
+        "detail_enabled": True,
+        "detail_description_selector": ".entry-content",
+        "request_delay_range": (2, 5),
+    },
+
+    # ── 5. INEFOP ─────────────────────────────────────────────────────────
     # Instituto Nacional do Emprego e Formação Profissional.
-    # Foco total em Concursos Públicos e Vagas de Estado.
     "INEFOP": {
         "base_url": "https://www.inefop.gov.ao",
         "list_url": "https://www.inefop.gov.ao/concursos",
-        "job_card_selector": "article, .concurso-item, .post, .entry",
-        "title_selector": "h1, h2, h3, .entry-title, .post-title",
-        "company_selector": None,  # Empresa fixa: Estado Angolano
-        "location_selector": ".location, .provincia, p",
+        "job_card_selector": "article, .concurso-item",
+        "title_selector": "h1, h2, h3, .entry-title",
+        "company_selector": None,
+        "location_selector": ".location, .provincia",
         "link_selector": "a",
         "detail_enabled": True,
-        "detail_description_selector": ".entry-content, .post-content, article",
+        "detail_description_selector": ".entry-content, article",
         "fixed_company": "Estado Angolano (INEFOP)",
         "fixed_category": "Concurso Público",
         "request_delay_range": (3, 5),
     },
 
-    # ── 5. CAREERJET ANGOLA ───────────────────────────────────────────────
-    # Agregador internacional com forte presença local. Grande volume de vagas.
+    # ── 6. CAREERJET ANGOLA ───────────────────────────────────────────────
     "Careerjet Angola": {
         "base_url": "https://www.careerjet.co.ao",
         "list_url": "https://www.careerjet.co.ao/jobs.html?ISOCountry=AO&locale_code=pt_AO",
-        "job_card_selector": "li.job, article.job, .job_item",
-        "title_selector": "article h2.title, h2, .title, a[href*='job']",
+        "job_card_selector": "li.job, article.job",
+        "title_selector": "h2, .title, a[href*='job']",
         "company_selector": ".company, p.company",
-        "location_selector": ".location, ul.tags li, .city",
-        "link_selector": "header a, h2 a, a.title",
-        "detail_enabled": False,  # Evitar bloqueios no Careerjet
+        "location_selector": ".location, .city",
+        "link_selector": "header a, h2 a",
+        "detail_enabled": False,
         "request_delay_range": (3, 5),
     },
 
-    # ── 6. MIRANTES ───────────────────────────────────────────────────────
-    # Portal de vagas com foco em Talatona e Luanda Sul.
+    # ── 7. MIRANTES ───────────────────────────────────────────────────────
+    # Foco em Talatona / Luanda Sul.
     "Mirantes": {
         "base_url": "https://www.mirantes.ao",
         "list_url": "https://www.mirantes.ao/emprego",
-        "job_card_selector": ".job-listing, article, .post, .vacancy",
-        "title_selector": "h2, h3, .job-title, .entry-title",
-        "company_selector": ".company, .employer, .empresa",
-        "location_selector": ".location, .city, .province",
+        "job_card_selector": ".job-listing, article, .post",
+        "title_selector": "h2, h3, .job-title",
+        "company_selector": ".company, .employer",
+        "location_selector": ".location, .city",
         "link_selector": "a",
         "detail_enabled": True,
         "detail_description_selector": ".job-description, .entry-content",
         "request_delay_range": (2, 4),
     },
 
-    # ── 7. ANGOJOB.NET ────────────────────────────────────────────────────
-    # Portal agregador angolano com vagas de múltiplos sectores.
-    "AngoJob.net": {
-        "base_url": "https://angojob.net",
-        "list_url": "https://angojob.net/vagas",
-        "job_card_selector": ".job-item, .vaga-item, article.post, .post",
-        "title_selector": "h2, h3, .job-title",
-        "company_selector": ".company, .empresa",
-        "location_selector": ".location, .city",
-        "link_selector": "a",
-        "detail_enabled": True,
-        "detail_description_selector": ".entry-content, .post-content",
-        "request_delay_range": (2, 5),
-    },
-
-    # ── 8. LINKEDIN (VAGAS PÚBLICAS ANGOLA) ───────────────────────────────
-    # Apenas captura vagas públicas, sem login. Headers reforçados.
+    # ── 8. LINKEDIN ───────────────────────────────────────────────────────
     "LinkedIn": {
         "base_url": "https://www.linkedin.com",
         "list_url": "https://www.linkedin.com/jobs/search/?keywords=angola&location=Angola&f_TPR=r86400",
-        "job_card_selector": ".job-search-card, .base-card, li.jobs-search-results__list-item",
-        "title_selector": "h3.base-search-card__title, h3, .job-search-card__title",
-        "company_selector": "h4.base-search-card__subtitle, .job-search-card__company-name",
-        "location_selector": ".job-search-card__location, .base-search-card__metadata",
-        "link_selector": "a.base-card__full-link, a",
-        "detail_enabled": False,  # LinkedIn bloqueia rapidamente fetchs de detalhe
-        "request_delay_range": (4, 7),  # Delays mais longos para LinkedIn
-        # LinkedIn requer headers especiais
+        "job_card_selector": ".job-search-card, .base-card",
+        "title_selector": "h3.base-search-card__title",
+        "company_selector": "h4.base-search-card__subtitle",
+        "location_selector": ".job-search-card__location",
+        "link_selector": "a.base-card__full-link",
+        "detail_enabled": False,
+        "request_delay_range": (5, 8),
         "extra_headers": {
             "Sec-Fetch-Dest": "document",
             "Sec-Fetch-Mode": "navigate",
@@ -238,6 +231,7 @@ JOBS_CONFIG: Dict[str, dict] = {
         },
     },
 }
+
 
 
 # ─────────────────────────────────────────────
@@ -506,18 +500,18 @@ class AngoJobScraper:
                         self._human_delay(cfg.get("request_delay_range", (2, 4)))
 
                     # ── Categoria ─────────────────────────────────────────
-                    category = self._categorize(title, cfg.get("fixed_category"))
+                    categoria = self._categorize(title, cfg.get("fixed_category"))
 
-                    # ── Payload Supabase ──────────────────────────────────
+                    # ── Payload Supabase (Mantendo fidelidade ao Schema e Front-end) ──────
                     payload = {
                         "title": title[:255],
                         "company": company[:255],
                         "location": location[:255],
                         "description": description,
                         "application_email": contact_email,
-                        "logo_url": image_url,
+                        "imagem_url": image_url,
                         "source_url": job_url or None,
-                        "category": category,
+                        "categoria": categoria,
                         "status": "pendente",
                         "posted_at": datetime.now(timezone.utc).isoformat(),
                     }

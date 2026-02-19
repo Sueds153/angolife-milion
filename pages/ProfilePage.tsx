@@ -86,7 +86,12 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onLogout }) => {
             </div>
             <div className="space-y-6">
               <div className="w-full h-3 bg-white/5 rounded-full overflow-hidden border border-white/5">
-                <div className="h-full bg-orange-500 transition-all duration-1000" style={{ width: `${Math.min((user.referralCount / 3) * 100, 100)}%` }}></div>
+                <div 
+                  className="h-full bg-orange-500 transition-all duration-1000" 
+                  style={{ '--progress-width': `${Math.min((user.referralCount / 3) * 100, 100)}%` } as React.CSSProperties}
+                >
+                   <div className="h-full w-[var(--progress-width)] bg-inherit"></div>
+                </div>
               </div>
               <div className="bg-slate-50 dark:bg-white/5 border border-orange-500/20 rounded-xl p-6 flex flex-col md:flex-row items-center justify-between gap-6">
                 <span className="text-orange-500 font-mono text-xl font-black">{user.referralCode}</span>

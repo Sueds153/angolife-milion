@@ -33,13 +33,30 @@ export const SupabaseService = {
     }));
   },
 
-  updateInformalRate: async (currency: 'USD' | 'EUR', buy: number, sell: number): Promise<void> => {
+  updateInformalRate: async (currency: 'USD' | 'EUR', buy: number, sell: number): Promise<boolean> => {
     const { error } = await supabase
       .from('exchange_rates')
       .update({ informal_buy: buy, informal_sell: sell, last_updated: new Date().toISOString() })
       .eq('currency', currency);
 
-    if (error) console.error('Error updating rate:', error);
+    if (error) {
+      console.error('Error updating informal rate:', error);
+      return false;
+    }
+    return true;
+  },
+
+  updateFormalRate: async (currency: 'USD' | 'EUR', buy: number, sell: number): Promise<boolean> => {
+    const { error } = await supabase
+      .from('exchange_rates')
+      .update({ formal_buy: buy, formal_sell: sell, last_updated: new Date().toISOString() })
+      .eq('currency', currency);
+
+    if (error) {
+      console.error('Error updating formal rate:', error);
+      return false;
+    }
+    return true;
   },
 
   // --- DEALS ---
@@ -129,7 +146,8 @@ export const SupabaseService = {
   getJobs: async (isAdmin: boolean = false): Promise<Job[]> => {
     let query = supabase.from('jobs').select('*');
     if (!isAdmin) {
-      query = query.eq('status', 'published');
+      // Suporte para ambos os nomes (inglês/português) para garantir visibilidade plena
+      query = query.or('status.eq.publicado,status.eq.published,status.eq.aprovado');
     }
 
     const { data, error } = await query;
@@ -150,7 +168,9 @@ export const SupabaseService = {
       requirements: j.requirements || [],
       sourceUrl: j.source_url,
       applicationEmail: j.application_email,
-      status: j.status
+      status: j.status,
+      imageUrl: j.imagem_url,
+      category: j.categoria
     }));
   },
 
@@ -158,12 +178,14 @@ export const SupabaseService = {
     const { data, error } = await supabase
       .from('jobs')
       .select('*')
-      .eq('status', 'pending');
+      .or('status.eq.pendente,status.eq.Pendente,status.eq.pending');
 
     if (error) {
       console.error('Error fetching pending jobs:', error);
       return [];
     }
+
+    console.log('📦 ADMIN PENDING JOBS:', data);
 
     return data.map((j: any) => ({
       id: j.id,
@@ -177,29 +199,133 @@ export const SupabaseService = {
       requirements: j.requirements || [],
       sourceUrl: j.source_url,
       applicationEmail: j.application_email,
-      status: j.status
+      // Normalize from DB (publicado/published/pendente/pending) to Frontend (published/pending)
+      status: (j.status?.toLowerCase() === 'publicado' || j.status?.toLowerCase() === 'published' || j.status?.toLowerCase() === 'aprovado') ? 'published' : 'pending',
+      imageUrl: j.imagem_url,
+      category: j.categoria
     }));
   },
 
-  approveJob: async (id: string, isApproved: boolean): Promise<void> => {
+  approveJob: async (id: string, isApproved: boolean): Promise<boolean> => {
     if (isApproved) {
+      console.log('🚀 [Supabase] Aprovando vaga ID:', id);
       const { error } = await supabase
         .from('jobs')
-        .update({ status: 'published' })
+        .update({ status: 'publicado' })
         .eq('id', id);
-       if (error) console.error('Error approving job:', error);
+      if (error) {
+        console.error('❌ Error approving job:', error.message, error.details);
+        return false;
+      }
+      return true;
     } else {
-       // Delete if rejected or set to rejected? Mock said "Reject deletes it"
-       const { error } = await supabase.from('jobs').delete().eq('id', id);
-       if (error) console.error('Error rejecting job:', error);
+      console.log('🗑️ [Supabase] Rejeitando vaga ID:', id);
+      const { error } = await supabase.from('jobs').delete().eq('id', id);
+      if (error) {
+        console.error('❌ Error rejecting job:', error.message, error.details);
+        return false;
+      }
+      return true;
     }
+  },
+
+  approveAllJobs: async (): Promise<boolean> => {
+    console.log('🚀 [Supabase] Aprovando TODAS as vagas pendentes');
+    const { error } = await supabase
+      .from('jobs')
+      .update({ status: 'publicado' })
+      .or('status.eq.pending,status.eq.pendente');
+    
+    if (error) {
+      console.error('❌ Error approving all jobs:', error.message, error.details);
+      return false;
+    }
+    return true;
+  },
+
+  createJob: async (job: Omit<Job, 'id' | 'postedAt' | 'status'>): Promise<boolean> => {
+    const { error } = await supabase
+      .from('jobs')
+      .insert([{
+        title: job.title,
+        company: job.company,
+        location: job.location,
+        type: job.type,
+        salary: job.salary,
+        description: job.description,
+        requirements: job.requirements,
+        application_email: job.applicationEmail,
+        status: 'publicado',
+        posted_at: new Date().toISOString()
+      }]);
+
+    if (error) {
+      console.error('Error creating job:', error);
+      return false;
+    }
+    return true;
+  },
+
+  toggleJobVerification: async (id: string, isVerified: boolean): Promise<boolean> => {
+    const { error } = await supabase
+      .from('jobs')
+      .update({ is_verified: isVerified })
+      .eq('id', id);
+    if (error) {
+      console.error('❌ Error toggling job verification:', error);
+      return false;
+    }
+    return true;
+  },
+
+  reportJob: async (id: string): Promise<void> => {
+    // 1. Get current report count
+    const { data: job, error: fetchError } = await supabase
+      .from('jobs')
+      .select('report_count')
+      .eq('id', id)
+      .single();
+
+    if (fetchError || !job) return;
+
+    const newCount = (job.report_count || 0) + 1;
+
+    // 2. Update count and flip to pending if threshold reached
+    const updateData: any = { report_count: newCount };
+    if (newCount >= 3) {
+      updateData.status = 'pending';
+    }
+
+    const { error: updateError } = await supabase
+      .from('jobs')
+      .update(updateData)
+      .eq('id', id);
+
+    if (updateError) console.error('Error reporting job:', updateError);
+  },
+
+  incrementApplicationCount: async (id: string): Promise<void> => {
+    const { data: job, error: fetchError } = await supabase
+      .from('jobs')
+      .select('application_count')
+      .eq('id', id)
+      .single();
+
+    if (fetchError || !job) return;
+
+    const { error: updateError } = await supabase
+      .from('jobs')
+      .update({ application_count: (job.application_count || 0) + 1 })
+      .eq('id', id);
+
+    if (updateError) console.error('Error incrementing application count:', updateError);
   },
 
   // --- NEWS ---
   getNews: async (isAdmin: boolean = false): Promise<NewsArticle[]> => {
     let query = supabase.from('news_articles').select('*');
     if (!isAdmin) {
-      query = query.eq('status', 'published');
+      query = query.or('status.eq.publicado,status.eq.published');
     }
 
     const { data, error } = await query;
@@ -210,13 +336,14 @@ export const SupabaseService = {
 
     return data.map((n: any) => ({
       id: n.id,
-      title: n.title,
-      summary: n.summary,
-      source: n.source,
-      url: n.url,
-      category: n.category,
+      title: n.titulo,
+      summary: n.resumo,
+      source: n.fonte,
+      url: n.url_origem,
+      category: n.categoria,
       publishedAt: n.published_at,
-      status: n.status
+      status: (n.status?.toLowerCase() === 'pendente' || n.status?.toLowerCase() === 'pending') ? 'pending' : 'published',
+      imageUrl: n.imagem_url
     }));
   },
 
@@ -224,36 +351,116 @@ export const SupabaseService = {
     const { data, error } = await supabase
       .from('news_articles')
       .select('*')
-      .eq('status', 'pending');
+      .or('status.eq.pendente,status.eq.Pendente,status.eq.pending')
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Error fetching pending news:', error);
       return [];
     }
 
+    console.log('📦 ADMIN PENDING NEWS:', data);
+
     return data.map((n: any) => ({
       id: n.id,
-      title: n.title,
-      summary: n.summary,
-      source: n.source,
-      url: n.url,
-      category: n.category,
+      title: n.titulo,
+      summary: n.resumo,
+      source: n.fonte,
+      url: n.url_origem,
+      category: n.categoria,
       publishedAt: n.published_at,
-      status: n.status
+      imageUrl: n.imagem_url,
+      status: (n.status?.toLowerCase() === 'pendente' || n.status?.toLowerCase() === 'pending') ? 'pending' : 'published'
     }));
   },
 
-  approveNews: async (id: string, isApproved: boolean): Promise<void> => {
-     if (isApproved) {
-        const { error } = await supabase
-          .from('news_articles')
-          .update({ status: 'published' })
-          .eq('id', id);
-        if (error) console.error('Error approving news:', error);
-     } else {
-        const { error } = await supabase.from('news_articles').delete().eq('id', id);
-        if (error) console.error('Error rejecting news:', error);
-     }
+  approveNews: async (id: string, isApproved: boolean): Promise<boolean> => {
+    if (isApproved) {
+      console.log('🚀 [Supabase] Aprovando notícia ID:', id);
+      const { error } = await supabase
+        .from('news_articles')
+        .update({ status: 'publicado' })
+        .eq('id', id);
+      if (error) {
+        console.error('❌ Error approving news:', error.message, error.details);
+        return false;
+      }
+      return true;
+    } else {
+      console.log('🗑️ [Supabase] Rejeitando notícia ID:', id);
+      const { error } = await supabase.from('news_articles').delete().eq('id', id);
+      if (error) {
+        console.error('❌ Error rejecting news:', error.message, error.details);
+        return false;
+      }
+      return true;
+    }
+  },
+
+  approveAllNews: async (): Promise<boolean> => {
+    console.log('🚀 [Supabase] Aprovando TODAS as notícias pendentes');
+    const { error } = await supabase
+      .from('news_articles')
+      .update({ status: 'publicado' })
+      .or('status.eq.pending,status.eq.pendente');
+    
+    if (error) {
+      console.error('❌ Error approving all news:', error.message, error.details);
+      return false;
+    }
+    return true;
+  },
+
+  updateNews: async (id: string, updates: Partial<NewsArticle>): Promise<boolean> => {
+    const { error } = await supabase
+      .from('news_articles')
+      .update({
+        titulo: updates.title,
+        resumo: updates.summary,
+        categoria: updates.category
+      })
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error updating news:', error);
+      return false;
+    }
+    return true;
+  },
+
+  deleteNews: async (id: string): Promise<boolean> => {
+    const { error } = await supabase
+      .from('news_articles')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error deleting news:', error);
+      return false;
+    }
+    return true;
+  },
+
+  createNews: async (news: Partial<NewsArticle>): Promise<boolean> => {
+    const { error } = await supabase
+      .from('news_articles')
+      .insert([{
+        titulo: news.title,
+        resumo: news.summary,
+        corpo: (news as any).body || '',
+        categoria: news.category,
+        imagem_url: news.imageUrl,
+        fonte: 'AngoLife Admin',
+        url_origem: `manual-${Date.now()}`,
+        status: 'publicado',
+        published_at: new Date().toISOString()
+      }]);
+
+    if (error) {
+      console.error('Error creating local news:', error);
+      return false;
+    }
+    return true;
   },
 
   // --- SIMULATION TRIGGERS (Keep them or make them call a Supabase Function?) ---
@@ -271,7 +478,7 @@ export const SupabaseService = {
           posted_at: new Date().toISOString(),
           requirements: ['Hardware', 'Redes', 'Atendimento'],
           source_url: 'https://ncr.ao/jobs',
-          status: 'pending'
+          status: 'pendente'
        },
        {
           title: 'Gerente Comercial (Demo)',
@@ -281,7 +488,7 @@ export const SupabaseService = {
           description: 'Gestão de equipas de vendas e análise de KPIs.',
           posted_at: new Date().toISOString(),
           requirements: ['Gestão', 'Vendas', 'Liderança'],
-          status: 'pending'
+          status: 'pendente'
        }
     ];
 
@@ -296,13 +503,13 @@ export const SupabaseService = {
   triggerNewsScraper: async (): Promise<number> => {
      const newNews = [
         {
-           title: 'Sonangol anuncia novas descobertas (Demo)',
-           summary: 'Petrolífera nacional confirma reservas na Bacia do Kwanza.',
-           source: 'Economia & Mercado',
-           url: 'https://mercado.co.ao',
-           category: 'Economia',
+           titulo: 'Sonangol anuncia novas descobertas (Demo)',
+           resumo: 'Petrolífera nacional confirma reservas na Bacia do Kwanza.',
+           fonte: 'Economia & Mercado',
+           url_origem: `https://mercado.co.ao/${Math.random()}`,
+           categoria: 'Economia',
            published_at: new Date().toISOString(),
-           status: 'pending'
+           status: 'pendente'
         }
      ];
      
