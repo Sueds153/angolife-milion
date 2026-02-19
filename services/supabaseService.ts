@@ -170,7 +170,8 @@ export const SupabaseService = {
       applicationEmail: j.application_email,
       status: j.status,
       imageUrl: j.imagem_url,
-      category: j.categoria
+      category: j.categoria,
+      source: j.fonte
     }));
   },
 
@@ -202,7 +203,8 @@ export const SupabaseService = {
       // Normalize from DB (publicado/published/pendente/pending) to Frontend (published/pending)
       status: (j.status?.toLowerCase() === 'publicado' || j.status?.toLowerCase() === 'published' || j.status?.toLowerCase() === 'aprovado') ? 'published' : 'pending',
       imageUrl: j.imagem_url,
-      category: j.categoria
+      category: j.categoria,
+      source: j.fonte
     }));
   },
 

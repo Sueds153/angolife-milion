@@ -126,13 +126,16 @@ export const RewardedAd: React.FC<RewardedAdProps> = ({ onReward, onClose }) => 
            <p className="text-slate-400 text-sm md:text-base font-medium max-w-xs mx-auto mb-12">Desbloqueie agora a visão estratégica que o seu negócio precisa.</p>
            
            <div className="w-full h-1.5 bg-white/10 rounded-full mx-auto overflow-hidden">
-              <div 
-                className="h-full bg-brand-gold transition-all duration-1000 ease-linear shadow-[0_0_20px_rgba(245,158,11,0.5)]"
-                style={{ '--progress-width': `${((DURATION - timeLeft) / DURATION) * 100}%` } as React.CSSProperties}
-              >
-                 <div className="h-full w-[var(--progress-width)] bg-inherit"></div>
-              </div>
-           </div>
+               <svg className="w-full h-full">
+                 <rect 
+                   x="0" 
+                   y="0" 
+                   height="100%" 
+                   width={`${((DURATION - timeLeft) / DURATION) * 100}%`} 
+                   className="fill-brand-gold transition-all duration-1000 ease-linear"
+                 />
+               </svg>
+            </div>
         </div>
       </div>
 

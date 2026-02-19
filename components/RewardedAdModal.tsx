@@ -189,12 +189,15 @@ export const RewardedAdModal: React.FC<RewardedAdModalProps> = ({
           </div>
 
           <div className="w-full bg-slate-800 h-1 mt-8 rounded-full overflow-hidden">
-            <div
-              className="bg-[#F59E0B] h-full transition-all duration-1000 ease-linear"
-              style={{ '--progress-width': `${((5 - interstitialTimer) / 5) * 100}%` } as React.CSSProperties}
-            >
-              <div className="h-full w-[var(--progress-width)] bg-inherit"></div>
-            </div>
+            <svg className="w-full h-full">
+              <rect 
+                x="0" 
+                y="0" 
+                height="100%" 
+                width={`${((5 - interstitialTimer) / 5) * 100}%`} 
+                className="fill-[#F59E0B] transition-all duration-1000 ease-linear"
+              />
+            </svg>
           </div>
         </div>
       </div>
@@ -252,9 +255,9 @@ export const RewardedAdModal: React.FC<RewardedAdModalProps> = ({
                   stroke="currentColor"
                   strokeWidth="8"
                   fill="transparent"
-                  strokeDasharray={364}
-                  style={{ '--dash-offset': 364 - (364 * (15 - rewardTimer)) / 15 } as React.CSSProperties}
-                  className="text-orange-500 transition-all duration-1000 ease-linear [stroke-dashoffset:var(--dash-offset)]"
+                  strokeDasharray="364"
+                  strokeDashoffset={364 - (364 * (15 - rewardTimer)) / 15}
+                  className="text-orange-500 transition-all duration-1000 ease-linear"
                 />
              </svg>
              <div className="absolute inset-0 flex flex-col items-center justify-center">

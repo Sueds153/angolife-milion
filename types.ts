@@ -17,6 +17,7 @@ export interface Job {
   category?: string;
   reportCount?: number;
   applicationCount?: number;
+  source?: string;
 }
 
 export interface ExchangeRate {

@@ -109,46 +109,32 @@ CATEGORY_MAP = {
 # ─────────────────────────────────────────────────────────────────────────
 JOBS_CONFIG: Dict[str, dict] = {
 
-    # ── 1. ANGOLA EMPREGO ──────────────────────────────────────────────────
-    # Principal portal local.
-    "Angola Emprego": {
-        "base_url": "https://www.angola-emprego.com",
-        "list_url": "https://www.angola-emprego.com",
-        "job_card_selector": ".job-item, .post-item, article",
-        "title_selector": ".job-title, h3, h2.entry-title",
-        "company_selector": ".company-name, .employer",
+    # ── 0. JOBARTIS (LÍDER DE MERCADO) ────────────────────────────────────
+    "Jobartis": {
+        "base_url": "https://www.jobartis.com",
+        "list_url": "https://www.jobartis.com/pt/empregos-em-angola",
+        "job_card_selector": ".job-item, article, .vacancy-card",
+        "title_selector": "h3, .title, .vacancy-title",
+        "company_selector": ".company, .employer",
         "location_selector": ".location, .city",
         "link_selector": "a",
         "detail_enabled": True,
-        "detail_description_selector": ".job-description, .entry-content",
+        "detail_description_selector": ".job-description, .vacancy-details",
         "request_delay_range": (3, 5),
     },
 
-    # ── 2. ANGO EMPREGO ────────────────────────────────────────────────────
-    "Ango Emprego": {
-        "base_url": "https://ango-emprego.com",
-        "list_url": "https://ango-emprego.com",
-        "job_card_selector": "article, .job_listing",
-        "title_selector": "h3, .title",
-        "company_selector": ".company, strong",
-        "location_selector": ".location",
-        "link_selector": "a",
-        "detail_enabled": True,
-        "detail_description_selector": ".job_description, .content",
-        "request_delay_range": (2, 4),
-    },
 
-    # ── 3. EMPREGA ANGOLA ─────────────────────────────────────────────────
-    "Emprega Angola": {
-        "base_url": "https://www.empregaangola.com",
-        "list_url": "https://www.empregaangola.com/empregos",
-        "job_card_selector": ".job-item, article, .card",
-        "title_selector": "h2, h3, .job-title",
-        "company_selector": ".company, .employer-name",
-        "location_selector": ".location, .province",
+    # ── 2. ANGO EMPREGO (CORRIGIDO) ────────────────────────────────────────
+    "Ango Emprego": {
+        "base_url": "https://angoemprego.com",
+        "list_url": "https://angoemprego.com",
+        "job_card_selector": "article, .job-listing, .post",
+        "title_selector": "h3, .title, .entry-title",
+        "company_selector": ".company, strong",
+        "location_selector": ".location, .meta",
         "link_selector": "a",
         "detail_enabled": True,
-        "detail_description_selector": ".job-description, .vacancy-body",
+        "detail_description_selector": ".job_description, .content, .entry-content",
         "request_delay_range": (2, 4),
     },
 
@@ -186,29 +172,14 @@ JOBS_CONFIG: Dict[str, dict] = {
     # ── 6. CAREERJET ANGOLA ───────────────────────────────────────────────
     "Careerjet Angola": {
         "base_url": "https://www.careerjet.co.ao",
-        "list_url": "https://www.careerjet.co.ao/jobs.html?ISOCountry=AO&locale_code=pt_AO",
-        "job_card_selector": "li.job, article.job",
-        "title_selector": "h2, .title, a[href*='job']",
+        "list_url": "https://www.careerjet.co.ao/pesquisar/vagas-de-emprego-angola-1234.html",
+        "job_card_selector": "li.job, article.job, .job",
+        "title_selector": "h2, .title, a",
         "company_selector": ".company, p.company",
         "location_selector": ".location, .city",
-        "link_selector": "header a, h2 a",
+        "link_selector": "a",
         "detail_enabled": False,
         "request_delay_range": (3, 5),
-    },
-
-    # ── 7. MIRANTES ───────────────────────────────────────────────────────
-    # Foco em Talatona / Luanda Sul.
-    "Mirantes": {
-        "base_url": "https://www.mirantes.ao",
-        "list_url": "https://www.mirantes.ao/emprego",
-        "job_card_selector": ".job-listing, article, .post",
-        "title_selector": "h2, h3, .job-title",
-        "company_selector": ".company, .employer",
-        "location_selector": ".location, .city",
-        "link_selector": "a",
-        "detail_enabled": True,
-        "detail_description_selector": ".job-description, .entry-content",
-        "request_delay_range": (2, 4),
     },
 
     # ── 8. LINKEDIN ───────────────────────────────────────────────────────

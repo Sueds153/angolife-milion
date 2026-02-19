@@ -24,8 +24,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
 
     return (
       <div 
-        className="relative flex items-center justify-center bg-white dark:bg-slate-800 rounded-2xl border border-orange-500/10 overflow-hidden shrink-0 shadow-sm"
-        style={{ width: size, height: size }}
+        className={`relative flex items-center justify-center bg-white dark:bg-slate-800 rounded-2xl border border-orange-500/10 overflow-hidden shrink-0 shadow-sm ${size === 60 ? 'job-logo-60' : (size === 80 ? 'job-logo-80' : 'job-logo-60')}`}
       >
         {loading && !error && src && (
           <div className="absolute inset-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800 animate-pulse z-10">

@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 load_dotenv(dotenv_path='../.env.local')
 
 url: str = os.environ.get("VITE_SUPABASE_URL")
-key: str = os.environ.get("VITE_SUPABASE_ANON_KEY")
+key: str = os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or os.environ.get("VITE_SUPABASE_ANON_KEY")
 
 headers = {
     "apikey": key,

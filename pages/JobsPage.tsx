@@ -36,8 +36,7 @@ const JobLogo: React.FC<{ src?: string; company: string; category?: string; size
 
   return (
     <div 
-      className="relative flex items-center justify-center bg-white dark:bg-slate-800 rounded-2xl border border-orange-500/10 overflow-hidden shrink-0 shadow-sm"
-      style={{ width: size, height: size }}
+      className={`relative flex items-center justify-center bg-white dark:bg-slate-800 rounded-2xl border border-orange-500/10 overflow-hidden shrink-0 shadow-sm ${size === 60 ? 'job-logo-60' : (size === 80 ? 'job-logo-80' : 'job-logo-60')}`}
     >
       {loading && !error && src && (
         <div className="absolute inset-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800 animate-pulse z-10">
@@ -99,6 +98,35 @@ export const JobsPage: React.FC<JobsPageProps> = ({
     const data = await SupabaseService.getJobs(false);
     setJobs(data);
     setLoading(false);
+
+    // Interest-based Notification Logic
+    if (data.length > 0) {
+      const savedInterests = JSON.parse(localStorage.getItem('user_interests') || '[]');
+      if (savedInterests.length > 0) {
+        // Find jobs posted in the last 2 hours that match interests
+        const now = new Date();
+        const twoHoursAgo = now.getTime() - (2 * 60 * 60 * 1000);
+        
+        const matches = data.filter(job => {
+          const postDate = new Date(job.postedAt).getTime();
+          if (postDate < twoHoursAgo) return false;
+          
+          return savedInterests.some((interest: string) => 
+            job.title.toLowerCase().includes(interest.toLowerCase())
+          );
+        });
+
+        if (matches.length > 0) {
+          const match = matches[0];
+          import('../services/notificationService').then(({ NotificationService }) => {
+            NotificationService.sendNativeNotification(
+              `Nova vaga de ${match.category || 'Emprego'} disponível!`,
+              `${match.title} @ ${match.company}. Clica para ver.`
+            );
+          });
+        }
+      }
+    }
   };
 
   const formatRelativeDate = (dateString: string) => {
@@ -279,7 +307,17 @@ export const JobsPage: React.FC<JobsPageProps> = ({
             placeholder="Cargo ou empresa..."
             className="w-full pl-10 pr-4 py-3.5 border border-orange-500/20 bg-white dark:bg-slate-900 rounded-2xl text-[10px] font-black uppercase tracking-widest outline-none focus:ring-2 focus:ring-orange-500/20 text-orange-500 transition-all shadow-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
             value={filter}
-            onChange={(e) => setFilter(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value;
+              setFilter(val);
+              // Save search as interest if it's long enough
+              if (val.length > 3) {
+                const interests = JSON.parse(localStorage.getItem('user_interests') || '[]');
+                if (!interests.includes(val)) {
+                  localStorage.setItem('user_interests', JSON.stringify([...interests, val].slice(-10))); // Keep last 10
+                }
+              }
+            }}
           />
           <Search className="absolute left-3.5 top-3.5 text-orange-500" size={16} />
         </div>
@@ -353,7 +391,12 @@ export const JobsPage: React.FC<JobsPageProps> = ({
                       <div className="flex items-center gap-1.5 mb-1">
                           <h3 className="font-black text-slate-900 dark:text-white leading-tight group-hover:text-orange-500 transition-colors line-clamp-2 uppercase text-sm">{job.title}</h3>
                           {job.isVerified && (
-                            <ShieldCheck size={18} className="text-amber-500 shrink-0 drop-shadow-sm" fill="currentColor" fillOpacity={0.3} title="Empresa Verificada (Confiável)" />
+                            <div className="flex items-center gap-1.5 px-2 py-0.5 bg-amber-500/10 rounded-lg border border-amber-500/20">
+                               <ShieldCheck size={14} className="text-amber-500" fill="currentColor" fillOpacity={0.2} />
+                               <span className="text-[8px] font-black text-amber-600 uppercase tracking-tighter">
+                                 {job.source ? `Via ${job.source}` : 'Verificada'}
+                               </span>
+                            </div>
                           )}
                       </div>
                       <p className="text-[10px] text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest truncate">{job.company}</p>

@@ -90,8 +90,8 @@ SITES_CONFIG: Dict[str, dict] = {
     "Expansão": {
         "base_url": "https://www.expansao.co.ao",
         "list_url": "https://www.expansao.co.ao/economia.html",
-        "article_selector": "article, .detalhe, .K2Teaser",
-        "title_selector": "h1, h2, h3, .titulo, .itemTitle",
+        "article_selector": "h3, article, .detalhe, .K2Teaser",
+        "title_selector": "h1, h2, h3, a",
         "link_selector": "a",
         "fixed_category": "Economia",
     },
@@ -101,43 +101,42 @@ SITES_CONFIG: Dict[str, dict] = {
     "Jornal de Angola": {
         "base_url": "https://www.jornaldeangola.ao",
         "list_url": "https://www.jornaldeangola.ao/ao/noticias/",
-        "article_selector": "article, .news-card, .td-module-container",
-        "title_selector": "h1, h2, h3, .title, .entry-title, .td-module-title",
+        "article_selector": "article, .news-card, .td-module-container, .post-item, .list-news-item",
+        "title_selector": "h1, h2, h3, h4, .title, .entry-title, .td-module-title, a",
         "link_selector": "a",
         "fixed_category": "Angola",
     },
 
     # ── 3. TPA (Televisão Pública de Angola) ──────────────────────────────
-    # Notícias oficiais. Foco em destaques.
     "TPA": {
         "base_url": "https://www.tpa.ao",
         "list_url": "https://www.tpa.ao/noticias",
-        "article_selector": "article, .news-item, .post",
-        "title_selector": "h1, h2, h3, .post-title, .entry-title",
+        "article_selector": "article, .news-item, .post, a[href*='/noticias/']",
+        "title_selector": "h1, h2, h3, .post-title, .entry-title, .",
         "link_selector": "a",
         "fixed_category": "Oficial",
+        "verify_ssl": False,
     },
 
     # ── 4. TV GIRASSOL ────────────────────────────────────────────────────
-    # Notícias e entretenimento oficial.
     "TV Girassol": {
         "base_url": "https://www.tvgirassol.com",
         "list_url": "https://www.tvgirassol.com/noticias",
-        "article_selector": "article, .news-card, .jeg_post",
-        "title_selector": "h1, h2, h3, .jeg_post_title, .post-title",
+        "article_selector": "article, .news-card, .jeg_post, a[href*='/noticias/']",
+        "title_selector": "h1, h2, h3, .jeg_post_title, .post-title, .",
         "link_selector": "a",
         "fixed_category": "Oficial",
     },
 
     # ── 5. ANGOP (Agência Angola Press) ──────────────────────────────────
-    # Agência oficial de notícias. Foco em Urgente e Oficial.
     "ANGOP": {
         "base_url": "https://www.angop.ao",
         "list_url": "https://www.angop.ao/angola/pt_pt/noticias/",
-        "article_selector": ".news_item, article, .item",
-        "title_selector": "h1, h2, h3, .item-title, .news-title",
+        "article_selector": ".news_item, article, .item, a[href*='/noticias/']",
+        "title_selector": "h1, h2, h3, .item-title, .news-title, .",
         "link_selector": "a",
         "fixed_category": "Urgente",
+        "referer": "https://www.google.com/",
     },
 
     # ── 6. NOVO JORNAL ────────────────────────────────────────────────────
@@ -162,46 +161,24 @@ SITES_CONFIG: Dict[str, dict] = {
         "fixed_category": "Utilidade",
     },
 
-    # ── 8. REDE ANGOLA ────────────────────────────────────────────────────
-    # Notícias independentes, análise e cultura angolana.
-    "Rede Angola": {
-        "base_url": "https://www.redeangola.info",
-        "list_url": "https://www.redeangola.info/noticias/",
-        "article_selector": "article, .entry, .hentry",
-        "title_selector": "h1, h2, h3, .entry-title",
-        "link_selector": "a",
-        "fixed_category": "Cultura",
-    },
-
-    # ── 9. TOP ANGOLA ─────────────────────────────────────────────────────
-    # Conteúdo diversificado, lifestyle e tendências.
-    "TopAngola": {
-        "base_url": "https://topangola.com",
-        "list_url": "https://topangola.com/noticias/",
-        "article_selector": "article, .jeg_post, .post-item",
-        "title_selector": "h1, h2, h3, .jeg_post_title, .entry-title",
-        "link_selector": "a",
-        "fixed_category": "Lifestyle",
-    },
 
     # ── 10. XÉ ANGOLA ────────────────────────────────────────────────────
-    # Grande alcance em sociedade e entretenimento popular.
     "Xé Angola": {
-        "base_url": "https://xeangola.com",
-        "list_url": "https://xeangola.com/noticias/",
-        "article_selector": "article, .post, .jeg_post",
-        "title_selector": "h1, h2, h3, .entry-title, .jeg_post_title",
+        "base_url": "https://www.xe-angola.com",
+        "list_url": "https://www.xe-angola.com/category/noticias/",
+        "article_selector": "article, .post, .jeg_post, a[href*='/noticias/']",
+        "title_selector": "h1, h2, h3, .entry-title, .jeg_post_title, .",
         "link_selector": "a",
-        "fixed_category": "Entretenimento",
+        "fixed_category": "Sociedade",
     },
 
     # ── 11. ANGONOTÍCIAS ─────────────────────────────────────────────────
     "Angonotícias": {
         "base_url": "https://www.angonoticias.com",
         "list_url": "https://www.angonoticias.com/Artigos/canal/2/generalista",
-        "article_selector": ".noticia, article, .item",
-        "title_selector": "h1, h2, h3, .titulo",
-        "link_selector": "a",
+        "article_selector": "a[href*='/Artigos/item/']",
+        "title_selector": ".",
+        "link_selector": ".",
         "fixed_category": "Angola",
     },
 
@@ -209,8 +186,8 @@ SITES_CONFIG: Dict[str, dict] = {
     "PlatinaLine": {
         "base_url": "https://platinaline.com",
         "list_url": "https://platinaline.com/category/noticias/",
-        "article_selector": "article",
-        "title_selector": "h1, h2, h3, h4, .post-title",
+        "article_selector": "article, .l-post, .post-meta",
+        "title_selector": "h1, h2, h3, h4, .post-title, a",
         "link_selector": "a",
         "fixed_category": "Geral",
     },
@@ -279,7 +256,7 @@ class AngoNewsScraper:
             ),
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
             "Accept-Language": "pt-AO,pt;q=0.9,en;q=0.8",
-            "Accept-Encoding": "gzip, deflate, br",
+            "Accept-Encoding": "gzip, deflate",
             "Connection": "keep-alive",
         })
         self.stats = {"processed": 0, "saved": 0, "skipped_dup": 0, "errors": 0}
@@ -375,13 +352,22 @@ class AngoNewsScraper:
         log.info(f"{'═' * 60}")
 
         try:
-            resp = self.session.get(cfg["list_url"], timeout=20)
+            # ── Configurações de Requisição Dinâmicas ─────────────────────
+            verify = cfg.get("verify_ssl", True)
+            headers = self.session.headers.copy()
+            if "referer" in cfg:
+                headers["Referer"] = cfg["referer"]
+            
+            resp = self.session.get(cfg["list_url"], timeout=20, verify=verify, headers=headers)
             resp.raise_for_status()
             soup = BeautifulSoup(resp.text, "html.parser")
 
             articles = soup.select(cfg["article_selector"])[:12]  # Máx 12 por ciclo
             if not articles:
-                log.warning(f"  ⚠️  Nenhum artigo encontrado. Seletor: '{cfg['article_selector']}'. Saltando.")
+                log.warning(f"  ⚠️  Nenhum artigo encontrado. Seletor: '{cfg['article_selector']}'.")
+                # Depuração: Mostrar pedaço do HTML se não encontrar nada
+                snippet = soup.prettify()[:500].replace("\n", " ")
+                log.debug(f"  Snippet do HTML: {snippet}")
                 self.stats["errors"] += 1
                 return
 
@@ -391,8 +377,15 @@ class AngoNewsScraper:
                 self.stats["processed"] += 1
                 try:
                     # ── Extração do Link ──────────────────────────────────
-                    link_tag = art.select_one(cfg["link_selector"])
-                    raw_url = link_tag.get("href", "") if link_tag else ""
+                    if cfg["link_selector"] == ".":
+                        raw_url = art.get("href", "")
+                    else:
+                        link_tag = art.select_one(cfg["link_selector"])
+                        raw_url = link_tag.get("href", "") if link_tag else ""
+                    
+                    if not raw_url and art.name == "a":
+                        raw_url = art.get("href", "")
+
                     article_url = self.normalize_url(raw_url, cfg["base_url"])
 
                     if not article_url or article_url == cfg["base_url"]:
@@ -405,11 +398,17 @@ class AngoNewsScraper:
                         continue
 
                     # ── Extração do Título (do card de lista) ─────────────
-                    title_tag = art.select_one(cfg["title_selector"])
-                    title = title_tag.get_text(strip=True) if title_tag else ""
+                    if cfg["title_selector"] == ".":
+                        title = art.get_text(strip=True)
+                    else:
+                        title_tag = art.select_one(cfg["title_selector"])
+                        title = title_tag.get_text(strip=True) if title_tag else ""
 
                     if not title or len(title) < 5:
-                        continue
+                        # Fallback: usar o próprio texto do card se o título falhar
+                        title = art.get_text(strip=True)
+                        if not title or len(title) < 5:
+                            continue
 
                     log.info(f"  ✨ Capturando: {title[:65]}...")
 

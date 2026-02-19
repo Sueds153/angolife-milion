@@ -1,6 +1,7 @@
 @layer base {
   body {
-    @apply antialiased;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
@@ -12,4 +13,33 @@
 body {
   margin: 0;
   padding: 0;
+}
+
+/* Custom Utilities to avoid inline styles flagged by Edge Tools */
+.job-logo-60 {
+  width: 60px;
+  height: 60px;
+}
+.job-logo-80 {
+  width: 80px;
+  height: 80px;
+}
+.job-logo-100 {
+  width: 100px;
+  height: 100px;
+}
+
+.progress-bar-container {
+  width: 100%;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  transition: width 1s linear;
+}
+
+/* Gold border for elite components */
+.gold-border-subtle {
+  border-color: rgba(245, 158, 11, 0.2);
 }

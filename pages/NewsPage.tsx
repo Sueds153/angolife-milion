@@ -62,6 +62,20 @@ const NewsImage: React.FC<{ src?: string; alt: string; className?: string; aspec
 export const NewsPage: React.FC<NewsPageProps> = ({ isAuthenticated, onRequireAuth }) => {
   const [news, setNews] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
   
   // Counter for reading tracking (persisted in sessionStorage)
   const [newsReadCount, setNewsReadCount] = useState<number>(() => {
@@ -77,11 +91,24 @@ export const NewsPage: React.FC<NewsPageProps> = ({ isAuthenticated, onRequireAu
 
   useEffect(() => {
     const loadNews = async () => {
+      if (!navigator.onLine) {
+        const cached = localStorage.getItem('news_cache');
+        if (cached) {
+          setNews(JSON.parse(cached));
+          setLoading(false);
+          return;
+        }
+      }
+
       setLoading(true);
       const data = await SupabaseService.getNews();
-      console.log("📰 News Data Loaded:", data);
       setNews(data);
       setLoading(false);
+
+      // Cache last 10
+      if (data.length > 0) {
+        localStorage.setItem('news_cache', JSON.stringify(data.slice(0, 10)));
+      }
     };
     loadNews();
   }, []);
@@ -147,6 +174,16 @@ export const NewsPage: React.FC<NewsPageProps> = ({ isAuthenticated, onRequireAu
         <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">O que ninguém lhe conta sobre Angola.</p>
       </div>
 
+      {isOffline && (
+        <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-2xl flex items-center justify-between animate-pulse">
+           <div className="flex items-center gap-3">
+              <Zap className="text-amber-500" size={18} />
+              <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest">Estás em modo offline. A ler notícias guardadas.</p>
+           </div>
+           <span className="text-[8px] font-bold text-amber-500 uppercase tracking-tighter">Poupança de Dados Ativa</span>
+        </div>
+      )}
+
       {loading ? (
         <div className="space-y-6">
           {[1, 2, 3].map(i => (
@@ -167,12 +204,18 @@ export const NewsPage: React.FC<NewsPageProps> = ({ isAuthenticated, onRequireAu
                className="bg-white dark:bg-slate-900 rounded-3xl overflow-hidden shadow-lg border border-slate-100 dark:border-white/5 group hover:border-brand-gold/50 transition-all cursor-pointer flex flex-col h-full"
             >
                <div className="relative overflow-hidden rounded-t-3xl border-b border-white/5">
-                  <NewsImage 
-                    src={item.imageUrl} 
-                    alt={item.title} 
-                    aspect="16/9"
-                    className="transform group-hover:scale-110 transition-transform duration-700"
-                  />
+                  {!isOffline ? (
+                    <NewsImage 
+                      src={item.imageUrl} 
+                      alt={item.title} 
+                      aspect="16/9"
+                      className="transform group-hover:scale-110 transition-transform duration-700"
+                    />
+                  ) : (
+                    <div className="aspect-video bg-slate-800 flex items-center justify-center">
+                       <Newspaper className="text-slate-700" size={40} />
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60 z-10"></div>
                   
                   <div className="absolute top-4 right-4 z-20 flex flex-col gap-2 items-end">

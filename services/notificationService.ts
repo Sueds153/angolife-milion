@@ -12,14 +12,26 @@ export const NotificationService = {
 
   sendNativeNotification: (title: string, body: string) => {
     if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-      // Cast options to any to avoid TS error: 'vibrate' does not exist in type 'NotificationOptions'
+      // Logic for 2 notifications per day limit
+      const now = new Date();
+      const today = now.toISOString().split('T')[0];
+      const sentinel = `notif_count_${today}`;
+      const currentCount = Number(localStorage.getItem(sentinel)) || 0;
+
+      if (currentCount >= 2) {
+        console.log('Push notification skipped: Daily limit reached (2/2).');
+        return;
+      }
+
       const options: any = {
         body,
-        icon: '/favicon.ico', // Fallback icon
+        icon: '/favicon.ico',
         badge: '/favicon.ico',
         vibrate: [200, 100, 200],
       };
+      
       new Notification(title, options);
+      localStorage.setItem(sentinel, (currentCount + 1).toString());
     }
   },
 
