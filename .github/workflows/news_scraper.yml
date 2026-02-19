@@ -1,0 +1,32 @@
+name: AngoNews Scraper
+
+on:
+  schedule:
+    # Executa todos os dias às 03:00 UTC (madrugada em Angola)
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+    # Permite execução manual pelo utilizador
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar Dependências
+        run: |
+          pip install -r scraper/requirements.txt
+
+      - name: Executar Scraper de Notícias
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          python scraper/news_scraper.py
