@@ -243,17 +243,24 @@ class SupabaseRestClient:
         return resp.json()
 
     def insert(self, table: str, data: dict) -> bool:
-        resp = requests.post(
-            f"{self.base_url}/rest/v1/{table}",
-            headers=self.headers,
-            json=data,
-            timeout=10,
-        )
-        if resp.status_code >= 400:
-            log.error(f"Erro Supabase ({resp.status_code}): {resp.text}")
-            log.error(f"Payload: {json.dumps(data, ensure_ascii=False)[:300]}")
+        try:
+            resp = requests.post(
+                f"{self.base_url}/rest/v1/{table}",
+                headers=self.headers,
+                json=data,
+                timeout=10,
+            )
+            # Depuração solicitada pelo utilizador: Resposta do Supabase
+            log.info(f"Resposta do Supabase: {resp.status_code} {resp.text}")
+            
+            if resp.status_code >= 400:
+                log.error(f"❌ Erro na inserção: {resp.text}")
+                log.error(f"Payload com erro: {json.dumps(data, ensure_ascii=False)[:500]}")
+                return False
+            return True
+        except Exception as e:
+            log.error(f"💥 Falha de conexão Supabase: {e}")
             return False
-        return True
 
 
 # ─────────────────────────────────────────────
@@ -312,8 +319,8 @@ class AngoNewsScraper:
                 if src:
                     return self.normalize_url(src, base_url)
 
-        # Nível 3: Placeholder AngoLife
-        return ANGOLIFE_PLACEHOLDER
+        # Nível 3: Placeholder AngoLife (Tratamento de Nulos)
+        return image_url if image_url else ANGOLIFE_PLACEHOLDER
 
     # ── Classificação Inteligente ─────────────────────────────────────────
     def classify(self, title: str, fixed_category: str) -> tuple:
@@ -432,16 +439,16 @@ class AngoNewsScraper:
                     # ── Classificação e Prioridade ────────────────────────
                     category, is_priority = self.classify(final_title, cfg.get("fixed_category", "Geral"))
 
-                    # ── Payload para Supabase ─────────────────────────────
+                    # ── Payload para Supabase (Check de Nulos e Colunas) ─────
                     payload = {
                         "titulo": final_title[:500],
-                        "resumo": summary,
-                        "corpo": body_html[:50000],  # Limite seguro
-                        "imagem_url": image_url,
-                        "categoria": category,
+                        "resumo": (summary or "")[:1000],
+                        "corpo": (body_html or "")[:50000],
+                        "imagem_url": image_url or ANGOLIFE_PLACEHOLDER,
+                        "categoria": category or "Geral",
                         "fonte": site_name,
                         "url_origem": article_url,
-                        "is_priority": is_priority,
+                        "is_priority": bool(is_priority),
                         "status": "pendente",
                     }
 

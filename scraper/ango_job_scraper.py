@@ -261,17 +261,24 @@ class SupabaseRestClient:
         return resp.json()
 
     def insert(self, table: str, data: dict) -> bool:
-        resp = requests.post(
-            f"{self.base_url}/rest/v1/{table}",
-            headers=self.headers,
-            json=data,
-            timeout=10,
-        )
-        if resp.status_code >= 400:
-            log.error(f"Erro Supabase ({resp.status_code}): {resp.text}")
-            log.error(f"Payload: {json.dumps(data, ensure_ascii=False)[:300]}")
+        try:
+            resp = requests.post(
+                f"{self.base_url}/rest/v1/{table}",
+                headers=self.headers,
+                json=data,
+                timeout=10,
+            )
+            # Depuração solicitada pelo utilizador: Resposta do Supabase
+            log.info(f"Resposta do Supabase: {resp.status_code} {resp.text}")
+            
+            if resp.status_code >= 400:
+                log.error(f"❌ Erro na inserção: {resp.text}")
+                log.error(f"Payload com erro: {json.dumps(data, ensure_ascii=False)[:300]}")
+                return False
+            return True
+        except Exception as e:
+            log.error(f"💥 Falha de conexão Supabase: {e}")
             return False
-        return True
 
 
 # ─────────────────────────────────────────────
@@ -503,15 +510,16 @@ class AngoJobScraper:
                     categoria = self._categorize(title, cfg.get("fixed_category"))
 
                     # ── Payload Supabase (Mantendo fidelidade ao Schema e Front-end) ──────
+                    # Imagem e Categoria tratadas como strings para evitar erros de nulo se a coluna for obrigatória
                     payload = {
                         "title": title[:255],
                         "company": company[:255],
                         "location": location[:255],
-                        "description": description,
-                        "application_email": contact_email,
-                        "imagem_url": image_url,
+                        "description": description or "",
+                        "application_email": contact_email or "",
+                        "imagem_url": image_url or "",
                         "source_url": job_url or None,
-                        "categoria": categoria,
+                        "categoria": categoria or "Geral",
                         "status": "pendente",
                         "posted_at": datetime.now(timezone.utc).isoformat(),
                     }
