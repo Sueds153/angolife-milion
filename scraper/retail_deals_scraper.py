@@ -40,13 +40,13 @@ log = logging.getLogger("RetailDealsScraper")
 RETAIL_CONFIG: Dict[str, dict] = {
     # ── GRANDES REDES ──────────────────────────────────────────────────
     "Kero": {
-        "base_url": "https://www.kero-angola.com",
-        "promo_url": "https://www.kero-angola.com/promocoes",
-        "item_selector": ".product-item, .product-card",
-        "name_selector": ".product-title, h3",
-        "price_selector": ".price, .special-price",
-        "old_price_selector": ".old-price, .regular-price",
-        "img_selector": "img.product-image",
+        "base_url": "https://www.kero.ao",
+        "promo_url": "https://www.kero.ao/promocoes/",
+        "item_selector": ".product-item, .product-card, div[data-product-id]",
+        "name_selector": ".product-title, .product-item-link, h3",
+        "price_selector": ".price, .special-price, .current-price",
+        "old_price_selector": ".old-price, .regular-price, .was-price",
+        "img_selector": "img.product-image, img.product-item-img",
         "category": "Misto"
     },
     "Candando": {
@@ -62,51 +62,51 @@ RETAIL_CONFIG: Dict[str, dict] = {
     "Shoprite": {
         "base_url": "https://www.shoprite.co.ao",
         "promo_url": "https://www.shoprite.co.ao/promocoes.html",
-        "item_selector": ".item-product",
-        "name_selector": ".name",
-        "price_selector": ".special-price",
+        "item_selector": ".item-product, .product-card",
+        "name_selector": ".name, .title",
+        "price_selector": ".special-price, .price",
         "old_price_selector": ".old-price",
         "img_selector": "img",
         "category": "Alimentação"
     },
     "Kibabo": {
         "base_url": "https://kibabo.co.ao",
-        "promo_url": "https://kibabo.co.ao/produtos-em-promocao/",
-        "item_selector": "li.product",
-        "name_selector": ".woocommerce-loop-product__title",
-        "price_selector": "ins .amount",
-        "old_price_selector": "del .amount",
+        "promo_url": "https://kibabo.co.ao/promocoes/",
+        "item_selector": "li.product, .product-grid-item",
+        "name_selector": ".woocommerce-loop-product__title, .product-title",
+        "price_selector": "ins .amount, .price",
+        "old_price_selector": "del .amount, .old-price",
         "img_selector": "img",
         "category": "Misto"
     },
 
     # ── ESPECIALISTAS ───────────────────────────────────────────────────
     "Fresmart": {
-        "base_url": "https://fresmart.ao",
-        "promo_url": "https://fresmart.ao/promocoes/",
-        "item_selector": ".product-grid-item",
-        "name_selector": ".wd-entities-title",
-        "price_selector": ".price ins .amount",
-        "old_price_selector": ".price del .amount",
+        "base_url": "https://fresmart.net",
+        "promo_url": "https://fresmart.net/promocoes/",
+        "item_selector": ".product-grid-item, .product",
+        "name_selector": ".wd-entities-title, .title",
+        "price_selector": ".price ins .amount, .current-price",
+        "old_price_selector": ".price del .amount, .old-price",
         "img_selector": "img",
         "category": "Alimentação"
     },
     "Angomart": {
-        "base_url": "https://angomart.com",
-        "promo_url": "https://angomart.com/promocoes",
-        "item_selector": "article.product-miniature",
-        "name_selector": ".product-title",
-        "price_selector": ".current-price",
+        "base_url": "https://angomart.co.ao",
+        "promo_url": "https://angomart.co.ao/promocoes/",
+        "item_selector": "article.product-miniature, .product-card",
+        "name_selector": ".product-title, .h3",
+        "price_selector": ".current-price, .price",
         "old_price_selector": ".regular-price",
         "img_selector": "img",
         "category": "Higiene/Alimentação"
     },
     "Alimenta Angola": {
-        "base_url": "https://alimentaangola.com",
-        "promo_url": "https://alimentaangola.com/promocoes",
-        "item_selector": ".product-card",
-        "name_selector": ".title",
-        "price_selector": ".new-price",
+        "base_url": "https://alimentaangola.co.ao",
+        "promo_url": "https://alimentaangola.co.ao/folheto/",
+        "item_selector": ".product-card, .promotion-item",
+        "name_selector": ".title, .name",
+        "price_selector": ".new-price, .current-price",
         "old_price_selector": ".old-price",
         "img_selector": "img",
         "category": "Atacado"
@@ -114,22 +114,22 @@ RETAIL_CONFIG: Dict[str, dict] = {
 
     # ── LOCAIS / ATACADO ───────────────────────────────────────────────
     "Novo São Paulo": {
-        "base_url": "https://novosaopaulo.co.ao",
-        "promo_url": "https://novosaopaulo.co.ao/promocoes",
-        "item_selector": ".item",
-        "name_selector": ".product-name",
-        "price_selector": ".price-promo",
+        "base_url": "https://novosaopaulo.ao",
+        "promo_url": "https://novosaopaulo.ao/promocoes",
+        "item_selector": ".item, .product-item",
+        "name_selector": ".product-name, .name",
+        "price_selector": ".price-promo, .price",
         "old_price_selector": ".price-old",
         "img_selector": "img",
         "category": "Alimentação"
     },
     "Arreio": {
         "base_url": "https://arreio.ao",
-        "promo_url": "https://arreio.ao/promocoes",
-        "item_selector": ".deal-item",
-        "name_selector": ".name",
-        "price_selector": ".current",
-        "old_price_selector": ".was",
+        "promo_url": "https://arreio.ao/promocoes/",
+        "item_selector": ".deal-item, .product-card",
+        "name_selector": ".name, .title",
+        "price_selector": ".current, .price",
+        "old_price_selector": ".was, .old-price",
         "img_selector": "img",
         "category": "Limpeza"
     }
@@ -214,10 +214,21 @@ class AngoRetailScraper:
         log.info(f"🚀 Iniciando {store_name} ({cfg['promo_url']})...")
         try:
             session = requests.Session()
-            res = session.get(cfg["promo_url"], headers=self.headers, timeout=30)
+            # Headers extras para evitar 403 (especialmente Shoprite)
+            session.headers.update({
+                "User-Agent": self.headers["User-Agent"],
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+                "Accept-Language": "pt-PT,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+                "Referer": cfg["base_url"],
+                "Connection": "keep-alive",
+                "Upgrade-Insecure-Requests": "1"
+            })
+            
+            res = session.get(cfg["promo_url"], timeout=30)
             
             if res.status_code != 200:
                 log.error(f"  ❌ Falha ao aceder {store_name}: {res.status_code}")
+                # Fallback: tenta sem www se falhar com www (ou vice-versa) se aplicável
                 return
 
             soup = BeautifulSoup(res.text, "html.parser")
