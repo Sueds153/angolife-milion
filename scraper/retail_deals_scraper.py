@@ -161,13 +161,20 @@ class SupabaseRestClient:
 
     def product_exists(self, product_name: str, store: str):
         try:
-            # Check for duplication by title (correct column) and store
-            url = f"{self.base_url}/product_deals?title=eq.{product_name}&store=eq.{store}"
-            res = requests.get(url, headers=self.headers)
+            # Uso de params para garantir encoding correto de espaços e caracteres especiais
+            params = {
+                "title": f"eq.{product_name}",
+                "store": f"eq.{store}"
+            }
+            res = requests.get(f"{self.base_url}/product_deals", headers=self.headers, params=params)
             if res.status_code == 200:
-                return len(res.json()) > 0
-            return False
-        except:
+                data = res.json()
+                return len(data) > 0
+            else:
+                log.debug(f"  🔍 Check duplicados status: {res.status_code}")
+                return False
+        except Exception as e:
+            log.warning(f"  ⚠️ Erro ao verificar duplicados: {e}")
             return False
 
 # ─────────────────────────────────────────────────────────────────────────
@@ -178,7 +185,9 @@ class AngoRetailScraper:
         self.db = db
         self.stats = {"processed": 0, "saved": 0, "skipped_dup": 0, "errors": 0}
         self.headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "Accept-Language": "pt-PT,pt;q=0.9,en-US;q=0.8,en;q=0.7",
         }
 
     def clean_price(self, price_str: str) -> float:
@@ -186,9 +195,13 @@ class AngoRetailScraper:
         if not price_str: return 0.0
         # Remove símbolos e espaços
         cleaned = re.sub(r'[^\d,.]', '', price_str)
-        # Se houver vírgula e ponto, assumimos vírgula como decimal (padrão AO)
+        # Se houver vírgula e ponto, assumimos vírgula como decimal (visto em muitos sites AO)
         if ',' in cleaned and '.' in cleaned:
-             cleaned = cleaned.replace('.', '').replace(',', '.')
+             # Se a vírgula vem depois do ponto (ex: 1.000,50)
+             if cleaned.find(',') > cleaned.find('.'):
+                 cleaned = cleaned.replace('.', '').replace(',', '.')
+             else:
+                 cleaned = cleaned.replace(',', '').replace('.', '.')
         elif ',' in cleaned:
              cleaned = cleaned.replace(',', '.')
         
@@ -198,34 +211,49 @@ class AngoRetailScraper:
             return 0.0
 
     def scrape_store(self, store_name: str, cfg: dict):
-        log.info(f"🚀 Iniciando {store_name}...")
+        log.info(f"🚀 Iniciando {store_name} ({cfg['promo_url']})...")
         try:
-            res = requests.get(cfg["promo_url"], headers=self.headers, timeout=20)
+            session = requests.Session()
+            res = session.get(cfg["promo_url"], headers=self.headers, timeout=30)
+            
             if res.status_code != 200:
                 log.error(f"  ❌ Falha ao aceder {store_name}: {res.status_code}")
                 return
 
             soup = BeautifulSoup(res.text, "html.parser")
             items = soup.select(cfg["item_selector"])
+            
+            if not items:
+                log.warning(f"  ⚠️ Nenhum item encontrado em {store_name}. Verifique os seletores.")
+                # Log snippet do HTML para debug se nada for encontrado
+                log.debug(f"  📄 HTML Snippet: {res.text[:500]}")
+                return
+
             log.info(f"  📦 Encontrados {len(items)} potenciais itens.")
 
-            for item in items[:20]: # Limite de 20 por execução
+            for item in items[:25]: # Limite razoável por rede
                 try:
                     name_tag = item.select_one(cfg["name_selector"])
                     if not name_tag: continue
                     product = name_tag.get_text(strip=True)
 
+                    if not product: continue
+
                     price_tag = item.select_one(cfg["price_selector"])
-                    current_price = self.clean_price(price_tag.get_text(strip=True)) if price_tag else 0.0
+                    price_text = price_tag.get_text(strip=True) if price_tag else ""
+                    current_price = self.clean_price(price_text)
 
                     old_price_tag = item.select_one(cfg["old_price_selector"])
-                    old_price = self.clean_price(old_price_tag.get_text(strip=True)) if old_price_tag else 0.0
+                    old_price_text = old_price_tag.get_text(strip=True) if old_price_tag else ""
+                    old_price = self.clean_price(old_price_text)
 
                     img_tag = item.select_one(cfg["img_selector"])
                     img_url = ""
                     if img_tag:
-                        img_url = img_tag.get("src") or img_tag.get("data-src")
-                        img_url = urljoin(cfg["base_url"], img_url)
+                        # Tenta vários atributos comuns de imagem
+                        raw_img = img_tag.get("src") or img_tag.get("data-src") or img_tag.get("data-lazy-src")
+                        if raw_img:
+                            img_url = urljoin(cfg["base_url"], raw_img)
 
                     # Deduplicação
                     if self.db.product_exists(product, store_name):
@@ -245,33 +273,48 @@ class AngoRetailScraper:
                     }
 
                     if self.db.insert("product_deals", payload):
-                        log.info(f"  ✅ Guardado: {product[:40]}... @ {store_name}")
+                        log.info(f"  ✅ Guardado: {product[:40]}... ({current_price} Kz)")
                         self.stats["saved"] += 1
+                    else:
+                        self.stats["errors"] += 1
                     
                     self.stats["processed"] += 1
-                    time.sleep(1) # Delay humano
+                    time.sleep(1.5) # Delay humano mais seguro
 
                 except Exception as e:
-                    log.warning(f"  ⚠️ Erro num item de {store_name}: {e}")
+                    log.warning(f"  ⚠️ Erro ao processar item em {store_name}: {e}")
 
         except Exception as e:
             log.error(f"  ❌ Erro crítico em {store_name}: {e}")
 
     def run(self):
-        log.info("ANGOLIFE RETAIL DEALS SCRAPER - START")
+        log.info("=== ANGOLIFE RETAIL DEALS SCRAPER - INICIADO ===")
         for store, cfg in RETAIL_CONFIG.items():
             self.scrape_store(store, cfg)
-        log.info(f"FINISH - Saved: {self.stats['saved']} | Skipped: {self.stats['skipped_dup']}")
+        
+        log.info("===============================================")
+        log.info(f"RESULTADO FINAL:")
+        log.info(f"  - Itens Processados: {self.stats['processed']}")
+        log.info(f"  - Itens Guardados: {self.stats['saved']}")
+        log.info(f"  - Duplicados Ignorados: {self.stats['skipped_dup']}")
+        log.info(f"  - Erros de Inserção: {self.stats['errors']}")
+        log.info("===============================================")
 
 if __name__ == "__main__":
+    # Tenta carregar localmente primeiro
     load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", ".env.local"))
+    
     URL = os.getenv("VITE_SUPABASE_URL")
-    # Using Service Role as established in security phase
+    # Prioridade máxima para Service Role Key
     KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("VITE_SUPABASE_ANON_KEY")
 
     if not URL or not KEY:
-        log.error("❌ Credenciais Supabase não encontradas.")
+        log.error("❌ Erro: Credenciais Supabase (URL ou KEY) não encontradas no ambiente.")
         exit(1)
+
+    log.info(f"📡 Conectando ao Supabase: {URL}")
+    if not os.getenv("SUPABASE_SERVICE_ROLE_KEY"):
+        log.warning("⚠️ Aviso: SUPABASE_SERVICE_ROLE_KEY não encontrada. Usando Anon Key (sujeito a RLS).")
 
     db = SupabaseRestClient(URL, KEY)
     scraper = AngoRetailScraper(db)
