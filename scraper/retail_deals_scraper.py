@@ -349,6 +349,14 @@ if __name__ == "__main__":
     load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", ".env.local"))
     
     URL = os.getenv("VITE_SUPABASE_URL")
+    # Prioridade máxima para Service Role Key
+    KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("VITE_SUPABASE_ANON_KEY")
+
+    if not URL or not KEY:
+        log.error("❌ Erro: Credenciais Supabase (URL ou KEY) não encontradas no ambiente.")
+        sys.exit(1)
+
+    log.info(f"📡 Conectando ao Supabase: {URL}")
     db = SupabaseRestClient(URL, KEY)
     scraper = AngoRetailScraper(db)
     scraper.run()
