@@ -92,8 +92,8 @@ RETAIL_CONFIG: Dict[str, dict] = {
         "category": "Alimentação"
     },
     "Angomart": {
-        "base_url": "https://angomart.co.ao",
-        "promo_url": "https://angomart.co.ao/promocoes/",
+        "base_url": "https://www.angomart.com",
+        "promo_url": "https://www.angomart.com/promocoes/",
         "item_selector": "article.product-miniature, .product-card",
         "name_selector": ".product-title, .h3",
         "price_selector": ".current-price, .price",
@@ -102,8 +102,8 @@ RETAIL_CONFIG: Dict[str, dict] = {
         "category": "Higiene/Alimentação"
     },
     "Alimenta Angola": {
-        "base_url": "https://alimentaangola.co.ao",
-        "promo_url": "https://alimentaangola.co.ao/folheto/",
+        "base_url": "https://www.alimentaangola.co.ao",
+        "promo_url": "https://www.alimentaangola.co.ao/folheto/",
         "item_selector": ".product-card, .promotion-item",
         "name_selector": ".title, .name",
         "price_selector": ".new-price, .current-price",
@@ -114,8 +114,8 @@ RETAIL_CONFIG: Dict[str, dict] = {
 
     # ── LOCAIS / ATACADO ───────────────────────────────────────────────
     "Novo São Paulo": {
-        "base_url": "https://novosaopaulo.ao",
-        "promo_url": "https://novosaopaulo.ao/promocoes",
+        "base_url": "https://www.cidadedoseculo.ao",
+        "promo_url": "https://www.cidadedoseculo.ao/promocoes",
         "item_selector": ".item, .product-item",
         "name_selector": ".product-name, .name",
         "price_selector": ".price-promo, .price",
@@ -123,9 +123,9 @@ RETAIL_CONFIG: Dict[str, dict] = {
         "img_selector": "img",
         "category": "Alimentação"
     },
-    "Arreio": {
-        "base_url": "https://arreio.ao",
-        "promo_url": "https://arreio.ao/promocoes/",
+    "Arreiou": {
+        "base_url": "https://www.arreiou.com",
+        "promo_url": "https://www.arreiou.com/recrutamento/",
         "item_selector": ".deal-item, .product-card",
         "name_selector": ".name, .title",
         "price_selector": ".current, .price",
@@ -212,124 +212,138 @@ class AngoRetailScraper:
 
     def scrape_store(self, store_name: str, cfg: dict):
         log.info(f"🚀 Iniciando {store_name} ({cfg['promo_url']})...")
-        try:
-            session = requests.Session()
-            
-            # PASSO STEALTH: Visita Home Primeiro para Cookies
+        
+        urls_to_try = [cfg['promo_url']]
+        # Triangulação: se falhar, tenta variações comuns
+        if ".co.ao" in cfg['promo_url']:
+            urls_to_try.append(cfg['promo_url'].replace(".co.ao", ".com"))
+        elif ".com" in cfg['promo_url'] and "candando" not in cfg['promo_url']:
+            urls_to_try.append(cfg['promo_url'].replace(".com", ".co.ao"))
+
+        last_error = ""
+        for url in urls_to_try:
             try:
-                session.get(cfg["base_url"], headers=self.headers, timeout=15)
-            except:
-                pass
-
-            # Headers extras para evitar 403
-            session.headers.update({
-                "Referer": cfg["base_url"],
-                "Connection": "keep-alive",
-            })
-            
-            res = session.get(cfg["promo_url"], headers=self.headers, timeout=30)
-            
-            if res.status_code != 200:
-                log.error(f"  ❌ Falha ao aceder {store_name}: {res.status_code}")
-                return
-
-            soup = BeautifulSoup(res.text, "html.parser")
-            items = soup.select(cfg["item_selector"])
-            
-            if not items:
-                log.warning(f"  ⚠️ Sem produtos em {store_name}. Tentando localizar Folheto...")
-                # ESTRATÉGIA FLYER-FIRST (Fallback)
-                flyer_found = False
-                # Procura por keywords de folheto em links
-                keywords = ["folheto", "pdf", "promo", "catalogo", "ver ofertas"]
-                for link in soup.find_all("a", href=True):
-                    text = (link.get_text() or "").lower()
-                    href = link["href"].lower()
-                    if any(kw in text for kw in keywords) or ".pdf" in href:
-                        flyer_url = urljoin(cfg["base_url"], link["href"])
-                        log.info(f"  📖 Folheto detetado: {flyer_url}")
-                        
-                        # Verifica se já existe esse "Folheto" no dia
-                        today_folder = datetime.now().strftime("%Y-%m-%d")
-                        flyer_title = f"Folheto Digital: {store_name} ({today_folder})"
-                        
-                        if not self.db.product_exists(flyer_title, store_name):
-                            payload = {
-                                "title": flyer_title,
-                                "store": store_name,
-                                "url": flyer_url,
-                                "category": cfg["category"],
-                                "image_placeholder": "https://img.icons8.com/color/96/pdf.png", # Ícone padrão
-                                "status": "pending",
-                                "submitted_by": "scraper_flyer"
-                            }
-                            if self.db.insert("product_deals", payload):
-                                log.info(f"  ✅ Folheto guardado: {store_name}")
-                                self.stats["saved"] += 1
-                                flyer_found = True
-                        break
-                
-                if not flyer_found:
-                    log.debug(f"  📄 Snippet do HTML falhado: {res.text[:300]}")
-                return
-
-            log.info(f"  📦 Encontrados {len(items)} potenciais itens.")
-
-            for item in items[:25]: # Limite razoável por rede
+                session = requests.Session()
+                # PASSO STEALTH: Visita Home Primeiro para Cookies
                 try:
-                    name_tag = item.select_one(cfg["name_selector"])
-                    if not name_tag: continue
-                    product = name_tag.get_text(strip=True)
+                    session.get(cfg["base_url"], headers=self.headers, timeout=15)
+                except:
+                    pass
 
-                    if not product: continue
+                # Headers extras para evitar 403
+                session.headers.update({
+                    "Referer": cfg["base_url"],
+                    "Connection": "keep-alive",
+                })
+                
+                log.info(f"  📡 Acedendo: {url}")
+                res = session.get(url, headers=self.headers, timeout=30)
+                
+                if res.status_code != 200:
+                    last_error = f"HTTP {res.status_code}"
+                    continue
 
-                    price_tag = item.select_one(cfg["price_selector"])
-                    price_text = price_tag.get_text(strip=True) if price_tag else ""
-                    current_price = self.clean_price(price_text)
-
-                    old_price_tag = item.select_one(cfg["old_price_selector"])
-                    old_price_text = old_price_tag.get_text(strip=True) if old_price_tag else ""
-                    old_price = self.clean_price(old_price_text)
-
-                    img_tag = item.select_one(cfg["img_selector"])
-                    img_url = ""
-                    if img_tag:
-                        # Tenta vários atributos comuns de imagem
-                        raw_img = img_tag.get("src") or img_tag.get("data-src") or img_tag.get("data-lazy-src")
-                        if raw_img:
-                            img_url = urljoin(cfg["base_url"], raw_img)
-
-                    # Deduplicação
-                    if self.db.product_exists(product, store_name):
-                        self.stats["skipped_dup"] += 1
-                        continue
-
-                    # Alinhamento com Schema Real do Supabase
-                    payload = {
-                        "title": product,
-                        "store": store_name,
-                        "discount_price": current_price,
-                        "original_price": old_price,
-                        "image_placeholder": img_url,
-                        "category": cfg["category"],
-                        "status": "pending",
-                        "submitted_by": "scraper"
-                    }
-
-                    if self.db.insert("product_deals", payload):
-                        log.info(f"  ✅ Guardado: {product[:40]}... ({current_price} Kz)")
-                        self.stats["saved"] += 1
-                    else:
-                        self.stats["errors"] += 1
+                soup = BeautifulSoup(res.text, "html.parser")
+                items = soup.select(cfg["item_selector"])
+                
+                if not items:
+                    log.warning(f"  ⚠️ Sem produtos em {store_name}. Tentando localizar Folheto...")
+                    # ESTRATÉGIA FLYER-FIRST (Fallback)
+                    flyer_found = False
+                    keywords = ["folheto", "pdf", "promo", "catalogo", "ver ofertas", "folhetos"]
+                    for link in soup.find_all("a", href=True):
+                        text = (link.get_text() or "").lower()
+                        href = link["href"].lower()
+                        if any(kw in text for kw in keywords) or ".pdf" in href:
+                            flyer_url = urljoin(cfg["base_url"], link["href"])
+                            log.info(f"  📖 Folheto detetado: {flyer_url}")
+                            
+                            today = datetime.now().strftime("%Y-%m-%d")
+                            flyer_title = f"Folheto Digital: {store_name} ({today})"
+                            
+                            if not self.db.product_exists(flyer_title, store_name):
+                                payload = {
+                                    "title": flyer_title,
+                                    "store": store_name,
+                                    "url": flyer_url,
+                                    "category": cfg["category"],
+                                    "image_placeholder": "https://img.icons8.com/color/96/pdf.png",
+                                    "status": "pending",
+                                    "submitted_by": "scraper_flyer"
+                                }
+                                if self.db.insert("product_deals", payload):
+                                    log.info(f"  ✅ Folheto guardado: {store_name}")
+                                    self.stats["saved"] += 1
+                                    flyer_found = True
+                            else:
+                                flyer_found = True 
+                            break
                     
-                    self.stats["processed"] += 1
-                    time.sleep(1.5) # Delay humano mais seguro
+                    if flyer_found: return
+                    log.debug(f"  🔍 DEBUG HTML ({store_name}): {res.text[:1000]}")
+                    continue 
 
-                except Exception as e:
-                    log.warning(f"  ⚠️ Erro ao processar item em {store_name}: {e}")
+                log.info(f"  📦 Encontrados {len(items)} potenciais itens.")
+                
+                for item in items[:25]: # Processa os itens encontrados
+                    try:
+                        name_tag = item.select_one(cfg["name_selector"])
+                        if not name_tag: continue
+                        product = name_tag.get_text(strip=True)
 
-        except Exception as e:
-            log.error(f"  ❌ Erro crítico em {store_name}: {e}")
+                        if not product: continue
+
+                        price_tag = item.select_one(cfg["price_selector"])
+                        price_text = price_tag.get_text(strip=True) if price_tag else ""
+                        current_price = self.clean_price(price_text)
+
+                        old_price_tag = item.select_one(cfg["old_price_selector"])
+                        old_price_text = old_price_tag.get_text(strip=True) if old_price_tag else ""
+                        old_price = self.clean_price(old_price_text)
+
+                        img_tag = item.select_one(cfg["img_selector"])
+                        img_url = ""
+                        if img_tag:
+                            raw_img = img_tag.get("src") or img_tag.get("data-src") or img_tag.get("data-lazy-src")
+                            if raw_img:
+                                img_url = urljoin(cfg["base_url"], raw_img)
+
+                        # Deduplicação
+                        if self.db.product_exists(product, store_name):
+                            self.stats["skipped_dup"] += 1
+                            continue
+
+                        payload = {
+                            "title": product,
+                            "store": store_name,
+                            "discount_price": current_price,
+                            "original_price": old_price,
+                            "image_placeholder": img_url,
+                            "category": cfg["category"],
+                            "status": "pending",
+                            "submitted_by": "scraper"
+                        }
+
+                        if self.db.insert("product_deals", payload):
+                            log.info(f"  ✅ Guardado: {product[:40]}... ({current_price} Kz)")
+                            self.stats["saved"] += 1
+                        else:
+                            self.stats["errors"] += 1
+                        
+                        self.stats["processed"] += 1
+                        time.sleep(0.5) 
+
+                    except Exception as e:
+                        log.warning(f"  ⚠️ Erro ao processar item em {store_name}: {e}")
+                
+                return # Sucesso total para esta loja
+                
+            except Exception as e:
+                last_error = str(e)
+                log.debug(f"  ❌ Erro ao tentar {url}: {last_error[:100]}")
+                continue
+
+        log.error(f"  ❌ Todas as tentativas falharam para {store_name}. Último erro: {last_error}")
 
     def run(self):
         log.info("=== ANGOLIFE RETAIL DEALS SCRAPER - INICIADO ===")
