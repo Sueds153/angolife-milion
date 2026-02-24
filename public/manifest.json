@@ -1,0 +1,24 @@
+{
+  "name": "AngoLife - Super App de Angola",
+  "short_name": "AngoLife",
+  "description": "O portal definitivo para empregos, câmbio, notícias e descontos em Angola.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0F172A",
+  "theme_color": "#F59E0B",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ]
+}

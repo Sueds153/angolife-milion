@@ -43,3 +43,49 @@ body {
 .gold-border-subtle {
   border-color: rgba(245, 158, 11, 0.2);
 }
+
+/* --- PWA & Mobile Optimization --- */
+
+/* Mobile-first responsiveness: Ensure fluids layouts and no side-scroll */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
+}
+
+/* Touch targets optimization (iOS/Android compliance) */
+button, 
+input, 
+select, 
+a.btn {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Responsive containers using relative units */
+.container {
+  width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 640px) {
+  .container { max-width: 640px; }
+}
+@media (min-width: 768px) {
+  .container { max-width: 768px; }
+}
+@media (min-width: 1024px) {
+  .container { max-width: 1024px; }
+}
+
+/* Fix for overlapping elements on mobile browsers with address bars */
+.min-h-screen-safe {
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+}
