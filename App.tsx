@@ -323,9 +323,8 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-white dark:bg-slate-900 flex justify-center overflow-x-hidden text-slate-900 dark:text-white transition-colors duration-300 print:bg-white print:text-black">
       <div className="print:hidden"><Background /></div>
 
-      {/* App Shell - Estritamente Mobile */}
-      {/* App Shell - Responsive */}
-      <div className="w-full max-w-[480px] md:max-w-7xl md:mx-auto print:max-w-none bg-white dark:bg-slate-900 min-h-screen shadow-[0_0_80px_rgba(0,0,0,0.1)] md:shadow-none print:shadow-none flex flex-col relative text-slate-900 dark:text-white transition-all duration-500">
+      {/* App Shell - Optimized for all screens */}
+      <div className="w-full lg:max-w-7xl xl:max-w-screen-2xl mx-auto print:max-w-none bg-white dark:bg-slate-900 min-h-screen shadow-2xl md:shadow-none print:shadow-none flex flex-col relative text-slate-900 dark:text-white transition-all duration-500">
 
         {activeNotification && (
           <NotificationToast
@@ -346,18 +345,20 @@ const App: React.FC = () => {
           onLogout={() => setUser(null)}
         />
 
-        <main className="flex-grow flex flex-col">
-          <div className="flex-grow px-4 py-6 animate-fade-in print:p-0">
+        <main className="flex-grow flex flex-col pb-safe">
+          <div className="flex-grow container-responsive py-6 animate-fade-in print:p-0">
             {renderPage()}
           </div>
 
           <div className="print:hidden"><Footer onNavigate={handleNavigate} /></div>
 
-          <div className={`${showStickyAd ? 'h-[100px]' : 'h-[60px]'} bg-black md:hidden print:hidden`}></div>
+          {/* Spacer for mobile bottom navigation */}
+          <div className={`${showStickyAd ? 'h-[110px]' : 'h-[75px]'} bg-transparent md:hidden lg:hidden print:hidden`}></div>
         </main>
 
+        {/* Mobile Bottom Navigation - Fluid but capped for large mobile */}
         <nav
-          className={`fixed bottom-0 left-1/2 -translate-x-1/2 md:hidden w-full max-w-[480px] bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-orange-500/20 gold-border-t-subtle z-[100] flex justify-around items-center px-2 py-3 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] print:hidden ${showStickyAd ? 'mb-[50px]' : 'mb-0'}`}
+          className={`fixed bottom-0 left-1/2 -translate-x-1/2 md:hidden w-full max-w-lg bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-orange-500/10 z-[100] flex justify-around items-center px-4 py-3 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.1)] print:hidden ${showStickyAd ? 'mb-[50px]' : 'mb-0'}`}
         >
           {[
             { id: 'home', label: 'Início', icon: Home },
@@ -369,10 +370,10 @@ const App: React.FC = () => {
             <button
               key={item.id}
               onClick={() => handleNavigate(item.id as Page)}
-              className={`flex flex-col items-center justify-center min-w-[50px] py-1 transition-all active:scale-90 ${currentPage === item.id ? 'text-orange-500' : 'text-slate-500 dark:text-slate-400'}`}
+              className={`flex flex-col items-center justify-center min-w-[60px] py-1 transition-all active:scale-95 ${currentPage === item.id ? 'text-orange-500' : 'text-slate-500 dark:text-slate-400 opacity-70 hover:opacity-100'}`}
             >
               <item.icon size={22} strokeWidth={currentPage === item.id ? 2.5 : 2} />
-              <span className={`text-[9px] font-black uppercase tracking-tighter mt-1 ${currentPage === item.id ? 'opacity-100' : 'opacity-60'}`}>
+              <span className={`text-[9px] font-black uppercase tracking-tighter mt-1 transition-opacity ${currentPage === item.id ? 'opacity-100' : 'opacity-60'}`}>
                 {item.label}
               </span>
             </button>
@@ -380,8 +381,8 @@ const App: React.FC = () => {
         </nav>
 
         {showStickyAd && (
-          <div className="fixed bottom-0 left-1/2 -translate-x-1/2 md:hidden w-full max-w-[480px] z-[110] bg-white dark:bg-black border-t border-orange-500/10 shadow-2xl print:hidden">
-            <div className="pb-[env(safe-area-inset-bottom)]">
+          <div className="fixed bottom-0 left-1/2 -translate-x-1/2 md:hidden w-full max-w-lg z-[110] bg-white dark:bg-black border-t border-orange-500/10 shadow-2xl print:hidden">
+            <div className="pb-safe">
               <AdBanner format="sticky-footer" />
             </div>
           </div>

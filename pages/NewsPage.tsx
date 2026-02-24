@@ -167,7 +167,7 @@ export const NewsPage: React.FC<NewsPageProps> = ({ isAuthenticated, onRequireAu
   return (
     <div className="space-y-6 animate-fade-in pb-20">
       <div className="flex flex-col gap-1 mb-4">
-        <h2 className="text-3xl font-black text-brand-gold uppercase tracking-tighter flex items-center gap-2">
+        <h2 className="text-fluid-h2 font-black text-brand-gold uppercase tracking-tighter flex items-center gap-2">
            <Flame className="fill-brand-gold text-brand-gold" />
            News Secretas
         </h2>

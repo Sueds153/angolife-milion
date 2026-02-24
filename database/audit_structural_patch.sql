@@ -1,116 +1,64 @@
 -- ==========================================
--- AngoLife AUDIT PATCH (2026-02-24)
--- Normalization and Structural Fixes
+-- AngoLife MASTER STRUCTURAL REPAIR
+-- Solve: Missing Tables, RLS Recursion, Admin Permissions
 -- ==========================================
-DO $$ BEGIN -- 1. PATCH PROFILES
-IF NOT EXISTS (
-    SELECT 1
-    FROM information_schema.columns
-    WHERE table_name = 'profiles'
-        AND column_name = 'account_type'
-) THEN
-ALTER TABLE public.profiles
-ADD COLUMN account_type TEXT DEFAULT 'free';
-END IF;
--- 2. PATCH JOBS (Consistency)
-IF NOT EXISTS (
-    SELECT 1
-    FROM information_schema.columns
-    WHERE table_name = 'jobs'
-        AND column_name = 'fonte'
-) THEN
-ALTER TABLE public.jobs
-ADD COLUMN fonte TEXT;
-END IF;
-IF NOT EXISTS (
-    SELECT 1
-    FROM information_schema.columns
-    WHERE table_name = 'jobs'
-        AND column_name = 'is_verified'
-) THEN
-ALTER TABLE public.jobs
-ADD COLUMN is_verified BOOLEAN DEFAULT false;
-END IF;
-IF NOT EXISTS (
-    SELECT 1
-    FROM information_schema.columns
-    WHERE table_name = 'jobs'
-        AND column_name = 'report_count'
-) THEN
-ALTER TABLE public.jobs
-ADD COLUMN report_count INTEGER DEFAULT 0;
-END IF;
-IF NOT EXISTS (
-    SELECT 1
-    FROM information_schema.columns
-    WHERE table_name = 'jobs'
-        AND column_name = 'application_count'
-) THEN
-ALTER TABLE public.jobs
-ADD COLUMN application_count INTEGER DEFAULT 0;
-END IF;
--- 3. PATCH NEWS (Ensure Scraper Compatibility)
--- If news_articles was created with English names (title), we add Portuguese names safely
-IF EXISTS (
-    SELECT 1
-    FROM information_schema.columns
-    WHERE table_name = 'news_articles'
-        AND column_name = 'title'
-) THEN
-ALTER TABLE public.news_articles
-    RENAME COLUMN title TO titulo;
-ALTER TABLE public.news_articles
-    RENAME COLUMN summary TO resumo;
-ALTER TABLE public.news_articles
-    RENAME COLUMN source TO fonte;
-ALTER TABLE public.news_articles
-    RENAME COLUMN url TO url_origem;
-ALTER TABLE public.news_articles
-    RENAME COLUMN category TO categoria;
-END IF;
--- Ensure missing columns in news
-IF NOT EXISTS (
-    SELECT 1
-    FROM information_schema.columns
-    WHERE table_name = 'news_articles'
-        AND column_name = 'corpo'
-) THEN
-ALTER TABLE public.news_articles
-ADD COLUMN corpo TEXT;
-END IF;
-IF NOT EXISTS (
-    SELECT 1
-    FROM information_schema.columns
-    WHERE table_name = 'news_articles'
-        AND column_name = 'imagem_url'
-) THEN
-ALTER TABLE public.news_articles
-ADD COLUMN imagem_url TEXT;
-END IF;
-IF NOT EXISTS (
-    SELECT 1
-    FROM information_schema.columns
-    WHERE table_name = 'news_articles'
-        AND column_name = 'is_priority'
-) THEN
-ALTER TABLE public.news_articles
-ADD COLUMN is_priority BOOLEAN DEFAULT false;
-END IF;
-END $$;
--- 4. REFRESH RLS POLICIES FOR SECURE ACCESS
--- Restrict profile access so users only see their own row
-DROP POLICY IF EXISTS "Public profiles are viewable by everyone." ON public.profiles;
-CREATE POLICY "Users see own profile" ON public.profiles FOR
-SELECT USING (auth.uid() = id);
-CREATE POLICY "Admin see all profiles" ON public.profiles FOR
-SELECT USING (
-        EXISTS (
-            SELECT 1
-            FROM public.profiles
-            WHERE id = auth.uid()
-                AND is_admin = true
-        )
+-- 1. ENSURE MISSING TABLES EXIST
+CREATE TABLE IF NOT EXISTS public.subscriptions_pending (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    user_id UUID REFERENCES auth.users(id),
+    plano_escolhido TEXT,
+    url_comprovativo TEXT,
+    status TEXT DEFAULT 'aguardando',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
+);
+-- 2. FIX RLS RECURSION (Helper Function)
+-- This function allows checking admin status without causing "Infinite Recursion"
+CREATE OR REPLACE FUNCTION public.check_is_admin() RETURNS boolean AS $$ BEGIN RETURN EXISTS (
+        SELECT 1
+        FROM public.profiles
+        WHERE id = auth.uid()
+            AND is_admin = true
     );
--- Reload schema caches
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+-- 3. APPLY REPAIR TO PROFILES
+UPDATE public.profiles
+SET is_admin = true
+WHERE email = 'suedjosue@gmail.com';
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Admin see all profiles" ON public.profiles;
+CREATE POLICY "Admin see all profiles" ON public.profiles FOR
+SELECT USING (public.check_is_admin());
+-- 4. CLEAN & RE-APPLY POLICIES FOR VISIBILITY
+-- JOBS
+ALTER TABLE public.jobs ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Admin can see all" ON public.jobs;
+CREATE POLICY "Admin can see all" ON public.jobs FOR
+SELECT USING (
+        status IN ('pendente', 'pending', 'publicado', 'published')
+        OR public.check_is_admin()
+    );
+-- NEWS
+ALTER TABLE public.news_articles ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Admin can see all news" ON public.news_articles;
+CREATE POLICY "Admin can see all news" ON public.news_articles FOR
+SELECT USING (
+        status IN ('pendente', 'pending', 'publicado', 'published')
+        OR public.check_is_admin()
+    );
+-- DEALS
+ALTER TABLE public.product_deals ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Admin can see all deals" ON public.product_deals;
+CREATE POLICY "Admin can see all deals" ON public.product_deals FOR
+SELECT USING (
+        status IN ('pendente', 'pending', 'publicado', 'published')
+        OR public.check_is_admin()
+    );
+-- CV SUBSCRIPTIONS
+ALTER TABLE public.subscriptions_pending ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Admin see all subscriptions" ON public.subscriptions_pending;
+CREATE POLICY "Admin see all subscriptions" ON public.subscriptions_pending FOR
+SELECT USING (public.check_is_admin());
+-- RELOAD CACHES
 NOTIFY pgrst,
 'reload schema';

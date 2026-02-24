@@ -92,7 +92,7 @@ export const TechnicalTemplate: React.FC<TemplateSharedProps> = ({ cv, education
                 {cv.skills && cv.skills.length > 0 && (
                     <div>
                         <h2 className="creative-sidebar-title">Qualidades</h2>
-                        <ul style={{ listStyleType: 'disc', paddingLeft: '20px', fontSize: '13px', lineHeight: '1.8' }}>
+                        <ul className="creative-skills-list">
                             {cv.skills.map((skill, i) => (
                                 <li key={i}>{skill}</li>
                             ))}

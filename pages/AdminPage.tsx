@@ -130,12 +130,37 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
     reader.readAsDataURL(file);
   };
 
+  // Diagnostic Widget to show Admin status
+  const AdminDiagnostic = () => {
+    if (process.env.NODE_ENV === 'production' && !user?.isAdmin) return null;
+    return (
+      <div className="bg-slate-900 text-[10px] text-slate-400 p-2 rounded-xl mb-4 border border-white/5 flex gap-4 font-mono">
+        <span>👤 {user?.email || 'Desconhecido'}</span>
+        <span className={user?.isAdmin ? 'text-emerald-500' : 'text-red-500'}>
+          🛡️ Admin: {user?.isAdmin ? 'SIM' : 'NÃO'}
+        </span>
+        <span>🆔 {user?.id?.substring(0, 8)}...</span>
+      </div>
+    );
+  };
+
   useEffect(() => {
     // Carregar dados iniciais ao montar o componente
     loadPendingJobs();
     loadPendingNews();
     loadPendingDeals();
     loadExchangeRates();
+
+    // Ativação de Realtime para atualizações automáticas
+    const channel = SupabaseService.getSupabaseInstance().channel('admin-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs' }, () => loadPendingJobs())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'news_articles' }, () => loadPendingNews())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'product_deals' }, () => loadPendingDeals())
+      .subscribe();
+
+    return () => {
+      SupabaseService.getSupabaseInstance().removeChannel(channel);
+    };
   }, []);
 
   useEffect(() => {
@@ -537,6 +562,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
 
   return (
     <div className="space-y-8 animate-slide-up pb-20">
+      <AdminDiagnostic />
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-black text-orange-500 uppercase tracking-tight">Painel Admin</h2>
@@ -608,6 +634,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
                 className="bg-emerald-500 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-600 active:scale-95 transition-all disabled:opacity-50 shadow-lg shadow-emerald-500/20"
               >
                 <Check size={18} /> Publicar Tudo
+              </button>
+              <button
+                onClick={handleSyncJobs}
+                disabled={loading}
+                title="Sincronizar Vagas via IA"
+                className="bg-brand-gold text-slate-900 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+              >
+                <RefreshCw className={loading ? 'animate-spin' : ''} size={18} /> Sincronizar (IA)
               </button>
               <button
                 onClick={() => setShowNewJobModal(true)}
@@ -752,6 +786,24 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
             </div>
             <div className="flex gap-2">
               <button
+                onClick={async () => {
+                  setLoading(true);
+                  const count = await SupabaseService.triggerDealsScraper();
+                  if (count > 0) {
+                    alert(`${count} novas ofertas capturadas pela IA para sua revisão!`);
+                    loadPendingDeals();
+                  } else {
+                    alert('Nenhuma oferta nova encontrada no momento.');
+                  }
+                  setLoading(false);
+                }}
+                disabled={loading}
+                title="Sincronizar Ofertas via IA"
+                className="bg-brand-gold text-slate-900 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+              >
+                <RefreshCw className={loading ? 'animate-spin' : ''} size={18} /> Sincronizar (IA)
+              </button>
+              <button
                 onClick={() => setShowNewDealModal(true)}
                 title="Criar Oferta Rápida"
                 className="bg-orange-500 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-orange-600 active:scale-95 transition-all shadow-lg shadow-orange-500/20"
@@ -817,6 +869,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
                           onClick={() => handleApproveDeal(deal.id)}
                           disabled={loading}
                           className="bg-emerald-500 hover:bg-emerald-600 text-white flex-1 py-3 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-500/20 active:scale-95"
+                          title="Aprovar Desconto"
                         >
                           <Check size={16} /> Aprovar
                         </button>
@@ -856,7 +909,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
                 </div>
                 <h3 className="font-black text-xl uppercase tracking-tight">Nova Oferta</h3>
               </div>
-              <button onClick={() => setShowNewDealModal(false)} className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-white/5 transition-colors">
+              <button onClick={() => setShowNewDealModal(false)} className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-white/5 transition-colors" title="Fechar Janela">
                 <X size={20} />
               </button>
             </div>
@@ -865,29 +918,29 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
               <form id="new-deal-form" onSubmit={handleCreateDealFast} className="space-y-6">
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Produto</label>
-                  <input required className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-800 transition-all text-slate-900 dark:text-white" placeholder="Título da oferta..." value={newDeal.title} onChange={e => setNewDeal({ ...newDeal, title: e.target.value })} />
+                  <input required className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-800 transition-all text-slate-900 dark:text-white" placeholder="Título da oferta..." value={newDeal.title} onChange={e => setNewDeal({ ...newDeal, title: e.target.value })} title="Título do Produto" />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Loja</label>
-                  <input required className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-800 transition-all text-slate-900 dark:text-white" placeholder="Nome da loja..." value={newDeal.store} onChange={e => setNewDeal({ ...newDeal, store: e.target.value })} />
+                  <input required className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-800 transition-all text-slate-900 dark:text-white" placeholder="Nome da loja..." value={newDeal.store} onChange={e => setNewDeal({ ...newDeal, store: e.target.value })} title="Nome da Loja" />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Localização</label>
-                  <input required className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-800 transition-all text-slate-900 dark:text-white" placeholder="Localização base..." value={newDeal.location} onChange={e => setNewDeal({ ...newDeal, location: e.target.value })} />
+                  <input required className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-800 transition-all text-slate-900 dark:text-white" placeholder="Localização base..." value={newDeal.location} onChange={e => setNewDeal({ ...newDeal, location: e.target.value })} title="Localização da Loja" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Preço (Desconto)</label>
-                    <input type="number" required className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-orange-500 transition-all text-slate-900 dark:text-white" placeholder="Ex: 5000" value={newDeal.discountPrice || ''} onChange={e => setNewDeal({ ...newDeal, discountPrice: Number(e.target.value) })} />
+                    <input type="number" required className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-orange-500 transition-all text-slate-900 dark:text-white" placeholder="Ex: 5000" value={newDeal.discountPrice || ''} onChange={e => setNewDeal({ ...newDeal, discountPrice: Number(e.target.value) })} title="Preço com Desconto" />
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Preço Antigo</label>
-                    <input type="number" required className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-orange-500 transition-all text-slate-900 dark:text-white" placeholder="Ex: 8000" value={newDeal.originalPrice || ''} onChange={e => setNewDeal({ ...newDeal, originalPrice: Number(e.target.value) })} />
+                    <input type="number" required className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-orange-500 transition-all text-slate-900 dark:text-white" placeholder="Ex: 8000" value={newDeal.originalPrice || ''} onChange={e => setNewDeal({ ...newDeal, originalPrice: Number(e.target.value) })} title="Preço Original" />
                   </div>
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Categoria</label>
-                  <select required className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-orange-500 transition-all text-slate-900 dark:text-white appearance-none" value={newDeal.category} onChange={e => setNewDeal({ ...newDeal, category: e.target.value })}>
+                  <select title="Categoria" required className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-orange-500 transition-all text-slate-900 dark:text-white appearance-none" value={newDeal.category} onChange={e => setNewDeal({ ...newDeal, category: e.target.value })}>
                     <option value="Alimentação">Alimentação</option>
                     <option value="Eletrónicos">Eletrónicos</option>
                     <option value="Higiene e Limpeza">Higiene e Limpeza</option>
@@ -897,7 +950,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Descrição / Folheto</label>
-                  <textarea required rows={3} className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-orange-500 resize-none transition-all text-slate-900 dark:text-white" placeholder="Detalhes da oferta..." value={newDeal.description} onChange={e => setNewDeal({ ...newDeal, description: e.target.value })} />
+                  <textarea required rows={3} className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-orange-500 resize-none transition-all text-slate-900 dark:text-white" placeholder="Detalhes da oferta..." value={newDeal.description} onChange={e => setNewDeal({ ...newDeal, description: e.target.value })} title="Descrição do Desconto" />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Imagem Promocional (Máx 150kb WeBP)</label>
@@ -910,14 +963,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
                         <span className="text-[10px] font-bold text-slate-400 uppercase text-center max-w-[200px]">Toque para carregar foto</span>
                       </>
                     )}
-                    <input type="file" accept="image/*" className="hidden" ref={dealFileInputRef} onChange={handleDealImageChange} />
+                    <input title="Imagem da Oferta" type="file" accept="image/*" className="hidden" ref={dealFileInputRef} onChange={handleDealImageChange} />
                   </div>
                 </div>
               </form>
             </div>
 
             <div className="p-6 border-t border-orange-500/10 bg-slate-50 dark:bg-slate-900/90 shrink-0">
-              <button form="new-deal-form" type="submit" disabled={loading} className="w-full bg-orange-500 text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-orange-500/20 active:scale-95 transition-all flex justify-center items-center gap-2 disabled:opacity-50">
+              <button form="new-deal-form" type="submit" disabled={loading} className="w-full bg-orange-500 text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-orange-500/20 active:scale-95 transition-all flex justify-center items-center gap-2 disabled:opacity-50" title="Publicar Oferta Agora">
                 {loading ? <RefreshCw size={20} className="animate-spin" /> : <Save size={20} />} Publicar Instantaneamente
               </button>
             </div>
@@ -937,7 +990,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
                 </div>
                 <h3 className="font-black text-xl uppercase tracking-tight">Editar Desconto</h3>
               </div>
-              <button onClick={() => setShowEditDealModal(false)} className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-white/5 transition-colors">
+              <button onClick={() => setShowEditDealModal(false)} className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-white/5 transition-colors" title="Fechar Janela">
                 <X size={20} />
               </button>
             </div>
@@ -946,31 +999,31 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
               <form id="edit-deal-form" onSubmit={(e) => { e.preventDefault(); handleApproveDeal(editingDeal.id, editingDeal); }} className="space-y-6">
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Produto</label>
-                  <input required className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-brand-dark focus:bg-white dark:focus:bg-slate-800 transition-all text-slate-900 dark:text-white" placeholder="Título da oferta..." value={editingDeal.title} onChange={e => setEditingDeal({ ...editingDeal, title: e.target.value })} />
+                  <input required className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-brand-dark focus:bg-white dark:focus:bg-slate-800 transition-all text-slate-900 dark:text-white" placeholder="Título da oferta..." value={editingDeal.title} onChange={e => setEditingDeal({ ...editingDeal, title: e.target.value })} title="Editar Título" />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Loja</label>
-                  <input required className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-brand-dark focus:bg-white dark:focus:bg-slate-800 transition-all text-slate-900 dark:text-white" placeholder="Nome da loja..." value={editingDeal.store} onChange={e => setEditingDeal({ ...editingDeal, store: e.target.value })} />
+                  <input required className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-brand-dark focus:bg-white dark:focus:bg-slate-800 transition-all text-slate-900 dark:text-white" placeholder="Nome da loja..." value={editingDeal.store} onChange={e => setEditingDeal({ ...editingDeal, store: e.target.value })} title="Editar Loja" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Preço (Desconto)</label>
-                    <input type="number" required className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-brand-dark transition-all text-slate-900 dark:text-white" placeholder="Ex: 5000" value={editingDeal.discountPrice || ''} onChange={e => setEditingDeal({ ...editingDeal, discountPrice: Number(e.target.value) })} />
+                    <input type="number" required className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-brand-dark transition-all text-slate-900 dark:text-white" placeholder="Ex: 5000" value={editingDeal.discountPrice || ''} onChange={e => setEditingDeal({ ...editingDeal, discountPrice: Number(e.target.value) })} title="Editar Preço com Desconto" />
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Preço Antigo</label>
-                    <input type="number" required className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-brand-dark transition-all text-slate-900 dark:text-white" placeholder="Ex: 8000" value={editingDeal.originalPrice || ''} onChange={e => setEditingDeal({ ...editingDeal, originalPrice: Number(e.target.value) })} />
+                    <input type="number" required className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-brand-dark transition-all text-slate-900 dark:text-white" placeholder="Ex: 8000" value={editingDeal.originalPrice || ''} onChange={e => setEditingDeal({ ...editingDeal, originalPrice: Number(e.target.value) })} title="Editar Preço Original" />
                   </div>
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Descrição</label>
-                  <textarea required rows={4} className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-brand-dark resize-none transition-all text-slate-900 dark:text-white" placeholder="Detalhes da oferta..." value={editingDeal.description || ''} onChange={e => setEditingDeal({ ...editingDeal, description: e.target.value })} />
+                  <textarea required rows={4} className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-brand-dark resize-none transition-all text-slate-900 dark:text-white" placeholder="Detalhes da oferta..." value={editingDeal.description || ''} onChange={e => setEditingDeal({ ...editingDeal, description: e.target.value })} title="Editar Descrição" />
                 </div>
               </form>
             </div>
 
             <div className="p-6 border-t border-brand-dark/10 bg-slate-50 dark:bg-slate-900/90 shrink-0">
-              <button form="edit-deal-form" type="submit" disabled={loading} className="w-full bg-brand-dark text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-brand-dark/20 active:scale-95 transition-all flex justify-center items-center gap-2 disabled:opacity-50">
+              <button form="edit-deal-form" type="submit" disabled={loading} className="w-full bg-brand-dark text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-brand-dark/20 active:scale-95 transition-all flex justify-center items-center gap-2 disabled:opacity-50" title="Salvar Alterações do Desconto">
                 {loading ? <RefreshCw size={20} className="animate-spin" /> : <Save size={20} />} Atualizar & Publicar
               </button>
             </div>
@@ -997,6 +1050,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
                 className="bg-emerald-500 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-600 active:scale-95 transition-all disabled:opacity-50 shadow-lg shadow-emerald-500/20"
               >
                 <Check size={18} /> Publicar Tudo
+              </button>
+              <button
+                onClick={handleSyncNews}
+                disabled={loading}
+                title="Sincronizar Notícias via IA"
+                className="bg-brand-gold text-slate-900 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+              >
+                <RefreshCw className={loading ? 'animate-spin' : ''} size={18} /> Sincronizar (IA)
               </button>
               <button
                 onClick={() => setShowNewNewsModal(true)}
@@ -1498,6 +1559,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
               <button
                 onClick={loadCvSubscriptions}
                 className="p-3 bg-slate-100 dark:bg-white/5 rounded-2xl text-slate-400 hover:text-brand-gold transition-all"
+                title="Sincronizar Subscrições"
               >
                 <RefreshCw size={20} className={isLoadingCvSubs ? 'animate-spin' : ''} />
               </button>

@@ -42,14 +42,14 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     const loadDashboardData = async () => {
       setLoading(true);
       try {
-        const [ratesData, dealsData] = await Promise.all([
+        const [ratesData, dealsData, jobsData] = await Promise.all([
           SupabaseService.getRates(),
-          SupabaseService.getDeals(false)
+          SupabaseService.getDeals(false),
+          SupabaseService.getJobs(false)
         ]);
         setRates(ratesData);
         setFeaturedDeals(dealsData.slice(0, 2));
-        const jobs = await GeminiService.fetchJobs();
-        setFeaturedJobs(jobs.slice(0, 3));
+        setFeaturedJobs(jobsData.slice(0, 3));
       } catch (error) {
         console.error("Dashboard error", error);
       } finally {
@@ -94,12 +94,12 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             MERCADO EM TEMPO REAL
           </div>
           
-          <h1 className="text-3xl md:text-8xl font-black text-white mb-4 md:mb-8 tracking-tighter leading-[1.1] md:leading-[0.85]">
+          <h1 className="text-fluid-h1 font-black text-white mb-4 md:mb-8 tracking-tighter leading-[1.1] md:leading-[0.85] uppercase">
             Angolife <br/>
             <span className="text-brand-gold">Su-Golden</span>
           </h1>
           
-          <p className="text-slate-100 text-xs md:text-xl font-bold max-w-md mb-6 md:mb-12 leading-relaxed opacity-90">
+          <p className="text-slate-100 text-xs md:text-xl font-bold max-w-md mb-6 md:mb-12 leading-relaxed opacity-90 uppercase tracking-tight">
             Lidere a economia nacional com inteligência de mercado e oportunidades exclusivas em Angola.
           </p>
           

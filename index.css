@@ -36,12 +36,13 @@ body {
 
 .progress-bar-fill {
   height: 100%;
-  transition: width 1s linear;
+  width: var(--progress-width, 0%);
+  transition: width 0.7s ease-out;
 }
 
 /* Gold border for elite components */
 .gold-border-subtle {
-  border-color: rgba(245, 158, 11, 0.2);
+  border: 1px solid rgba(245, 158, 11, 0.15);
 }
 
 /* --- PWA & Mobile Optimization --- */
@@ -86,6 +87,6 @@ a.btn {
 
 /* Fix for overlapping elements on mobile browsers with address bars */
 .min-h-screen-safe {
-  min-height: 100vh;
   min-height: -webkit-fill-available;
+  min-height: 100vh;
 }

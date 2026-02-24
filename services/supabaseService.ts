@@ -12,6 +12,8 @@ export const SupabaseService = {
       .replace(/['";\\]/g, '');   // Remove caracteres de escape comuns
   },
 
+  getSupabaseInstance: () => supabase,
+
   // --- AUTHENTICATION ---
   auth: {
     signUp: async (email: string, password: string, fullName: string) => {
@@ -114,7 +116,7 @@ export const SupabaseService = {
     let query = supabase.from('product_deals').select('*');
 
     if (!isAdmin) {
-      query = query.eq('status', 'approved');
+      query = query.or('status.eq.approved,status.eq.aprovado,status.eq.publicado,status.eq.published');
     }
 
     const { data, error } = await query;
@@ -147,9 +149,11 @@ export const SupabaseService = {
       .or('status.eq.pending,status.eq.Pending,status.eq.pendente,status.eq.Pendente');
 
     if (error) {
-      console.error('Error fetching pending deals:', error);
+      console.error('❌ [Supabase] Error fetching pending deals:', error);
       return [];
     }
+
+    console.log('📦 [Supabase] Pending Deals count:', data?.length || 0);
 
     return data.map((d: any) => ({
       id: d.id,
@@ -285,7 +289,7 @@ export const SupabaseService = {
     let query = supabase.from('jobs').select('*');
     if (!isAdmin) {
       // Suporte para ambos os nomes (inglês/português) para garantir visibilidade plena
-      query = query.or('status.eq.publicado,status.eq.published,status.eq.aprovado');
+      query = query.or('status.eq.publicado,status.eq.published,status.eq.aprovado,status.eq.approved');
     }
 
     const { data, error } = await query;
@@ -320,9 +324,11 @@ export const SupabaseService = {
       .or('status.eq.pendente,status.eq.Pendente,status.eq.pending,status.eq.Pending');
 
     if (error) {
-      console.error('Error fetching pending jobs:', error);
+      console.error('❌ [Supabase] Error fetching pending jobs:', error);
       return [];
     }
+
+    console.log('📦 [Supabase] Admin Pending Jobs count:', data?.length || 0);
 
     console.log('📦 ADMIN PENDING JOBS:', data);
 
@@ -465,7 +471,7 @@ export const SupabaseService = {
   getNews: async (isAdmin: boolean = false): Promise<NewsArticle[]> => {
     let query = supabase.from('news_articles').select('*');
     if (!isAdmin) {
-      query = query.or('status.eq.publicado,status.eq.published');
+      query = query.or('status.eq.publicado,status.eq.published,status.eq.aprovado,status.eq.approved');
     }
 
     const { data, error } = await query;
@@ -495,9 +501,11 @@ export const SupabaseService = {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching pending news:', error);
+      console.error('❌ [Supabase] Error fetching pending news:', error);
       return [];
     }
+
+    console.log('📦 [Supabase] Pending News count:', data?.length || 0);
 
     console.log('📦 ADMIN PENDING NEWS:', data);
 
@@ -603,62 +611,83 @@ export const SupabaseService = {
     return true;
   },
 
-  // --- SIMULATION TRIGGERS (Keep them or make them call a Supabase Function?) ---
-  // For now, we'll keep them as client-side inserts for demo
+  // --- SIMULATION TRIGGERS (NOW OPERATIONAL WITH GEMINI) ---
   triggerJobScraper: async (): Promise<number> => {
-    // Simulate scraper adding jobs
-    const newJobs = [
-      {
-        title: 'Técnico de Suporte IT (Demo)',
-        company: 'NCR Angola',
-        location: 'Luanda, Centro',
-        type: 'Tempo Inteiro',
-        salary: 'Confidencial',
-        description: 'Manutenção de hardware e suporte ao cliente.',
+    try {
+      // Fetch real jobs from Gemini
+      const aiJobs = await (await import('./gemini')).GeminiService.fetchJobs();
+      
+      const jobsToInsert = aiJobs.map(j => ({
+        title: j.title,
+        company: j.company,
+        location: j.location,
+        type: j.type,
+        salary: j.salary,
+        description: j.description,
         posted_at: new Date().toISOString(),
-        requirements: ['Hardware', 'Redes', 'Atendimento'],
-        source_url: 'https://ncr.ao/jobs',
-        status: 'pendente'
-      },
-      {
-        title: 'Gerente Comercial (Demo)',
-        company: 'Shoprite',
-        location: 'Benguela',
-        type: 'Tempo Inteiro',
-        description: 'Gestão de equipas de vendas e análise de KPIs.',
-        posted_at: new Date().toISOString(),
-        requirements: ['Gestão', 'Vendas', 'Liderança'],
-        status: 'pendente'
-      }
-    ];
+        requirements: j.requirements,
+        source_url: j.sourceUrl,
+        application_email: j.applicationEmail,
+        status: 'pendente' // Always pending for admin review
+      }));
 
-    const { error } = await supabase.from('jobs').insert(newJobs);
-    if (error) {
+      const { data, error } = await supabase.from('jobs').insert(jobsToInsert).select();
+      if (error) throw error;
+      return data?.length || 0;
+    } catch (error) {
       console.error('Error triggering job scraper:', error);
       return 0;
     }
-    return newJobs.length;
   },
 
   triggerNewsScraper: async (): Promise<number> => {
-    const newNews = [
-      {
-        titulo: 'Sonangol anuncia novas descobertas (Demo)',
-        resumo: 'Petrolífera nacional confirma reservas na Bacia do Kwanza.',
-        fonte: 'Economia & Mercado',
-        url_origem: `https://mercado.co.ao/${Math.random()}`,
-        categoria: 'Economia',
+    try {
+      // Fetch real news from Gemini
+      const aiNews = await (await import('./gemini')).GeminiService.fetchNews();
+      
+      const newsToInsert = aiNews.map(n => ({
+        titulo: n.title,
+        resumo: n.summary,
+        fonte: n.source,
+        url_origem: n.url,
+        categoria: n.category,
         published_at: new Date().toISOString(),
-        status: 'pendente'
-      }
-    ];
+        status: 'pendente' // Always pending for admin review
+      }));
 
-    const { error } = await supabase.from('news_articles').insert(newNews);
-    if (error) {
+      const { data, error } = await supabase.from('news_articles').insert(newsToInsert).select();
+      if (error) throw error;
+      return data?.length || 0;
+    } catch (error) {
       console.error('Error triggering news scraper:', error);
       return 0;
     }
-    return newNews.length;
+  },
+
+  triggerDealsScraper: async (): Promise<number> => {
+    try {
+      const aiDeals = await (await import('./gemini')).GeminiService.fetchDeals();
+      const dealsToInsert = aiDeals.map(d => ({
+        title: d.title,
+        store: d.store,
+        original_price: d.originalPrice,
+        discount_price: d.discountPrice,
+        location: d.location,
+        description: d.description,
+        image_placeholder: d.imagePlaceholder,
+        category: d.category || 'Alimentação',
+        status: 'pendente',
+        submitted_by: 'IA Bot',
+        created_at: new Date().toISOString()
+      }));
+
+      const { data, error } = await supabase.from('product_deals').insert(dealsToInsert).select();
+      if (error) throw error;
+      return data?.length || 0;
+    } catch (error) {
+      console.error('Error triggering deals scraper:', error);
+      return 0;
+    }
   },
 
   // --- STORAGE & UTILS ---
@@ -725,7 +754,7 @@ export const SupabaseService = {
     const { data, error } = await supabase
       .from('subscriptions_pending')
       .select('*, profiles(email, full_name)')
-      .order('data', { ascending: false });
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Error fetching CV subscriptions:', error);

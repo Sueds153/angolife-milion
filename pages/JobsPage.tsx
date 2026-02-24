@@ -298,8 +298,8 @@ export const JobsPage: React.FC<JobsPageProps> = ({
       )}
       <div className="flex flex-col md:flex-row justify-between items-center gap-4">
         <div>
-          <h2 className="text-3xl md:text-4xl font-black text-orange-500 tracking-tight uppercase">Vagas de Emprego</h2>
-          <p className="text-slate-500 dark:text-slate-400 font-medium text-xs md:text-sm mt-1">Conectando talentos às maiores empresas de Angola.</p>
+          <h2 className="text-fluid-h2 font-black text-orange-500 tracking-tight uppercase">Vagas de Emprego</h2>
+          <p className="text-slate-500 dark:text-slate-400 font-medium text-[10px] md:text-sm mt-1">Conectando talentos às maiores empresas de Angola.</p>
         </div>
         <div className="relative w-full md:w-80">
           <input

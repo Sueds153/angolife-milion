@@ -465,14 +465,14 @@ export const ExchangePage: React.FC<ExchangePageProps> = ({ isAuthenticated, use
       <FeedbackModal isOpen={isFeedbackModalOpen} order={activeOrder} onClose={() => { setIsFeedbackModalOpen(false); setActiveOrderId(null); localStorage.removeItem('ANGOLIFE_EXCHANGE_SESSION'); }} />
 
       {/* Main Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
         <div>
-          <h2 className="text-4xl font-black text-[orange-500] tracking-tight uppercase leading-none">CAMBIO FORMAL / INFORMAL</h2>
-          <p className="text-slate-500 mt-2 font-medium text-sm">Cotações oficiais e mercado de rua em tempo real.</p>
+          <h2 className="text-fluid-h2 font-black text-orange-500 tracking-tight uppercase leading-none">CAMBIO FORMAL / INFORMAL</h2>
+          <p className="text-slate-500 mt-2 font-medium text-xs md:text-sm">Cotações oficiais e mercado de rua em tempo real.</p>
         </div>
-        <div className="flex bg-slate-100 dark:bg-slate-900 p-1.5 rounded-2xl border border-orange-500/20 shadow-sm transition-colors">
-          <button onClick={() => setActiveTab('view')} className={`px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'view' ? 'bg-[orange-500] text-white shadow-lg' : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-300'}`}>CONSULTAR TAXAS</button>
-          <button onClick={() => setActiveTab('trade')} className={`px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'trade' ? 'bg-slate-900 dark:bg-black text-white' : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-300'}`}>COMPRAR / VENDER</button>
+        <div className="flex w-full lg:w-auto bg-slate-100 dark:bg-slate-900 p-1.5 rounded-2xl border border-orange-500/20 shadow-sm transition-colors overflow-x-auto no-scrollbar">
+          <button onClick={() => setActiveTab('view')} className={`flex-1 lg:flex-none px-6 md:px-8 py-3 rounded-xl text-[10px] md:text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === 'view' ? 'bg-orange-500 text-white shadow-lg' : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-300'}`}>CONSULTAR TAXAS</button>
+          <button onClick={() => setActiveTab('trade')} className={`flex-1 lg:flex-none px-6 md:px-8 py-3 rounded-xl text-[10px] md:text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === 'trade' ? 'bg-slate-900 dark:bg-black text-white' : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-300'}`}>COMPRAR / VENDER</button>
         </div>
       </div>
 
@@ -521,10 +521,10 @@ export const ExchangePage: React.FC<ExchangePageProps> = ({ isAuthenticated, use
                 </div>
 
                 <div className="space-y-6">
-                  <div className="bg-white dark:bg-black p-8 rounded-[2rem] border border-orange-500/20 shadow-sm">
+                  <div className="bg-white dark:bg-black p-6 md:p-8 rounded-[2rem] border border-orange-500/20 shadow-sm">
                     <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4 block">VOCÊ ENVIA</span>
                     <div className="flex items-center gap-4">
-                      <input type="number" value={baseAmount} onChange={e => setBaseAmount(Number(e.target.value))} className="w-full bg-transparent text-5xl font-black text-slate-900 dark:text-white outline-none" title="Enviar" />
+                      <input type="number" value={baseAmount} onChange={e => setBaseAmount(Number(e.target.value))} className="w-full bg-transparent text-3xl md:text-5xl font-black text-slate-900 dark:text-white outline-none" title="Enviar" />
                       <div className="relative" onClick={(e) => e.stopPropagation()}>
                         <button
                           onClick={(e) => { e.stopPropagation(); setOpenDropdown(openDropdown === 'base' ? null : 'base'); }}
@@ -566,10 +566,10 @@ export const ExchangePage: React.FC<ExchangePageProps> = ({ isAuthenticated, use
                     </button>
                   </div>
 
-                  <div className="bg-white dark:bg-black p-8 rounded-[2rem] border border-orange-500/20 shadow-sm">
+                  <div className="bg-white dark:bg-black p-6 md:p-8 rounded-[2rem] border border-orange-500/20 shadow-sm">
                     <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4 block">VOCÊ RECEBE</span>
                     <div className="flex items-center gap-4">
-                      <div className="w-full text-5xl font-black text-[orange-500]">{calculateConversion()}</div>
+                      <div className="w-full text-3xl md:text-5xl font-black text-[orange-500]">{calculateConversion()}</div>
                       <div className="relative" onClick={(e) => e.stopPropagation()}>
                         <button
                           onClick={(e) => { e.stopPropagation(); setOpenDropdown(openDropdown === 'target' ? null : 'target'); }}

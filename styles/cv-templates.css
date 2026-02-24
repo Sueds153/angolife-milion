@@ -129,3 +129,9 @@
 .min-skills-list { display: flex; flex-direction: column; gap: 8px; }
 .min-skill-item { font-size: 12px; font-weight: 300; border-left: 2px solid rgba(255,255,255,0.3); padding-left: 10px; }
 .min-summary { margin-bottom: 30px; font-size: 14px; line-height: 1.6; color: #555; text-align: justify; }
+.creative-skills-list {
+    list-style-type: disc;
+    padding-left: 20px;
+    font-size: 13px;
+    line-height: 1.8;
+}

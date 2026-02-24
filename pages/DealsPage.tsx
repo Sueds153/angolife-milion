@@ -31,14 +31,10 @@ export const DealsPage: React.FC<DealsPageProps> = ({ isAuthenticated, user, onR
     const fetchDeals = async () => {
       setLoading(true);
       try {
-        const [aiDeals, dbDeals] = await Promise.all([
-          GeminiService.fetchDeals(),
-          SupabaseService.getDeals(false)
-        ]);
-        setDeals([...aiDeals, ...dbDeals]);
-      } catch (e) {
         const dbDeals = await SupabaseService.getDeals(false);
         setDeals(dbDeals);
+      } catch (e) {
+        console.error("Error fetching deals", e);
       } finally {
         setLoading(false);
       }
@@ -151,8 +147,8 @@ export const DealsPage: React.FC<DealsPageProps> = ({ isAuthenticated, user, onR
   return (
     <div className="space-y-6 pb-20">
       <div className="px-1">
-        <h2 className="text-3xl font-black text-brand-gold uppercase tracking-tighter">Descontos</h2>
-        <p className="text-slate-500 font-bold text-[10px] uppercase tracking-widest">Preços reais encontrados em Luanda</p>
+        <h2 className="text-fluid-h2 font-black text-brand-gold uppercase tracking-tighter leading-none">Descontos</h2>
+        <p className="text-slate-500 font-bold text-[10px] md:text-xs uppercase tracking-widest mt-1">Preços reais encontrados em Luanda</p>
       </div>
 
       {/* FAB - POSICIONADO ACIMA DA TAB BAR E DO ANÚNCIO */}
@@ -353,7 +349,7 @@ export const DealsPage: React.FC<DealsPageProps> = ({ isAuthenticated, user, onR
                     <span className="text-[10px] font-black text-brand-gold uppercase text-center max-w-[200px]">Toque para carregar foto<br />(Comprime para WebP &lt; 150kb)</span>
                   </>
                 )}
-                <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageChange} />
+                <input title="Carregar Imagem" type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageChange} />
               </div>
             </form>
           </div>

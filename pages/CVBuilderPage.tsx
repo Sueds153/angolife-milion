@@ -1,5 +1,4 @@
-
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Download, ChevronRight, ChevronLeft, Sparkles, Plus, Trash2, User, Briefcase, GraduationCap, Award, FileText, Lock, Star, Check, Zap, Crown, CreditCard, Calendar, Clock, X } from 'lucide-react';
 import { GeminiService } from '../services/gemini';
 import { SupabaseService } from '../services/supabaseService';
@@ -39,6 +38,7 @@ export const CVBuilderPage: React.FC<CVBuilderPageProps> = ({ isAuthenticated, u
   const [selectedTemplate, setSelectedTemplate] = useState<CVTemplateType>('classic');
   const [educationFirst, setEducationFirst] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const strengthRef = useRef<HTMLDivElement>(null);
 
   // --- CV STRENGTH METER ---
   const cvStrength = (() => {
@@ -53,8 +53,14 @@ export const CVBuilderPage: React.FC<CVBuilderPageProps> = ({ isAuthenticated, u
     if (cv.experiences.some(e => e.description.trim().length > 30)) score += 10;
     if (cv.education.length > 0) score += 10;
     if (cv.skills.length >= 3) score += 10;
-    return Math.min(score, 100);
+    return score;
   })();
+
+  useEffect(() => {
+    if (strengthRef.current) {
+      strengthRef.current.style.setProperty('--progress-width', `${cvStrength}%`);
+    }
+  }, [cvStrength]);
 
   const strengthLabel = cvStrength < 30 ? 'Fraco' : cvStrength < 60 ? 'Médio' : cvStrength < 85 ? 'Bom' : 'Excelente';
   const strengthColor = cvStrength < 30 ? 'bg-red-500' : cvStrength < 60 ? 'bg-amber-500' : cvStrength < 85 ? 'bg-brand-gold' : 'bg-emerald-500';
@@ -489,10 +495,9 @@ export const CVBuilderPage: React.FC<CVBuilderPageProps> = ({ isAuthenticated, u
                 <span className={`text-[10px] font-black uppercase tracking-widest ${strengthColor.replace('bg-', 'text-')}`}>{strengthLabel} · {cvStrength}%</span>
               </div>
               <div className="w-full h-2 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
-                {/* eslint-disable-next-line */}
                 <div
-                  className={`h-full rounded-full transition-all duration-700 ease-out ${strengthColor}`}
-                  style={{ width: `${cvStrength}%` } as React.CSSProperties}
+                  ref={strengthRef}
+                  className={`h-full rounded-full transition-all duration-700 ease-out progress-bar-fill ${strengthColor}`}
                 />
               </div>
               <div className="flex justify-between mt-2">
