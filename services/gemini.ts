@@ -40,6 +40,7 @@ const FALLBACK_JOBS: Job[] = [
     ],
     sourceUrl: "",
     applicationEmail: "recrutamento@unitel.co.ao",
+    status: "published",
   },
   {
     id: "f2",
@@ -58,6 +59,7 @@ const FALLBACK_JOBS: Job[] = [
     ],
     sourceUrl: "",
     applicationEmail: "carreiras@bai.ao",
+    status: "published",
   },
   {
     id: "f3",
@@ -76,6 +78,7 @@ const FALLBACK_JOBS: Job[] = [
     ],
     sourceUrl: "",
     applicationEmail: "rh@mota-engil.ao",
+    status: "published",
   },
 ];
 
@@ -90,6 +93,7 @@ const FALLBACK_NEWS: NewsArticle[] = [
     url: "#",
     category: "Urgente",
     publishedAt: "Agora mesmo",
+    status: "published",
   },
   {
     id: "n2",
@@ -101,6 +105,7 @@ const FALLBACK_NEWS: NewsArticle[] = [
     url: "#",
     category: "Exclusivo",
     publishedAt: "Há 15 min",
+    status: "published",
   },
   {
     id: "n3",
@@ -111,6 +116,7 @@ const FALLBACK_NEWS: NewsArticle[] = [
     url: "#",
     category: "Bombástico",
     publishedAt: "Há 1 hora",
+    status: "published",
   },
 ];
 
@@ -204,6 +210,7 @@ export const GeminiService = {
         applicationEmail:
           job.applicationEmail ||
           `hr@${job.company.toLowerCase().replace(/\s/g, "")}.ao`,
+        status: "published" as const,
       }));
 
       setCachedData("jobs", enrichedData);
@@ -299,6 +306,7 @@ export const GeminiService = {
           news.url && news.url !== "#"
             ? news.url
             : groundingLinks[idx % groundingLinks.length] || news.url,
+        status: "published" as const,
       }));
 
       setCachedData("news", enrichedData);
