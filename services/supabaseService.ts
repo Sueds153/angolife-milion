@@ -144,7 +144,7 @@ export const SupabaseService = {
     const { data, error } = await supabase
       .from('product_deals')
       .select('*')
-      .eq('status', 'pending');
+      .or('status.eq.pending,status.eq.Pending,status.eq.pendente,status.eq.Pendente');
 
     if (error) {
       console.error('Error fetching pending deals:', error);
@@ -317,7 +317,7 @@ export const SupabaseService = {
     const { data, error } = await supabase
       .from('jobs')
       .select('*')
-      .or('status.eq.pendente,status.eq.Pendente,status.eq.pending');
+      .or('status.eq.pendente,status.eq.Pendente,status.eq.pending,status.eq.Pending');
 
     if (error) {
       console.error('Error fetching pending jobs:', error);
@@ -491,7 +491,7 @@ export const SupabaseService = {
     const { data, error } = await supabase
       .from('news_articles')
       .select('*')
-      .or('status.eq.pendente,status.eq.Pendente,status.eq.pending')
+      .or('status.eq.pendente,status.eq.Pendente,status.eq.pending,status.eq.Pending')
       .order('created_at', { ascending: false });
 
     if (error) {
