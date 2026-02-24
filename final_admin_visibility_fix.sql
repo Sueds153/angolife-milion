@@ -13,7 +13,17 @@ CREATE OR REPLACE FUNCTION public.check_is_admin() RETURNS boolean AS $$ BEGIN R
     );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
--- B. Ensure the main developer is an admin in the DB
+-- B. Ensure structural integrity and Admin Status
+DO $$ BEGIN IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_name = 'profiles'
+        AND column_name = 'account_type'
+) THEN
+ALTER TABLE public.profiles
+ADD COLUMN account_type TEXT DEFAULT 'free';
+END IF;
+END $$;
 UPDATE public.profiles
 SET is_admin = true,
     account_type = 'premium',
