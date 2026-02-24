@@ -12,17 +12,67 @@ export const SupabaseService = {
       .replace(/['";\\]/g, '');   // Remove caracteres de escape comuns
   },
 
+  // --- AUTHENTICATION ---
+  auth: {
+    signUp: async (email: string, password: string, fullName: string) => {
+      // Create user
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+          },
+        },
+      });
+      return { data, error };
+    },
+
+    signIn: async (email: string, password: string) => {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      return { data, error };
+    },
+
+    signOut: async () => {
+      const { error } = await supabase.auth.signOut();
+      return { error };
+    },
+
+    getProfile: async (userId: string) => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      return { data, error };
+    },
+
+    resetPassword: async (email: string) => {
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin, // Send them back to the site
+      });
+      return { data, error };
+    },
+
+    onAuthStateChange: (callback: (event: string, session: any) => void) => {
+      return supabase.auth.onAuthStateChange(callback);
+    }
+  },
+
   // --- EXCHANGE RATES ---
   getRates: async (): Promise<ExchangeRate[]> => {
     const { data, error } = await supabase
       .from('exchange_rates')
       .select('*');
-    
+
     if (error) {
       console.error('Error fetching rates:', error);
       return [];
     }
-    
+
     return data.map((r: any) => ({
       currency: r.currency,
       formalBuy: r.formal_buy,
@@ -62,17 +112,17 @@ export const SupabaseService = {
   // --- DEALS ---
   getDeals: async (isAdmin: boolean = false): Promise<ProductDeal[]> => {
     let query = supabase.from('product_deals').select('*');
-    
+
     if (!isAdmin) {
       query = query.eq('status', 'approved');
     }
-    
+
     const { data, error } = await query;
     if (error) {
       console.error('Error fetching deals:', error);
       return [];
     }
-    
+
     return data.map((d: any) => ({
       id: d.id,
       title: d.title,
@@ -95,12 +145,12 @@ export const SupabaseService = {
       .from('product_deals')
       .select('*')
       .eq('status', 'pending');
-      
+
     if (error) {
       console.error('Error fetching pending deals:', error);
       return [];
     }
-    
+
     return data.map((d: any) => ({
       id: d.id,
       title: d.title,
@@ -147,6 +197,89 @@ export const SupabaseService = {
     if (error) console.error('Error approving deal:', error);
   },
 
+  getDealById: async (id: string): Promise<ProductDeal | null> => {
+    const { data, error } = await supabase
+      .from('product_deals')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error || !data) {
+      console.error('Error fetching deal by id:', error);
+      return null;
+    }
+
+    return {
+      id: data.id,
+      title: data.title,
+      store: data.store,
+      storeNumber: data.store_number,
+      phone: data.phone,
+      originalPrice: data.original_price,
+      discountPrice: data.discount_price,
+      price: data.discount_price,
+      location: data.location,
+      description: data.description,
+      imagePlaceholder: data.image_placeholder,
+      imageUrl: data.image_url,
+      url: data.url,
+      category: data.category,
+      status: data.status,
+      submittedBy: data.submitted_by,
+      createdAt: data.created_at,
+      views: data.views ?? 0,
+      likes: data.likes ?? 0,
+      verified: data.verified ?? false,
+      is_admin: data.is_admin ?? false,
+    };
+  },
+
+  incrementDealViews: async (id: string): Promise<void> => {
+    // Fetch current views then increment (fallback safe if RPC not available)
+    const { data, error: fetchError } = await supabase
+      .from('product_deals')
+      .select('views')
+      .eq('id', id)
+      .single();
+
+    if (fetchError || !data) return;
+
+    const { error: updateError } = await supabase
+      .from('product_deals')
+      .update({ views: (data.views ?? 0) + 1 })
+      .eq('id', id);
+
+    if (updateError) console.error('Error incrementing deal views:', updateError);
+  },
+
+  // --- STORAGE ---
+  uploadDiscountImage: async (file: File): Promise<string | null> => {
+    try {
+      const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+      const { data, error } = await supabase.storage
+        .from('discount-images')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) {
+        console.error('Error uploading discount image:', error);
+        return null;
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('discount-images')
+        .getPublicUrl(data.path);
+
+      return publicUrl;
+    } catch (err) {
+      console.error('Unexpected error during upload:', err);
+      return null;
+    }
+  },
+
   // --- JOBS ---
   getJobs: async (isAdmin: boolean = false): Promise<Job[]> => {
     let query = supabase.from('jobs').select('*');
@@ -169,7 +302,7 @@ export const SupabaseService = {
       type: j.type,
       salary: j.salary,
       description: j.description,
-      postedAt: j.posted_at, 
+      postedAt: j.posted_at,
       requirements: j.requirements || [],
       sourceUrl: j.source_url,
       applicationEmail: j.application_email,
@@ -242,7 +375,7 @@ export const SupabaseService = {
       .from('jobs')
       .update({ status: 'publicado' })
       .or('status.eq.pending,status.eq.pendente');
-    
+
     if (error) {
       console.error('❌ Error approving all jobs:', error.message, error.details);
       return false;
@@ -410,7 +543,7 @@ export const SupabaseService = {
       .from('news_articles')
       .update({ status: 'publicado' })
       .or('status.eq.pending,status.eq.pendente');
-    
+
     if (error) {
       console.error('❌ Error approving all news:', error.message, error.details);
       return false;
@@ -475,57 +608,57 @@ export const SupabaseService = {
   triggerJobScraper: async (): Promise<number> => {
     // Simulate scraper adding jobs
     const newJobs = [
-       {
-          title: 'Técnico de Suporte IT (Demo)',
-          company: 'NCR Angola',
-          location: 'Luanda, Centro',
-          type: 'Tempo Inteiro',
-          salary: 'Confidencial',
-          description: 'Manutenção de hardware e suporte ao cliente.',
-          posted_at: new Date().toISOString(),
-          requirements: ['Hardware', 'Redes', 'Atendimento'],
-          source_url: 'https://ncr.ao/jobs',
-          status: 'pendente'
-       },
-       {
-          title: 'Gerente Comercial (Demo)',
-          company: 'Shoprite',
-          location: 'Benguela',
-          type: 'Tempo Inteiro',
-          description: 'Gestão de equipas de vendas e análise de KPIs.',
-          posted_at: new Date().toISOString(),
-          requirements: ['Gestão', 'Vendas', 'Liderança'],
-          status: 'pendente'
-       }
+      {
+        title: 'Técnico de Suporte IT (Demo)',
+        company: 'NCR Angola',
+        location: 'Luanda, Centro',
+        type: 'Tempo Inteiro',
+        salary: 'Confidencial',
+        description: 'Manutenção de hardware e suporte ao cliente.',
+        posted_at: new Date().toISOString(),
+        requirements: ['Hardware', 'Redes', 'Atendimento'],
+        source_url: 'https://ncr.ao/jobs',
+        status: 'pendente'
+      },
+      {
+        title: 'Gerente Comercial (Demo)',
+        company: 'Shoprite',
+        location: 'Benguela',
+        type: 'Tempo Inteiro',
+        description: 'Gestão de equipas de vendas e análise de KPIs.',
+        posted_at: new Date().toISOString(),
+        requirements: ['Gestão', 'Vendas', 'Liderança'],
+        status: 'pendente'
+      }
     ];
 
     const { error } = await supabase.from('jobs').insert(newJobs);
     if (error) {
-       console.error('Error triggering job scraper:', error);
-       return 0;
+      console.error('Error triggering job scraper:', error);
+      return 0;
     }
     return newJobs.length;
   },
 
   triggerNewsScraper: async (): Promise<number> => {
-     const newNews = [
-        {
-           titulo: 'Sonangol anuncia novas descobertas (Demo)',
-           resumo: 'Petrolífera nacional confirma reservas na Bacia do Kwanza.',
-           fonte: 'Economia & Mercado',
-           url_origem: `https://mercado.co.ao/${Math.random()}`,
-           categoria: 'Economia',
-           published_at: new Date().toISOString(),
-           status: 'pendente'
-        }
-     ];
-     
-     const { error } = await supabase.from('news_articles').insert(newNews);
-     if (error) {
-        console.error('Error triggering news scraper:', error);
-        return 0;
-     }
-     return newNews.length;
+    const newNews = [
+      {
+        titulo: 'Sonangol anuncia novas descobertas (Demo)',
+        resumo: 'Petrolífera nacional confirma reservas na Bacia do Kwanza.',
+        fonte: 'Economia & Mercado',
+        url_origem: `https://mercado.co.ao/${Math.random()}`,
+        categoria: 'Economia',
+        published_at: new Date().toISOString(),
+        status: 'pendente'
+      }
+    ];
+
+    const { error } = await supabase.from('news_articles').insert(newNews);
+    if (error) {
+      console.error('Error triggering news scraper:', error);
+      return 0;
+    }
+    return newNews.length;
   },
 
   // --- STORAGE & UTILS ---
@@ -548,6 +681,86 @@ export const SupabaseService = {
       .getPublicUrl(filePath);
 
     return data.publicUrl;
+  },
+
+  uploadReceipt: async (file: File): Promise<string | null> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `receipts/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('payment-receipts')
+      .upload(filePath, file);
+
+    if (uploadError) {
+      console.error('Error uploading receipt:', uploadError);
+      return null;
+    }
+
+    const { data } = supabase.storage
+      .from('payment-receipts')
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
+  },
+
+  submitCVSubscription: async (userId: string, planId: string, receiptUrl: string): Promise<boolean> => {
+    const { error } = await supabase
+      .from('subscriptions_pending')
+      .insert([{
+        user_id: userId,
+        plano_escolhido: planId,
+        url_comprovativo: receiptUrl,
+        status: 'aguardando'
+      }]);
+
+    if (error) {
+      console.error('Error submitting CV subscription:', error);
+      return false;
+    }
+    return true;
+  },
+
+  getCVSubscriptions: async (): Promise<any[]> => {
+    const { data, error } = await supabase
+      .from('subscriptions_pending')
+      .select('*, profiles(email, full_name)')
+      .order('data', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching CV subscriptions:', error);
+      return [];
+    }
+    return data;
+  },
+
+  approveCVSubscription: async (id: string, userId: string): Promise<boolean> => {
+    // 1. Approve subscription
+    const { error: subError } = await supabase
+      .from('subscriptions_pending')
+      .update({ status: 'premium' })
+      .eq('id', id);
+
+    if (subError) {
+      console.error('Error approving CV subscription:', subError);
+      return false;
+    }
+
+    // 2. Upgrade user profile to Premium
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({
+        is_premium: true,
+        account_type: 'premium'
+      })
+      .eq('id', userId);
+
+    if (profileError) {
+      console.error('Error upgrading user profile:', profileError);
+      return false;
+    }
+
+    return true;
   },
 
   // --- ORDERS & REVIEWS ---

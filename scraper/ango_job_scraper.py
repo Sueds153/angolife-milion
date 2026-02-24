@@ -107,82 +107,104 @@ CATEGORY_MAP = {
 # JOBS_CONFIG — Dicionário Unificado de Adaptadores
 # Cada chave é o nome do portal. Os valores são os seletores CSS específicos.
 # ─────────────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────
+# JOBS_CONFIG — Dicionário Unificado de Adaptadores (Ordenado por Peso)
+# 1-2: HTML Estático (Leve) | 3-6: Dinâmicos | 7-8: Pesados (LinkedIn/JS)
+# ─────────────────────────────────────────────────────────────────────────
 JOBS_CONFIG: Dict[str, dict] = {
-
-    # ── 0. JOBARTIS (LÍDER DE MERCADO) ────────────────────────────────────
-    "Jobartis": {
-        "base_url": "https://www.jobartis.com",
-        "list_url": "https://www.jobartis.com/pt/empregos-em-angola",
-        "job_card_selector": ".job-item, article, .vacancy-card",
-        "title_selector": "h3, .title, .vacancy-title",
-        "company_selector": ".company, .employer",
-        "location_selector": ".location, .city",
+    "Portal de Emprego": {
+        "base_url": "https://portaldeemprego.ao",
+        "list_url": "https://portaldeemprego.ao/vagas/",
+        "job_card_selector": ".job-item, .post",
+        "title_selector": "h2, .job-title",
+        "company_selector": ".job-company",
+        "location_selector": ".job-location",
         "link_selector": "a",
         "detail_enabled": True,
-        "detail_description_selector": ".job-description, .vacancy-details",
-        "request_delay_range": (3, 5),
+        "detail_description_selector": ".job-description, .entry-content",
+        "detail_requirements_selector": ".job-requirements, .entry-content ul",
+        "request_delay_range": (1, 3),
     },
-
-
-    # ── 2. ANGO EMPREGO (CORRIGIDO) ────────────────────────────────────────
     "Ango Emprego": {
         "base_url": "https://angoemprego.com",
         "list_url": "https://angoemprego.com",
-        "job_card_selector": "article, .job-listing, .post",
-        "title_selector": "h3, .title, .entry-title",
+        "job_card_selector": "article, .job-listing",
+        "title_selector": "h3, .title",
         "company_selector": ".company, strong",
-        "location_selector": ".location, .meta",
+        "location_selector": ".location",
         "link_selector": "a",
         "detail_enabled": True,
-        "detail_description_selector": ".job_description, .content, .entry-content",
-        "request_delay_range": (2, 4),
+        "detail_description_selector": ".job_description, .entry-content",
+        "detail_requirements_selector": ".entry-content ul",
+        "request_delay_range": (1, 3),
     },
-
-    # ── 4. ANGOVAGAS.NET ──────────────────────────────────────────────────
     "AngoVagas": {
         "base_url": "https://angovagas.net",
         "list_url": "https://angovagas.net",
-        "job_card_selector": "article.post, .post",
-        "title_selector": "h2.entry-title, h2",
-        "company_selector": ".author, .company",
-        "location_selector": ".location, .entry-meta",
+        "job_card_selector": "article.post",
+        "title_selector": "h2.entry-title",
+        "company_selector": ".author",
+        "location_selector": ".entry-meta",
         "link_selector": "a",
         "detail_enabled": True,
         "detail_description_selector": ".entry-content",
-        "request_delay_range": (2, 5),
+        "detail_requirements_selector": ".entry-content ul",
+        "request_delay_range": (2, 4),
     },
-
-    # ── 5. INEFOP ─────────────────────────────────────────────────────────
-    # Instituto Nacional do Emprego e Formação Profissional.
     "INEFOP": {
         "base_url": "https://www.inefop.gov.ao",
         "list_url": "https://www.inefop.gov.ao/concursos",
-        "job_card_selector": "article, .concurso-item",
-        "title_selector": "h1, h2, h3, .entry-title",
+        "job_card_selector": "article",
+        "title_selector": "h1, h2, h3",
         "company_selector": None,
-        "location_selector": ".location, .provincia",
+        "location_selector": ".provincia",
         "link_selector": "a",
         "detail_enabled": True,
-        "detail_description_selector": ".entry-content, article",
+        "detail_description_selector": ".entry-content",
+        "detail_requirements_selector": None,
         "fixed_company": "Estado Angolano (INEFOP)",
         "fixed_category": "Concurso Público",
         "request_delay_range": (3, 5),
     },
-
-    # ── 6. CAREERJET ANGOLA ───────────────────────────────────────────────
-    "Careerjet Angola": {
-        "base_url": "https://www.careerjet.co.ao",
-        "list_url": "https://www.careerjet.co.ao/pesquisar/vagas-de-emprego-angola-1234.html",
-        "job_card_selector": "li.job, article.job, .job",
-        "title_selector": "h2, .title, a",
-        "company_selector": ".company, p.company",
-        "location_selector": ".location, .city",
+    "Emprega Angola": {
+        "base_url": "https://empregaangola.com",
+        "list_url": "https://empregaangola.com/vagas",
+        "job_card_selector": ".job-card, .vaga-item",
+        "title_selector": "h3, .title",
+        "company_selector": ".company-name",
+        "location_selector": ".location",
         "link_selector": "a",
-        "detail_enabled": False,
+        "detail_enabled": True,
+        "detail_description_selector": ".job-description, #description",
+        "detail_requirements_selector": ".requirements, #requirements",
         "request_delay_range": (3, 5),
     },
-
-    # ── 8. LINKEDIN ───────────────────────────────────────────────────────
+    "Jobartis": {
+        "base_url": "https://www.jobartis.com",
+        "list_url": "https://www.jobartis.com/pt/empregos-em-angola",
+        "job_card_selector": ".job-item, article",
+        "title_selector": "h3, .title",
+        "company_selector": ".company",
+        "location_selector": ".location",
+        "link_selector": "a",
+        "detail_enabled": True,
+        "detail_description_selector": ".job-description",
+        "detail_requirements_selector": ".job-requirements",
+        "request_delay_range": (3, 6),
+    },
+    "AngoJob": {
+        "base_url": "https://angojob.net",
+        "list_url": "https://angojob.net/vagas-recentes/",
+        "job_card_selector": "article, .post",
+        "title_selector": "h2, h3",
+        "company_selector": ".company, strong",
+        "location_selector": ".location",
+        "link_selector": "a",
+        "detail_enabled": True,
+        "detail_description_selector": ".entry-content",
+        "detail_requirements_selector": None,
+        "request_delay_range": (2, 4),
+    },
     "LinkedIn": {
         "base_url": "https://www.linkedin.com",
         "list_url": "https://www.linkedin.com/jobs/search/?keywords=angola&location=Angola&f_TPR=r86400",
@@ -191,8 +213,8 @@ JOBS_CONFIG: Dict[str, dict] = {
         "company_selector": "h4.base-search-card__subtitle",
         "location_selector": ".job-search-card__location",
         "link_selector": "a.base-card__full-link",
-        "detail_enabled": False,
-        "request_delay_range": (5, 8),
+        "detail_enabled": False, # LinkedIn blockeia scraping de detalhe sem login agressivo
+        "request_delay_range": (6, 12),
         "extra_headers": {
             "Sec-Fetch-Dest": "document",
             "Sec-Fetch-Mode": "navigate",
@@ -384,157 +406,192 @@ class AngoJobScraper:
                 return sel
         return None
 
-    # ── Scraper por Site ──────────────────────────────────────────────────
-    def scrape_site(self, site_name: str, cfg: dict):
+    # ── Loop Principal: Round-Robin (Rodízio) ─────────────────────────────
+    def run(self, max_total_vagas: int = 100):
         """
-        Processa um único site de forma isolada.
-        Falha no site → log de erro → salta para o próximo. Nunca para o motor todo.
+        Executa o motor em ciclos: 5 vagas por fonte em cada iteração.
+        Garante diversidade de fontes no banco de dados.
         """
-        log.info(f"\n{'═' * 60}")
-        log.info(f"💼 FONTE: {site_name}")
-        log.info(f"   URL: {cfg['list_url']}")
-        log.info(f"{'═' * 60}")
-
-        try:
-            soup = self._fetch(cfg["list_url"], extra_headers=cfg.get("extra_headers"))
-            if not soup:
-                log.error(f"❌ {site_name} inacessível. Saltando para o próximo...")
-                self.stats["errors"] += 1
-                return
-
-            # Tentar seletor configurado, depois auto-detecção
-            cards = soup.select(cfg["job_card_selector"])
-            if not cards:
-                log.warning(f"  ⚠️  Seletor '{cfg['job_card_selector']}' sem resultados. A tentar auto-detecção...")
-                detected = self._auto_detect_selector(soup)
-                if detected:
-                    cards = soup.select(detected)
-                else:
-                    log.error(f"  ❌ Não foi possível encontrar cards em {site_name}. Saltando.")
-                    self.stats["errors"] += 1
-                    return
-
-            log.info(f"  📋 {len(cards)} cards encontrados. Processando...")
-
-            for card in cards[:15]:  # Máx 15 por site por ciclo
-                self.stats["processed"] += 1
-                try:
-                    # ── Link ──────────────────────────────────────────────
-                    link_tag = card.select_one(cfg["link_selector"]) or card.find("a")
-                    raw_url = link_tag.get("href", "") if link_tag else ""
-                    job_url = self._normalize_url(raw_url, cfg["base_url"])
-
-                    # ── Deduplicação por URL ──────────────────────────────
-                    if job_url and self._is_duplicate_url(job_url):
-                        log.info(f"  ⏭️  Duplicado (URL): {job_url[:70]}")
-                        self.stats["skipped_dup"] += 1
-                        continue
-
-                    # ── Título ────────────────────────────────────────────
-                    title_tag = card.select_one(cfg["title_selector"])
-                    title = self._clean(title_tag.get_text() if title_tag else "")
-                    if not title or len(title) < 4:
-                        continue
-
-                    # ── Empresa ───────────────────────────────────────────
-                    company = cfg.get("fixed_company", "")
-                    if not company and cfg.get("company_selector"):
-                        company_tag = card.select_one(cfg["company_selector"])
-                        company = self._clean(company_tag.get_text() if company_tag else "")
-                    if not company:
-                        company = "Empresa Confidencial"
-
-                    # ── Deduplicação por (Título + Empresa) ───────────────
-                    if self._is_duplicate_composite(title, company):
-                        log.info(f"  ⏭️  Duplicado (título+empresa): {title[:50]} @ {company}")
-                        self.stats["skipped_dup"] += 1
-                        continue
-
-                    # ── Localização ───────────────────────────────────────
-                    location_tag = card.select_one(cfg["location_selector"]) if cfg.get("location_selector") else None
-                    location = self._clean(location_tag.get_text() if location_tag else "Angola")
-                    if not location:
-                        location = "Angola"
-
-                    # ── Detalhe da Vaga ───────────────────────────────────
-                    description = ""
-                    contact_email = None
-                    image_url = None
-
-                    if cfg.get("detail_enabled") and job_url:
-                        self._human_delay(cfg.get("request_delay_range", (2, 3)))
-                        log.info(f"  📄 Abrindo detalhe: {title[:50]}...")
-                        detail_soup = self._fetch(job_url, extra_headers=cfg.get("extra_headers"))
-                        if detail_soup:
-                            detail_sel = cfg.get("detail_description_selector", ".entry-content")
-                            body = detail_soup.select_one(detail_sel)
-                            if body:
-                                description = self._clean(body.get_text(separator=" "))[:3000]
-                            contact_email = self._extract_email(detail_soup.get_text())
-                            image_url = self._extract_image(detail_soup, cfg["base_url"])
-                    else:
-                        contact_email = self._extract_email(card.get_text())
-                        image_url = self._extract_image(card, cfg["base_url"])
-                        self._human_delay(cfg.get("request_delay_range", (2, 4)))
-
-                    # ── Categoria ─────────────────────────────────────────
-                    categoria = self._categorize(title, cfg.get("fixed_category"))
-
-                    # ── Payload Supabase (Mantendo fidelidade ao Schema e Front-end) ──────
-                    # Imagem e Categoria tratadas como strings para evitar erros de nulo se a coluna for obrigatória
-                    payload = {
-                        "title": title[:255],
-                        "company": company[:255],
-                        "location": location[:255],
-                        "description": description or "",
-                        "application_email": contact_email or "",
-                        "imagem_url": image_url or "",
-                        "source_url": job_url or None,
-                        "categoria": categoria or "Geral",
-                        "status": "pendente",
-                        "posted_at": datetime.now(timezone.utc).isoformat(),
-                    }
-
-                    success = self.db.insert("jobs", payload)
-                    if success:
-                        log.info(f"  ✅ Guardada: [{categoria}] {title[:55]} @ {company}")
-                        self.stats["saved"] += 1
-                    else:
-                        self.stats["errors"] += 1
-
-                except Exception as card_err:
-                    log.warning(f"  ⚠️  Erro num card de {site_name}: {card_err}")
-                    continue
-
-            time.sleep(3)  # Pausa entre sites
-
-        except Exception as site_err:
-            # Blindagem total — erro no site nunca para o motor
-            log.error(f"❌ SITE FALHADO: {site_name} — {site_err}")
-            log.error(f"   → A saltar para o próximo site...")
-            self.stats["errors"] += 1
-
-    # ── Loop Principal ────────────────────────────────────────────────────
-    def run(self):
-        """Itera por todos os sites de forma independente."""
         start = datetime.now(timezone.utc)
         log.info(f"\n{'█' * 60}")
-        log.info(f"  AngoJobScraper v2 — SUPER MOTOR DE EMPREGOS")
-        log.info(f"  {len(JOBS_CONFIG)} fontes configuradas")
-        log.info(f"  {start.strftime('%Y-%m-%d %H:%M:%S UTC')}")
+        log.info(f"  AngoJobScraper v2.5 — MODO RODÍZIO ATIVADO")
+        log.info(f"  {len(JOBS_CONFIG)} fontes em ciclo | Meta: {max_total_vagas} vagas")
         log.info(f"{'█' * 60}\n")
 
-        for site_name, cfg in JOBS_CONFIG.items():
-            self.scrape_site(site_name, cfg)
+        # Cache de sopas por fonte para não pedir a home 1000 vezes
+        soups_cache = {}
+        processed_links_per_site = {name: set() for name in JOBS_CONFIG}
+        indices_per_site = {name: 0 for name in JOBS_CONFIG}
+
+        while self.stats["saved"] < max_total_vagas:
+            saved_this_cycle = 0
+            
+            for site_name, cfg in JOBS_CONFIG.items():
+                if self.stats["saved"] >= max_total_vagas:
+                    break
+                
+                log.info(f"🔄 Ciclo: {site_name} (Início no índice {indices_per_site[site_name]})")
+                
+                try:
+                    if site_name not in soups_cache:
+                        soups_cache[site_name] = self._fetch(cfg["list_url"], cfg.get("extra_headers"))
+                    
+                    soup = soups_cache[site_name]
+                    if not soup:
+                        continue
+                        
+                    cards = soup.select(cfg["job_card_selector"])
+                    if not cards:
+                        log.warning(f"  ⚠️  Nenhum card em {site_name}. Tentando auto-deteção...")
+                        detected = self._auto_detect_selector(soup)
+                        if detected: cards = soup.select(detected)
+                    
+                    if not cards:
+                        continue
+
+                    # Pega as próximas 5 vagas não processadas
+                    count_in_cycle = 0
+                    current_idx = indices_per_site[site_name]
+                    
+                    while count_in_cycle < 5 and current_idx < len(cards):
+                        card = cards[current_idx]
+                        current_idx += 1
+                        
+                        # Extração de Link
+                        link_tag = card.select_one(cfg["link_selector"]) or card.find("a")
+                        raw_url = link_tag.get("href", "") if link_tag else ""
+                        job_url = self._normalize_url(raw_url, cfg["base_url"])
+                        
+                        if not job_url or job_url in processed_links_per_site[site_name]:
+                            continue
+                        
+                        processed_links_per_site[site_name].add(job_url)
+                        
+                        # Processar Vaga
+                        success = self._process_card(card, job_url, site_name, cfg)
+                        if success:
+                            count_in_cycle += 1
+                            saved_this_cycle += 1
+                            self.stats["saved"] += 1
+                    
+                    indices_per_site[site_name] = current_idx
+                    
+                except Exception as e:
+                    log.error(f"❌ Erro no ciclo de {site_name}: {e}")
+                    continue
+
+            if saved_this_cycle == 0:
+                log.info("🏁 Nenhuma nova vaga encontrada em todas as fontes. Finalizando.")
+                break
+            
+            log.info(f"📊 Fim do Ciclo. Total guardado: {self.stats['saved']}/{max_total_vagas}")
 
         elapsed = (datetime.now(timezone.utc) - start).seconds
         log.info(f"\n{'█' * 60}")
         log.info(f"  🏁 VARREDURA CONCLUÍDA em {elapsed}s")
-        log.info(f"  📊 Processados:  {self.stats['processed']}")
-        log.info(f"  💾 Guardados:    {self.stats['saved']}")
-        log.info(f"  ⏭️  Duplicados:   {self.stats['skipped_dup']}")
-        log.info(f"  ❌ Erros:        {self.stats['errors']}")
+        log.info(f"  📊 Estatísticas Finais:")
+        log.info(f"     → Guardados:   {self.stats['saved']}")
+        log.info(f"     → Erros:       {self.stats['errors']}")
         log.info(f"{'█' * 60}\n")
+
+    def _process_card(self, card, job_url, site_name, cfg) -> bool:
+        """Extração e inserção de uma única vaga."""
+        try:
+            # 1. Deduplicação URL
+            if self._is_duplicate_url(job_url):
+                return False
+
+            # 2. Título & Empresa (Obrigatórios)
+            title_tag = card.select_one(cfg["title_selector"])
+            title = self._clean(title_tag.get_text() if title_tag else "")
+            
+            company = cfg.get("fixed_company", "")
+            if not company and cfg.get("company_selector"):
+                comp_tag = card.select_one(cfg["company_selector"])
+                company = self._clean(comp_tag.get_text() if comp_tag else "")
+            if not company: company = "Empresa Confidencial"
+
+            if not title or not company:
+                return False
+
+            # 3. Localização
+            loc_tag = card.select_one(cfg["location_selector"]) if cfg.get("location_selector") else None
+            location = self._clean(loc_tag.get_text() if loc_tag else "Angola")
+
+            # 4. DEEP SCRAPING (Página de Detalhe)
+            description = ""
+            requirements_list = []
+            image_url = ""
+            email = ""
+
+            if cfg.get("detail_enabled") and job_url:
+                self._human_delay(cfg.get("request_delay_range", (2, 4)))
+                detail_soup = self._fetch(job_url, cfg.get("extra_headers"))
+                if detail_soup:
+                    # Descrição
+                    desc_sel = cfg.get("detail_description_selector")
+                    desc_tag = detail_soup.select_one(desc_sel) if desc_sel else None
+                    if desc_tag:
+                        description = self._clean(desc_tag.get_text(separator="\n"))
+                    
+                    # Requisitos (Convertendo para Lista)
+                    req_sel = cfg.get("detail_requirements_selector")
+                    req_tag = detail_soup.select_one(req_sel) if req_sel else None
+                    if req_tag:
+                        req_text = self._clean(req_tag.get_text(separator="\n"))
+                        # Split por quebra de linha, filtra vazios e limpa espaços
+                        requirements_list = [r.strip("- •").strip() for r in req_text.split("\n") if r.strip()]
+                    
+                    # Imagem/Logo
+                    image_url = self._extract_image(detail_soup, cfg["base_url"])
+                    
+                    # Email por Regex na descrição profunda
+                    email = self._extract_email(detail_soup.get_text())
+            
+            # 5. Fallbacks e Limpeza
+            if not image_url:
+                image_url = self._get_category_placeholder(title)
+            
+            if not email:
+                # Se não houver email, guardamos o link de candidatura
+                email = f"Candidatar via: {job_url}"
+
+            categoria = self._categorize(title, cfg.get("fixed_category"))
+
+            payload = {
+                "title": title[:255],
+                "company": company[:255],
+                "location": location[:255],
+                "description": description[:5000],
+                "requirements": requirements_list, # Enviado como ARRAY JSON para o Supabase
+                "application_email": email[:255],
+                "imagem_url": image_url,
+                "source_url": job_url,
+                "categoria": categoria,
+                "status": "pendente",
+                "posted_at": datetime.now(timezone.utc).isoformat(),
+            }
+
+            return self.db.insert("jobs", payload)
+
+        except Exception as e:
+            log.warning(f"  ⚠️ Erro ao processar card: {e}")
+            self.stats["errors"] += 1
+            return False
+
+    def _get_category_placeholder(self, title: str) -> str:
+        """Retorna uma imagem por categoria se o logo não for encontrado."""
+        cat = self._categorize(title)
+        placeholders = {
+            "Tecnologia": "https://img.icons8.com/color/144/code.png",
+            "Gestão": "https://img.icons8.com/color/144/manager.png",
+            "Finanças": "https://img.icons8.com/color/144/money-bag-lira.png",
+            "Saúde": "https://img.icons8.com/color/144/hospital.png",
+            "Engenharia": "https://img.icons8.com/color/144/engineering.png",
+            "Vendas & Marketing": "https://img.icons8.com/color/144/megaphone.png",
+            "Geral": "https://img.icons8.com/color/144/company.png"
+        }
+        return placeholders.get(cat, placeholders["Geral"])
 
 
 # ─────────────────────────────────────────────

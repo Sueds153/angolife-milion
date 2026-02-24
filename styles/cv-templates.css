@@ -1,0 +1,131 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+
+.cv-template-container {
+    font-family: 'Open Sans', 'Roboto', sans-serif;
+    color: #333;
+    display: flex;
+    min-height: 297mm;
+    width: 210mm;
+    margin: 0 auto;
+    background-color: white;
+    box-shadow: none;
+    box-sizing: border-box;
+}
+
+/* ============================================================
+   MODERNO TEMPLATE (ModernTemplate.tsx - Canva Image 2/6)
+============================================================ */
+.modern-sidebar {
+    width: 32%;
+    background-color: #1a237e;
+    color: #ffffff;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+.modern-photo-container {
+    width: 150px; height: 150px; border-radius: 50%; overflow: hidden;
+    border: 4px solid #ffffff; margin: 0 auto 20px auto; background-color: #ffffff;
+    display: flex; align-items: center; justify-content: center;
+}
+.modern-photo-container img { width: 100%; height: 100%; object-fit: cover; }
+.modern-contact-item { display: flex; align-items: center; gap: 12px; font-size: 13px; margin-bottom: 15px; font-weight: 300; word-break: break-all; }
+.modern-sidebar-title { font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.3); padding-bottom: 5px; color: #ffffff; }
+.modern-skill-tag { background-color: rgba(255, 255, 255, 0.15); padding: 6px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; display: inline-block; }
+.modern-skills-container { display: flex; flex-wrap: wrap; gap: 8px; }
+.modern-main { flex: 1; padding: 40px 50px; background-color: #ffffff; }
+.modern-name { font-size: 42px; font-weight: 900; color: #1a237e; text-transform: uppercase; line-height: 1.1; margin-bottom: 5px; letter-spacing: -0.5px; }
+.modern-section-title { font-size: 20px; font-weight: 800; color: #1a237e; text-transform: uppercase; border-bottom: 2px solid #1a237e; padding-bottom: 5px; margin-bottom: 20px; margin-top: 35px; letter-spacing: 1px; }
+.modern-summary { font-size: 14px; line-height: 1.6; color: #444; }
+.modern-item { margin-bottom: 25px; }
+.modern-item-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+.modern-item-title { font-size: 16px; font-weight: 800; color: #1a237e; text-transform: uppercase; }
+.modern-item-date { font-size: 12px; font-weight: 600; color: #888; }
+.modern-item-subtitle { font-size: 14px; font-weight: 700; color: #444; margin-bottom: 8px; }
+.modern-item-desc { font-size: 13px; line-height: 1.6; color: #555; white-space: pre-line; }
+
+/* ============================================================
+   CRIATIVO TEMPLATE (TechnicalTemplate.tsx - Canva Image 3/5)
+============================================================ */
+.creative-sidebar {
+    width: 32%; background: linear-gradient(135deg, #4a148c 0%, #c2185b 100%); color: #ffffff;
+    padding: 40px; display: flex; flex-direction: column; gap: 30px; border-top-right-radius: 40px; border-bottom-right-radius: 40px;
+}
+.creative-photo-container { width: 140px; height: 140px; border-radius: 50%; overflow: hidden; border: 5px solid rgba(255, 255, 255, 0.4); margin: 0 auto 20px auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; background-color: rgba(255,255,255,0.1); }
+.creative-photo-container img { width: 100%; height: 100%; object-fit: cover; }
+.creative-sidebar-title { font-size: 18px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; color: #ffffff; border-left: 3px solid #ff4081; padding-left: 10px; }
+.creative-contact-item { display: flex; align-items: center; gap: 12px; font-size: 13px; margin-bottom: 15px; font-weight: 400; }
+.creative-main { flex: 1; padding: 40px 50px; background-color: #fafafa; }
+.creative-header { margin-bottom: 40px; text-align: right; border-bottom: 2px dashed #e0e0e0; padding-bottom: 20px; }
+.creative-name { font-size: 46px; font-weight: 800; color: #4a148c; line-height: 1; margin-bottom: 10px; }
+.creative-role { font-size: 18px; font-weight: 600; color: #c2185b; text-transform: uppercase; letter-spacing: 4px; }
+.creative-section-title { display: inline-block; background-color: #4a148c; color: white; font-size: 14px; font-weight: 800; text-transform: uppercase; padding: 8px 16px; border-radius: 20px; margin-bottom: 20px; margin-top: 30px; letter-spacing: 1px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+.creative-item { margin-bottom: 30px; position: relative; padding-left: 20px; border-left: 2px solid #e0e0e0; }
+.creative-item::before { content: ''; position: absolute; left: -7px; top: 5px; width: 12px; height: 12px; background-color: #c2185b; border-radius: 50%; }
+.creative-item-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
+.creative-item-title { font-size: 16px; font-weight: 800; color: #333; }
+.creative-item-date { font-size: 12px; font-weight: 600; color: #c2185b; background-color: rgba(194, 24, 91, 0.1); padding: 2px 8px; border-radius: 10px; }
+.creative-item-subtitle { font-size: 14px; font-weight: 600; color: #666; margin-bottom: 10px; }
+.creative-item-desc { font-size: 13px; line-height: 1.6; color: #555; white-space: pre-line; }
+
+/* ============================================================
+   CLASSIC TEMPLATE (ClassicTemplate.tsx - Canva Image 1)
+============================================================ */
+.classic-wrapper { display: flex; flex-direction: column; width: 100%; background: white; padding: 40px 50px; }
+.classic-header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; border-bottom: 2px solid #e2e8f0; padding-bottom: 30px; }
+.classic-header-left { flex: 1; padding-top: 20px; }
+.classic-name { font-size: 40px; font-weight: 300; color: #333; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; line-height: 1; }
+.classic-name strong { font-weight: 700; color: #1e40af; } /* Use bold for surname ideally, or just color */
+.classic-role { font-size: 16px; font-weight: 300; letter-spacing: 5px; color: #64748b; text-transform: uppercase; margin-bottom: 25px; }
+.classic-contacts { color: #1e40af; font-size: 13px; font-weight: 600; }
+.classic-contact-item { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.classic-header-right { position: relative; width: 160px; height: 160px; display: flex; justify-content: flex-end; }
+.classic-circle-bg { position: absolute; right: -20px; top: -20px; width: 150px; height: 150px; background-color: #1e40af; border-radius: 50%; z-index: 0; }
+.classic-photo { width: 130px; height: 130px; border-radius: 50%; object-fit: cover; border: 4px solid white; position: relative; z-index: 1; }
+
+.classic-body-row { display: flex; gap: 50px; }
+.classic-sidebar { width: 35%; display: flex; flex-direction: column; gap: 30px; }
+.classic-main { flex: 1; display: flex; flex-direction: column; gap: 30px; }
+.classic-section-title { font-size: 16px; font-weight: 700; color: #1e40af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; }
+.classic-summary-text { font-size: 13px; color: #555; line-height: 1.6; border-left: 2px solid #e2e8f0; padding-left: 15px; }
+.classic-skill-list { list-style: none; padding: 0; margin: 0; border-left: 2px solid #e2e8f0; padding-left: 15px; }
+.classic-skill-list li { font-size: 13px; color: #555; margin-bottom: 8px; }
+.classic-item { margin-bottom: 20px; border-left: 2px solid #1e40af; padding-left: 15px; position: relative; }
+.classic-item-role { font-size: 14px; font-weight: 700; color: #333; }
+.classic-item-company { font-size: 13px; font-weight: 600; color: #64748b; margin-bottom: 5px; }
+.classic-item-date { font-size: 12px; color: #888; margin-bottom: 8px; }
+.classic-item-desc { font-size: 13px; color: #555; line-height: 1.6; white-space: pre-line; }
+
+/* ============================================================
+   MINIMALIST TEMPLATE (MinimalistTemplate.tsx - Canva Image 4)
+============================================================ */
+.min-sidebar { width: 35%; background-color: #1e3a8a; color: white; padding: 40px; display: flex; flex-direction: column; gap: 35px; }
+.min-photo { width: 120px; height: 120px; object-fit: cover; margin-bottom: 20px; border: 3px solid rgba(255,255,255,0.2); }
+.min-sidebar-title { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 8px; color: white; }
+.min-contact-item { font-size: 12px; margin-bottom: 12px; line-height: 1.5; font-weight: 300; }
+.min-main { flex: 1; padding: 40px 50px; background-color: white; }
+.min-header { margin-bottom: 40px; }
+.min-name { font-size: 40px; font-weight: 800; color: #1e3a8a; line-height: 1.1; margin-bottom: 5px; }
+.min-role { font-size: 16px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 2px; }
+.min-section-title { background-color: #1e3a8a; color: white; padding: 8px 15px; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px; margin-top: 35px; }
+.min-item { margin-bottom: 25px; display: flex; gap: 20px; }
+.min-item-left { width: 120px; flex-shrink: 0; }
+.min-item-company { font-size: 12px; font-weight: 800; color: #1e3a8a; text-transform: uppercase; margin-bottom: 4px; }
+.min-item-date { font-size: 11px; color: #64748b; }
+.min-item-right { flex: 1; }
+.min-item-role { font-size: 15px; font-weight: 700; color: #333; margin-bottom: 8px; }
+.min-item-desc { font-size: 13px; line-height: 1.6; color: #555; white-space: pre-line; }
+
+.creative-photo-fallback { width: 100%; height: 100%; background-color: rgba(255,255,255,0.2); }
+.creative-contact-email { word-break: break-all; }
+.creative-summary { margin-bottom: 30px; text-align: justify; font-size: 14px; line-height: 1.6; color: #555; }
+
+.classic-photo-fallback { background-color: #e2e8f0; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
+
+.min-photo-fallback { background-color: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
+.min-contact-icon { margin-right: 8px; }
+.min-email-text { word-break: break-all; }
+.min-skills-list { display: flex; flex-direction: column; gap: 8px; }
+.min-skill-item { font-size: 12px; font-weight: 300; border-left: 2px solid rgba(255,255,255,0.3); padding-left: 10px; }
+.min-summary { margin-bottom: 30px; font-size: 14px; line-height: 1.6; color: #555; text-align: justify; }

@@ -1,4 +1,3 @@
-
 export interface Job {
   id: string;
   title: string;
@@ -11,7 +10,7 @@ export interface Job {
   requirements: string[];
   sourceUrl?: string;
   applicationEmail?: string;
-  status: 'pending' | 'published';
+  status: "pending" | "published";
   isVerified?: boolean;
   imageUrl?: string;
   category?: string;
@@ -21,7 +20,7 @@ export interface Job {
 }
 
 export interface ExchangeRate {
-  currency: 'USD' | 'EUR';
+  currency: "USD" | "EUR";
   formalBuy: number;
   formalSell: number;
   informalBuy: number;
@@ -34,16 +33,25 @@ export interface ProductDeal {
   title: string;
   store: string;
   storeNumber?: string;
+  phone?: string;
   originalPrice: number;
   discountPrice: number;
+  /** Alias de discountPrice — usado em alguns componentes como deal.price */
+  price?: number;
   location: string;
   description: string;
   imagePlaceholder: string;
+  /** URL pública do bucket discount-images do Supabase Storage */
+  imageUrl?: string;
   url?: string;
   category?: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: "pending" | "approved" | "rejected";
   submittedBy: string;
   createdAt: string;
+  views?: number;
+  likes?: number;
+  verified?: boolean;
+  is_admin?: boolean;
 }
 
 export interface NewsArticle {
@@ -54,11 +62,12 @@ export interface NewsArticle {
   url: string;
   category: string;
   publishedAt: string;
-  status: 'pending' | 'published';
+  status: "pending" | "published";
   imageUrl?: string;
 }
 
 export interface UserProfile {
+  id?: string;
   email: string;
   referralCount: number;
   isPremium: boolean;
@@ -66,18 +75,19 @@ export interface UserProfile {
   isAdmin: boolean;
   cvCredits: number;
   premiumExpiry?: number; // Timestamp
-  subscriptionType?: 'pack3' | 'monthly' | 'yearly';
+  subscriptionType?: "pack3" | "monthly" | "yearly";
+  accountType?: "free" | "premium";
 }
 
 export interface AppNotification {
   id: string;
   title: string;
   message: string;
-  type: 'job' | 'market' | 'system';
+  type: "job" | "market" | "system";
   timestamp: number;
 }
 
-export type UserRole = 'guest' | 'admin';
+export type UserRole = "guest" | "admin";
 
 // CV Types
 export interface CVExperience {
@@ -103,6 +113,7 @@ export interface CVData {
   phone: string;
   location: string;
   summary: string;
+  photoUrl?: string;
   experiences: CVExperience[];
   education: CVEducation[];
   skills: string[];
