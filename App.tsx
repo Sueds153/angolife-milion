@@ -345,7 +345,7 @@ const App: React.FC = () => {
           onLogout={() => setUser(null)}
         />
 
-        <main className="flex-grow flex flex-col pb-safe">
+        <main className="flex-grow flex flex-col pt-safe">
           <div className="flex-grow container-responsive py-6 animate-fade-in print:p-0">
             {renderPage()}
           </div>
@@ -358,7 +358,7 @@ const App: React.FC = () => {
 
         {/* Mobile Bottom Navigation - Fluid but capped for large mobile */}
         <nav
-          className={`fixed bottom-0 left-1/2 -translate-x-1/2 md:hidden w-full max-w-lg bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-orange-500/10 z-[100] flex justify-around items-center px-4 py-3 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.1)] print:hidden ${showStickyAd ? 'mb-[50px]' : 'mb-0'}`}
+          className={`fixed bottom-0 left-1/2 -translate-x-1/2 md:hidden w-full max-w-lg bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-orange-500/10 z-[120] flex justify-around items-center px-4 py-3 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.1)] print:hidden ${showStickyAd ? 'mb-[50px]' : 'mb-0'}`}
         >
           {[
             { id: 'home', label: 'Início', icon: Home },

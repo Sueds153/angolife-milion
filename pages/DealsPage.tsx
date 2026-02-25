@@ -146,9 +146,11 @@ export const DealsPage: React.FC<DealsPageProps> = ({ isAuthenticated, user, onR
 
   return (
     <div className="space-y-6 pb-20">
-      <div className="px-1">
-        <h2 className="text-fluid-h2 font-black text-brand-gold uppercase tracking-tighter leading-none">Descontos</h2>
-        <p className="text-slate-500 font-bold text-[10px] md:text-xs uppercase tracking-widest mt-1">Preços reais encontrados em Luanda</p>
+      <div className="px-1 flex flex-col md:flex-row justify-between items-center gap-4 stack-narrow">
+        <div>
+          <h2 className="text-fluid-h2 font-black text-brand-gold uppercase tracking-tighter leading-none">Descontos</h2>
+          <p className="text-slate-500 font-bold text-[10px] md:text-xs uppercase tracking-widest mt-1">Preços reais encontrados em Luanda</p>
+        </div>
       </div>
 
       {/* FAB - POSICIONADO ACIMA DA TAB BAR E DO ANÚNCIO */}
@@ -184,9 +186,9 @@ export const DealsPage: React.FC<DealsPageProps> = ({ isAuthenticated, user, onR
             </div>
           )}
 
-          <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 ${!isAuthenticated ? 'blur-md select-none pointer-events-none opacity-50 overflow-hidden max-h-[600px]' : ''}`}>
+          <div className={`grid grid-cols-1 min-[450px]:grid-cols-2 lg:grid-cols-4 gap-4 ${!isAuthenticated ? 'blur-md select-none pointer-events-none opacity-50 overflow-hidden max-h-[600px]' : ''}`}>
             {deals.map((deal) => (
-              <div key={deal.id} onClick={() => onSelectDeal(deal)} className="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-md border border-slate-100 dark:border-white/5 group hover:shadow-xl transition-all cursor-pointer active:scale-[0.98]">
+              <div key={deal.id} onClick={() => onSelectDeal(deal)} className="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-md border border-slate-100 dark:border-white/5 group hover:shadow-xl transition-all cursor-pointer active:scale-[0.98] flex flex-col h-full">
                 <div className="h-48 overflow-hidden relative">
                   <img src={deal.imageUrl} alt={deal.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                   <div className="absolute top-3 right-3 bg-red-500 text-white text-[10px] font-black px-2 py-1 rounded-lg shadow-lg">
@@ -201,8 +203,8 @@ export const DealsPage: React.FC<DealsPageProps> = ({ isAuthenticated, user, onR
                   </div>
                   <h3 className="font-bold text-slate-800 dark:text-white leading-tight mb-3 line-clamp-2 min-h-[2.5em]">{deal.title}</h3>
 
-                  <div className="flex items-end justify-between">
-                    <div>
+                  <div className="flex flex-wrap items-end justify-between gap-2">
+                    <div className="flex-1 min-w-[100px]">
                       <p className="text-xs text-slate-400 line-through font-medium">{deal.originalPrice.toLocaleString()} Kz</p>
                       <p className="text-lg font-black text-brand-gold">{deal.discountPrice.toLocaleString()} <span className="text-xs">Kz</span></p>
                     </div>
@@ -223,7 +225,7 @@ export const DealsPage: React.FC<DealsPageProps> = ({ isAuthenticated, user, onR
       {/* FORMULÁRIO DE PUBLICAÇÃO */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[1000] bg-slate-950 flex flex-col animate-fade-in">
-          <div className="px-6 py-10 flex justify-between items-center border-b gold-border-b-subtle">
+          <div className="px-6 py-10 flex justify-between items-center border-b gold-border-b-subtle pt-[calc(2.5rem+var(--sat))]">
             <div className="flex items-center gap-3 text-brand-gold font-black uppercase text-lg">
               <Camera size={24} /> <span>Publicar Oferta</span>
             </div>

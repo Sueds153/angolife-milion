@@ -99,7 +99,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             <span className="text-brand-gold">Su-Golden</span>
           </h1>
           
-          <p className="text-slate-100 text-xs md:text-xl font-bold max-w-md mb-6 md:mb-12 leading-relaxed opacity-90 uppercase tracking-tight">
+          <p className="text-fluid-p text-slate-100 font-bold max-w-md mb-6 md:mb-12 opacity-90 uppercase tracking-tight">
             Lidere a economia nacional com inteligência de mercado e oportunidades exclusivas em Angola.
           </p>
           
@@ -164,19 +164,19 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black via-black/85 to-transparent"></div>
         </div>
 
-        <div className="relative z-10 p-6 md:p-24 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12 w-full text-center md:text-left">
+        <div className="relative z-10 p-6 md:p-24 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12 w-full text-center md:text-left stack-narrow">
           <div className="max-w-3xl">
             <p className="text-brand-gold text-[8px] md:text-sm font-black uppercase tracking-[0.2em] mb-4 drop-shadow-md animate-pulse">
               Anuncie e veja o seu negócio crescer
             </p>
             
-            <h2 className="text-3xl md:text-7xl font-black text-white leading-tight tracking-tighter uppercase mb-6">
+            <h2 className="text-fluid-h2 font-black text-white uppercase mb-6">
               ALCANCE O <br/>
               <span className="text-brand-gold">TOPO</span> DO MERCADO
             </h2>
             
             <div className="block border-l-2 md:border-l-4 border-brand-gold pl-4 md:pl-6 py-2 mb-6 md:mb-0">
-              <p className="text-slate-200 text-xs md:text-2xl font-bold leading-relaxed">
+              <p className="text-fluid-p text-slate-200 font-bold">
                 Alcance o topo do mercado angolano. Anuncie na rede exclusiva de empresários e investidores da Angolife.
               </p>
             </div>

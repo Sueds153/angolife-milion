@@ -39,7 +39,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   }
 
   return (
-    <nav className="bg-white/95 dark:bg-slate-900/95 text-slate-900 dark:text-white shadow-sm sticky top-0 z-50 border-b border-orange-500/20 transition-colors duration-300 backdrop-blur-md print:hidden">
+    <nav className="bg-white/95 dark:bg-slate-900/95 text-slate-900 dark:text-white shadow-sm sticky top-0 z-[100] border-b border-orange-500/20 transition-colors duration-300 backdrop-blur-md pt-safe print:hidden">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16 md:h-20">
           {/* Brand Section */}
@@ -53,8 +53,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               </span>
             </div>
             <div className="flex items-center text-lg md:text-2xl font-bold tracking-tighter">
-              <span className="text-slate-900 dark:text-white">ANGO</span>
-              <span className="text-orange-500 ml-0.5">LIFE</span>
+              <h1 className="flex items-center">
+                <span className="text-slate-900 dark:text-white">ANGO</span>
+                <span className="text-orange-500 ml-0.5">LIFE</span>
+              </h1>
             </div>
           </div>
 
@@ -135,9 +137,9 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Mobile Menu Overlay - Fully Responsive */}
       {isOpen && (
-        <div className="lg:hidden fixed inset-0 top-16 bg-slate-950/60 backdrop-blur-sm z-40 animate-fade-in" onClick={() => setIsOpen(false)}>
+        <div className="lg:hidden fixed inset-0 top-[calc(64px+var(--sat))] bg-slate-950/60 backdrop-blur-sm z-40 animate-fade-in" onClick={() => setIsOpen(false)}>
           <div
-            className="bg-white dark:bg-slate-900 w-full shadow-2xl border-t border-orange-500/20 animate-slide-up"
+            className="bg-white dark:bg-slate-900 w-full shadow-2xl border-t border-orange-500/20 animate-slide-up max-h-[calc(100vh-64px-var(--sat))] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="px-6 py-6 space-y-2">

@@ -595,50 +595,50 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
   return (
     <div className="space-y-8 animate-slide-up pb-20">
       <AdminDiagnostic />
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-3xl font-black text-orange-500 uppercase tracking-tight">Painel Admin</h2>
-          <p className="text-slate-500 dark:text-slate-400 font-medium text-sm">Gerindo a AngoLife com precisão.</p>
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 stack-narrow">
+        <div className="pt-safe w-full md:w-auto">
+          <h2 className="text-fluid-h2 font-black text-orange-500 uppercase tracking-tight leading-tight">Painel Admin</h2>
+          <p className="text-slate-500 dark:text-slate-400 font-medium text-[10px] md:text-sm uppercase tracking-widest mt-1">Gerindo a AngoLife com precisão.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="scroll-x-touch flex flex-nowrap-shrink-0 gap-2 pb-4 -mx-4 px-4 scrollbar-none">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'overview' ? 'bg-orange-500 text-white shadow-lg' : 'bg-slate-100 dark:bg-white/5 text-slate-500'}`}
+            className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === 'overview' ? 'bg-orange-500 text-white shadow-lg' : 'bg-white dark:bg-white/5 text-slate-500 border border-orange-500/10'}`}
             title="Ver Visão Geral"
           >
             Geral
           </button>
           <button
             onClick={() => setActiveTab('jobs')}
-            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'jobs' ? 'bg-orange-500 text-white shadow-lg' : 'bg-slate-100 dark:bg-white/5 text-slate-500'}`}
+            className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === 'jobs' ? 'bg-orange-500 text-white shadow-lg' : 'bg-white dark:bg-white/5 text-slate-500 border border-orange-500/10'}`}
             title="Gerir Vagas"
           >
             Vagas
           </button>
           <button
             onClick={() => setActiveTab('news')}
-            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'news' ? 'bg-orange-500 text-white shadow-lg' : 'bg-slate-100 dark:bg-white/5 text-slate-500'}`}
+            className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === 'news' ? 'bg-orange-500 text-white shadow-lg' : 'bg-white dark:bg-white/5 text-slate-500 border border-orange-500/10'}`}
             title="Gerir Notícias"
           >
             Notícias
           </button>
           <button
             onClick={() => setActiveTab('deals')}
-            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'deals' ? 'bg-orange-500 text-white shadow-lg' : 'bg-slate-100 dark:bg-white/5 text-slate-500'}`}
+            className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === 'deals' ? 'bg-orange-500 text-white shadow-lg' : 'bg-white dark:bg-white/5 text-slate-500 border border-orange-500/10'}`}
             title="Gerir Descontos"
           >
             Descontos
           </button>
           <button
             onClick={() => setActiveTab('exchange')}
-            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'exchange' ? 'bg-orange-500 text-white shadow-lg' : 'bg-slate-100 dark:bg-white/5 text-slate-500'}`}
+            className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === 'exchange' ? 'bg-orange-500 text-white shadow-lg' : 'bg-white dark:bg-white/5 text-slate-500 border border-orange-500/10'}`}
             title="Gerir Câmbio"
           >
             Câmbio
           </button>
           <button
             onClick={() => setActiveTab('cv')}
-            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'cv' ? 'bg-orange-500 text-white shadow-lg' : 'bg-slate-100 dark:bg-white/5 text-slate-500'}`}
+            className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === 'cv' ? 'bg-orange-500 text-white shadow-lg' : 'bg-white dark:bg-white/5 text-slate-500 border border-orange-500/10'}`}
             title="Validar CVs"
           >
             CVs
@@ -648,39 +648,39 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
 
       {activeTab === 'jobs' && (
         <div className="space-y-6">
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-orange-500/10 shadow-sm flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-500">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-orange-500/10 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4 stack-narrow">
+            <div className="flex items-center gap-4 w-full md:w-auto">
+              <div className="w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-500 shrink-0">
                 <Briefcase size={24} />
               </div>
               <div>
-                <h3 className="font-black text-lg uppercase">Gestão de Empregos</h3>
+                <h3 className="font-black text-lg uppercase leading-tight">Gestão de Empregos</h3>
                 <p className="text-xs text-slate-500">{pendingJobs.length} vagas pendentes de aprovação.</p>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="grid grid-cols-2 lg:flex gap-2 w-full md:w-auto">
               <button
                 onClick={handleApproveAll}
                 disabled={loading || pendingJobs.length === 0}
                 title="Publicar Todas as Vagas Pendentes"
-                className="bg-emerald-500 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-600 active:scale-95 transition-all disabled:opacity-50 shadow-lg shadow-emerald-500/20"
+                className="bg-emerald-500 text-white px-4 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-emerald-600 active:scale-95 transition-all disabled:opacity-50 shadow-lg shadow-emerald-500/20"
               >
-                <Check size={18} /> Publicar Tudo
+                <Check size={16} /> Publicar Tudo
               </button>
               <button
                 onClick={handleSyncJobs}
                 disabled={loading}
                 title="Sincronizar Vagas via IA"
-                className="bg-brand-gold text-slate-900 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+                className="bg-brand-gold text-slate-900 px-4 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
               >
-                <RefreshCw className={loading ? 'animate-spin' : ''} size={18} /> Sincronizar (IA)
+                <RefreshCw className={loading ? 'animate-spin' : ''} size={16} /> Sincronizar
               </button>
               <button
                 onClick={() => setShowNewJobModal(true)}
                 title="Criar Nova Vaga Manualmente"
-                className="bg-slate-900 dark:bg-white text-white dark:text-slate-950 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:scale-105 active:scale-95 transition-all"
+                className="bg-slate-900 dark:bg-white text-white dark:text-slate-950 px-4 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:scale-105 active:scale-95 transition-all col-span-2 lg:col-auto"
               >
-                <Plus size={18} /> Nova Vaga
+                <Plus size={16} /> Nova Vaga
               </button>
             </div>
           </div>
@@ -763,30 +763,30 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
                     </div>
 
                     {/* Botões de Ação */}
-                    <div className="flex flex-row lg:flex-col gap-3 shrink-0 w-full lg:w-auto lg:pt-14">
-                      <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0 w-full lg:w-auto lg:pt-14">
+                      <div className="flex gap-2 w-full lg:w-auto">
                         <button
                           onClick={() => handleToggleVerification(job.id, job.isVerified || false)}
-                          className={`p-2 rounded-xl transition-all ${job.isVerified ? 'bg-amber-500/10 text-amber-500' : 'bg-slate-100 dark:bg-white/5 text-slate-400'}`}
+                          className={`p-3 md:p-4 rounded-xl transition-all border ${job.isVerified ? 'bg-amber-500/10 text-amber-500 border-amber-500/30' : 'bg-slate-100 dark:bg-white/5 text-slate-400 border-transparent'}`}
                           title={job.isVerified ? "Remover Verificação" : "Verificar Empresa"}
                         >
-                          <ShieldCheck size={16} />
+                          <ShieldCheck size={20} />
                         </button>
                         <button
                           onClick={() => handleApprove(job.id)}
                           disabled={loading}
-                          className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-5 rounded-[1.5rem] font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 transition-all shadow-xl shadow-emerald-500/20 active:scale-95 flex-1 lg:flex-none"
+                          className="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all shadow-xl shadow-emerald-500/20 active:scale-95 flex-1"
                           title="✅ Publicar Vaga Agora"
                         >
-                          <Check size={20} /> ✅ Publicar
+                          <Check size={18} /> Publicar
                         </button>
                       </div>
                       <button
                         onClick={() => handleReject(job.id)}
-                        className="bg-slate-100 dark:bg-white/5 text-slate-400 hover:bg-red-500 hover:text-white px-8 py-5 rounded-[1.5rem] font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 transition-all active:scale-95 flex-1 lg:flex-none border border-slate-200 dark:border-white/5"
+                        className="bg-slate-100 dark:bg-white/5 text-slate-400 hover:bg-red-500 hover:text-white px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all active:scale-95 w-full lg:w-auto border border-slate-200 dark:border-white/5"
                         title="Rejeitar Vaga Permanentemente"
                       >
-                        <X size={20} /> Rejeitar
+                        <X size={18} /> Rejeitar
                       </button>
                     </div>
                   </div>
@@ -806,17 +806,17 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
 
       {activeTab === 'deals' && (
         <div className="space-y-6">
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-orange-500/10 shadow-sm flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-500">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-orange-500/10 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4 stack-narrow">
+            <div className="flex items-center gap-4 w-full md:w-auto">
+              <div className="w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-500 shrink-0">
                 <Tag size={24} />
               </div>
               <div>
-                <h3 className="font-black text-xl text-slate-900 dark:text-white uppercase tracking-tight">Descontos Pendentes</h3>
+                <h3 className="font-black text-xl text-slate-900 dark:text-white uppercase tracking-tight leading-tight">Descontos Pendentes</h3>
                 <p className="text-slate-500 text-xs font-medium">{pendingDeals.length} ofertas a aguardar aprovação</p>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="grid grid-cols-2 lg:flex gap-2 w-full md:w-auto">
               <button
                 onClick={async () => {
                   setLoading(true);
@@ -831,16 +831,16 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
                 }}
                 disabled={loading}
                 title="Sincronizar Ofertas via IA"
-                className="bg-brand-gold text-slate-900 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+                className="bg-brand-gold text-slate-900 px-4 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
               >
-                <RefreshCw className={loading ? 'animate-spin' : ''} size={18} /> Sincronizar (IA)
+                <RefreshCw className={loading ? 'animate-spin' : ''} size={16} /> Sincronizar
               </button>
               <button
                 onClick={() => setShowNewDealModal(true)}
                 title="Criar Oferta Rápida"
-                className="bg-orange-500 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-orange-600 active:scale-95 transition-all shadow-lg shadow-orange-500/20"
+                className="bg-orange-500 text-white px-4 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-orange-600 active:scale-95 transition-all shadow-lg shadow-orange-500/20"
               >
-                <Plus size={18} /> Nova Oferta
+                <Plus size={16} /> Nova Oferta
               </button>
             </div>
           </div>
@@ -896,7 +896,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
                       >
                         <Edit3 size={16} /> Editar & Publicar
                       </button>
-                      <div className="flex gap-3">
+                      <div className="flex flex-col sm:flex-row gap-3">
                         <button
                           onClick={() => handleApproveDeal(deal.id)}
                           disabled={loading}
@@ -1064,39 +1064,39 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
       )}
       {activeTab === 'news' && (
         <div className="space-y-6">
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-orange-500/10 shadow-sm flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-500">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-orange-500/10 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4 stack-narrow">
+            <div className="flex items-center gap-4 w-full md:w-auto">
+              <div className="w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-500 shrink-0">
                 <Newspaper size={24} />
               </div>
               <div>
-                <h3 className="font-black text-lg uppercase">Gestão de Notícias</h3>
-                <p className="text-xs text-orange-500 font-bold uppercase tracking-widest">Tens {pendingNews.length} notícias pendentes para revisão.</p>
+                <h3 className="font-black text-lg uppercase leading-tight">Gestão de Notícias</h3>
+                <p className="text-xs text-orange-500 font-bold uppercase tracking-widest">Tens {pendingNews.length} notícias pendentes.</p>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="grid grid-cols-2 lg:flex gap-2 w-full md:w-auto">
               <button
                 onClick={handleApproveAllNews}
                 disabled={loading || pendingNews.length === 0}
                 title="Publicar Todas as Notícias Pendentes"
-                className="bg-emerald-500 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-600 active:scale-95 transition-all disabled:opacity-50 shadow-lg shadow-emerald-500/20"
+                className="bg-emerald-500 text-white px-4 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-emerald-600 active:scale-95 transition-all disabled:opacity-50 shadow-lg shadow-emerald-500/20"
               >
-                <Check size={18} /> Publicar Tudo
+                <Check size={16} /> Publicar Tudo
               </button>
               <button
                 onClick={handleSyncNews}
                 disabled={loading}
                 title="Sincronizar Notícias via IA"
-                className="bg-brand-gold text-slate-900 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+                className="bg-brand-gold text-slate-900 px-4 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
               >
-                <RefreshCw className={loading ? 'animate-spin' : ''} size={18} /> Sincronizar (IA)
+                <RefreshCw className={loading ? 'animate-spin' : ''} size={16} /> Sincronizar
               </button>
               <button
                 onClick={() => setShowNewNewsModal(true)}
                 title="Criar Notícia Urgente"
-                className="bg-orange-500 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-orange-600 active:scale-95 transition-all shadow-lg shadow-orange-500/20"
+                className="bg-orange-500 text-white px-4 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-orange-600 active:scale-95 transition-all shadow-lg shadow-orange-500/20 col-span-2 lg:col-auto"
               >
-                <Plus size={18} /> Criar Notícia Urgente
+                <Plus size={16} /> Nova Notícia
               </button>
             </div>
           </div>
@@ -1181,13 +1181,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
       {
         activeTab === 'exchange' && (
           <div className="space-y-6">
-            <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-orange-500/10 shadow-sm">
-              <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+            <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-orange-500/10 shadow-sm">
+              <div className="flex flex-col md:flex-row items-center md:items-start gap-4 mb-8 text-center md:text-left stack-narrow">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 shrink-0">
                   <DollarSign size={24} />
                 </div>
-                <div>
-                  <h3 className="font-black text-lg uppercase">Gestão de Câmbio Informal</h3>
+                <div className="w-full md:w-auto">
+                  <h3 className="font-black text-lg uppercase leading-tight">Gestão de Câmbio</h3>
                   <p className="text-xs text-slate-500">Atualiza as taxas de mercado paralelo em tempo real.</p>
                 </div>
               </div>
@@ -1258,13 +1258,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
       {
         showNewJobModal && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-fade-in overflow-y-auto">
-            <div className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-[2.5rem] shadow-2xl border border-orange-500/30 overflow-hidden flex flex-col max-h-[90vh]">
-              <div className="p-8 border-b border-orange-500/10 flex justify-between items-center text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800/50">
+            <div className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-[2rem] md:rounded-[2.5rem] shadow-2xl border border-orange-500/30 overflow-hidden flex flex-col max-h-[95vh] mx-auto">
+              <div className="p-6 md:p-8 border-b border-orange-500/10 flex justify-between items-center text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800/50 pt-[calc(1.5rem+var(--sat))]">
                 <div>
-                  <h3 className="text-2xl font-black uppercase tracking-tight">Publicação Manual</h3>
-                  <p className="text-xs text-orange-500 font-bold uppercase tracking-widest mt-1">Criar nova vaga na hora</p>
+                  <h3 className="text-xl md:text-2xl font-black uppercase tracking-tight">Publicação Manual</h3>
+                  <p className="text-[10px] text-orange-500 font-bold uppercase tracking-widest mt-1">Criar nova vaga na hora</p>
                 </div>
-                <button onClick={() => setShowNewJobModal(false)} className="bg-white dark:bg-slate-800 p-3 rounded-full shadow-lg text-slate-400 hover:text-orange-500 transition-all" title="Fechar Modal">
+                <button onClick={() => setShowNewJobModal(false)} className="bg-white dark:bg-slate-800 p-2.5 rounded-full shadow-lg text-slate-400 hover:text-orange-500 transition-all" title="Fechar Modal">
                   <X size={20} />
                 </button>
               </div>
@@ -1578,9 +1578,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
       {
         activeTab === 'cv' && (
           <div className="space-y-6 animate-fade-in">
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-orange-500/10 shadow-sm flex justify-between items-center">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500">
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-orange-500/10 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4 stack-narrow">
+              <div className="flex items-center gap-4 w-full md:w-auto">
+                <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500 shrink-0">
                   <Crown size={24} />
                 </div>
                 <div>

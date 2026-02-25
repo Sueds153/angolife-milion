@@ -166,12 +166,12 @@ export const NewsPage: React.FC<NewsPageProps> = ({ isAuthenticated, onRequireAu
 
   return (
     <div className="space-y-6 animate-fade-in pb-20">
-      <div className="flex flex-col gap-1 mb-4">
-        <h2 className="text-fluid-h2 font-black text-brand-gold uppercase tracking-tighter flex items-center gap-2">
-           <Flame className="fill-brand-gold text-brand-gold" />
+      <div className="flex flex-col gap-1 mb-4 w-full stack-narrow">
+        <h2 className="text-fluid-h2 font-black text-brand-gold uppercase tracking-tighter flex flex-wrap items-center gap-2 leading-tight">
+           <Flame className="fill-brand-gold text-brand-gold shrink-0" />
            News Secretas
         </h2>
-        <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">O que ninguém lhe conta sobre Angola.</p>
+        <p className="text-slate-500 text-[10px] md:text-xs font-bold uppercase tracking-widest leading-relaxed">O que ninguém lhe conta sobre Angola.</p>
       </div>
 
       {isOffline && (
@@ -201,7 +201,7 @@ export const NewsPage: React.FC<NewsPageProps> = ({ isAuthenticated, onRequireAu
             <div 
                key={item.id} 
                onClick={() => handleArticleClick(item)}
-               className="bg-white dark:bg-slate-900 rounded-3xl overflow-hidden shadow-lg border border-slate-100 dark:border-white/5 group hover:border-brand-gold/50 transition-all cursor-pointer flex flex-col h-full"
+               className="bg-white dark:bg-slate-900 rounded-3xl overflow-hidden shadow-lg border border-slate-100 dark:border-white/5 group hover:border-brand-gold/50 transition-all cursor-pointer flex flex-col h-full overflow-hidden"
             >
                <div className="relative overflow-hidden rounded-t-3xl border-b border-white/5">
                   {!isOffline ? (
@@ -302,12 +302,12 @@ export const NewsPage: React.FC<NewsPageProps> = ({ isAuthenticated, onRequireAu
                  <h1 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter leading-none mb-6">
                     {selectedArticle.title}
                  </h1>
-                 <div className="flex items-center gap-4 text-slate-400 border-y border-white/5 py-4 mb-8">
+                 <div className="flex flex-wrap items-center gap-4 text-slate-400 border-y border-white/5 py-4 mb-8">
                     <span className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
-                       <Eye size={14} /> Fonte: {selectedArticle.source}
+                       <Eye size={14} className="shrink-0" /> Fonte: {selectedArticle.source}
                     </span>
                     <span className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
-                       <Calendar size={14} /> {selectedArticle.publishedAt}
+                       <Calendar size={14} className="shrink-0" /> {selectedArticle.publishedAt}
                     </span>
                  </div>
 

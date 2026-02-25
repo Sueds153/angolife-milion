@@ -1,13 +1,27 @@
 @layer base {
+  * {
+    box-sizing: border-box;
+  }
   body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    line-height: 1.5;
+  }
+  img,
+  video,
+  canvas,
+  svg {
+    max-width: 100%;
+    height: auto;
+    display: block;
   }
 }
 
 /* Fallback for global styles if tailwind is not enough */
 :root {
   --brand-gold: #f59e0b;
+  --sab: env(safe-area-inset-bottom);
+  --sat: env(safe-area-inset-top);
 }
 
 body {
@@ -48,16 +62,17 @@ body {
 /* --- PWA & Mobile Optimization --- */
 
 /* Mobile-first responsiveness: Ensure fluids layouts and no side-scroll */
-html, body {
+html,
+body {
   overflow-x: hidden;
   width: 100%;
   position: relative;
 }
 
 /* Touch targets optimization (iOS/Android compliance) */
-button, 
-input, 
-select, 
+button,
+input,
+select,
 a.btn {
   min-height: 44px;
   min-width: 44px;
@@ -76,17 +91,75 @@ a.btn {
 }
 
 @media (min-width: 640px) {
-  .container { max-width: 640px; }
+  .container {
+    max-width: 640px;
+  }
 }
 @media (min-width: 768px) {
-  .container { max-width: 768px; }
+  .container {
+    max-width: 768px;
+  }
 }
 @media (min-width: 1024px) {
-  .container { max-width: 1024px; }
+  .container {
+    max-width: 1024px;
+  }
 }
 
 /* Fix for overlapping elements on mobile browsers with address bars */
 .min-h-screen-safe {
   min-height: -webkit-fill-available;
   min-height: 100vh;
+}
+
+/* Fluid Typography Classes */
+.text-fluid-h1 {
+  font-size: clamp(1.75rem, 5vw, 3rem);
+  line-height: 1.1;
+}
+.text-fluid-h2 {
+  font-size: clamp(1.5rem, 4.5vw, 2.25rem);
+  line-height: 1.2;
+}
+.text-fluid-h3 {
+  font-size: clamp(1.25rem, 4vw, 1.75rem);
+  line-height: 1.3;
+}
+.text-fluid-p {
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  line-height: 1.5; /* Strict adherence to user request */
+}
+
+/* Safe Area Paddings */
+.pb-safe {
+  padding-bottom: var(--sab);
+}
+.pt-safe {
+  padding-top: var(--sat);
+}
+
+/* Horizontal Scroll with Touch Support */
+.scroll-x-touch {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+}
+.scroll-x-touch::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+.flex-nowrap-shrink-0 > * {
+  flex-shrink: 0;
+}
+
+/* Forced Stacking for narrow devices requested ( < 380px ) */
+@media (max-width: 380px) {
+  .stack-narrow {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+}
+
+/* Global line-height enforcement */
+* {
+  line-height: 1.5;
 }

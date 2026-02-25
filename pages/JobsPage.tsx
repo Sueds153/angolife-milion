@@ -296,10 +296,10 @@ export const JobsPage: React.FC<JobsPageProps> = ({
            </div>
         </div>
       )}
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-        <div>
-          <h2 className="text-fluid-h2 font-black text-orange-500 tracking-tight uppercase">Vagas de Emprego</h2>
-          <p className="text-slate-500 dark:text-slate-400 font-medium text-[10px] md:text-sm mt-1">Conectando talentos às maiores empresas de Angola.</p>
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 stack-narrow">
+        <div className="w-full md:w-auto">
+          <h2 className="text-fluid-h2 font-black text-orange-500 tracking-tight uppercase leading-tight">Vagas de Emprego</h2>
+          <p className="text-slate-500 dark:text-slate-400 font-medium text-[10px] md:text-sm mt-1 leading-relaxed">Conectando talentos às maiores empresas de Angola.</p>
         </div>
         <div className="relative w-full md:w-80">
           <input
@@ -324,7 +324,7 @@ export const JobsPage: React.FC<JobsPageProps> = ({
       </div>
 
       {/* PROVINCE & URGENCY FILTERS */}
-      <div className="flex overflow-x-auto gap-2 pb-2 scrollbar-none no-scrollbar -mx-4 px-4">
+      <div className="scroll-x-touch flex flex-nowrap-shrink-0 gap-2 pb-4 -mx-4 px-4">
         {PROVINCES.map((province) => (
           <button
             key={province}
@@ -384,14 +384,14 @@ export const JobsPage: React.FC<JobsPageProps> = ({
           {filteredJobs.length > 0 ? (
             filteredJobs.map((job, index) => (
               <React.Fragment key={job.id}>
-                <div onClick={() => handleOpenDetails(job)} className="bg-white dark:bg-slate-900 p-6 rounded-[2.5rem] shadow-sm border border-orange-500/10 hover:border-orange-500/50 transition-all cursor-pointer group flex flex-col h-full hover:shadow-xl hover:-translate-y-1 relative group">
-                  <div className="flex items-start gap-4 mb-4">
+                <div onClick={() => handleOpenDetails(job)} className="bg-white dark:bg-slate-900 p-6 rounded-[2.5rem] shadow-sm border border-orange-500/10 hover:border-orange-500/50 transition-all cursor-pointer group flex flex-col h-full hover:shadow-xl hover:-translate-y-1 relative group overflow-hidden">
+                  <div className="flex flex-col min-[320px]:flex-row items-start gap-4 mb-4 stack-narrow">
                     <JobLogo src={job.imageUrl} company={job.company} category={job.category} size={60} />
-                    <div className="flex-1 min-w-0 pt-1">
-                      <div className="flex items-center gap-1.5 mb-1">
+                    <div className="flex-1 min-w-0 pt-1 w-full md:w-auto">
+                      <div className="flex flex-wrap items-center gap-1.5 mb-1">
                           <h3 className="font-black text-slate-900 dark:text-white leading-tight group-hover:text-orange-500 transition-colors line-clamp-2 uppercase text-sm">{job.title}</h3>
                           {job.isVerified && (
-                            <div className="flex items-center gap-1.5 px-2 py-0.5 bg-amber-500/10 rounded-lg border border-amber-500/20">
+                            <div className="flex items-center gap-1.5 px-2 py-0.5 bg-amber-500/10 rounded-lg border border-amber-500/20 shrink-0">
                                <ShieldCheck size={14} className="text-amber-500" fill="currentColor" fillOpacity={0.2} />
                                <span className="text-[8px] font-black text-amber-600 uppercase tracking-tighter">
                                  {job.source ? `Via ${job.source}` : 'Verificada'}
@@ -403,7 +403,7 @@ export const JobsPage: React.FC<JobsPageProps> = ({
                     </div>
                   </div>
                   
-                  <div className="flex flex-wrap gap-2 mb-4 flex-1">
+                  <div className="flex flex-wrap gap-2 mb-4 flex-1 items-start">
                     <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-white/5 text-[9px] font-black uppercase tracking-tight text-slate-500 border border-slate-200/50 dark:border-white/5">
                       <MapPin size={12} className="text-orange-500" />
                       {job.location}
