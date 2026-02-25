@@ -101,6 +101,7 @@ export const LegalModals: React.FC<LegalModalsProps> = ({ isOpen, onClose, type 
         <div className="p-6 md:p-8 pb-4 flex flex-col items-center text-center relative border-b border-orange-500/10">
           <button
             onClick={onClose}
+            aria-label="Fechar"
             className="absolute top-4 right-4 text-slate-400 hover:text-orange-500 transition-colors p-2"
           >
             <X size={24} />
