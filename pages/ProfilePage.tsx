@@ -3,6 +3,7 @@ import { User, Briefcase, Tag, Camera, Award, Share2, MessageCircle, CheckCircle
 import { UserProfile } from '../types';
 import { NotificationService } from '../services/notificationService';
 import { SupabaseService } from '../services/supabaseService';
+import { APP_CONFIG } from '../constants';
 
 interface ProfilePageProps {
   user: UserProfile;
@@ -55,7 +56,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onLogout }) => {
 
   const handleClaimAdReward = () => {
     const message = `Olá Su-Golden! Sou um Embaixador Angolife (${user.email}). Desafio concluído!`;
-    window.open(`https://wa.me/244900000000?text=${encodeURIComponent(message)}`, '_blank');
+    window.open(`https://wa.me/${APP_CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   return (

@@ -4,6 +4,7 @@ import { ArrowRight, Briefcase, ShoppingBag, DollarSign, ChevronRight, MessageCi
 import { SupabaseService } from '../services/supabaseService';
 import { GeminiService } from '../services/gemini';
 import { ExchangeRate, Job, ProductDeal } from '../types';
+import { APP_CONFIG } from '../constants';
 
 interface HomePageProps {
   onNavigate: (page: any) => void;
@@ -65,7 +66,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   }, []);
 
   const handleWhatsAppContact = () => {
-    const phone = "244900000000"; 
+    const phone = APP_CONFIG.WHATSAPP_NUMBER; 
     const message = "Olá! Gostaria de saber mais sobre as opções de publicidade premium no Angolife para o meu negócio.";
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
   };

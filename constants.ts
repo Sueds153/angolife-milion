@@ -1,0 +1,14 @@
+
+export const APP_CONFIG = {
+  WHATSAPP_NUMBER: "244921967122",
+  OPERATIONAL_HOURS: {
+    START: 8,
+    END: 22
+  },
+  BANK_DETAILS: {
+    ENTITY: "10116",
+    REFERENCE: "921 967 112",
+    BINANCE_PAY_ID: "821967221",
+    WISE_PAYPAL_EMAIL: "info@angolife.site"
+  }
+};
