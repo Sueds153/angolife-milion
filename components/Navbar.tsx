@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Menu, X, Briefcase, DollarSign, Tag, Newspaper, UserCog, Sun, Moon, Home, LogOut, User, LogIn, UserPlus, FileText } from 'lucide-react';
+import { Menu, X, Briefcase, DollarSign, Tag, Newspaper, UserCog, Sun, Moon, Home, LogOut, User, LogIn, UserPlus, FileText, ShieldCheck, Lock } from 'lucide-react';
 
 interface NavbarProps {
   currentPage: string;
@@ -11,6 +11,7 @@ interface NavbarProps {
   isAdmin: boolean;
   onOpenAuth: (mode: 'login' | 'register') => void;
   onLogout: () => void;
+  onOpenLegal: (type: 'privacy' | 'terms' | 'data') => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -21,7 +22,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   isAuthenticated,
   isAdmin,
   onOpenAuth,
-  onLogout
+  onLogout,
+  onOpenLegal
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -193,6 +195,34 @@ export const Navbar: React.FC<NavbarProps> = ({
                     </button>
                   </div>
                 )}
+              </div>
+
+              {/* Mobile Legal & Apoio Section */}
+              <div className="pt-6 mt-6 border-t border-orange-500/20">
+                <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 px-5">Legal & Apoio</h4>
+                <div className="space-y-1">
+                  <button
+                    onClick={() => { onOpenLegal('privacy'); setIsOpen(false); }}
+                    className="flex items-center space-x-4 w-full px-5 py-3 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5 transition-all"
+                  >
+                    <ShieldCheck size={18} />
+                    <span>Privacidade</span>
+                  </button>
+                  <button
+                    onClick={() => { onOpenLegal('terms'); setIsOpen(false); }}
+                    className="flex items-center space-x-4 w-full px-5 py-3 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5 transition-all"
+                  >
+                    <FileText size={18} />
+                    <span>Termos de Uso</span>
+                  </button>
+                  <button
+                    onClick={() => { onOpenLegal('data'); setIsOpen(false); }}
+                    className="flex items-center space-x-4 w-full px-5 py-3 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5 transition-all"
+                  >
+                    <Lock size={18} />
+                    <span>Dados Pessoais</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>

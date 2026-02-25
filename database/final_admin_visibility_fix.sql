@@ -12,7 +12,9 @@ CREATE OR REPLACE FUNCTION public.check_is_admin() RETURNS boolean AS $$ BEGIN R
             AND is_admin = true
     );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public,
+    pg_temp;
 -- B. Ensure structural integrity and Admin Status
 DO $$ BEGIN IF NOT EXISTS (
     SELECT 1

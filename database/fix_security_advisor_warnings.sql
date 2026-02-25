@@ -5,7 +5,8 @@
 -- 1. Fix: Function Search Path Mutable
 -- Secures the admin check function to prevent potentially malicious search path hijacking.
 ALTER FUNCTION public.check_is_admin()
-SET search_path = public;
+SET search_path = public,
+    pg_temp;
 -- 2. Fix: RLS Disabled in Public / Policy exists RLS Disabled
 -- Ensure Row Level Security is truly enabled for the pending subscriptions table.
 ALTER TABLE public.subscriptions_pending ENABLE ROW LEVEL SECURITY;

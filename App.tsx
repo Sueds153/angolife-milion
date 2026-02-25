@@ -19,7 +19,8 @@ import { NotificationToast } from './components/NotificationToast';
 import { NotificationService } from './services/notificationService';
 import { SupabaseService } from './services/supabaseService';
 import { UserProfile, AppNotification, ProductDeal } from './types';
-import { Home, Briefcase, DollarSign, Tag, Newspaper, FileText } from 'lucide-react'; // Added FileText
+import { Home, Briefcase, DollarSign, Tag, Newspaper, FileText, ShieldCheck } from 'lucide-react'; // Added FileText, ShieldCheck
+import { LegalModals } from './components/LegalModals';
 
 type Page = 'home' | 'jobs' | 'exchange' | 'deals' | 'news' | 'admin' | 'profile' | 'cv-builder';
 
@@ -183,6 +184,15 @@ const App: React.FC = () => {
   // Notification State
   const [activeNotification, setActiveNotification] = useState<AppNotification | null>(null);
 
+  // Legal Modals State
+  const [showLegalModal, setShowLegalModal] = useState<boolean>(false);
+  const [legalModalType, setLegalModalType] = useState<'privacy' | 'terms' | 'data'>('terms');
+
+  const openLegalModal = (type: 'privacy' | 'terms' | 'data') => {
+    setLegalModalType(type);
+    setShowLegalModal(true);
+  };
+
 
   const handleLoginSuccess = (email: string) => {
     // With real auth, the onAuthStateChange listener will detect the login 
@@ -343,6 +353,7 @@ const App: React.FC = () => {
           isAdmin={user?.isAdmin || false}
           onOpenAuth={(mode) => { setAuthMode(mode); setIsAuthModalOpen(true); }}
           onLogout={() => setUser(null)}
+          onOpenLegal={openLegalModal}
         />
 
         <main className="flex-grow flex flex-col pt-safe">
@@ -350,7 +361,7 @@ const App: React.FC = () => {
             {renderPage()}
           </div>
 
-          <div className="print:hidden"><Footer onNavigate={handleNavigate} /></div>
+          <div className="print:hidden"><Footer onNavigate={handleNavigate} onOpenLegal={openLegalModal} /></div>
 
           {/* Spacer for mobile bottom navigation */}
           <div className={`${showStickyAd ? 'h-[110px]' : 'h-[75px]'} bg-transparent md:hidden lg:hidden print:hidden`}></div>
@@ -420,6 +431,12 @@ const App: React.FC = () => {
           onClose={() => { setShowRewarded(false); onAdCancel?.(); }}
         />
       )}
+
+      <LegalModals
+        isOpen={showLegalModal}
+        onClose={() => setShowLegalModal(false)}
+        type={legalModalType}
+      />
     </div>
   );
 };

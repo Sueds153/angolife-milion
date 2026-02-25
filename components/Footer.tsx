@@ -4,9 +4,10 @@ import { Share2, ShieldCheck, FileText, ChevronRight, Lock } from 'lucide-react'
 
 interface FooterProps {
   onNavigate: (page: any) => void;
+  onOpenLegal: (type: 'privacy' | 'terms' | 'data') => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
+export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenLegal }) => {
   const handleShareApp = async () => {
     const shareData = {
       title: 'Angolife Su-Golden',
@@ -76,13 +77,22 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               Legal & Apoio
             </h4>
             <div className="flex flex-col space-y-3">
-              <button className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors text-xs font-medium w-fit">
+              <button
+                onClick={() => onOpenLegal('privacy')}
+                className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors text-xs font-medium w-fit"
+              >
                 <ShieldCheck size={14} /> Privacidade
               </button>
-              <button className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors text-xs font-medium w-fit">
+              <button
+                onClick={() => onOpenLegal('terms')}
+                className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors text-xs font-medium w-fit"
+              >
                 <FileText size={14} /> Termos de Uso
               </button>
-              <button className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors text-xs font-medium w-fit">
+              <button
+                onClick={() => onOpenLegal('data')}
+                className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors text-xs font-medium w-fit"
+              >
                 <Lock size={14} /> Dados Pessoais
               </button>
             </div>
