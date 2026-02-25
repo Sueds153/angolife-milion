@@ -198,11 +198,17 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
   };
 
   const loadPendingJobs = async () => {
-    setLoading(true);
-    const data = await SupabaseService.getPendingJobs();
-    console.log('🔍 [Admin/Jobs] Dados Recebidos:', data);
-    setPendingJobs(data);
-    setLoading(false);
+    try {
+      setLoading(true);
+      const data = await SupabaseService.getPendingJobs();
+      console.log('🔍 [Admin/Jobs] Dados Recebidos:', data);
+      setPendingJobs(data);
+    } catch (error) {
+      console.error('❌ [Admin/Jobs] Erro crítico ao carregar vagas:', error);
+      alert('Erro inesperado ao carregar vagas pendentes.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleApprove = async (id: string) => {
@@ -220,10 +226,17 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
   };
 
   const loadPendingDeals = async () => {
-    setLoading(true);
-    const data = await SupabaseService.getPendingDeals();
-    setPendingDeals(data);
-    setLoading(false);
+    try {
+      setLoading(true);
+      const data = await SupabaseService.getPendingDeals();
+      console.log('🔍 [Admin/Deals] Dados Recebidos:', data);
+      setPendingDeals(data);
+    } catch (error) {
+      console.error('❌ [Admin/Deals] Erro crítico ao carregar descontos:', error);
+      alert('Erro inesperado ao carregar descontos pendentes.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleApproveDeal = async (id: string, dealToApprove?: ProductDeal) => {
@@ -337,38 +350,57 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
   };
 
   const loadPendingNews = async () => {
-    setLoading(true);
-    const data = await SupabaseService.getPendingNews();
-    console.log('🔍 [Admin/News] Dados Recebidos:', data);
-    setPendingNews(data);
-    setLoading(false);
+    try {
+      setLoading(true);
+      const data = await SupabaseService.getPendingNews();
+      console.log('🔍 [Admin/News] Dados Recebidos:', data);
+      setPendingNews(data);
+    } catch (error) {
+      console.error('❌ [Admin/News] Erro crítico ao carregar notícias:', error);
+      alert('Erro inesperado ao carregar notícias pendentes.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleApproveNews = async (id: string) => {
-    setLoading(true);
-    console.log('✅ Tentando aprovar notícia:', id);
-    const success = await SupabaseService.approveNews(id, true);
-    if (success) {
-      setPendingNews(prev => prev.filter(news => news.id !== id));
-      alert('Notícia publicada com sucesso na AngoLife!');
-    } else {
-      alert('Erro ao publicar notícia.');
+    try {
+      setLoading(true);
+      console.log('✅ Tentando aprovar notícia:', id);
+      const result = await SupabaseService.approveNews(id, true);
+      if (result.success) {
+        setPendingNews(prev => prev.filter(news => news.id !== id));
+        // Apenas Toast no futuro, por agora alert discreto
+        console.log('Notícia publicada com sucesso!');
+      } else {
+        alert('Erro ao publicar: ' + (result.error || 'Erro desconhecido'));
+      }
+    } catch (err) {
+      console.error('Erro na aprovação:', err);
+      alert('Falha na comunicação com o servidor.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleApproveAllNews = async () => {
     if (!confirm(`Deseja publicar TODAS as ${pendingNews.length} notícias pendentes?`)) return;
-    setLoading(true);
-    const success = await SupabaseService.approveAllNews();
-    if (success) {
-      setPendingNews([]);
-      alert('Todas as notícias foram publicadas com sucesso!');
-    } else {
-      alert('Erro ao publicar todas as notícias.');
-      loadPendingNews();
+    try {
+      setLoading(true);
+      const result = await SupabaseService.approveAllNews();
+      if (result.success) {
+        setPendingNews([]);
+        alert('Todas as notícias foram publicadas com sucesso!');
+      } else {
+        alert('Erro ao publicar todas: ' + (result.error || 'Erro desconhecido'));
+        loadPendingNews();
+      }
+    } catch (err) {
+      console.error('Erro na aprovação em massa:', err);
+      alert('Falha na comunicação com o servidor.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleRejectNews = async (id: string) => {

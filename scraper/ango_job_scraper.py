@@ -112,39 +112,39 @@ CATEGORY_MAP = {
 # 1-2: HTML Estático (Leve) | 3-6: Dinâmicos | 7-8: Pesados (LinkedIn/JS)
 # ─────────────────────────────────────────────────────────────────────────
 JOBS_CONFIG: Dict[str, dict] = {
-    "Portal de Emprego": {
-        "base_url": "https://portaldeemprego.ao",
-        "list_url": "https://portaldeemprego.ao/vagas/",
-        "job_card_selector": ".job-item, .post",
-        "title_selector": "h2, .job-title",
-        "company_selector": ".job-company",
-        "location_selector": ".job-location",
+    "Contrata.ao": {
+        "base_url": "https://contrata.ao",
+        "list_url": "https://contrata.ao/vagas",
+        "job_card_selector": ".job-item, .card-grid, .post",
+        "title_selector": "h3, h2, .title",
+        "company_selector": ".company, .employer",
+        "location_selector": ".location",
         "link_selector": "a",
         "detail_enabled": True,
-        "detail_description_selector": ".job-description, .entry-content",
-        "detail_requirements_selector": ".job-requirements, .entry-content ul",
+        "detail_description_selector": ".description, .content",
+        "detail_requirements_selector": ".requirements",
         "request_delay_range": (1, 3),
     },
     "Ango Emprego": {
         "base_url": "https://angoemprego.com",
         "list_url": "https://angoemprego.com",
-        "job_card_selector": "article, .job-listing",
-        "title_selector": "h3, .title",
-        "company_selector": ".company, strong",
+        "job_card_selector": "li.job_listing, .job-container",
+        "title_selector": "h3",
+        "company_selector": ".company",
         "location_selector": ".location",
         "link_selector": "a",
         "detail_enabled": True,
-        "detail_description_selector": ".job_description, .entry-content",
+        "detail_description_selector": ".job_description",
         "detail_requirements_selector": ".entry-content ul",
         "request_delay_range": (1, 3),
     },
     "AngoVagas": {
         "base_url": "https://angovagas.net",
         "list_url": "https://angovagas.net",
-        "job_card_selector": "article.post",
-        "title_selector": "h2.entry-title",
-        "company_selector": ".author",
-        "location_selector": ".entry-meta",
+        "job_card_selector": "article.l-post, .post-meta",
+        "title_selector": "h2.post-title",
+        "company_selector": ".author, .company",
+        "location_selector": ".post-date",
         "link_selector": "a",
         "detail_enabled": True,
         "detail_description_selector": ".entry-content",
@@ -167,43 +167,43 @@ JOBS_CONFIG: Dict[str, dict] = {
         "request_delay_range": (3, 5),
     },
     "Emprega Angola": {
-        "base_url": "https://empregaangola.com",
-        "list_url": "https://empregaangola.com/vagas",
-        "job_card_selector": ".job-card, .vaga-item",
-        "title_selector": "h3, .title",
+        "base_url": "https://empregangola.com",
+        "list_url": "https://empregangola.com/vagas",
+        "job_card_selector": "article.blog-post-default",
+        "title_selector": "h2.entry-title",
         "company_selector": ".company-name",
         "location_selector": ".location",
         "link_selector": "a",
         "detail_enabled": True,
-        "detail_description_selector": ".job-description, #description",
+        "detail_description_selector": ".entry-content",
         "detail_requirements_selector": ".requirements, #requirements",
         "request_delay_range": (3, 5),
     },
     "Jobartis": {
         "base_url": "https://www.jobartis.com",
-        "list_url": "https://www.jobartis.com/pt/empregos-em-angola",
-        "job_card_selector": ".job-item, article",
-        "title_selector": "h3, .title",
-        "company_selector": ".company",
-        "location_selector": ".location",
+        "list_url": "https://www.jobartis.com/vagas-emprego/luanda",
+        "job_card_selector": "article, .thumbnail-card",
+        "title_selector": "h2",
+        "company_selector": "h5",
+        "location_selector": "li",
         "link_selector": "a",
         "detail_enabled": True,
         "detail_description_selector": ".job-description",
         "detail_requirements_selector": ".job-requirements",
         "request_delay_range": (3, 6),
     },
-    "AngoJob": {
-        "base_url": "https://angojob.net",
-        "list_url": "https://angojob.net/vagas-recentes/",
-        "job_card_selector": "article, .post",
-        "title_selector": "h2, h3",
-        "company_selector": ".company, strong",
-        "location_selector": ".location",
+    "VerAngola": {
+        "base_url": "https://www.verangola.net",
+        "list_url": "https://www.verangola.net/va/pt/emprego/",
+        "job_card_selector": ".card-type-news, .card",
+        "title_selector": "h2.card-title",
+        "company_selector": ".card-author, .company",
+        "location_selector": ".card-section",
         "link_selector": "a",
         "detail_enabled": True,
-        "detail_description_selector": ".entry-content",
+        "detail_description_selector": ".card-deck, .article-content",
         "detail_requirements_selector": None,
-        "request_delay_range": (2, 4),
+        "request_delay_range": (3, 6),
     },
     "LinkedIn": {
         "base_url": "https://www.linkedin.com",
@@ -287,7 +287,7 @@ class AngoJobScraper:
         ),
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
         "Accept-Language": "pt-AO,pt;q=0.9,en-US;q=0.8,en;q=0.7",
-        "Accept-Encoding": "gzip, deflate, br",
+        "Accept-Encoding": "gzip, deflate",
         "Connection": "keep-alive",
         "Referer": "https://www.google.com/",
         "Cache-Control": "no-cache",
@@ -330,11 +330,15 @@ class AngoJobScraper:
 
     def _fetch(self, url: str, extra_headers: dict = None) -> Optional[BeautifulSoup]:
         """Faz o request e retorna BeautifulSoup, ou None se falhar."""
-        headers = {}
-        if extra_headers:
-            headers.update(extra_headers)
         try:
-            resp = self.session.get(url, headers=headers, timeout=20)
+            # Mescla headers se extra_headers for fornecido
+            headers = self.session.headers.copy()
+            if extra_headers:
+                headers.update(extra_headers)
+                
+            resp = self.session.get(url, headers=headers, timeout=45)
+            # log.debug(f"Fetch {url} - Status: {resp.status_code} - KB: {len(resp.text)/1024:.1f}")
+            
             resp.raise_for_status()
             resp.encoding = resp.apparent_encoding or "utf-8"
             return BeautifulSoup(resp.text, "html.parser")
@@ -462,7 +466,10 @@ class AngoJobScraper:
                         raw_url = link_tag.get("href", "") if link_tag else ""
                         job_url = self._normalize_url(raw_url, cfg["base_url"])
                         
-                        if not job_url or job_url in processed_links_per_site[site_name]:
+                        if not job_url:
+                            continue
+                        if job_url in processed_links_per_site[site_name]:
+                            log.debug(f"  ⏭️  Link já visto neste ciclo: {job_url}")
                             continue
                         
                         processed_links_per_site[site_name].add(job_url)
@@ -512,6 +519,7 @@ class AngoJobScraper:
             if not company: company = "Empresa Confidencial"
 
             if not title or not company:
+                log.warning(f"  ⏭️  Card sem título ou empresa em {site_name}")
                 return False
 
             # 3. Localização

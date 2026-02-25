@@ -89,9 +89,9 @@ SITES_CONFIG: Dict[str, dict] = {
     # Foco em Economia. Estrutura baseada em artigos padrão WordPress.
     "Expansão": {
         "base_url": "https://www.expansao.co.ao",
-        "list_url": "https://www.expansao.co.ao/economia.html",
+        "list_url": "https://www.expansao.co.ao/economia/ultimas.html",
         "article_selector": "h3, article, .detalhe, .K2Teaser",
-        "title_selector": "h1, h2, h3, a",
+        "title_selector": "a",
         "link_selector": "a",
         "fixed_category": "Economia",
     },
@@ -101,18 +101,18 @@ SITES_CONFIG: Dict[str, dict] = {
     "Jornal de Angola": {
         "base_url": "https://www.jornaldeangola.ao",
         "list_url": "https://www.jornaldeangola.ao/ao/noticias/",
-        "article_selector": "article, .news-card, .td-module-container, .post-item, .list-news-item",
-        "title_selector": "h1, h2, h3, h4, .title, .entry-title, .td-module-title, a",
+        "article_selector": "h3, .title, .news-card, .td-module-title",
+        "title_selector": "a",
         "link_selector": "a",
         "fixed_category": "Angola",
     },
 
     # ── 3. TPA (Televisão Pública de Angola) ──────────────────────────────
     "TPA": {
-        "base_url": "https://www.tpa.ao",
-        "list_url": "https://www.tpa.ao/noticias",
-        "article_selector": "article, .news-item, .post, a[href*='/noticias/']",
-        "title_selector": "h1, h2, h3, .post-title, .entry-title, .",
+        "base_url": "https://tpaonline.ao",
+        "list_url": "https://tpaonline.ao/category/noticias/",
+        "article_selector": "article, .post, .entry, a[href*='/detalhe/']",
+        "title_selector": "h2, h3, .title",
         "link_selector": "a",
         "fixed_category": "Oficial",
         "verify_ssl": False,
@@ -120,10 +120,10 @@ SITES_CONFIG: Dict[str, dict] = {
 
     # ── 4. TV GIRASSOL ────────────────────────────────────────────────────
     "TV Girassol": {
-        "base_url": "https://www.tvgirassol.com",
-        "list_url": "https://www.tvgirassol.com/noticias",
-        "article_selector": "article, .news-card, .jeg_post, a[href*='/noticias/']",
-        "title_selector": "h1, h2, h3, .jeg_post_title, .post-title, .",
+        "base_url": "https://redegirassol.com",
+        "list_url": "https://redegirassol.com/giranoticia/",
+        "article_selector": "article, .post, .jeg_post, .news-item",
+        "title_selector": "h2, h3, .jeg_post_title",
         "link_selector": "a",
         "fixed_category": "Oficial",
     },
@@ -133,7 +133,7 @@ SITES_CONFIG: Dict[str, dict] = {
         "base_url": "https://www.angop.ao",
         "list_url": "https://www.angop.ao/angola/pt_pt/noticias/",
         "article_selector": ".news_item, article, .item, a[href*='/noticias/']",
-        "title_selector": "h1, h2, h3, .item-title, .news-title, .",
+        "title_selector": "h3, h2, .item-title, .news-title",
         "link_selector": "a",
         "fixed_category": "Urgente",
         "referer": "https://www.google.com/",
@@ -164,10 +164,10 @@ SITES_CONFIG: Dict[str, dict] = {
 
     # ── 10. XÉ ANGOLA ────────────────────────────────────────────────────
     "Xé Angola": {
-        "base_url": "https://www.xe-angola.com",
-        "list_url": "https://www.xe-angola.com/category/noticias/",
-        "article_selector": "article, .post, .jeg_post, a[href*='/noticias/']",
-        "title_selector": "h1, h2, h3, .entry-title, .jeg_post_title, .",
+        "base_url": "https://xaa.ao",
+        "list_url": "https://xaa.ao/category/noticias/",
+        "article_selector": ".post, article, .jeg_post",
+        "title_selector": "h3, h2, .entry-title, .jeg_post_title",
         "link_selector": "a",
         "fixed_category": "Sociedade",
     },
@@ -254,9 +254,15 @@ class AngoNewsScraper:
                 "AppleWebKit/537.36 (KHTML, like Gecko) "
                 "Chrome/122.0.0.0 Safari/537.36"
             ),
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Accept-Language": "pt-AO,pt;q=0.9,en;q=0.8",
-            "Accept-Encoding": "gzip, deflate",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+            "Accept-Language": "pt-PT,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Upgrade-Insecure-Requests": "1",
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+            "Sec-Fetch-User": "?1",
+            "Cache-Control": "max-age=0",
             "Connection": "keep-alive",
         })
         self.stats = {"processed": 0, "saved": 0, "skipped_dup": 0, "errors": 0}
