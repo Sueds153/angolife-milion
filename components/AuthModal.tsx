@@ -8,9 +8,10 @@ interface AuthModalProps {
   onClose: () => void;
   onLogin: (email: string) => void;
   initialMode?: 'login' | 'register';
+  onOpenLegal: (type: 'privacy' | 'terms' | 'data') => void;
 }
 
-export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, initialMode = 'login' }) => {
+export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, onOpenLegal, initialMode = 'login' }) => {
   const [isRegister, setIsRegister] = useState(initialMode === 'register');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -18,6 +19,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, 
   const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   useEffect(() => {
     setIsRegister(initialMode === 'register');
@@ -25,6 +27,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, 
     setErrorMsg('');
     setFullName('');
     setIsLoading(false);
+    setTermsAccepted(false);
   }, [initialMode, isOpen]);
 
   if (!isOpen) return null;
@@ -41,6 +44,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setErrorMsg('Por favor, insira um e-mail válido.');
+      return;
+    }
+
+    if (isRegister && !termsAccepted) {
+      setErrorMsg('Deves aceitar os Termos e a Política de Privacidade.');
       return;
     }
 
@@ -203,6 +211,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, 
               </div>
             )}
           </div>
+
+          {isRegister && (
+            <div className="flex items-start gap-3 p-3 bg-slate-50 dark:bg-white/5 rounded-xl border border-orange-500/10 animate-fade-in group cursor-pointer" onClick={() => setTermsAccepted(!termsAccepted)}>
+              <div className={`mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center transition-all ${termsAccepted ? 'bg-orange-500 border-orange-500 shadow-lg shadow-orange-500/20' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800'}`}>
+                {termsAccepted && <div className="w-2.5 h-2.5 bg-white rounded-[2px]" />}
+              </div>
+              <div className="flex-grow">
+                <p className="text-[10px] md:text-xs font-bold text-slate-600 dark:text-slate-400 leading-tight">
+                  Aceito os <button type="button" onClick={(e) => { e.stopPropagation(); onOpenLegal('terms'); }} className="text-orange-500 hover:underline">Termos de Uso</button> e a <button type="button" onClick={(e) => { e.stopPropagation(); onOpenLegal('privacy'); }} className="text-orange-500 hover:underline">Política de Privacidade</button>.
+                </p>
+              </div>
+            </div>
+          )}
 
           <button
             type="submit"

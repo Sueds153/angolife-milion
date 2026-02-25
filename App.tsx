@@ -405,6 +405,7 @@ const App: React.FC = () => {
         onClose={() => setIsAuthModalOpen(false)}
         onLogin={handleLoginSuccess}
         initialMode={authMode}
+        onOpenLegal={openLegalModal}
       />
 
       {showInterstitial && (
