@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, Lock, Mail, User, ArrowRight, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { X, Lock, Mail, User, ArrowRight, Eye, EyeOff, Loader2, Tag } from 'lucide-react';
 import { SupabaseService } from '../services/supabaseService';
 
 interface AuthModalProps {
@@ -20,6 +20,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, 
   const [errorMsg, setErrorMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [invitedBy, setInvitedBy] = useState('');
 
   useEffect(() => {
     setIsRegister(initialMode === 'register');
@@ -28,6 +29,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, 
     setFullName('');
     setIsLoading(false);
     setTermsAccepted(false);
+    setInvitedBy('');
   }, [initialMode, isOpen]);
 
   if (!isOpen) return null;
@@ -56,7 +58,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, 
 
     try {
       if (isRegister) {
-        const { error } = await SupabaseService.auth.signUp(email, password, fullName);
+        const { error } = await SupabaseService.auth.signUp(email, password, fullName, invitedBy);
         if (error) {
           if (error.message.toLowerCase().includes('rate limit')) {
             setErrorMsg('Limite de tentativas excedido. Por favor, aguarde uns minutos ou desative a Confirmação de Email no Supabase.');
@@ -138,21 +140,40 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, 
           )}
 
           {isRegister && (
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-slate-700 dark:text-slate-300 ml-1 uppercase tracking-widest text-[10px] font-bold">Nome Completo</label>
-              <div className="relative">
-                <User size={18} className="absolute left-3 top-2.5 text-slate-400" />
-                <input
-                  type="text"
-                  required={isRegister}
-                  value={fullName}
-                  onChange={(e) => {
-                    setFullName(e.target.value);
-                    setErrorMsg('');
-                  }}
-                  className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-800 border border-orange-500/20 rounded-lg focus:ring-2 focus:ring-orange-500/20 outline-none text-slate-900 dark:text-white placeholder:text-slate-400 transition-all font-medium"
-                  placeholder="Seu nome"
-                />
+            <div className="space-y-4 pt-2 border-t border-orange-500/10">
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-slate-700 dark:text-slate-300 ml-1 uppercase tracking-widest text-[10px] font-bold">Nome Completo</label>
+                <div className="relative">
+                  <User size={18} className="absolute left-3 top-2.5 text-slate-400" />
+                  <input
+                    type="text"
+                    required={isRegister}
+                    value={fullName}
+                    onChange={(e) => {
+                      setFullName(e.target.value);
+                      setErrorMsg('');
+                    }}
+                    className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-800 border border-orange-500/20 rounded-lg focus:ring-2 focus:ring-orange-500/20 outline-none text-slate-900 dark:text-white placeholder:text-slate-400 transition-all font-medium"
+                    placeholder="Seu nome"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex justify-between items-center">
+                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300 ml-1 uppercase tracking-widest text-[10px] font-bold">Código de Convite</label>
+                  <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest bg-slate-100 dark:bg-white/5 px-2 py-0.5 rounded">Opcional</span>
+                </div>
+                <div className="relative">
+                  <Tag size={18} className="absolute left-3 top-2.5 text-slate-400" />
+                  <input
+                    type="text"
+                    value={invitedBy}
+                    onChange={(e) => setInvitedBy(e.target.value.toUpperCase())}
+                    className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-800 border border-orange-500/20 rounded-lg focus:ring-2 focus:ring-orange-500/20 outline-none text-slate-900 dark:text-white placeholder:text-slate-400 transition-all font-medium uppercase font-mono tracking-wider"
+                    placeholder="ANGO-XXXXXX"
+                  />
+                </div>
               </div>
             </div>
           )}

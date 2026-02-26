@@ -10,7 +10,7 @@ export interface Job {
   requirements: string[];
   sourceUrl?: string;
   applicationEmail?: string;
-  status: "pending" | "published";
+  status: "pending" | "published" | "approved" | "rejected";
   isVerified?: boolean;
   imageUrl?: string;
   category?: string;
@@ -62,7 +62,7 @@ export interface NewsArticle {
   url: string;
   category: string;
   publishedAt: string;
-  status: "pending" | "published";
+  status: "pending" | "published" | "approved" | "rejected";
   imageUrl?: string;
 }
 
@@ -77,6 +77,12 @@ export interface UserProfile {
   premiumExpiry?: number; // Timestamp
   subscriptionType?: "pack3" | "monthly" | "yearly";
   accountType?: "free" | "premium";
+  fullName?: string;
+  phone?: string;
+  location?: string;
+  savedJobs?: string[]; // IDs das vagas guardadas
+  applicationHistory?: { jobId: string, date: string, title: string }[];
+  cvHistory?: { id: string, date: string, url: string, name: string }[];
 }
 
 export interface AppNotification {

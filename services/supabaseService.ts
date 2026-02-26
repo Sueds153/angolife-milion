@@ -13,10 +13,28 @@ export const SupabaseService = {
   },
 
   getSupabaseInstance: () => supabase,
+  
+  mapStatus: (status: string | undefined): "pending" | "published" | "approved" | "rejected" => {
+    if (!status) return "pending";
+    const s = status.toLowerCase();
+    
+    // Published/Publicado/Approved/Aprovado/Premium -> published (or approved for deals)
+    if (s === "publicado" || s === "published" || s === "aprovado" || s === "approved" || s === "premium" || s === "ativo" || s === "active") {
+      return "published";
+    }
+    
+    // Rejected/Rejeitado -> rejected
+    if (s === "rejeitado" || s === "rejected") {
+      return "rejected";
+    }
+    
+    // Default to pending (aguardando, pending, pendente)
+    return "pending";
+  },
 
   // --- AUTHENTICATION ---
   auth: {
-    signUp: async (email: string, password: string, fullName: string) => {
+    signUp: async (email: string, password: string, fullName: string, invitedBy?: string) => {
       // Create user
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -24,6 +42,7 @@ export const SupabaseService = {
         options: {
           data: {
             full_name: fullName,
+            invited_by: invitedBy,
           },
         },
       });
@@ -49,6 +68,14 @@ export const SupabaseService = {
         .select("*")
         .eq("id", userId)
         .single();
+      return { data, error };
+    },
+
+    updateProfile: async (userId: string, updates: any) => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .update(updates)
+        .eq("id", userId);
       return { data, error };
     },
 
@@ -142,6 +169,7 @@ export const SupabaseService = {
     }
 
     return data.map((d: any) => ({
+      ...d,
       id: d.id,
       title: d.title,
       store: d.store,
@@ -152,7 +180,7 @@ export const SupabaseService = {
       imagePlaceholder: d.image_placeholder,
       url: d.url,
       category: d.category,
-      status: d.status,
+      status: SupabaseService.mapStatus(d.status) === "published" ? "approved" : (SupabaseService.mapStatus(d.status) as any),
       submittedBy: d.submitted_by,
       createdAt: d.created_at,
     }));
@@ -174,6 +202,7 @@ export const SupabaseService = {
     console.log("📦 [Supabase] Pending Deals count:", data?.length || 0);
 
     return data.map((d: any) => ({
+      ...d,
       id: d.id,
       title: d.title,
       store: d.store,
@@ -184,7 +213,7 @@ export const SupabaseService = {
       imagePlaceholder: d.image_placeholder,
       url: d.url,
       category: d.category,
-      status: d.status,
+      status: "pending",
       submittedBy: d.submitted_by,
       createdAt: d.created_at,
     }));
@@ -248,7 +277,7 @@ export const SupabaseService = {
       imageUrl: data.image_url,
       url: data.url,
       category: data.category,
-      status: data.status,
+      status: SupabaseService.mapStatus(data.status) === "published" ? "approved" : (SupabaseService.mapStatus(data.status) as any),
       submittedBy: data.submitted_by,
       createdAt: data.created_at,
       views: data.views ?? 0,
@@ -333,7 +362,7 @@ export const SupabaseService = {
       requirements: j.requirements || [],
       sourceUrl: j.source_url,
       applicationEmail: j.application_email,
-      status: j.status,
+      status: SupabaseService.mapStatus(j.status) as any,
       imageUrl: j.imagem_url,
       category: j.categoria,
       source: j.fonte,
@@ -369,17 +398,11 @@ export const SupabaseService = {
       requirements: j.requirements || [],
       sourceUrl: j.source_url,
       applicationEmail: j.application_email,
-      // Normalize from DB (publicado/published/pendente/pending) to Frontend (published/pending)
-      status:
-        j.status?.toLowerCase() === "publicado" ||
-        j.status?.toLowerCase() === "published" ||
-        j.status?.toLowerCase() === "aprovado"
-          ? "published"
-          : "pending",
+      status: SupabaseService.mapStatus(j.status) as any,
       imageUrl: j.imagem_url,
       category: j.categoria,
       source: j.fonte,
-      isVerified: j.is_verified, // Map the snake_case field from DB to camelCase
+      isVerified: j.is_verified, 
     }));
   },
 
@@ -531,11 +554,7 @@ export const SupabaseService = {
       url: n.url_origem,
       category: n.categoria,
       publishedAt: n.published_at,
-      status:
-        n.status?.toLowerCase() === "pendente" ||
-        n.status?.toLowerCase() === "pending"
-          ? "pending"
-          : "published",
+      status: SupabaseService.mapStatus(n.status) as any,
       imageUrl: n.imagem_url,
     }));
   },
@@ -567,11 +586,7 @@ export const SupabaseService = {
       category: n.categoria,
       publishedAt: n.published_at,
       imageUrl: n.imagem_url,
-      status:
-        n.status?.toLowerCase() === "pendente" ||
-        n.status?.toLowerCase() === "pending"
-          ? "pending"
-          : "published",
+      status: SupabaseService.mapStatus(n.status) as any,
     }));
   },
 
@@ -852,7 +867,11 @@ export const SupabaseService = {
       console.error("Error fetching CV subscriptions:", error);
       return [];
     }
-    return data;
+
+    return data.map((sub: any) => ({
+      ...sub,
+      status: SupabaseService.mapStatus(sub.status)
+    }));
   },
 
   approveCVSubscription: async (

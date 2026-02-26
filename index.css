@@ -160,3 +160,8 @@ a.btn {
 * {
   line-height: 1.5;
 }
+
+/* Support for dynamic progress bars without inline style width for lint compliance */
+[style*="--progress-width"] {
+  width: var(--progress-width);
+}

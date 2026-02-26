@@ -93,6 +93,13 @@ const App: React.FC = () => {
           referralCode: `ANGO-${data.id.substring(0, 6).toUpperCase()}`,
           isAdmin: data.is_admin || sessionUser.email === 'suedjosue@gmail.com', // Stronger fallback
           cvCredits: data.cv_credits || 0,
+          fullName: data.full_name,
+          phone: data.phone,
+          location: data.location,
+          savedJobs: data.saved_jobs || [],
+          applicationHistory: data.application_history || [],
+          cvHistory: data.cv_history || [],
+          accountType: data.account_type || 'free',
         });
         setIsAuthenticated(true);
       } else {
@@ -322,7 +329,7 @@ const App: React.FC = () => {
         onDecrementCredit={() => user && setUser({ ...user, cvCredits: Math.max(0, user.cvCredits - 1) })}
       />;
       case 'admin': return <AdminPage user={user} onNavigate={handleNavigate} />;
-      case 'profile': return user ? <ProfilePage user={user} onLogout={() => setUser(null)} /> : <HomePage onNavigate={handleNavigate} />;
+      case 'profile': return user ? <ProfilePage user={user} onLogout={handleLogout} onUpdateUser={(updates) => setUser({ ...user, ...updates })} /> : <HomePage onNavigate={handleNavigate} />;
       default: return <HomePage onNavigate={handleNavigate} />;
     }
   };
