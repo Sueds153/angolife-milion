@@ -109,8 +109,12 @@ export const ExchangePage: React.FC<ExchangePageProps> = ({ isAuthenticated, use
   useEffect(() => {
     const init = async () => {
       setLoading(true);
-      const data = await SupabaseService.getRates();
-      setRates(data);
+      const [ratesData, participantCount] = await Promise.all([
+        SupabaseService.getRates(),
+        SupabaseService.getActiveOrdersCount()
+      ]);
+      setRates(ratesData);
+      setActiveParticipants(participantCount);
       setLoading(false);
     };
     init();
@@ -126,23 +130,13 @@ export const ExchangePage: React.FC<ExchangePageProps> = ({ isAuthenticated, use
       setTradeCurrency('USD');
       setTradeAmount(terminalAmount);
     }
-    setActiveParticipants(Math.floor(Math.random() * 40) + 12);
     setIsCheckoutOpen(true);
     setCurrentStep(1);
     setTimeLeft(900);
     setIsExpired(false);
   };
 
-  // Dynamic Social Proof Logic
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveParticipants(prev => {
-        const change = Math.floor(Math.random() * 5) - 2; // -2 to +2
-        return Math.max(8, prev + change);
-      });
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
+  // Static Social Proof (Sync once on mount)
 
   // PERSISTENCE: Save session
   useEffect(() => {

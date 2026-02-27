@@ -1,43 +1,47 @@
 import React, { useState, useEffect } from 'react';
 import { Activity } from 'lucide-react';
-
-const names = ['André', 'Kieza', 'Mário', 'Delfina', 'Nkosi', 'Kiame', 'Nayara', 'Mauro', 'Jelson', 'Aura'];
-const wallets = ['Binance', 'Wise', 'PayPal', 'Redotpay', 'Revolut'];
-const amounts = [50, 100, 250, 500, 1000, 1500, 75, 120];
+import { SupabaseService } from '../services/supabaseService';
 
 export const LiveFeed = () => {
   const [currentFeed, setCurrentFeed] = useState<any>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [orderQueue, setOrderQueue] = useState<any[]>([]);
 
   useEffect(() => {
-    const generateFeed = () => {
-      const name = names[Math.floor(Math.random() * names.length)];
-      const wallet = wallets[Math.floor(Math.random() * wallets.length)];
-      const amount = amounts[Math.floor(Math.random() * amounts.length)];
-      const currency = Math.random() > 0.5 ? 'USD' : 'EUR';
-      const type = Math.random() > 0.5 ? 'buy' : 'sell';
-      const bank = ['BAI', 'BFA', 'Atlântico'][Math.floor(Math.random() * 3)];
-      
-      setCurrentFeed({ name, wallet, amount, currency, type, bank });
-      setIsVisible(true);
+    const fetchOrders = async () => {
+      const orders = await SupabaseService.getLatestOrders(10);
+      if (orders.length > 0) {
+        setOrderQueue(orders);
+      }
+    };
+    fetchOrders();
+    const refreshInterval = setInterval(fetchOrders, 300000); // Refresh every 5 min
+    return () => clearInterval(refreshInterval);
+  }, []);
 
+  useEffect(() => {
+    if (orderQueue.length === 0) return;
+
+    let index = 0;
+    const showNext = () => {
+      setCurrentFeed(orderQueue[index]);
+      setIsVisible(true);
+      
       setTimeout(() => {
         setIsVisible(false);
       }, 5000);
+
+      index = (index + 1) % orderQueue.length;
     };
 
-    const interval = setInterval(() => {
-      generateFeed();
-    }, 45000 + Math.random() * 15000);
-
-    // Initial feed after a short delay
-    const initialTimeout = setTimeout(generateFeed, 5000);
+    const interval = setInterval(showNext, 60000); // Show an item every minute
+    const initialTimeout = setTimeout(showNext, 5000);
 
     return () => {
       clearInterval(interval);
       clearTimeout(initialTimeout);
     };
-  }, []);
+  }, [orderQueue]);
 
   if (!currentFeed) return null;
 

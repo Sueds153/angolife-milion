@@ -86,9 +86,17 @@ export const SupabaseService = {
     },
 
     updateProfile: async (userId: string, updates: any) => {
+      // Map frontend camelCase to backend snake_case if necessary
+      const dbUpdates: any = { ...updates };
+      if (updates.fullName) dbUpdates.full_name = updates.fullName;
+      if (updates.avatarUrl) dbUpdates.avatar_url = updates.avatarUrl;
+      if (updates.savedJobs) dbUpdates.saved_jobs = updates.savedJobs;
+      if (updates.applicationHistory) dbUpdates.application_history = updates.applicationHistory;
+      if (updates.cvHistory) dbUpdates.cv_history = updates.cvHistory;
+      
       const { data, error } = await supabase
         .from("profiles")
-        .update(updates)
+        .update(dbUpdates)
         .eq("id", userId);
       return { data, error };
     },
@@ -595,6 +603,95 @@ export const SupabaseService = {
       console.error("Error incrementing application count:", updateError);
   },
 
+  getJobById: async (id: string): Promise<Job | null> => {
+    const { data, error } = await supabase
+      .from("jobs")
+      .select("*")
+      .eq("id", id)
+      .single();
+    
+    if (error || !data) return null;
+    return {
+      id: data.id,
+      title: data.title,
+      company: data.company,
+      location: data.location,
+      type: data.type,
+      salary: data.salary,
+      description: data.description,
+      postedAt: data.posted_at,
+      requirements: data.requirements || [],
+      sourceUrl: data.source_url,
+      applicationEmail: data.application_email,
+      status: SupabaseService.mapStatus(data.status) as any,
+      imageUrl: data.imagem_url,
+      category: data.categoria,
+      source: data.fonte,
+    };
+  },
+
+  getJobsByIds: async (ids: string[]): Promise<Job[]> => {
+    if (!ids || ids.length === 0) return [];
+    
+    const { data, error } = await supabase
+      .from("jobs")
+      .select("*")
+      .in("id", ids);
+    
+    if (error || !data) return [];
+    return data.map((j: any) => ({
+      id: j.id,
+      title: j.title,
+      company: j.company,
+      location: j.location,
+      type: j.type,
+      salary: j.salary,
+      description: j.description,
+      postedAt: j.posted_at,
+      requirements: j.requirements || [],
+      sourceUrl: j.source_url,
+      applicationEmail: j.application_email,
+      status: SupabaseService.mapStatus(j.status) as any,
+      imageUrl: j.imagem_url,
+      category: j.categoria,
+      source: j.fonte,
+    }));
+  },
+
+  toggleSaveJob: async (userId: string, currentSaved: string[], jobId: string): Promise<string[]> => {
+    const isSaved = currentSaved.includes(jobId);
+    const newList = isSaved 
+      ? currentSaved.filter(id => id !== jobId) 
+      : [...currentSaved, jobId];
+    
+    await supabase
+      .from("profiles")
+      .update({ saved_jobs: newList })
+      .eq("id", userId);
+    
+    return newList;
+  },
+
+  submitJobApplication: async (userId: string, currentHistory: any[], job: Job): Promise<any[]> => {
+    const newEntry = {
+      jobId: job.id,
+      title: job.title,
+      company: job.company,
+      date: new Date().toISOString()
+    };
+    const newHistory = [newEntry, ...currentHistory];
+    
+    await supabase
+      .from("profiles")
+      .update({ application_history: newHistory })
+      .eq("id", userId);
+    
+    // Also increment global count
+    await SupabaseService.incrementApplicationCount(job.id);
+    
+    return newHistory;
+  },
+
   // --- NEWS ---
   getNews: async (isAdmin: boolean = false): Promise<NewsArticle[]> => {
     let query = supabase.from("news_articles").select("*");
@@ -743,6 +840,35 @@ export const SupabaseService = {
       return false;
     }
     return true;
+  },
+
+  getActiveOrdersCount: async (): Promise<number> => {
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { count, error } = await supabase
+      .from("orders")
+      .select("*", { count: 'exact', head: true })
+      .gte("created_at", twentyFourHoursAgo);
+    
+    if (error) return 0;
+    return (count || 0) + 12; // Base offset to make it look "active" as requested
+  },
+
+  getLatestOrders: async (limit: number = 5): Promise<any[]> => {
+    const { data, error } = await supabase
+      .from("orders")
+      .select("full_name, wallet, amount, currency, order_type, bank")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    
+    if (error) return [];
+    return data.map(o => ({
+      name: o.full_name?.split(' ')[0] || 'Utilizador',
+      wallet: o.wallet,
+      amount: o.amount,
+      currency: o.currency,
+      type: o.order_type === 'venda' ? 'sell' : 'buy',
+      bank: o.bank
+    }));
   },
 
   createNews: async (news: Partial<NewsArticle>): Promise<boolean> => {

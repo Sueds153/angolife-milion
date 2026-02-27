@@ -3,8 +3,6 @@
     box-sizing: border-box;
   }
   body {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
     line-height: 1.5;
   }
   img, video, canvas, svg {
@@ -142,11 +140,10 @@ a.btn {
 /* Horizontal Scroll with Touch Support */
 .scroll-x-touch {
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none; /* Firefox */
 }
+
 .scroll-x-touch::-webkit-scrollbar {
-  display: none; /* Chrome/Safari */
+  display: none;
 }
 .flex-nowrap-shrink-0 > * {
   flex-shrink: 0;
@@ -159,6 +156,60 @@ a.btn {
     align-items: stretch !important;
   }
 }
+
+.progress-fill-dynamic {
+  width: var(--progress-width, 0%);
+}
+
+.animate-delay-float {
+  animation-delay: -8s;
+}
+
+.spin-slow {
+  animation: spin var(--spin-duration, 3s) linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.particle {
+  position: absolute;
+  background-color: var(--brand-gold);
+  border-radius: 9999px;
+  filter: blur(0.3px);
+  animation: drift linear infinite;
+  opacity: 0.2;
+  top: 110vh;
+}
+
+@keyframes drift {
+  from { transform: translateY(0); }
+  to { transform: translateY(-120vh); }
+}
+
+/* Pre-defined particle variations to avoid inline styles */
+.particle-0  { width: 1px;   height: 1px;   left: 10%;  animation-delay: 1s;  animation-duration: 20s; }
+.particle-1  { width: 1.5px; height: 1.5px; left: 25%;  animation-delay: 5s;  animation-duration: 25s; }
+.particle-2  { width: 0.8px; height: 0.8px; left: 40%;  animation-delay: 2s;  animation-duration: 22s; }
+.particle-3  { width: 1.2px; height: 1.2px; left: 55%;  animation-delay: 8s;  animation-duration: 28s; }
+.particle-4  { width: 0.5px; height: 0.5px; left: 70%;  animation-delay: 3s;  animation-duration: 18s; }
+.particle-5  { width: 1.4px; height: 1.4px; left: 85%;  animation-delay: 10s; animation-duration: 30s; }
+.particle-6  { width: 1.1px; height: 1.1px; left: 15%;  animation-delay: 4s;  animation-duration: 24s; }
+.particle-7  { width: 0.9px; height: 0.9px; left: 30%;  animation-delay: 7s;  animation-duration: 21s; }
+.particle-8  { width: 1.3px; height: 1.3px; left: 45%;  animation-delay: 6s;  animation-duration: 26s; }
+.particle-9  { width: 0.7px; height: 0.7px; left: 60%;  animation-delay: 9s;  animation-duration: 23s; }
+.particle-10 { width: 1.2px; height: 1.2px; left: 75%;  animation-delay: 2s;  animation-duration: 27s; }
+.particle-11 { width: 1.0px; height: 1.0px; left: 90%;  animation-delay: 1s;  animation-duration: 19s; }
+
+/* Referral Progress Classes */
+.ref-progress-0 { width: 0%; }
+.ref-progress-1 { width: 20%; }
+.ref-progress-2 { width: 40%; }
+.ref-progress-3 { width: 60%; }
+.ref-progress-4 { width: 80%; }
+.ref-progress-5 { width: 100%; }
 
 /* Global line-height enforcement */
 * {

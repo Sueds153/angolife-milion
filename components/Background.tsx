@@ -7,8 +7,8 @@ export const Background: React.FC = () => {
       {/* Mesh Gradient Layer */}
       <div className="absolute inset-0 bg-white dark:bg-[#020617] transition-colors duration-1000">
         {/* Subtle dynamic orbs with brand colors */}
-        <div className="absolute top-[-10%] left-[-5%] w-[50%] h-[50%] bg-brand-gold/10 dark:bg-brand-gold/[0.04] rounded-full blur-[140px] animate-float"></div>
-        <div className="absolute bottom-[-15%] right-[-5%] w-[60%] h-[60%] bg-[#CC092F]/[0.03] dark:bg-[#CC092F]/[0.015] rounded-full blur-[140px] animate-float" style={{ animationDelay: '-8s' }}></div>
+        <div className="absolute top-[-10%] left-[-5%] w-[50%] h-[50%] bg-brand-gold/10 dark:bg-brand-gold/[0.04] rounded-full blur-[140px] animate-float" />
+        <div className="absolute bottom-[-15%] right-[-5%] w-[60%] h-[60%] bg-[#CC092F]/[0.03] dark:bg-[#CC092F]/[0.015] rounded-full blur-[140px] animate-float animate-delay-float" />
       </div>
 
       {/* Financial Terminal Grid & Candlestick Simulation Overlay */}
@@ -53,17 +53,8 @@ export const Background: React.FC = () => {
         {[...Array(12)].map((_, i) => (
           <div
             key={i}
-            className="absolute bg-brand-gold rounded-full blur-[0.3px] animate-drift"
-            style={{
-              width: Math.random() * 1.5 + 0.5 + 'px',
-              height: Math.random() * 1.5 + 0.5 + 'px',
-              left: Math.random() * 100 + '%',
-              top: '110vh',
-              animationDelay: Math.random() * 15 + 's',
-              animationDuration: Math.random() * 12 + 18 + 's',
-              opacity: 0.2
-            }}
-          ></div>
+            className={`particle particle-${i}`}
+          />
         ))}
       </div>
       

@@ -1,14 +1,16 @@
 
 import React, { useEffect, useState } from 'react';
-import { MapPin, Building, Clock, Search, X, CheckCircle2, Award, Mail, ChevronRight, Settings, Plus, Share2, AlertTriangle, ShieldCheck, HardHat, Briefcase, Store } from 'lucide-react';
+import { MapPin, Building, Clock, Search, X, CheckCircle2, Award, Mail, ChevronRight, Settings, Plus, Share2, AlertTriangle, ShieldCheck, HardHat, Briefcase, Store, Heart } from 'lucide-react';
 import { SupabaseService } from '../services/supabaseService';
-import { Job } from '../types';
+import { Job, UserProfile } from '../types';
 import { ShareButton } from '../components/ShareButton';
 import { AdBanner } from '../components/AdBanner';
 
 interface JobsPageProps {
   isAuthenticated: boolean;
   isAdmin?: boolean;
+  user?: UserProfile;
+  onUpdateUser?: (updates: Partial<UserProfile>) => void;
   onNavigate?: (page: any) => void;
   onRequireAuth: () => void;
   onRequestReward?: (onSuccess: () => void, onCancel: () => void) => void;
@@ -73,6 +75,8 @@ const JobLogo: React.FC<{ src?: string; company: string; category?: string; size
 export const JobsPage: React.FC<JobsPageProps> = ({ 
   isAuthenticated, 
   isAdmin, 
+  user,
+  onUpdateUser,
   onNavigate,
   onRequireAuth, 
   onRequestReward, 
@@ -217,9 +221,29 @@ export const JobsPage: React.FC<JobsPageProps> = ({
     }, 500);
   };
 
+  const handleToggleSave = async (e: React.MouseEvent, jobId: string) => {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      onRequireAuth();
+      return;
+    }
+    if (!user || !onUpdateUser) return;
+
+    const newList = await SupabaseService.toggleSaveJob(user.id || '', user.savedJobs || [], jobId);
+    onUpdateUser({ savedJobs: newList });
+  };
+
   const handleApplyClick = async (job: Job) => {
     const executeApply = async () => {
+      // 1. Increment global count
       await SupabaseService.incrementApplicationCount(job.id);
+      
+      // 2. Save to user history if authenticated
+      if (user && onUpdateUser) {
+        const newHistory = await SupabaseService.submitJobApplication(user.id || '', user.applicationHistory || [], job);
+        onUpdateUser({ applicationHistory: newHistory });
+      }
+
       window.open(`mailto:${job.applicationEmail}?subject=Candidatura: ${job.title}`, '_blank');
       setJobs(prev => prev.map(j => j.id === job.id ? { ...j, applicationCount: (j.applicationCount || 0) + 1 } : j));
     };
@@ -426,6 +450,13 @@ export const JobsPage: React.FC<JobsPageProps> = ({
                   <div className="pt-5 border-t border-orange-500/10 flex items-center justify-between">
                       <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{formatRelativeDate(job.postedAt)}</span>
                       <div className="flex items-center gap-2">
+                        <button 
+                          onClick={(e) => handleToggleSave(e, job.id)}
+                          title={user?.savedJobs?.includes(job.id) ? "Remover dos Favoritos" : "Guardar Vaga"}
+                          className={`p-2.5 rounded-xl transition-all ${user?.savedJobs?.includes(job.id) ? 'bg-rose-500/10 text-rose-500 opacity-100' : 'bg-slate-100 dark:bg-white/5 text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 opacity-0 group-hover:opacity-100'}`}
+                        >
+                          <Heart size={14} fill={user?.savedJobs?.includes(job.id) ? "currentColor" : "none"} />
+                        </button>
                         <button 
                           onClick={(e) => handleReport(e, job.id)}
                           title="Denunciar Vaga"

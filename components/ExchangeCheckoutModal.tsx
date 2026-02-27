@@ -347,7 +347,7 @@ export const ExchangeCheckoutModal: React.FC<ExchangeCheckoutModalProps> = ({
               <div className="border-2 border-[orange-500] rounded-2xl p-5 flex items-center justify-between bg-[orange-500]/5 relative overflow-hidden">
                 <div className="flex items-center gap-4">
                   <div className="p-2 bg-[orange-500]/10 rounded-lg">
-                    <RefreshCw size={24} className={`text-[orange-500] ${!isExpired ? 'animate-spin' : ''}`} style={{ '--spin-duration': '3s' } as React.CSSProperties} />
+                    <RefreshCw size={24} className={`text-[orange-500] ${!isExpired ? 'spin-slow' : ''}`} />
                   </div>
                   <div>
                     <span className="block text-[9px] font-black text-[orange-500] uppercase tracking-[0.2em] opacity-70">TEMPO RESTANTE</span>

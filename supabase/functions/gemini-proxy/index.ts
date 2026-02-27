@@ -2,15 +2,15 @@
 // Command: supabase functions deploy gemini-proxy
 // Secret: supabase secrets set GEMINI_API_KEY=your_key
 
-import { serve } from "https://deno.land/std@0.161.0/http/server.ts"
-import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.0"
+import { serve } from "std/http/server.ts"
+import { GoogleGenerativeAI } from "@google/generative-ai"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
   // Handle CORS
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -87,7 +87,7 @@ serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
-  } catch (error) {
+  } catch (error: any) {
     return new Response(
       JSON.stringify({ error: error.message }),
       { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

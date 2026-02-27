@@ -93,18 +93,18 @@ const App: React.FC = () => {
           id: sessionUser.id,
           email: data.email,
           referralCount: data.referral_count || 0,
-          isPremium: data.is_premium || false,
+          isPremium: (data.referral_count >= 5) ? true : (data.is_premium || false),
           referralCode: `ANGO-${data.id.substring(0, 6).toUpperCase()}`,
           isAdmin: data.is_admin || sessionUser.email === 'suedjosue@gmail.com', // Stronger fallback
-          cvCredits: data.cv_credits || 0,
+          cvCredits: (data.referral_count >= 5) ? Math.max(data.cv_credits || 0, 3) : (data.cv_credits || 0),
           fullName: data.full_name,
           phone: data.phone,
           location: data.location,
           savedJobs: data.saved_jobs || [],
           applicationHistory: data.application_history || [],
           cvHistory: data.cv_history || [],
-          accountType: data.account_type || 'free',
-          hasReferralDiscount: data.has_referral_discount || false,
+          accountType: (data.referral_count >= 5) ? 'premium' : (data.account_type || 'free'),
+          hasReferralDiscount: (data.referral_count >= 5) || (data.has_referral_discount || false),
           avatarUrl: data.avatar_url,
         });
         setIsAuthenticated(true);
@@ -154,39 +154,46 @@ const App: React.FC = () => {
   const [lastInterstitialTime, setLastInterstitialTime] = useState(0);
   const [subscribedCategories, setSubscribedCategories] = useState<string[]>([]);
 
-  // Simulação de Push Notification (Demo)
+  // Real-time Update Checker (Formerly simulatePush)
   useEffect(() => {
-    const simulatePush = () => {
-      const isJob = Math.random() > 0.6;
-      let mockNotification: AppNotification;
+    const checkForUpdates = async () => {
+      // Logic: Pick a random category or recent high-value update
+      const [jobs, news] = await Promise.all([
+        SupabaseService.getJobs(false),
+        SupabaseService.getNews(false)
+      ]);
 
-      if (isJob) {
-        const category = subscribedCategories.length > 0
-          ? subscribedCategories[Math.floor(Math.random() * subscribedCategories.length)]
-          : 'Premium';
+      const isJob = Math.random() > 0.5;
+      let mockNotification: AppNotification | null = null;
 
+      if (isJob && jobs.length > 0) {
+        const latestJob = jobs[0];
         mockNotification = {
-          id: Date.now().toString(),
-          title: `Nova Vaga: ${category}`,
-          message: `Há uma nova oportunidade para ${category} em Luanda. Candidata-te já!`,
+          id: latestJob.id,
+          title: `Nova Vaga: ${latestJob.title}`,
+          message: `Oportunidade em ${latestJob.company} (${latestJob.location}). Candidata-te já!`,
           type: 'job',
           timestamp: Date.now()
         };
-      } else {
+      } else if (news.length > 0) {
+        const latestNews = news[0];
         mockNotification = {
-          id: Date.now().toString(),
-          title: 'Alerta de Câmbio',
-          message: 'O Dólar teve uma ligeira queda no mercado informal. Melhor hora para comprar!',
+          id: latestNews.id,
+          title: latestNews.title,
+          message: latestNews.summary,
           type: 'market',
           timestamp: Date.now()
         };
       }
 
-      setActiveNotification(mockNotification);
-      NotificationService.sendNativeNotification(mockNotification.title, mockNotification.message);
+      if (mockNotification) {
+        setActiveNotification(mockNotification);
+        NotificationService.sendNativeNotification(mockNotification.title, mockNotification.message);
+      }
     };
 
-    const timer = setTimeout(simulatePush, 12000); // Slightly longer for better UX
+    // Check periodically but subtly (every 2-3 minutes)
+    const timer = setTimeout(checkForUpdates, 180000); 
     return () => clearTimeout(timer);
   }, [subscribedCategories]);
 
@@ -261,9 +268,11 @@ const App: React.FC = () => {
   const renderPage = () => {
     switch (currentPage) {
       case 'home': return <HomePage onNavigate={handleNavigate} />;
-      case 'jobs': return <JobsPage
-        isAuthenticated={!!user}
+      case 'jobs': return <JobsPage 
+        isAuthenticated={!!user} 
         isAdmin={user?.isAdmin}
+        user={user || undefined}
+        onUpdateUser={(updates) => user && setUser({ ...user, ...updates })}
         onNavigate={handleNavigate}
         onRequireAuth={() => setIsAuthModalOpen(true)}
         onRequestReward={(onSuccess, onCancel) => {
@@ -274,13 +283,10 @@ const App: React.FC = () => {
         onShowInterstitial={(callback) => {
           const now = Date.now();
           const FIVE_MINUTES = 5 * 60 * 1000;
-
           if (now - lastInterstitialTime < FIVE_MINUTES) {
-            // Capping: Skip ad and execute action immediately
             callback();
           } else {
-            // Show Ad
-            setInterstitialDuration(7); // Reduced duration for better UX
+            setInterstitialDuration(5);
             setInterstitialCallback(() => callback);
             setShowInterstitial(true);
           }
@@ -335,7 +341,7 @@ const App: React.FC = () => {
         onDecrementCredit={() => user && setUser({ ...user, cvCredits: Math.max(0, user.cvCredits - 1) })}
       />;
       case 'admin': return <AdminPage user={user} onNavigate={handleNavigate} />;
-      case 'profile': return user ? <ProfilePage user={user} onLogout={handleLogout} onUpdateUser={(updates) => setUser({ ...user, ...updates })} /> : <HomePage onNavigate={handleNavigate} />;
+      case 'profile': return user ? <ProfilePage user={user} onLogout={handleLogout} onUpdateUser={(updates) => setUser({ ...user, ...updates })} onNavigate={handleNavigate} /> : <HomePage onNavigate={handleNavigate} />;
       default: return <HomePage onNavigate={handleNavigate} />;
     }
   };

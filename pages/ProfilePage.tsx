@@ -9,9 +9,10 @@ interface ProfilePageProps {
   user: UserProfile;
   onLogout: () => void;
   onUpdateUser: (updates: Partial<UserProfile>) => void;
+  onNavigate: (page: any) => void;
 }
 
-export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onLogout, onUpdateUser }) => {
+export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onLogout, onUpdateUser, onNavigate }) => {
   const [profileImage, setProfileImage] = useState<string | null>(user.avatarUrl || null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
@@ -38,6 +39,21 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onLogout, onUpda
     fetchOrders();
   }, [user.email]);
   
+  const [savedJobsData, setSavedJobsData] = useState<Job[]>([]);
+  const [loadingJobs, setLoadingJobs] = useState(false);
+
+  useEffect(() => {
+    const fetchSavedJobs = async () => {
+      if (user.savedJobs && user.savedJobs.length > 0) {
+        setLoadingJobs(true);
+        const jobs = await SupabaseService.getJobsByIds(user.savedJobs);
+        setSavedJobsData(jobs);
+        setLoadingJobs(false);
+      }
+    };
+    fetchSavedJobs();
+  }, [user.savedJobs]);
+
   const firstName = user.fullName || user.email.split('@')[0];
   const formattedName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
 
@@ -368,22 +384,32 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onLogout, onUpda
                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{user.savedJobs?.length || 0} Itens</span>
             </div>
             
-            {user.savedJobs && user.savedJobs.length > 0 ? (
+            {savedJobsData.length > 0 ? (
                <div className="space-y-4">
-                  {/* Lista de vagas guardadas (IDs fictícios para exemplo) */}
-                  <div className="p-4 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 flex items-center justify-between group hover:border-orange-500/30 transition-all cursor-pointer">
-                     <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500">
-                           <Briefcase size={20} />
-                        </div>
-                        <div>
-                           <p className="text-[10px] font-black uppercase dark:text-white">Software Engineer</p>
-                           <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Unitel • Luanda</p>
-                        </div>
-                     </div>
-                     <ChevronRight size={16} className="text-slate-300 group-hover:text-orange-500 transition-colors" />
-                  </div>
+                  {savedJobsData.map((job) => (
+                    <div 
+                      key={job.id} 
+                      onClick={() => onNavigate({ name: 'job-details', params: { job } })}
+                      className="p-4 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 flex items-center justify-between group hover:border-orange-500/30 transition-all cursor-pointer"
+                    >
+                       <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500">
+                             <Briefcase size={20} />
+                          </div>
+                          <div>
+                             <p className="text-[10px] font-black uppercase dark:text-white">{job.title}</p>
+                             <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">{job.company} • {job.location}</p>
+                          </div>
+                       </div>
+                       <ChevronRight size={16} className="text-slate-300 group-hover:text-orange-500 transition-colors" />
+                    </div>
+                  ))}
                </div>
+            ) : loadingJobs ? (
+                <div className="py-10 text-center animate-pulse">
+                   <RefreshCw className="mx-auto text-slate-300 animate-spin" size={24} />
+                   <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-2">A carregar favoritos...</p>
+                </div>
             ) : (
                <div className="py-10 text-center space-y-3 opacity-50">
                   <Heart className="mx-auto text-slate-300" size={32} />
@@ -404,15 +430,19 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onLogout, onUpda
             
             {user.applicationHistory && user.applicationHistory.length > 0 ? (
                <div className="space-y-4">
-                  <div className="p-4 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 flex items-center justify-between">
-                     <div className="flex items-center gap-4">
-                        <CheckCircle2 className="text-emerald-500" size={16} />
-                        <div>
-                           <p className="text-[10px] font-black uppercase dark:text-white">Designer Gráfico</p>
-                           <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Candidato em 24 Fev</p>
-                        </div>
-                     </div>
-                  </div>
+                  {user.applicationHistory.map((app, idx) => (
+                    <div key={idx} className="p-4 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 flex items-center justify-between">
+                       <div className="flex items-center gap-4">
+                          <CheckCircle2 className="text-emerald-500" size={16} />
+                          <div>
+                             <p className="text-[10px] font-black uppercase dark:text-white">{app.title}</p>
+                             <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">
+                                Candidato em {new Date(app.date).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short' })}
+                             </p>
+                          </div>
+                       </div>
+                    </div>
+                  ))}
                </div>
             ) : (
                <div className="py-10 text-center space-y-3 opacity-50">
@@ -521,8 +551,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onLogout, onUpda
                 </div>
                 <div className="w-56 h-2 bg-white/5 rounded-full overflow-hidden border border-white/10">
                   <div 
-                    className="h-full bg-gradient-to-r from-brand-gold to-amber-400 rounded-full transition-all duration-1000 shadow-[0_0_15px_rgba(212,175,55,0.4)]"
-                    style={{ '--progress-width': `${Math.min(100, (user.referralCount / 5) * 100)}%` } as React.CSSProperties}
+                    className={`h-full bg-gradient-to-r from-brand-gold to-amber-400 rounded-full transition-all duration-1000 shadow-[0_0_15px_rgba(212,175,55,0.4)] ref-progress-${Math.min(5, user.referralCount || 0)}`}
                   />
                 </div>
               </div>

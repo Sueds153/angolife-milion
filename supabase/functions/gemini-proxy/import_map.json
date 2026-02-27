@@ -1,0 +1,6 @@
+{
+  "imports": {
+    "std/": "https://deno.land/std@0.161.0/",
+    "@google/generative-ai": "https://esm.sh/@google/generative-ai@0.1.0"
+  }
+}
