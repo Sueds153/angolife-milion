@@ -36,6 +36,10 @@ export const LegalModals: React.FC<LegalModalsProps> = ({ isOpen, onClose, type 
         {
           title: '5. Limitação de Responsabilidade',
           text: 'Em nenhuma circunstância o proprietário do AngoLife será responsável por danos incidentais, especiais ou consequentes. O utilizador concorda em indemnizar e isentar o desenvolvedor de qualquer reclamação judicial movida por terceiros devido ao uso indevido da plataforma.'
+        },
+        {
+          title: '6. Proibição de Engenharia Reversa e Plágio',
+          text: 'Fica expressamente proibida qualquer tentativa de engenharia reversa, descompilação ou acesso não autorizado ao código-fonte da plataforma. A reprodução, cópia ou plágio da interface, lógica operacional ou algoritmos de raspagem (scrapers) do AngoLife é ilegal e sujeita a severas sanções criminais e cíveis nos termos da legislação de propriedade intelectual angolana e internacional.'
         }
       ]
     },

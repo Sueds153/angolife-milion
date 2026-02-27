@@ -1,3 +1,8 @@
+/**
+ * @copyright (c) 2024-2026 AngoLife by Su-Golden. All rights reserved.
+ * @license Proprietary. Unauthorized copying, modification, or reverse engineering is strictly prohibited.
+ */
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';

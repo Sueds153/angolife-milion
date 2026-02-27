@@ -1,3 +1,8 @@
+/**
+ * @copyright (c) 2024-2026 AngoLife by Su-Golden. All rights reserved.
+ * @license Proprietary. Unauthorized copying, modification, or reverse engineering is strictly prohibited.
+ */
+
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;

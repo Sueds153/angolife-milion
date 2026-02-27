@@ -1,9 +1,13 @@
-/// <reference types="vite/client" />
-import { GoogleGenAI } from "@google/genai";
-import { Job, NewsArticle, ProductDeal } from "../types";
+/**
+ * @copyright (c) 2024-2026 AngoLife by Su-Golden. All rights reserved.
+ * @license Proprietary. Unauthorized copying, modification, or reverse engineering is strictly prohibited.
+ */
 
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY || "dummy_key_for_init";
-const ai = new GoogleGenAI({ apiKey });
+import { Job, NewsArticle, ProductDeal } from "../types";
+import { supabase } from "./supabaseClient";
+
+// Service used to call the secure Supabase Edge Function
+// This prevents exposing API keys in the frontend bundle.
 
 // Simple cache to prevent redundant hits within a session
 const cache: Record<string, { data: any; timestamp: number }> = {};
@@ -22,6 +26,7 @@ const setCachedData = (key: string, data: any) => {
 };
 
 // --- FALLBACK DATA ---
+// ... (Keeping FALLBACKs as they are essential for resilience)
 const FALLBACK_JOBS: Job[] = [
   {
     id: "f1",
@@ -175,52 +180,26 @@ O mercado cambial apresenta uma ligeira estabilidade nesta semana.
 Recomendação: O momento é de cautela. Observe as flutuações nas primeiras horas da manhã antes de realizar grandes transações.
 `;
 
+// Helper to call Supabase Edge Functions
+async function callEdgeProxy(action: string, payload: any = {}) {
+  const { data, error } = await supabase.functions.invoke('gemini-proxy', {
+    body: { action, ...payload }
+  });
+  if (error) throw error;
+  return data;
+}
+
 export const GeminiService = {
   fetchJobs: async (): Promise<Job[]> => {
     const cached = getCachedData<Job[]>("jobs");
     if (cached) return cached;
 
     try {
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: `Pesquise na internet por vagas de emprego RECENTES em Angola.
-        Retorne uma lista JSON com 6 vagas reais.
-        Format JSON array only. Campos: id, title, company, location, type, salary, description, postedAt, requirements (array), sourceUrl, applicationEmail.
-        IMPORTANTE: Mantenha os textos em Português de Angola (pt-AO).`,
-        config: { tools: [{ googleSearch: {} }] },
-      });
-
-      const text = response.text || "";
-      const cleanText = text
-        .replace(/```json/g, "")
-        .replace(/```/g, "")
-        .trim();
-      const data = JSON.parse(cleanText) as Job[];
-
-      const groundingChunks =
-        response.candidates?.[0]?.groundingMetadata?.groundingChunks;
-      const groundingLinks =
-        groundingChunks?.filter((c: any) => c.web).map((c: any) => c.web.uri) ||
-        [];
-
-      const enrichedData = data.map((job, idx) => ({
-        ...job,
-        sourceUrl:
-          job.sourceUrl || groundingLinks[idx % groundingLinks.length] || "",
-        applicationEmail:
-          job.applicationEmail ||
-          `hr@${job.company.toLowerCase().replace(/\s/g, "")}.ao`,
-        status: "published" as const,
-      }));
-
-      setCachedData("jobs", enrichedData);
-      return enrichedData;
+      const { jobs } = await callEdgeProxy('fetchJobs');
+      setCachedData("jobs", jobs);
+      return jobs;
     } catch (error: any) {
-      if (error.message?.includes("429") || error.status === 429) {
-        console.warn("Gemini Quota Exceeded (Jobs). Using fallback data.");
-      } else {
-        console.error("Gemini Job Fetch Error:", error);
-      }
+      console.error("Gemini Job Fetch Error:", error);
       return FALLBACK_JOBS;
     }
   },
@@ -230,43 +209,11 @@ export const GeminiService = {
     if (cached) return cached;
 
     try {
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: `Pesquise pelas ofertas DESTA SEMANA nos supermercados Kero, Shoprite e Candando em Angola.
-        Retorne APENAS um JSON array de 6 produtos.
-        Campos: id, title, store, originalPrice, discountPrice, location, description, imagePlaceholder (food, tech, home).
-        IMPORTANTE: Mantenha os textos em Português de Angola (pt-AO).`,
-        config: { tools: [{ googleSearch: {} }] },
-      });
-
-      const text = response.text || "";
-      const cleanText = text
-        .replace(/```json/g, "")
-        .replace(/```/g, "")
-        .trim();
-      const deals = JSON.parse(cleanText);
-
-      const formattedDeals = deals.map((d: any) => ({
-        ...d,
-        status: "approved",
-        submittedBy: "System AI",
-        createdAt: new Date().toISOString(),
-        imagePlaceholder:
-          d.imagePlaceholder === "tech"
-            ? "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=500&q=80"
-            : d.imagePlaceholder === "home"
-              ? "https://images.unsplash.com/photo-1583947215259-38e31be8751f?w=500&q=80"
-              : "https://images.unsplash.com/photo-1506617420156-8e4536971650?w=500&q=80",
-      }));
-
-      setCachedData("deals", formattedDeals);
-      return formattedDeals;
+      const { deals } = await callEdgeProxy('fetchDeals');
+      setCachedData("deals", deals);
+      return deals;
     } catch (error: any) {
-      if (error.message?.includes("429") || error.status === 429) {
-        console.warn("Gemini Quota Exceeded (Deals). Using fallback data.");
-      } else {
-        console.error("Gemini Deals Fetch Error:", error);
-      }
+      console.error("Gemini Deals Fetch Error:", error);
       return FALLBACK_DEALS;
     }
   },
@@ -276,47 +223,11 @@ export const GeminiService = {
     if (cached) return cached;
 
     try {
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: `Pesquise as notícias mais quentes de hoje em Angola (Economia, Sociedade, Escândalos Financeiros, Oportunidades Secretas).
-        Crie títulos EXTREMAMENTE chamativos, estilo "clickbait" mas verdadeiros, que despertem curiosidade imediata (Ex: "O segredo que os bancos não contam", "Mudança drástica no Kwanza").
-        
-        Retorne JSON array com 5 notícias. 
-        Campos: id, title, summary (um resumo que deixa suspense), source, publishedAt, category (use categorias como: 'BOMBÁSTICO', 'ALERTA', 'SEGREDO', 'URGENTE').
-        IMPORTANTE: Mantenha os textos em Português de Angola (pt-AO).`,
-        config: { tools: [{ googleSearch: {} }] },
-      });
-
-      const text = response.text || "";
-      const cleanText = text
-        .replace(/```json/g, "")
-        .replace(/```/g, "")
-        .trim();
-      const data = JSON.parse(cleanText) as NewsArticle[];
-
-      const groundingChunks =
-        response.candidates?.[0]?.groundingMetadata?.groundingChunks;
-      const groundingLinks =
-        groundingChunks?.filter((c: any) => c.web).map((c: any) => c.web.uri) ||
-        [];
-
-      const enrichedData = data.map((news, idx) => ({
-        ...news,
-        url:
-          news.url && news.url !== "#"
-            ? news.url
-            : groundingLinks[idx % groundingLinks.length] || news.url,
-        status: "published" as const,
-      }));
-
-      setCachedData("news", enrichedData);
-      return enrichedData;
+      const { news } = await callEdgeProxy('fetchNews');
+      setCachedData("news", news);
+      return news;
     } catch (error: any) {
-      if (error.message?.includes("429") || error.status === 429) {
-        console.warn("Gemini Quota Exceeded (News). Using fallback data.");
-      } else {
-        console.error("Gemini News Fetch Error:", error);
-      }
+      console.error("Gemini News Fetch Error:", error);
       return FALLBACK_NEWS;
     }
   },
@@ -326,36 +237,11 @@ export const GeminiService = {
     if (cached) return cached;
 
     try {
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: `Analise o mercado cambial informal e oficial de Angola hoje. Seja direto e profissional.
-        IMPORTANTE: Mantenha os textos em Português de Angola (pt-AO).`,
-        config: { tools: [{ googleSearch: {} }] },
-      });
-      const data = response.text || "Análise indisponível no momento.";
-
-      let sourcesInfo = "";
-      const groundingChunks =
-        response.candidates?.[0]?.groundingMetadata?.groundingChunks;
-      if (groundingChunks) {
-        const links = groundingChunks
-          .filter((c: any) => c.web)
-          .map((c: any) => `\n- [${c.web.title}](${c.web.uri})`)
-          .join("");
-        if (links) {
-          sourcesInfo = "\n\nFontes consultadas:" + links;
-        }
-      }
-
-      const finalAnalysis = data + sourcesInfo;
-      setCachedData("market-analysis", finalAnalysis);
-      return finalAnalysis;
+      const { analysis } = await callEdgeProxy('fetchMarketAnalysis');
+      setCachedData("market-analysis", analysis);
+      return analysis;
     } catch (error: any) {
-      if (error.message?.includes("429") || error.status === 429) {
-        console.warn("Gemini Quota Exceeded (Analysis). Using fallback data.");
-      } else {
-        console.error("Gemini Market Analysis Error:", error);
-      }
+      console.error("Gemini Market Analysis Error:", error);
       return FALLBACK_ANALYSIS;
     }
   },
@@ -365,19 +251,12 @@ export const GeminiService = {
     type: "description" | "summary",
   ): Promise<string> => {
     try {
-      const prompt = type === 'summary' 
-        ? `Reescreva este resumo profissional para um Currículo (CV). Torne-o impactante, executivo e persuasivo, focado no mercado de trabalho angolano/internacional. Use Português de Angola (pt-AO). Texto original: "${originalText}"`
-        : `Reescreva esta descrição de experiência profissional para um CV. Use verbos de ação, quantifique resultados se possível, e mantenha um tom profissional e direto em Português de Angola (pt-AO). Texto original: "${originalText}"`;
-
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-      });
-
-      return response.text || originalText;
+      const { improvedText } = await callEdgeProxy('improveCVContent', { originalText, type });
+      return improvedText;
     } catch (error) {
       console.error("CV Improvement Error:", error);
-      return originalText; // Fail gracefully
+      return originalText;
     }
   },
 };
+

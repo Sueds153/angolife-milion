@@ -1,3 +1,7 @@
+/**
+ * @copyright (c) 2024-2026 AngoLife by Su-Golden. All rights reserved.
+ * @license Proprietary. Unauthorized copying, modification, or reverse engineering is strictly prohibited.
+ */
 
 export const NotificationService = {
   requestPermission: async (): Promise<boolean> => {
