@@ -109,7 +109,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               onClick={() => onNavigate('exchange')}
               className="w-full sm:w-auto bg-brand-gold hover:bg-amber-600 text-white font-black py-4 px-8 rounded-xl md:rounded-2xl transition-all flex items-center justify-center shadow-xl active:scale-95 text-[10px] md:text-sm uppercase tracking-widest border border-brand-gold/50"
             >
-              Consultar Terminal <ArrowRight size={16} className="ml-2" />
+              Consultar Câmbio <ArrowRight size={16} className="ml-2" />
             </button>
           </div>
         </div>
