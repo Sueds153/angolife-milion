@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { User, Briefcase, Tag, Camera, Award, Share2, MessageCircle, CheckCircle2, Bell, BellOff, RefreshCw, DollarSign, ChevronRight, Edit3, Save, Star, History, Download, ShieldCheck, Heart } from 'lucide-react';
+import { User, Briefcase, Tag, Camera, Award, Share2, MessageCircle, CheckCircle2, Bell, BellOff, RefreshCw, DollarSign, ChevronRight, Edit3, Save, Star, History, Download, ShieldCheck, Heart, Link as LinkIcon } from 'lucide-react';
 import { UserProfile, Job } from '../types';
 import { NotificationService } from '../services/notificationService';
 import { SupabaseService } from '../services/supabaseService';
@@ -12,11 +12,13 @@ interface ProfilePageProps {
 }
 
 export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onLogout, onUpdateUser }) => {
-  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [profileImage, setProfileImage] = useState<string | null>(user.avatarUrl || null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [copied, setCopied] = useState(false);
+  const [copiedCode, setCopiedCode] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(user.fullName || '');
   const [editPhone, setEditPhone] = useState(user.phone || '');
@@ -46,14 +48,28 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onLogout, onUpda
   const handleSaveProfile = async () => {
     if (!user.id) return;
     setSaving(true);
+    
+    let avatarUrl = user.avatarUrl;
+    
+    // 1. Upload photo if selected
+    if (selectedFile) {
+      const uploadedUrl = await SupabaseService.uploadAvatar(selectedFile);
+      if (uploadedUrl) {
+        avatarUrl = uploadedUrl;
+      }
+    }
+
+    // 2. Update profile
     const { error } = await SupabaseService.auth.updateProfile(user.id, {
       full_name: editName,
-      phone: editPhone
+      phone: editPhone,
+      avatar_url: avatarUrl
     });
     
     if (!error) {
-      onUpdateUser({ fullName: editName, phone: editPhone });
+      onUpdateUser({ fullName: editName, phone: editPhone, avatarUrl: avatarUrl });
       setIsEditing(false);
+      setSelectedFile(null);
     }
     setSaving(false);
   };
@@ -84,6 +100,18 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onLogout, onUpda
     }
   };
 
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const stats = [
     { label: 'Guardadas', value: user.savedJobs?.length.toString() || '0', icon: Heart, color: 'text-rose-500', bg: 'bg-rose-500/10' },
     { label: 'Candidaturas', value: user.applicationHistory?.length.toString() || '0', icon: Briefcase, color: 'text-orange-500', bg: 'bg-orange-500/10' },
@@ -96,13 +124,13 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onLogout, onUpda
       await navigator.share({ title: 'Angolife', text: shareText, url: window.location.origin });
     } else {
       navigator.clipboard.writeText(user.referralCode);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setCopiedCode(true);
+      setTimeout(() => setCopiedCode(false), 2000);
     }
   };
 
   const handleClaimAdReward = () => {
-    const message = `Olá Su-Golden! Sou um Embaixador Angolife (${user.email}). Desafio concluído!`;
+    const message = `Olá Su-Golden! Quero o meu bónus de Embaixador Angolife (${user.email}). Já comecei a partilhar com os mambos!`;
     window.open(`https://wa.me/${APP_CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
@@ -132,7 +160,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onLogout, onUpda
                   <Award size={18} />
                 </div>
               )}
-              <input type="file" ref={fileInputRef} className="hidden" accept="image/*" title="Trocar foto de perfil" />
+              <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handlePhotoChange} title="Trocar foto de perfil" />
             </div>
 
             <div className="flex-1 text-center md:text-left space-y-4">
@@ -467,6 +495,99 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onLogout, onUpda
       </div>
 
       {/* CHALLENGE EMBAIXADOR - DASHBOARD FINAL */}
+      <div className="bg-slate-950 rounded-[2.5rem] p-10 border border-brand-gold/30 shadow-2xl relative overflow-hidden group">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-brand-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl group-hover:bg-brand-gold/10 transition-all"></div>
+        
+        <div className="relative z-10 flex flex-col md:flex-row items-center gap-10">
+          <div className="w-32 h-32 flex-shrink-0 bg-brand-gold/10 rounded-full flex items-center justify-center border border-brand-gold/20 shadow-[0_0_50px_rgba(212,175,55,0.1)]">
+            <Award size={64} className="text-brand-gold animate-bounce-slow" />
+          </div>
+          
+          <div className="flex-1 text-center md:text-left space-y-4">
+            <h2 className="text-3xl font-black text-white uppercase tracking-tighter leading-none italic">
+              Desafio <span className="text-brand-gold">Embaixador</span>
+            </h2>
+            <p className="text-sm font-bold text-slate-400 max-w-xl leading-relaxed">
+              "Deixa os mambos falarem, tu só tens de crescer!" Convida **5 amigos** para o Angolife. 
+              Ao bateres a meta, ganhas o **Plano Prata (999,99kz)** de borla e um **Desconto de 5%** no Câmbio de USD/EUR. 
+              Aproveita agora, mambo é sério!
+            </p>
+            
+            <div className="pt-4 flex flex-wrap items-center justify-center md:justify-start gap-6">
+              <div className="space-y-2">
+                <div className="flex justify-between text-[10px] font-black uppercase text-slate-500 tracking-[0.2em]">
+                  <span>Progresso da Meta</span>
+                  <span className="text-brand-gold">{user.referralCount}/5 Amigos</span>
+                </div>
+                <div className="w-56 h-2 bg-white/5 rounded-full overflow-hidden border border-white/10">
+                  <div 
+                    className="h-full bg-gradient-to-r from-brand-gold to-amber-400 rounded-full transition-all duration-1000 shadow-[0_0_15px_rgba(212,175,55,0.4)]"
+                    style={{ '--progress-width': `${Math.min(100, (user.referralCount / 5) * 100)}%` } as React.CSSProperties}
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="bg-white/5 border border-white/10 px-4 py-3 rounded-xl flex items-center gap-3 group/code hover:border-brand-gold/50 transition-all">
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Teu Código:</span>
+                  <span className="text-xs font-black text-white font-mono tracking-wider">{user.referralCode}</span>
+                  <button 
+                    onClick={() => {
+                      navigator.clipboard.writeText(user.referralCode);
+                      setCopiedCode(true);
+                      setTimeout(() => setCopiedCode(false), 2000);
+                    }}
+                    className="p-1.5 hover:bg-white/10 rounded-lg text-slate-400 hover:text-brand-gold transition-colors"
+                    title="Copiar Código"
+                  >
+                    {copiedCode ? <CheckCircle2 size={14} className="text-emerald-500" /> : <RefreshCw size={14} />}
+                  </button>
+                  <div className="w-px h-4 bg-white/10"></div>
+                  <button 
+                    onClick={() => {
+                      const shareUrl = `${window.location.origin}?ref=${user.referralCode}`;
+                      navigator.clipboard.writeText(shareUrl);
+                      setCopiedLink(true);
+                      setTimeout(() => setCopiedLink(false), 2000);
+                    }}
+                    className="p-1.5 hover:bg-white/10 rounded-lg text-slate-400 hover:text-brand-gold transition-colors"
+                    title="Copiar Link de Convite"
+                  >
+                    {copiedLink ? <CheckCircle2 size={14} className="text-emerald-500" /> : <LinkIcon size={14} />}
+                  </button>
+                </div>
+                
+                <button 
+                  onClick={handleShareReferral}
+                  className="px-8 py-3 bg-brand-gold text-slate-950 rounded-xl font-black text-[10px] uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-amber-500/20"
+                >
+                  Convidar Agora
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {user.hasReferralDiscount && (
+          <div className="mt-8 pt-8 border-t border-white/10 grid grid-cols-1 md:grid-cols-2 gap-4">
+             <div className="flex items-center gap-4 p-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/20">
+                <ShieldCheck size={24} className="text-emerald-500" />
+                <div>
+                   <p className="text-[10px] font-black uppercase text-emerald-500 tracking-widest">Benefício Ativo</p>
+                   <p className="text-xs font-bold text-white uppercase tracking-tight">Câmbio VIP: Desconto de 5% em USD/EUR</p>
+                </div>
+             </div>
+             <div className="flex items-center gap-4 p-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/20">
+                <CheckCircle2 size={24} className="text-emerald-500" />
+                <div>
+                   <p className="text-[10px] font-black uppercase text-emerald-500 tracking-widest">Selo Ativado</p>
+                   <p className="text-xs font-bold text-white uppercase tracking-tight">Plano Prata Renovado (Ilimitado)</p>
+                </div>
+             </div>
+          </div>
+        )}
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {stats.map((stat, idx) => (
           <div key={idx} className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 border border-orange-500/10 shadow-sm hover:shadow-2xl transition-all group overflow-hidden relative">

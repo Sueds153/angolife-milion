@@ -51,6 +51,15 @@ export const SupabaseService = {
           },
         },
       });
+
+      if (!error && data?.user && invitedBy) {
+        // Run reward logic in the background (or here for simplicity)
+        await SupabaseService.referrals.processReward(data.user.id, invitedBy);
+      } else if (!error && data?.user) {
+        // Even without referral, maybe give a small welcome?
+        // For now, only focus on the referral request
+      }
+
       return { data, error };
     },
 
@@ -94,6 +103,56 @@ export const SupabaseService = {
     onAuthStateChange: (callback: (event: string, session: any) => void) => {
       return supabase.auth.onAuthStateChange(callback);
     },
+  },
+
+  // --- REFERRALS & REWARDS ---
+  referrals: {
+    processReward: async (newUserId: string, referralCode: string) => {
+      try {
+        // 1. Identify the Sharer (Ambassador)
+        // Referral code format: ANGO-XXXXXX
+        const sharerIdPrefix = referralCode.replace('ANGO-', '').toLowerCase();
+        
+        const { data: sharer, error: sharerError } = await supabase
+          .from("profiles")
+          .select("id, referral_count, cv_credits, email")
+          .ilike("id", `${sharerIdPrefix}%`)
+          .single();
+
+        if (sharerError || !sharer) return;
+
+        // 2. Award Recruit (Bronze Reward - 5 Credits)
+        await supabase
+          .from("profiles")
+          .update({ 
+            cv_credits: 5,
+            account_type: 'bronze'
+          })
+          .eq("id", newUserId);
+
+        // 3. Update Sharer Count
+        const newCount = (sharer.referral_count || 0) + 1;
+        const updates: any = { referral_count: newCount };
+
+        // 4. Check for Ambassador Goal (Silver Reward at 5)
+        if (newCount === 5) {
+          updates.account_type = 'silver';
+          updates.is_premium = true;
+          updates.premium_expiry = Date.now() + (30 * 24 * 60 * 60 * 1000); // 30 days
+          updates.has_referral_discount = true;
+          // Add 15 credits (Silver equivalent)
+          updates.cv_credits = (sharer.cv_credits || 0) + 15;
+        }
+
+        await supabase
+          .from("profiles")
+          .update(updates)
+          .eq("id", sharer.id);
+
+      } catch (err) {
+        console.error("Referral process error:", err);
+      }
+    }
   },
 
   // --- EXCHANGE RATES ---
@@ -836,6 +895,27 @@ export const SupabaseService = {
 
     const { data } = supabase.storage
       .from("payment-receipts")
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
+  },
+
+  uploadAvatar: async (file: File): Promise<string | null> => {
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `avatars/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(filePath, file);
+
+    if (uploadError) {
+      console.error("Error uploading avatar:", uploadError);
+      return null;
+    }
+
+    const { data } = supabase.storage
+      .from("avatars")
       .getPublicUrl(filePath);
 
     return data.publicUrl;

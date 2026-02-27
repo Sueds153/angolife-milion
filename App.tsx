@@ -104,6 +104,8 @@ const App: React.FC = () => {
           applicationHistory: data.application_history || [],
           cvHistory: data.cv_history || [],
           accountType: data.account_type || 'free',
+          hasReferralDiscount: data.has_referral_discount || false,
+          avatarUrl: data.avatar_url,
         });
         setIsAuthenticated(true);
       } else {
@@ -290,7 +292,7 @@ const App: React.FC = () => {
           );
         }}
       />;
-      case 'exchange': return <ExchangePage isAuthenticated={!!user} userEmail={user?.email} onRequireAuth={() => setIsAuthModalOpen(true)} isDarkMode={isDarkMode} />;
+      case 'exchange': return <ExchangePage isAuthenticated={!!user} userProfile={user || undefined} onRequireAuth={() => setIsAuthModalOpen(true)} isDarkMode={isDarkMode} />;
       case 'deals':
         return selectedDeal
           ? <DealDetailPage deal={selectedDeal} onBack={() => setSelectedDeal(null)} user={user} />

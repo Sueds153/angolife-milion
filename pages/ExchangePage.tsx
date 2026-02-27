@@ -19,15 +19,17 @@ import { RewardedAdModal } from '../components/RewardedAdModal';
 import { AdService } from '../services/adService';
 import { APP_CONFIG } from '../constants';
 
+import { UserProfile } from '../types';
+
 interface ExchangePageProps {
   isAuthenticated: boolean;
-  userEmail?: string;
+  userProfile?: UserProfile;
   onRequireAuth: () => void;
   isDarkMode: boolean;
   onRequestReward?: (callback: () => void) => void;
 }
 
-export const ExchangePage: React.FC<ExchangePageProps> = ({ isAuthenticated, userEmail, onRequireAuth, isDarkMode, onRequestReward }) => {
+export const ExchangePage: React.FC<ExchangePageProps> = ({ isAuthenticated, userProfile, onRequireAuth, isDarkMode, onRequestReward }) => {
   const [rates, setRates] = useState<ExchangeRate[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'view' | 'trade'>('view');
@@ -352,7 +354,7 @@ export const ExchangePage: React.FC<ExchangePageProps> = ({ isAuthenticated, use
       bank: tradeAction === 'sell' ? formData.bank : null,
       iban: tradeAction === 'sell' ? SupabaseService.sanitize(formData.iban) : null,
       account_holder: tradeAction === 'sell' ? SupabaseService.sanitize(formData.accountHolder) : null,
-      user_email: userEmail || null,
+      user_email: userProfile?.email || null,
     };
 
     try {
@@ -381,10 +383,18 @@ export const ExchangePage: React.FC<ExchangePageProps> = ({ isAuthenticated, use
   const estimatedTotalFormatted = estimatedTotal.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' });
 
   // Derived UI Formats
+  // Derived UI Formats
   const currentRateValue = tradeAction === 'buy' ? (rates.find(r => r.currency === tradeCurrency)?.informalSell || 0) : (rates.find(r => r.currency === tradeCurrency)?.informalBuy || 0);
-  const totalKz = Math.round(((parseFloat(tradeAmount) || 0) * currentRateValue) * 100) / 100;
+  
+  const discountThreshold = 30;
+  const isEligibleForDiscount = (parseFloat(tradeAmount) || 0) >= discountThreshold && userProfile?.hasReferralDiscount;
+  const discountFactor = isEligibleForDiscount ? 0.95 : 1; // 5% discount
+
+  const totalKz = Math.round(((parseFloat(tradeAmount) || 0) * currentRateValue * discountFactor) * 100) / 100;
   const totalKzFormatted = totalKz.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' });
-  const savingsAmount = Math.round((50 * (parseFloat(tradeAmount) || 0)) * 100) / 100;
+  
+  const originalTotalKz = Math.round(((parseFloat(tradeAmount) || 0) * currentRateValue) * 100) / 100;
+  const savingsAmount = originalTotalKz - totalKz;
   const savingsFormatted = savingsAmount.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' });
 
   const rateData = rates.find(r => r.currency === tradeCurrency);

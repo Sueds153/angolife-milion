@@ -81,13 +81,15 @@ export interface UserProfile {
   cvCredits: number;
   premiumExpiry?: number; // Timestamp
   subscriptionType?: "pack3" | "monthly" | "yearly";
-  accountType?: "free" | "premium";
+  accountType?: "free" | "premium" | "bronze" | "silver";
   fullName?: string;
   phone?: string;
   location?: string;
   savedJobs?: string[]; // IDs das vagas guardadas
   applicationHistory?: { jobId: string, date: string, title: string }[];
   cvHistory?: { id: string, date: string, url: string, name: string }[];
+  hasReferralDiscount?: boolean;
+  avatarUrl?: string;
 }
 
 export interface AppNotification {

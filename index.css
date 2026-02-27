@@ -10,6 +10,10 @@
   img, video, canvas, svg {
     display: block;
     max-width: 100%;
+  }
+
+  /* Specific handling for images to avoid intrinsic height issues in some browsers */
+  img {
     height: auto;
   }
 }
