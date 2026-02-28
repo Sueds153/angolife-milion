@@ -4,7 +4,7 @@ import { TemplateSharedProps } from './CVTemplateSelector';
 import '../../styles/cv-templates.css';
 
 export const MinimalistTemplate: React.FC<TemplateSharedProps> = ({ cv, educationFirst }) => {
-    
+
     const renderExperience = () => {
         if (!cv.experiences || cv.experiences.length === 0) return null;
         return (
@@ -108,7 +108,7 @@ export const MinimalistTemplate: React.FC<TemplateSharedProps> = ({ cv, educatio
             <div className="min-main">
                 <div className="min-header">
                     <h1 className="min-name">{cv.fullName || 'Seu Nome'}</h1>
-                    <div className="min-role">Candidato Profissional</div>
+                    <div className="min-role">{cv.title || 'Candidato Profissional'}</div>
                 </div>
 
                 {/* Perfil / Summary */}

@@ -78,8 +78,8 @@ export const ClassicTemplate: React.FC<TemplateSharedProps> = ({ cv, educationFi
                 <div className="classic-header-row">
                     <div className="classic-header-left">
                         <h1 className="classic-name">{cv.fullName || 'Seu Nome'}</h1>
-                        <div className="classic-role">Profissional Especializado</div>
-                        
+                        <div className="classic-role">{cv.title || 'Profissional Especializado'}</div>
+
                         {(cv.email || cv.phone || cv.location) && (
                             <div className="classic-contacts">
                                 {cv.phone && (
@@ -100,7 +100,7 @@ export const ClassicTemplate: React.FC<TemplateSharedProps> = ({ cv, educationFi
                             </div>
                         )}
                     </div>
-                    
+
                     <div className="classic-header-right">
                         <div className="classic-circle-bg" />
                         {cv.photoUrl ? (

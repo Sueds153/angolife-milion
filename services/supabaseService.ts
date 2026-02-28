@@ -18,21 +18,21 @@ export const SupabaseService = {
   },
 
   getSupabaseInstance: () => supabase,
-  
+
   mapStatus: (status: string | undefined): "pending" | "published" | "approved" | "rejected" => {
     if (!status) return "pending";
     const s = status.toLowerCase();
-    
+
     // Published/Publicado/Approved/Aprovado/Premium -> published (or approved for deals)
     if (s === "publicado" || s === "published" || s === "aprovado" || s === "approved" || s === "premium" || s === "ativo" || s === "active") {
       return "published";
     }
-    
+
     // Rejected/Rejeitado -> rejected
     if (s === "rejeitado" || s === "rejected") {
       return "rejected";
     }
-    
+
     // Default to pending (aguardando, pending, pendente)
     return "pending";
   },
@@ -93,7 +93,7 @@ export const SupabaseService = {
       if (updates.savedJobs) dbUpdates.saved_jobs = updates.savedJobs;
       if (updates.applicationHistory) dbUpdates.application_history = updates.applicationHistory;
       if (updates.cvHistory) dbUpdates.cv_history = updates.cvHistory;
-      
+
       const { data, error } = await supabase
         .from("profiles")
         .update(dbUpdates)
@@ -120,7 +120,7 @@ export const SupabaseService = {
         // 1. Identify the Sharer (Ambassador)
         // Referral code format: ANGO-XXXXXX
         const sharerIdPrefix = referralCode.replace('ANGO-', '').toLowerCase();
-        
+
         const { data: sharer, error: sharerError } = await supabase
           .from("profiles")
           .select("id, referral_count, cv_credits, email")
@@ -132,7 +132,7 @@ export const SupabaseService = {
         // 2. Award Recruit (Bronze Reward - 5 Credits)
         await supabase
           .from("profiles")
-          .update({ 
+          .update({
             cv_credits: 5,
             account_type: 'bronze'
           })
@@ -426,10 +426,10 @@ export const SupabaseService = {
       id: j.id,
       title: j.title,
       company: j.company,
-      location: j.location,
-      type: j.type,
+      location: j.location || '',
+      type: j.type || '',
       salary: j.salary,
-      description: j.description,
+      description: j.description || '',
       postedAt: j.posted_at,
       requirements: j.requirements || [],
       sourceUrl: j.source_url,
@@ -438,6 +438,8 @@ export const SupabaseService = {
       imageUrl: j.imagem_url,
       category: j.categoria,
       source: j.fonte,
+      isVerified: j.is_verified || false,
+      applicationCount: j.application_count || 0,
     }));
   },
 
@@ -474,7 +476,7 @@ export const SupabaseService = {
       imageUrl: j.imagem_url,
       category: j.categoria,
       source: j.fonte,
-      isVerified: j.is_verified, 
+      isVerified: j.is_verified,
     }));
   },
 
@@ -609,7 +611,7 @@ export const SupabaseService = {
       .select("*")
       .eq("id", id)
       .single();
-    
+
     if (error || !data) return null;
     return {
       id: data.id,
@@ -632,12 +634,12 @@ export const SupabaseService = {
 
   getJobsByIds: async (ids: string[]): Promise<Job[]> => {
     if (!ids || ids.length === 0) return [];
-    
+
     const { data, error } = await supabase
       .from("jobs")
       .select("*")
       .in("id", ids);
-    
+
     if (error || !data) return [];
     return data.map((j: any) => ({
       id: j.id,
@@ -660,15 +662,15 @@ export const SupabaseService = {
 
   toggleSaveJob: async (userId: string, currentSaved: string[], jobId: string): Promise<string[]> => {
     const isSaved = currentSaved.includes(jobId);
-    const newList = isSaved 
-      ? currentSaved.filter(id => id !== jobId) 
+    const newList = isSaved
+      ? currentSaved.filter(id => id !== jobId)
       : [...currentSaved, jobId];
-    
+
     await supabase
       .from("profiles")
       .update({ saved_jobs: newList })
       .eq("id", userId);
-    
+
     return newList;
   },
 
@@ -680,15 +682,15 @@ export const SupabaseService = {
       date: new Date().toISOString()
     };
     const newHistory = [newEntry, ...currentHistory];
-    
+
     await supabase
       .from("profiles")
       .update({ application_history: newHistory })
       .eq("id", userId);
-    
+
     // Also increment global count
     await SupabaseService.incrementApplicationCount(job.id);
-    
+
     return newHistory;
   },
 
@@ -756,13 +758,13 @@ export const SupabaseService = {
       console.log("🚀 [Supabase] Aprovando notícia ID:", id);
       const { data, error } = await supabase
         .from("news_articles")
-        .update({ 
+        .update({
           status: "publicado",
           published_at: new Date().toISOString()
         })
         .eq("id", id)
         .select();
-      
+
       if (error) {
         console.error("❌ Error approving news:", error.message);
         return { success: false, error: error.message };
@@ -780,7 +782,7 @@ export const SupabaseService = {
         .from("news_articles")
         .delete()
         .eq("id", id);
-      
+
       if (error) {
         console.error("❌ Error rejecting news:", error.message);
         return { success: false, error: error.message };
@@ -793,7 +795,7 @@ export const SupabaseService = {
     console.log("🚀 [Supabase] Aprovando TODAS as notícias pendentes");
     const { error } = await supabase
       .from("news_articles")
-      .update({ 
+      .update({
         status: "publicado",
         published_at: new Date().toISOString()
       })
@@ -848,7 +850,7 @@ export const SupabaseService = {
       .from("orders")
       .select("*", { count: 'exact', head: true })
       .gte("created_at", twentyFourHoursAgo);
-    
+
     if (error) return 0;
     return (count || 0) + 12; // Base offset to make it look "active" as requested
   },
@@ -859,7 +861,7 @@ export const SupabaseService = {
       .select("full_name, wallet, amount, currency, order_type, bank")
       .order("created_at", { ascending: false })
       .limit(limit);
-    
+
     if (error) return [];
     return data.map(o => ({
       name: o.full_name?.split(' ')[0] || 'Utilizador',

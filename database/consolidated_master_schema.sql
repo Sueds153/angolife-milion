@@ -175,6 +175,8 @@ select using (
             where id = auth.uid()
         )
     );
+create policy "Enable insert for authenticated users only" on public.orders for
+insert with check (auth.uid() is not null);
 create policy "Admin see all orders" on public.orders for
 select using (
         exists (

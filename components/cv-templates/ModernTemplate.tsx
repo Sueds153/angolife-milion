@@ -7,7 +7,7 @@ export const ModernTemplate: React.FC<TemplateSharedProps> = ({ cv, educationFir
     // Only render Experience section if there is at least one experience
     const renderExperience = () => {
         if (!cv.experiences || cv.experiences.length === 0) return null;
-        
+
         return (
             <div className="modern-section">
                 <h2 className="modern-section-title">Experiência Profissional</h2>
@@ -32,7 +32,7 @@ export const ModernTemplate: React.FC<TemplateSharedProps> = ({ cv, educationFir
     // Only render Education section if there is at least one education entry
     const renderEducation = () => {
         if (!cv.education || cv.education.length === 0) return null;
-        
+
         return (
             <div className="modern-section">
                 <h2 className="modern-section-title">Formação Académica</h2>
@@ -105,7 +105,8 @@ export const ModernTemplate: React.FC<TemplateSharedProps> = ({ cv, educationFir
             <div className="modern-main">
                 <div className="modern-header">
                     <h1 className="modern-name">{cv.fullName || 'Seu Nome'}</h1>
-                    {/* The CV data structure doesnt have a specific "Title" field isolated, but we can add one if needed, or leave it cleaner */}
+                    {/* Title / Role */}
+                    {cv.title && <div className="modern-role">{cv.title}</div>}
                 </div>
 
                 {/* Sobre Mim */}

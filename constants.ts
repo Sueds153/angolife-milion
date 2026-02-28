@@ -7,7 +7,7 @@ export const APP_CONFIG = {
   },
   BANK_DETAILS: {
     ENTITY: "10116",
-    REFERENCE: "921 967 112",
+    REFERENCE: "921 967 122",
     BINANCE_PAY_ID: "821967221",
     WISE_PAYPAL_EMAIL: "info@angolife.site"
   }

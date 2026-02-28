@@ -15,6 +15,7 @@ interface CVBuilderPageProps {
 
 const initialCV: CVData = {
   fullName: '',
+  title: '',
   email: '',
   phone: '',
   location: '',
@@ -215,7 +216,10 @@ export const CVBuilderPage: React.FC<CVBuilderPageProps> = ({ isAuthenticated, u
           <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Cargo / Título Profissional</label>
           <input
             className="w-full bg-slate-50 dark:bg-white/5 border gold-border-subtle p-3 rounded-xl outline-none"
+            value={cv.title || ''}
+            onChange={e => updateField('title', e.target.value)}
             placeholder="Ex: Engenheiro Civil Sénior"
+            aria-label="Cargo / Título Profissional"
           />
         </div>
         <div className="space-y-1 md:col-span-2">
@@ -453,7 +457,7 @@ export const CVBuilderPage: React.FC<CVBuilderPageProps> = ({ isAuthenticated, u
         <div className="flex flex-wrap gap-2">
           {cv.skills.map((skill, i) => (
             <span key={i} className="bg-brand-gold/10 text-brand-gold px-3 py-1 rounded-lg text-sm font-bold flex items-center gap-2">
-              {skill} <button onClick={() => updateField('skills', cv.skills.filter(s => s !== skill))} aria-label={`Remover habilidade ${skill}`}><CloseIcon size={14} /></button>
+              {skill} <button onClick={() => updateField('skills', cv.skills.filter(s => s !== skill))} aria-label={`Remover habilidade ${skill}`}><X size={14} /></button>
             </span>
           ))}
         </div>
@@ -561,6 +565,7 @@ export const CVBuilderPage: React.FC<CVBuilderPageProps> = ({ isAuthenticated, u
                 {step === 2 && "Em vez de listar tarefas, liste resultados. Use a IA para transformar 'Vendi produtos' em 'Gerenciei vendas resultando em 20% de aumento de receita'."}
                 {step === 3 && "Coloque a educação mais recente primeiro. Se tem experiência, não precisa detalhar o ensino médio."}
                 {step === 4 && "Foque em competências técnicas (Hard Skills) relevantes para a vaga. Soft skills são melhores demonstradas na entrevista."}
+                {step === 5 && "Revise o resumo cuidadosamente. Esta é a primeira coisa que o recrutador lê, e por vezes a única. Seja direto, objetivo e destaque o seu maior diferencial."}
               </p>
             </div>
           </div>

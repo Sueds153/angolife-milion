@@ -7,7 +7,7 @@ export const TechnicalTemplate: React.FC<TemplateSharedProps> = ({ cv, education
     // Only render Experience section if there is at least one experience
     const renderExperience = () => {
         if (!cv.experiences || cv.experiences.length === 0) return null;
-        
+
         return (
             <div>
                 <h2 className="creative-section-title">Experiências Profissionais</h2>
@@ -32,7 +32,7 @@ export const TechnicalTemplate: React.FC<TemplateSharedProps> = ({ cv, education
     // Only render Education section if there is at least one education entry
     const renderEducation = () => {
         if (!cv.education || cv.education.length === 0) return null;
-        
+
         return (
             <div>
                 <h2 className="creative-section-title">Formações</h2>
@@ -105,7 +105,7 @@ export const TechnicalTemplate: React.FC<TemplateSharedProps> = ({ cv, education
             <div className="creative-main">
                 <div className="creative-header">
                     <h1 className="creative-name">{cv.fullName || 'Seu Nome'}</h1>
-                    <div className="creative-role">Profissional Especializado</div>
+                    <div className="creative-role">{cv.title || 'Profissional Especializado'}</div>
                 </div>
 
                 {/* Sobre Mim / Resumo Profissional */}

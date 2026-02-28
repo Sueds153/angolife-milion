@@ -193,7 +193,7 @@ const App: React.FC = () => {
     };
 
     // Check periodically but subtly (every 2-3 minutes)
-    const timer = setTimeout(checkForUpdates, 180000); 
+    const timer = setTimeout(checkForUpdates, 180000);
     return () => clearTimeout(timer);
   }, [subscribedCategories]);
 
@@ -268,8 +268,8 @@ const App: React.FC = () => {
   const renderPage = () => {
     switch (currentPage) {
       case 'home': return <HomePage onNavigate={handleNavigate} />;
-      case 'jobs': return <JobsPage 
-        isAuthenticated={!!user} 
+      case 'jobs': return <JobsPage
+        isAuthenticated={!!user}
         isAdmin={user?.isAdmin}
         user={user || undefined}
         onUpdateUser={(updates) => user && setUser({ ...user, ...updates })}
@@ -376,7 +376,7 @@ const App: React.FC = () => {
         />
 
         <main className="flex-grow flex flex-col pt-safe">
-          <div className="flex-grow container-responsive py-6 animate-fade-in print:p-0">
+          <div className="flex-grow container py-6 animate-fade-in print:p-0">
             {renderPage()}
           </div>
 
