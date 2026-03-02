@@ -121,6 +121,8 @@ export const HomePage: React.FC = () => {
             <button 
               onClick={() => setShowInterstitial(false)}
               className="absolute top-6 right-6 z-10 p-2 bg-black/40 hover:bg-black/60 rounded-full text-white transition-all"
+              aria-label="Fechar Anúncio"
+              title="Fechar"
             >
               <X size={20} />
             </button>
@@ -202,7 +204,14 @@ export const HomePage: React.FC = () => {
                   >
                     Resgatar Bónus
                   </button>
-                  <button onClick={() => setShowRewarded(false)} className="text-slate-500 text-[10px] font-black uppercase tracking-widest hover:text-white transition-colors">Fechar</button>
+                  <button 
+                    onClick={() => setShowRewarded(false)} 
+                    className="text-slate-500 text-[10px] font-black uppercase tracking-widest hover:text-white transition-colors"
+                    title="Fechar"
+                    aria-label="Fechar Oferta"
+                  >
+                    Fechar
+                  </button>
                 </div>
               </div>
             </div>

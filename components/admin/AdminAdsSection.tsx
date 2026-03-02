@@ -118,10 +118,12 @@ export const AdminAdsSection: React.FC<AdminAdsSectionProps> = ({
                       <Globe size={16} className="text-blue-500" />
                       <span className="text-[10px] font-black uppercase text-slate-500">Google AdSense</span>
                     </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
+                    <label htmlFor="google-ads-toggle" className="relative inline-flex items-center cursor-pointer">
                       <input 
+                        id="google-ads-toggle"
                         type="checkbox" 
                         className="sr-only peer"
+                        title="Ativar/Desativar Google Ads"
                         checked={editedSettings?.google_ads.enabled}
                         onChange={(e) => setEditedSettings({
                           ...editedSettings!,
@@ -132,8 +134,10 @@ export const AdminAdsSection: React.FC<AdminAdsSectionProps> = ({
                     </label>
                   </div>
                   <input 
+                    id="google-ads-client"
                     type="text"
                     placeholder="CLIENT ID (ca-pub-...)"
+                    aria-label="Google AdSense Client ID"
                     value={editedSettings?.google_ads.client || ''}
                     onChange={(e) => setEditedSettings({
                       ...editedSettings!,
@@ -150,8 +154,10 @@ export const AdminAdsSection: React.FC<AdminAdsSectionProps> = ({
                     <span className="text-[10px] font-black uppercase text-slate-500">WhatsApp de Contacto</span>
                   </div>
                   <input 
+                    id="whatsapp-contact"
                     type="text"
                     placeholder="Número (Ex: 244...)"
+                    aria-label="Número de WhatsApp para Contacto"
                     value={editedSettings?.contact_info.whatsapp || ''}
                     onChange={(e) => setEditedSettings({
                       ...editedSettings!,
@@ -246,6 +252,8 @@ export const AdminAdsSection: React.FC<AdminAdsSectionProps> = ({
                   <button 
                     onClick={() => handleDeleteAd(ad.id)}
                     className="p-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all"
+                    title="Eliminar Anúncio"
+                    aria-label="Eliminar"
                   >
                     <Trash2 size={16} />
                   </button>

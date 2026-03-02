@@ -76,7 +76,12 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
               {editingAd ? 'Editar Anúncio' : 'Novo Anúncio'}
             </h3>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-colors">
+          <button 
+            onClick={onClose} 
+            className="p-2 hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-colors"
+            aria-label="Fechar Modal"
+            title="Fechar"
+          >
             <X size={20} className="text-slate-400" />
           </button>
         </div>
@@ -110,10 +115,11 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
 
             {/* Configs de Exibição */}
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Onde Aparecer (Local)</label>
+              <label htmlFor="ad-location" className="text-[10px] font-black uppercase text-slate-400 ml-1">Onde Aparecer (Local)</label>
               <div className="relative">
                 <MapPin size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                 <select 
+                  id="ad-location"
                   value={formData.location}
                   onChange={(e) => setFormData({...formData, location: e.target.value as any})}
                   className="w-full bg-slate-50 dark:bg-white/5 border-none rounded-2xl p-4 pl-10 text-xs font-bold appearance-none focus:ring-2 focus:ring-brand-gold/50"
@@ -127,10 +133,11 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Formato do Anúncio</label>
+              <label htmlFor="ad-format" className="text-[10px] font-black uppercase text-slate-400 ml-1">Formato do Anúncio</label>
               <div className="relative">
                 <Layout size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                 <select 
+                  id="ad-format"
                   value={formData.format}
                   onChange={(e) => setFormData({...formData, format: e.target.value as any})}
                   className="w-full bg-slate-50 dark:bg-white/5 border-none rounded-2xl p-4 pl-10 text-xs font-bold appearance-none focus:ring-2 focus:ring-brand-gold/50"
@@ -144,8 +151,9 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
 
             {/* Duração & Ordem */}
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Duração (Segundos) <Clock size={10} className="inline ml-1"/></label>
+              <label htmlFor="ad-duration" className="text-[10px] font-black uppercase text-slate-400 ml-1">Duração (Segundos) <Clock size={10} className="inline ml-1"/></label>
               <input 
+                id="ad-duration"
                 type="number"
                 value={formData.duration_seconds}
                 onChange={(e) => setFormData({...formData, duration_seconds: parseInt(e.target.value)})}

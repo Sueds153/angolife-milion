@@ -31,8 +31,7 @@ export const AdBanner: React.FC<AdBannerProps> = ({ format }) => {
   if (isGoogleEnabled && adSlot) {
     return (
       <div className={`flex items-center justify-center overflow-hidden ${getStyles()}`}>
-        <ins className="adsbygoogle"
-             style={{ display: 'block' }}
+        <ins className="adsbygoogle block"
              data-ad-client={PARTNER_ADS.googleAds.client}
              data-ad-slot={adSlot}
              data-ad-format="auto"
