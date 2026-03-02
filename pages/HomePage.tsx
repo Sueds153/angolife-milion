@@ -1,7 +1,6 @@
-
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Briefcase, ShoppingBag, DollarSign, ChevronRight, MessageCircle, Activity } from 'lucide-react';
+import { ArrowRight, Briefcase, ShoppingBag, DollarSign, ChevronRight, MessageCircle, Activity, Volume2, VolumeX } from 'lucide-react';
 import { ExchangeService } from '../services/exchange.service';
 import { DealsService } from '../services/deals.service';
 import { JobsService } from '../services/jobs.service';
@@ -16,20 +15,21 @@ export const HomePage: React.FC = () => {
   const [featuredJobs, setFeaturedJobs] = useState<Job[]>([]);
   const [featuredDeals, setFeaturedDeals] = useState<ProductDeal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isMuted, setIsMuted] = useState(true);
 
   const [heroImageIndex, setHeroImageIndex] = useState(0);
   const [adImageIndex, setAdImageIndex] = useState(0);
 
-  const heroImages = PARTNER_ADS.heroBanners.map(b => b.imageUrl);
-  const adImages = PARTNER_ADS.partnerBanners.filter(b => b.isActive).map(b => b.imageUrl);
+  const heroBanners = PARTNER_ADS.heroBanners;
+  const adBanners = PARTNER_ADS.partnerBanners.filter(b => b.isActive);
 
   useEffect(() => {
     const heroInterval = setInterval(() => {
-      setHeroImageIndex((prev) => (prev + 1) % heroImages.length);
+      setHeroImageIndex((prev) => (prev + 1) % heroBanners.length);
     }, 6000);
 
     const adInterval = setInterval(() => {
-      setAdImageIndex((prev) => (prev + 1) % adImages.length);
+      setAdImageIndex((prev) => (prev + 1) % adBanners.length);
     }, 5000);
 
     const loadDashboardData = async () => {
@@ -70,15 +70,38 @@ export const HomePage: React.FC = () => {
       {/* Hero Section Dynamic - Mobile Optimized Height */}
       <div className="relative rounded-[1.5rem] md:rounded-[3rem] overflow-hidden bg-slate-950 shadow-2xl min-h-[380px] md:min-h-[600px] flex items-center group gold-border-subtle">
         <div className="absolute inset-0 z-0">
-          {heroImages.map((img, idx) => (
-            <img 
-              key={idx}
-              src={img} 
-              alt="Professional Success" 
-              className={`absolute inset-0 w-full h-full object-cover transition-all duration-[3000ms] ease-in-out ${heroImageIndex === idx ? 'opacity-40 scale-110 translate-x-0' : 'opacity-0 scale-100 translate-x-4'}`}
-            />
+          {heroBanners.map((banner, idx) => (
+            banner.mediaType === 'video' ? (
+              <video 
+                key={idx}
+                src={banner.videoUrl} 
+                poster={banner.imageUrl}
+                autoPlay 
+                muted={isMuted}
+                loop 
+                playsInline
+                className={`absolute inset-0 w-full h-full object-cover transition-all duration-[3000ms] ease-in-out ${heroImageIndex === idx ? 'opacity-40 scale-110' : 'opacity-0 scale-100'}`}
+              />
+            ) : (
+              <img 
+                key={idx}
+                src={banner.imageUrl} 
+                alt={banner.title} 
+                className={`absolute inset-0 w-full h-full object-cover transition-all duration-[3000ms] ease-in-out ${heroImageIndex === idx ? 'opacity-40 scale-110 translate-x-0' : 'opacity-0 scale-100 translate-x-4'}`}
+              />
+            )
           ))}
           <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-slate-950 via-slate-950/70 to-transparent"></div>
+
+          {/* Volume Toggle Hero */}
+          {heroBanners[heroImageIndex]?.mediaType === 'video' && (
+            <button 
+              onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted); }}
+              className="absolute bottom-6 right-6 z-30 p-3 bg-black/40 hover:bg-black/60 backdrop-blur-md rounded-full text-white border border-white/20 transition-all active:scale-95"
+            >
+              {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+            </button>
+          )}
         </div>
         
         <div className="relative z-10 p-6 md:p-16 max-w-4xl w-full">
@@ -146,15 +169,38 @@ export const HomePage: React.FC = () => {
       {/* Ad Section - Mobile Responsive CTA */}
       <div className="relative rounded-[1.5rem] md:rounded-[4rem] overflow-hidden bg-black shadow-2xl group transition-all gold-border-subtle min-h-[400px] md:min-h-[500px] flex items-center">
         <div className="absolute inset-0 z-0">
-          {adImages.map((img, idx) => (
-            <img 
-              key={idx}
-              src={img} 
-              alt="Business Prosperity" 
-              className={`absolute inset-0 w-full h-full object-cover transition-all duration-[4000ms] ${adImageIndex === idx ? 'opacity-60 scale-105 blur-none' : 'opacity-0 scale-100'}`}
-            />
+          {adBanners.map((banner, idx) => (
+            banner.mediaType === 'video' ? (
+              <video 
+                key={idx}
+                src={banner.videoUrl} 
+                poster={banner.imageUrl}
+                autoPlay 
+                muted={isMuted}
+                loop 
+                playsInline
+                className={`absolute inset-0 w-full h-full object-cover transition-all duration-[4000ms] ${adImageIndex === idx ? 'opacity-60 scale-105 blur-none' : 'opacity-0 scale-100'}`}
+              />
+            ) : (
+              <img 
+                key={idx}
+                src={banner.imageUrl} 
+                alt={banner.companyName} 
+                className={`absolute inset-0 w-full h-full object-cover transition-all duration-[4000ms] ${adImageIndex === idx ? 'opacity-60 scale-105 blur-none' : 'opacity-0 scale-100'}`}
+              />
+            )
           ))}
           <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black via-black/85 to-transparent"></div>
+          
+          {/* Volume Toggle Ads */}
+          {adBanners[adImageIndex]?.mediaType === 'video' && (
+            <button 
+              onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted); }}
+              className="absolute bottom-6 right-6 z-30 p-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white border border-white/10 transition-all active:scale-95"
+            >
+              {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+            </button>
+          )}
         </div>
 
         <div className="relative z-10 p-6 md:p-24 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12 w-full text-center md:text-left stack-narrow">
