@@ -66,7 +66,15 @@ export const NotificationService = {
       return subscription;
     } catch (error) {
       console.error('Erro ao inicializar Web Push:', error);
+      return null;
     }
+  },
+
+  isSubscribed: async (): Promise<boolean> => {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return false;
+    const registration = await navigator.serviceWorker.ready;
+    const subscription = await registration.pushManager.getSubscription();
+    return !!subscription;
   },
 
   subscribeUser: async (userId: string) => {

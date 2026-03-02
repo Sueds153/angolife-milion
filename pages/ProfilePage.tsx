@@ -77,8 +77,8 @@ export const ProfilePage: React.FC = () => {
     
     // Inicializar Web Push se suportado
     if (user?.id) {
-      NotificationService.initWebPush(user.id).then(sub => {
-        if (sub) setNotificationPermission('granted');
+      NotificationService.isSubscribed().then(isSub => {
+        if (isSub) setNotificationPermission('granted');
       });
     }
   }, [user?.id]);

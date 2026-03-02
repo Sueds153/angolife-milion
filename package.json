@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.3.2",
+    "@sentry/react": "^10.41.0",
+    "@sentry/tracing": "^7.120.4",
     "@supabase/supabase-js": "^2.95.3",
     "lucide-react": "^0.563.0",
     "playwright": "^1.58.2",
