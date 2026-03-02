@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { UserProfile, AppNotification } from '../types';
+import { SystemSettings } from '../services/ads.service';
 
 interface AppState {
   // Auth State
@@ -11,6 +12,9 @@ interface AppState {
   isDarkMode: boolean;
   isAuthModalOpen: boolean;
   authMode: 'login' | 'register';
+  
+  // Settings
+  systemSettings: SystemSettings | null;
   
   // Notifications
   notifications: AppNotification[];
@@ -25,6 +29,7 @@ interface AppState {
   addNotification: (notification: AppNotification) => void;
   removeNotification: (id: string) => void;
   clearNotifications: () => void;
+  setSystemSettings: (settings: SystemSettings) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -36,6 +41,7 @@ export const useAppStore = create<AppState>((set) => ({
   isAuthModalOpen: false,
   authMode: 'login',
   notifications: [],
+  systemSettings: null,
 
   setUser: (user) => set({ user }),
   setIsAuthenticated: (isAuthenticated) => set({ isAuthenticated }),
@@ -73,4 +79,5 @@ export const useAppStore = create<AppState>((set) => ({
   })),
   
   clearNotifications: () => set({ notifications: [] }),
+  setSystemSettings: (systemSettings) => set({ systemSettings }),
 }));

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Info, Sparkles } from 'lucide-react';
+import { useAppStore } from '../store/useAppStore';
 import { PARTNER_ADS } from '../constants/ads';
 
 interface AdBannerProps {
@@ -7,8 +8,12 @@ interface AdBannerProps {
 }
 
 export const AdBanner: React.FC<AdBannerProps> = ({ format }) => {
-  const isGoogleEnabled = PARTNER_ADS.googleAds.enabled;
-  const adSlot = PARTNER_ADS.googleAds.slots[format as keyof typeof PARTNER_ADS.googleAds.slots];
+  const { systemSettings } = useAppStore();
+  
+  // Use settings from Supabase if available, otherwise fallback to static constants
+  const adsConfig = systemSettings?.google_ads || PARTNER_ADS.googleAds;
+  const isGoogleEnabled = adsConfig.enabled;
+  const adSlot = adsConfig.slots[format as keyof typeof adsConfig.slots];
 
   const getStyles = () => {
     switch (format) {

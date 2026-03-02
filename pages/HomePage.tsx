@@ -8,22 +8,36 @@ import { ExchangeRate, Job, ProductDeal } from '../types';
 import { APP_CONFIG } from '../constants';
 import { PARTNER_ADS } from '../constants/ads';
 import { AdBanner } from '../components/AdBanner';
+import { AdsService, Ad } from '../services/ads.service';
+import { useAppStore } from '../store/useAppStore';
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
+  const { systemSettings, setSystemSettings } = useAppStore();
   const [rates, setRates] = useState<ExchangeRate[]>([]);
   const [featuredJobs, setFeaturedJobs] = useState<Job[]>([]);
   const [featuredDeals, setFeaturedDeals] = useState<ProductDeal[]>([]);
   const [loading, setLoading] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
+  
+  const [ads, setAds] = useState<Ad[]>([]);
 
   const [heroImageIndex, setHeroImageIndex] = useState(0);
   const [adImageIndex, setAdImageIndex] = useState(0);
 
-  const heroBanners = PARTNER_ADS.heroBanners;
-  const adBanners = PARTNER_ADS.partnerBanners.filter(b => b.isActive);
+  // Derivar banners dos ads carregados ou usar fallback estático
+  const heroBanners = ads.length > 0 
+    ? ads.filter(a => a.type === 'hero' && a.is_active) 
+    : PARTNER_ADS.heroBanners;
+    
+  const adBanners = ads.length > 0 
+    ? ads.filter(a => a.type === 'partner' && a.is_active) 
+    : PARTNER_ADS.partnerBanners.filter(b => b.isActive);
 
   useEffect(() => {
+    // Só inicia intervalos se houver banners
+    if (heroBanners.length === 0 || adBanners.length === 0) return;
+
     const heroInterval = setInterval(() => {
       setHeroImageIndex((prev) => (prev + 1) % heroBanners.length);
     }, 6000);
@@ -35,14 +49,20 @@ export const HomePage: React.FC = () => {
     const loadDashboardData = async () => {
       setLoading(true);
       try {
-        const [ratesData, dealsData, jobsData] = await Promise.all([
+        const [ratesData, dealsData, jobsData, adsData, settingsData] = await Promise.all([
           ExchangeService.getRates(),
           DealsService.getDeals(false),
-          JobsService.getJobs(false)
+          JobsService.getJobs(false),
+          AdsService.getAds().catch(() => []), // Fallback se falhar
+          AdsService.getSettings().catch(() => null)
         ]);
+        
         setRates(ratesData);
         setFeaturedDeals(dealsData.slice(0, 2));
         setFeaturedJobs(jobsData.slice(0, 3));
+        if (adsData.length > 0) setAds(adsData);
+        if (settingsData) setSystemSettings(settingsData);
+        
       } catch (error) {
         console.error("Dashboard error", error);
       } finally {

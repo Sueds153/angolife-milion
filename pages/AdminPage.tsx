@@ -23,6 +23,9 @@ import { AdminNewNewsModal } from '../components/admin/AdminNewNewsModal';
 import { AdminEditNewsModal } from '../components/admin/AdminEditNewsModal';
 import { AdminNewDealModal } from '../components/admin/AdminNewDealModal';
 import { AdminEditDealModal } from '../components/admin/AdminEditDealModal';
+import { AdsService, Ad, SystemSettings } from '../services/ads.service';
+import { AdminAdsSection } from '../components/admin/AdminAdsSection';
+import { Monitor } from 'lucide-react';
 
 
 export const AdminPage: React.FC = () => {
@@ -30,10 +33,12 @@ export const AdminPage: React.FC = () => {
   const navigate = useNavigate();
 
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'jobs' | 'news' | 'exchange' | 'deals' | 'cv'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'jobs' | 'news' | 'exchange' | 'deals' | 'cv' | 'ads'>('overview');
   const [pendingJobs, setPendingJobs] = useState<Job[]>([]);
   const [pendingNews, setPendingNews] = useState<NewsArticle[]>([]);
   const [pendingDeals, setPendingDeals] = useState<ProductDeal[]>([]);
+  const [ads, setAds] = useState<Ad[]>([]);
+  const [systemSettings, setSystemSettings] = useState<SystemSettings | null>(null);
   const [loading, setLoading] = useState(false);
   const [showNewJobModal, setShowNewJobModal] = useState(false);
   const [showNewNewsModal, setShowNewNewsModal] = useState(false);
@@ -109,6 +114,7 @@ export const AdminPage: React.FC = () => {
     loadPendingNews();
     loadPendingDeals();
     loadExchangeRates();
+    loadAdsData();
 
     // Ativação de Realtime para atualizações automáticas
     const channel = supabase.channel('admin-realtime')
@@ -551,6 +557,31 @@ export const AdminPage: React.FC = () => {
     }
   };
 
+  const loadAdsData = async () => {
+    try {
+      setLoading(true);
+      const [adsData, settingsData] = await Promise.all([
+        AdsService.getAds(),
+        AdsService.getSettings()
+      ]);
+      setAds(adsData);
+      setSystemSettings(settingsData);
+    } catch (error) {
+      console.error("Load ads error", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateSetting = async (key: string, value: any) => {
+    try {
+      await AdsService.updateSetting(key, value);
+      loadAdsData();
+    } catch (error) {
+      console.error("Update setting error", error);
+    }
+  };
+
   if (!user?.isAdmin) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm border border-orange-500/30">
@@ -621,6 +652,20 @@ export const AdminPage: React.FC = () => {
             title="Validar CVs"
           >
             CVs
+          </button>
+          <button
+            onClick={() => setActiveTab('ads')}
+            className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === 'ads' ? 'bg-orange-500 text-white shadow-lg' : 'bg-white dark:bg-white/5 text-slate-500 border border-orange-500/10'}`}
+            title="Gerir Publicidade"
+          >
+            Publicidade
+          </button>
+          <button
+            onClick={() => setActiveTab('ads')}
+            className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === 'ads' ? 'bg-orange-500 text-white shadow-lg' : 'bg-white dark:bg-white/5 text-slate-500 border border-orange-500/10'}`}
+            title="Gerir Publicidade"
+          >
+            Publicidade
           </button>
         </div>
       </div>
@@ -737,6 +782,17 @@ export const AdminPage: React.FC = () => {
         editingNews={editingNews}
         setEditingNews={setEditingNews}
       />
+
+      {/* ADS TAB */}
+          {activeTab === 'ads' && (
+            <AdminAdsSection 
+              ads={ads} 
+              settings={systemSettings} 
+              loading={loading} 
+              onRefresh={loadAdsData}
+              onUpdateSetting={handleUpdateSetting}
+            />
+          )}
 
       {/* CV SUBSCRIPTIONS TAB */}
       {activeTab === 'cv' && (
