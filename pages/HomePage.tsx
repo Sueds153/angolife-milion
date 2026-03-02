@@ -1,16 +1,15 @@
 
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Briefcase, ShoppingBag, DollarSign, ChevronRight, MessageCircle, Activity } from 'lucide-react';
-import { SupabaseService } from '../services/supabaseService';
-import { GeminiService } from '../services/gemini';
+import { ExchangeService } from '../services/exchange.service';
+import { DealsService } from '../services/deals.service';
+import { JobsService } from '../services/jobs.service';
 import { ExchangeRate, Job, ProductDeal } from '../types';
 import { APP_CONFIG } from '../constants';
 
-interface HomePageProps {
-  onNavigate: (page: any) => void;
-}
-
-export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
+export const HomePage: React.FC = () => {
+  const navigate = useNavigate();
   const [rates, setRates] = useState<ExchangeRate[]>([]);
   const [featuredJobs, setFeaturedJobs] = useState<Job[]>([]);
   const [featuredDeals, setFeaturedDeals] = useState<ProductDeal[]>([]);
@@ -44,9 +43,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       setLoading(true);
       try {
         const [ratesData, dealsData, jobsData] = await Promise.all([
-          SupabaseService.getRates(),
-          SupabaseService.getDeals(false),
-          SupabaseService.getJobs(false)
+          ExchangeService.getRates(),
+          DealsService.getDeals(false),
+          JobsService.getJobs(false)
         ]);
         setRates(ratesData);
         setFeaturedDeals(dealsData.slice(0, 2));
@@ -106,7 +105,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           
           <div className="flex flex-col sm:flex-row gap-3">
             <button 
-              onClick={() => onNavigate('exchange')}
+              onClick={() => navigate('/cambio')}
               className="w-full sm:w-auto bg-brand-gold hover:bg-amber-600 text-white font-black py-4 px-8 rounded-xl md:rounded-2xl transition-all flex items-center justify-center shadow-xl active:scale-95 text-[10px] md:text-sm uppercase tracking-widest border border-brand-gold/50"
             >
               Consultar Câmbio <ArrowRight size={16} className="ml-2" />
@@ -117,7 +116,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
       {/* Stats Dashboard - Responsive Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
-        <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] p-5 md:p-10 shadow-xl cursor-pointer group gold-border-subtle active:scale-[0.98] transition-all" onClick={() => onNavigate('exchange')}>
+        <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] p-5 md:p-10 shadow-xl cursor-pointer group gold-border-subtle active:scale-[0.98] transition-all" onClick={() => navigate('/cambio')}>
           <div className="flex justify-between items-center mb-4 md:mb-6">
             <div className="w-10 h-10 md:w-14 md:h-14 bg-brand-gold/5 rounded-xl text-brand-gold flex items-center justify-center">
               <DollarSign className="w-5 h-5 md:w-7 md:h-7" />
@@ -128,7 +127,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           <span className="text-2xl md:text-5xl font-black text-brand-gold">{usdRate?.informalSell.toFixed(0)} <span className="text-xs md:text-sm font-bold text-brand-gold">Kz</span></span>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] p-5 md:p-10 shadow-xl cursor-pointer group gold-border-subtle active:scale-[0.98] transition-all" onClick={() => onNavigate('jobs')}>
+        <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] p-5 md:p-10 shadow-xl cursor-pointer group gold-border-subtle active:scale-[0.98] transition-all" onClick={() => navigate('/vagas')}>
           <div className="flex justify-between items-center mb-4 md:mb-6">
             <div className="w-10 h-10 md:w-14 md:h-14 bg-brand-gold/5 rounded-xl text-brand-gold flex items-center justify-center">
               <Briefcase className="w-5 h-5 md:w-7 md:h-7" />
@@ -139,7 +138,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           <span className="text-2xl md:text-5xl font-black text-brand-gold">{featuredJobs.length}+ <span className="text-xs md:text-sm font-bold text-slate-400">Abertas</span></span>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] p-5 md:p-10 shadow-xl cursor-pointer group lg:col-span-1 sm:col-span-2 gold-border-subtle active:scale-[0.98] transition-all" onClick={() => onNavigate('deals')}>
+        <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] p-5 md:p-10 shadow-xl cursor-pointer group lg:col-span-1 sm:col-span-2 gold-border-subtle active:scale-[0.98] transition-all" onClick={() => navigate('/ofertas')}>
           <div className="flex justify-between items-center mb-4 md:mb-6">
             <div className="w-10 h-10 md:w-14 md:h-14 bg-brand-gold/10 rounded-xl text-brand-gold flex items-center justify-center">
               <ShoppingBag className="w-5 h-5 md:w-7 md:h-7" />

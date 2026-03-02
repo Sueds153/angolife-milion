@@ -7,7 +7,10 @@ import { TradeTerminal } from '../components/TradeTerminal';
 import { DirectTradeSection } from '../components/DirectTradeSection';
 import { ExchangeCheckoutModal } from '../components/ExchangeCheckoutModal';
 import { TermsModal } from '../components/TermsModal';
-import { SupabaseService } from '../services/supabaseService';
+import { ExchangeService } from '../services/exchange.service';
+import { OrderService } from '../services/order.service';
+import { StorageService } from '../services/storage.service';
+import { ServiceUtils } from '../services/utils';
 import { supabase } from '../services/supabaseClient';
 import { GeminiService } from '../services/gemini';
 import { ExchangeRate } from '../types';
@@ -20,16 +23,15 @@ import { AdService } from '../services/adService';
 import { APP_CONFIG } from '../constants';
 
 import { UserProfile } from '../types';
+import { useAppStore } from '../store/useAppStore';
 
 interface ExchangePageProps {
-  isAuthenticated: boolean;
-  userProfile?: UserProfile;
-  onRequireAuth: () => void;
-  isDarkMode: boolean;
   onRequestReward?: (callback: () => void) => void;
 }
 
-export const ExchangePage: React.FC<ExchangePageProps> = ({ isAuthenticated, userProfile, onRequireAuth, isDarkMode, onRequestReward }) => {
+export const ExchangePage: React.FC<ExchangePageProps> = ({ onRequestReward }) => {
+  const { user, isAuthenticated, isDarkMode, setAuthModal } = useAppStore();
+  const onRequireAuth = () => setAuthModal(true, 'login');
   const [rates, setRates] = useState<ExchangeRate[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'view' | 'trade'>('view');
@@ -110,8 +112,8 @@ export const ExchangePage: React.FC<ExchangePageProps> = ({ isAuthenticated, use
     const init = async () => {
       setLoading(true);
       const [ratesData, participantCount] = await Promise.all([
-        SupabaseService.getRates(),
-        SupabaseService.getActiveOrdersCount()
+        ExchangeService.getRates(),
+        OrderService.getActiveOrdersCount()
       ]);
       setRates(ratesData);
       setActiveParticipants(participantCount);
@@ -240,7 +242,7 @@ export const ExchangePage: React.FC<ExchangePageProps> = ({ isAuthenticated, use
 
     setUploading(true);
     try {
-      const url = await SupabaseService.uploadProof(file);
+      const url = await StorageService.uploadProof(file);
       if (url) {
         setProofUrl(url);
         console.log('Upload successful:', url);
@@ -333,11 +335,11 @@ export const ExchangePage: React.FC<ExchangePageProps> = ({ isAuthenticated, use
     const totalKz = tradeAmountNum * (rateValue || 0);
 
     const orderData = {
-      full_name: SupabaseService.sanitize(formData.fullName),
-      age: SupabaseService.sanitize(formData.age),
+      full_name: ServiceUtils.sanitize(formData.fullName),
+      age: ServiceUtils.sanitize(formData.age),
       gender: formData.gender,
       wallet: tradeAction === 'buy' ? formData.wallet : null,
-      coordinates: tradeAction === 'buy' ? SupabaseService.sanitize(formData.coordinates) : null,
+      coordinates: tradeAction === 'buy' ? ServiceUtils.sanitize(formData.coordinates) : null,
       amount: tradeAmountNum,
       currency: tradeCurrency,
       total_kz: totalKz,
@@ -346,13 +348,13 @@ export const ExchangePage: React.FC<ExchangePageProps> = ({ isAuthenticated, use
       proof_url: proofUrl,
       type: tradeAction,
       bank: tradeAction === 'sell' ? formData.bank : null,
-      iban: tradeAction === 'sell' ? SupabaseService.sanitize(formData.iban) : null,
-      account_holder: tradeAction === 'sell' ? SupabaseService.sanitize(formData.accountHolder) : null,
-      user_email: userProfile?.email || null,
+      iban: tradeAction === 'sell' ? ServiceUtils.sanitize(formData.iban) : null,
+      account_holder: tradeAction === 'sell' ? ServiceUtils.sanitize(formData.accountHolder) : null,
+      user_email: user?.email || null,
     };
 
     try {
-      const orderId = await SupabaseService.createOrder(orderData);
+      const orderId = await OrderService.createOrder(orderData);
       
       // Mostramos Interstitial se permitido
       if (AdService.canShowInterstitial()) {
@@ -381,7 +383,7 @@ export const ExchangePage: React.FC<ExchangePageProps> = ({ isAuthenticated, use
   const currentRateValue = tradeAction === 'buy' ? (rates.find(r => r.currency === tradeCurrency)?.informalSell || 0) : (rates.find(r => r.currency === tradeCurrency)?.informalBuy || 0);
   
   const discountThreshold = 30;
-  const isEligibleForDiscount = (parseFloat(tradeAmount) || 0) >= discountThreshold && userProfile?.hasReferralDiscount;
+  const isEligibleForDiscount = (parseFloat(tradeAmount) || 0) >= discountThreshold && user?.hasReferralDiscount;
   const discountFactor = isEligibleForDiscount ? 0.95 : 1; // 5% discount
 
   const totalKz = Math.round(((parseFloat(tradeAmount) || 0) * currentRateValue * discountFactor) * 100) / 100;

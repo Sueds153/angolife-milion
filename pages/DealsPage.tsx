@@ -1,20 +1,20 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { Plus, ShoppingBag, MapPin, X, Camera, FileUp } from 'lucide-react';
-import { SupabaseService } from '../services/supabaseService';
+import { DealsService } from '../services/deals.service';
 import { GeminiService } from '../services/gemini';
 import { ProductDeal, UserProfile } from '../types';
 import { ShareButton } from '../components/ShareButton';
+import { useAppStore } from '../store/useAppStore';
 
 interface DealsPageProps {
-  isAuthenticated: boolean;
-  user?: UserProfile | null;
-  onRequireAuth: () => void;
   onSelectDeal: (deal: ProductDeal) => void;
   onShowInterstitial?: (callback: () => void) => void;
 }
 
-export const DealsPage: React.FC<DealsPageProps> = ({ isAuthenticated, user, onRequireAuth, onSelectDeal, onShowInterstitial }) => {
+export const DealsPage: React.FC<DealsPageProps> = ({ onSelectDeal, onShowInterstitial }) => {
+  const { user, isAuthenticated, setAuthModal } = useAppStore();
+  const onRequireAuth = () => setAuthModal(true, 'login');
   const [deals, setDeals] = useState<ProductDeal[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -31,7 +31,7 @@ export const DealsPage: React.FC<DealsPageProps> = ({ isAuthenticated, user, onR
     const fetchDeals = async () => {
       setLoading(true);
       try {
-        const dbDeals = await SupabaseService.getDeals(false);
+        const dbDeals = await DealsService.getDeals(false);
         setDeals(dbDeals);
       } catch (e) {
         console.error("Error fetching deals", e);
@@ -99,7 +99,7 @@ export const DealsPage: React.FC<DealsPageProps> = ({ isAuthenticated, user, onR
 
       // Upload do ficheiro WebP se existir, senao usar placeholder
       if (imageFile) {
-        uploadedUrl = await SupabaseService.uploadDiscountImage(imageFile);
+        uploadedUrl = await DealsService.uploadDiscountImage(imageFile);
         if (!uploadedUrl) {
           alert('Erro ao carregar a imagem da oferta. Detalhes devem constar na consola.');
           setIsUploading(false);
@@ -112,7 +112,7 @@ export const DealsPage: React.FC<DealsPageProps> = ({ isAuthenticated, user, onR
       const isUserAdmin = user?.isAdmin || false;
       const userName = user?.fullName || user?.email?.split('@')[0] || 'Anónimo';
 
-      await SupabaseService.submitDeal({
+      await DealsService.submitDeal({
         title: formData.title,
         store: formData.store,
         storeNumber: formData.storeNumber,

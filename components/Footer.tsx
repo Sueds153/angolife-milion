@@ -1,13 +1,13 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Share2, ShieldCheck, FileText, ChevronRight, Lock } from 'lucide-react';
 
 interface FooterProps {
-  onNavigate: (page: any) => void;
   onOpenLegal: (type: 'privacy' | 'terms' | 'data') => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenLegal }) => {
+export const Footer: React.FC<FooterProps> = ({ onOpenLegal }) => {
   const handleShareApp = async () => {
     const shareData = {
       title: 'Angolife Su-Golden',
@@ -59,15 +59,27 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenLegal }) => {
               Plataforma
             </h4>
             <div className="flex flex-col space-y-3">
-              <button onClick={() => onNavigate('exchange')} className="group flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors text-xs font-bold w-fit">
+              <Link 
+                to="/cambio" 
+                onClick={() => window.scrollTo(0, 0)}
+                className="group flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors text-xs font-bold w-fit"
+              >
                 <ChevronRight size={12} className="text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity" /> Câmbio Real
-              </button>
-              <button onClick={() => onNavigate('jobs')} className="group flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors text-xs font-bold w-fit">
+              </Link>
+              <Link 
+                to="/vagas" 
+                onClick={() => window.scrollTo(0, 0)}
+                className="group flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors text-xs font-bold w-fit"
+              >
                 <ChevronRight size={12} className="text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity" /> Oportunidades
-              </button>
-              <button onClick={() => onNavigate('deals')} className="group flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors text-xs font-bold w-fit">
+              </Link>
+              <Link 
+                to="/ofertas" 
+                onClick={() => window.scrollTo(0, 0)}
+                className="group flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors text-xs font-bold w-fit"
+              >
                 <ChevronRight size={12} className="text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity" /> Descontos
-              </button>
+              </Link>
             </div>
           </div>
 

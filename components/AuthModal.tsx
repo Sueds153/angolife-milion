@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, Lock, Mail, User, ArrowRight, Eye, EyeOff, Loader2, Tag } from 'lucide-react';
-import { SupabaseService } from '../services/supabaseService';
+import { AuthService } from '../services/auth.service';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -58,7 +58,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, 
 
     try {
       if (isRegister) {
-        const { error } = await SupabaseService.auth.signUp(email, password, fullName, invitedBy);
+        const { error } = await AuthService.signUp(email, password, fullName, invitedBy);
         if (error) {
           if (error.message.toLowerCase().includes('rate limit')) {
             setErrorMsg('Limite de tentativas excedido. Por favor, aguarde uns minutos ou desative a Confirmação de Email no Supabase.');
@@ -70,7 +70,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, 
           onLogin(email);
         }
       } else {
-        const { error } = await SupabaseService.auth.signIn(email, password);
+        const { error } = await AuthService.signIn(email, password);
         if (error) {
           setErrorMsg('Credenciais inválidas. Verifique o seu e-mail e palavra-passe.');
         } else {
@@ -94,7 +94,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, 
     setIsLoading(true);
     setErrorMsg('');
     try {
-      const { error } = await SupabaseService.auth.resetPassword(email);
+      const { error } = await AuthService.resetPassword(email);
       if (error) {
         setErrorMsg('Erro ao recuperar senha. Verifique o seu e-mail.');
       } else {

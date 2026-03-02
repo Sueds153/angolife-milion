@@ -84,12 +84,12 @@ export const AdminJobsSection: React.FC<AdminJobsSectionProps> = ({
             <p className="text-xs text-slate-500">{pendingJobs.length} vagas pendentes de aprovação.</p>
           </div>
         </div>
-        <div className="grid grid-cols-2 lg:flex gap-2 w-full md:w-auto">
+        <div className="scroll-x-touch flex flex-nowrap lg:flex-row gap-2 w-full md:w-auto pb-2 lg:pb-0 -mx-2 px-2 no-scrollbar">
           <button
             onClick={handleApproveAll}
             disabled={loading || pendingJobs.length === 0}
             title="Publicar Todas as Vagas Pendentes"
-            className="bg-emerald-500 text-white px-4 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-emerald-600 active:scale-95 transition-all disabled:opacity-50 shadow-lg shadow-emerald-500/20"
+            className="shrink-0 bg-emerald-500 text-white px-4 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-emerald-600 active:scale-95 transition-all disabled:opacity-50 shadow-lg shadow-emerald-500/20"
           >
             <Check size={16} /> Publicar Tudo
           </button>
@@ -97,14 +97,14 @@ export const AdminJobsSection: React.FC<AdminJobsSectionProps> = ({
             onClick={handleSyncJobs}
             disabled={loading}
             title="Sincronizar Vagas via IA"
-            className="bg-brand-gold text-slate-900 px-4 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+            className="shrink-0 bg-brand-gold text-slate-900 px-4 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
           >
             <RefreshCw className={loading ? 'animate-spin' : ''} size={16} /> Sincronizar
           </button>
           <button
             onClick={() => setShowNewJobModal(true)}
             title="Criar Nova Vaga Manualmente"
-            className="bg-slate-900 dark:bg-white text-white dark:text-slate-950 px-4 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:scale-105 active:scale-95 transition-all col-span-2 lg:col-auto"
+            className="shrink-0 bg-slate-900 dark:bg-white text-white dark:text-slate-950 px-4 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:scale-105 active:scale-95 transition-all"
           >
             <Plus size={16} /> Nova Vaga
           </button>
@@ -122,8 +122,8 @@ export const AdminJobsSection: React.FC<AdminJobsSectionProps> = ({
               <div className="flex flex-col lg:flex-row justify-between items-start gap-8">
                 <div className="flex-1 space-y-8 w-full">
                   {/* Cabeçalho da Vaga */}
-                  <div className="flex items-center gap-4">
-                    <h4 className="font-black text-2xl text-slate-900 dark:text-white uppercase tracking-tight leading-none">{job.title}</h4>
+                  <div className="flex flex-wrap items-center gap-4">
+                    <h4 className="font-black text-2xl text-slate-900 dark:text-white uppercase tracking-tight leading-none break-words">{job.title}</h4>
                     <span className="px-3 py-1 rounded-full bg-amber-500/10 text-amber-500 text-[9px] font-black uppercase tracking-widest border border-amber-500/20 whitespace-nowrap">Pendente</span>
                   </div>
 

@@ -1,18 +1,14 @@
 
 import React, { useEffect, useState } from 'react';
 import { MapPin, Building, Clock, Search, X, CheckCircle2, Award, Mail, ChevronRight, Settings, Plus, Share2, AlertTriangle, ShieldCheck, HardHat, Briefcase, Store, Heart } from 'lucide-react';
-import { SupabaseService } from '../services/supabaseService';
+import { JobsService } from '../services/jobs.service';
 import { Job, UserProfile } from '../types';
 import { ShareButton } from '../components/ShareButton';
 import { AdBanner } from '../components/AdBanner';
+import { useAppStore } from '../store/useAppStore';
 
 interface JobsPageProps {
-  isAuthenticated: boolean;
-  isAdmin?: boolean;
-  user?: UserProfile;
-  onUpdateUser?: (updates: Partial<UserProfile>) => void;
   onNavigate?: (page: any) => void;
-  onRequireAuth: () => void;
   onRequestReward?: (onSuccess: () => void, onCancel: () => void) => void;
   onShowInterstitial?: (callback: () => void) => void;
   subscribedCategories?: string[];
@@ -104,18 +100,17 @@ const JobLogo: React.FC<{ src?: string; company: string; category?: string; size
   );
 };
 
-export const JobsPage: React.FC<JobsPageProps> = ({
-  isAuthenticated,
-  isAdmin,
-  user,
-  onUpdateUser,
+export const JobsPage: React.FC<JobsPageProps> = ({ 
   onNavigate,
-  onRequireAuth,
-  onRequestReward,
-  onShowInterstitial,
-  subscribedCategories = [],
-  onToggleSubscription
+  onRequestReward, 
+  onShowInterstitial, 
+  subscribedCategories = [], 
+  onToggleSubscription 
 }) => {
+  const { user, setUser, isAuthenticated, setAuthModal } = useAppStore();
+  const isAdmin = user?.isAdmin || false;
+  const onRequireAuth = () => setAuthModal(true, 'login');
+  const onUpdateUser = (updates: Partial<UserProfile>) => user && setUser({ ...user, ...updates });
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
@@ -131,7 +126,7 @@ export const JobsPage: React.FC<JobsPageProps> = ({
 
   const loadJobs = async () => {
     setLoading(true);
-    const data = await SupabaseService.getJobs(false);
+    const data = await JobsService.getJobs(false);
     setJobs(data);
     setLoading(false);
 
@@ -261,18 +256,18 @@ export const JobsPage: React.FC<JobsPageProps> = ({
     }
     if (!user || !onUpdateUser) return;
 
-    const newList = await SupabaseService.toggleSaveJob(user.id || '', user.savedJobs || [], jobId);
+    const newList = await JobsService.toggleSaveJob(user.id || '', user.savedJobs || [], jobId);
     onUpdateUser({ savedJobs: newList });
   };
 
   const handleApplyClick = async (job: Job) => {
     const executeApply = async () => {
       // 1. Increment global count
-      await SupabaseService.incrementApplicationCount(job.id);
+      await JobsService.incrementApplicationCount(job.id);
 
       // 2. Save to user history if authenticated
       if (user && onUpdateUser) {
-        const newHistory = await SupabaseService.submitJobApplication(user.id || '', user.applicationHistory || [], job);
+        const newHistory = await JobsService.submitJobApplication(user.id || '', user.applicationHistory || [], job);
         onUpdateUser({ applicationHistory: newHistory });
       }
 
@@ -299,7 +294,7 @@ export const JobsPage: React.FC<JobsPageProps> = ({
     }
     if (!confirm('Deseja denunciar esta vaga como falsa ou suspeita?')) return;
 
-    await SupabaseService.reportJob(jobId);
+    await JobsService.reportJob(jobId);
     alert('Obrigado! A denúncia foi registada. Vagas com muitas denúncias são revistas pela nossa equipa.');
     loadJobs();
   };

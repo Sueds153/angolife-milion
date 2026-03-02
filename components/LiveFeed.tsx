@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Activity } from 'lucide-react';
-import { SupabaseService } from '../services/supabaseService';
+import { OrderService } from '../services/order.service';
 
 export const LiveFeed = () => {
   const [currentFeed, setCurrentFeed] = useState<any>(null);
@@ -9,7 +9,7 @@ export const LiveFeed = () => {
 
   useEffect(() => {
     const fetchOrders = async () => {
-      const orders = await SupabaseService.getLatestOrders(10);
+      const orders = await OrderService.getLatestOrders(10);
       if (orders.length > 0) {
         setOrderQueue(orders);
       }

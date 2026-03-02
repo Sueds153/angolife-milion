@@ -1,43 +1,40 @@
-
 import React, { useState } from 'react';
+import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { Menu, X, Briefcase, DollarSign, Tag, Newspaper, UserCog, Sun, Moon, Home, LogOut, User, LogIn, UserPlus, FileText, ShieldCheck, Lock } from 'lucide-react';
+import { useAppStore } from '../store/useAppStore';
+import { AuthService } from '../services/auth.service';
 
 interface NavbarProps {
-  currentPage: string;
-  onNavigate: (page: any) => void;
-  isDarkMode: boolean;
-  toggleTheme: () => void;
-  isAuthenticated: boolean;
-  isAdmin: boolean;
-  onOpenAuth: (mode: 'login' | 'register') => void;
-  onLogout: () => void;
-  onOpenLegal: (type: 'privacy' | 'terms' | 'data') => void;
+  onOpenLegal?: (type: 'privacy' | 'terms' | 'data') => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({
-  currentPage,
-  onNavigate,
-  isDarkMode,
-  toggleTheme,
-  isAuthenticated,
-  isAdmin,
-  onOpenAuth,
-  onLogout,
-  onOpenLegal
-}) => {
+export const Navbar: React.FC<NavbarProps> = ({ onOpenLegal }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
+  const { 
+    user, isAuthenticated, isDarkMode, toggleTheme, setAuthModal 
+  } = useAppStore();
+
+  const handleLogout = async () => {
+    await AuthService.signOut();
+    useAppStore.getState().setUser(null);
+    useAppStore.getState().setIsAuthenticated(false);
+    navigate('/');
+  };
+
+  const isAdmin = user?.isAdmin || false;
 
   const navItems = [
-    { id: 'home', label: 'Início', icon: Home },
-    { id: 'jobs', label: 'Empregos', icon: Briefcase },
-    { id: 'cv-builder', label: 'Criar CV', icon: FileText },
-    { id: 'exchange', label: 'Câmbio', icon: DollarSign },
-    { id: 'deals', label: 'Descontos', icon: Tag },
-    { id: 'news', label: 'Notícias', icon: Newspaper },
+    { id: 'home', label: 'Início', icon: Home, path: '/' },
+    { id: 'jobs', label: 'Empregos', icon: Briefcase, path: '/vagas' },
+    { id: 'cv-builder', label: 'Criar CV', icon: FileText, path: '/cv-criador' },
+    { id: 'exchange', label: 'Câmbio', icon: DollarSign, path: '/cambio' },
+    { id: 'deals', label: 'Descontos', icon: Tag, path: '/ofertas' },
+    { id: 'news', label: 'Notícias', icon: Newspaper, path: '/noticias' },
   ];
 
   if (isAdmin) {
-    navItems.push({ id: 'admin', label: 'Admin', icon: UserCog });
+    navItems.push({ id: 'admin', label: 'Admin', icon: UserCog, path: '/admin' });
   }
 
   return (
@@ -45,9 +42,10 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16 md:h-20">
           {/* Brand Section */}
-          <div
+          <Link
+            to="/"
             className="flex items-center gap-3 md:gap-4 cursor-pointer select-none group"
-            onClick={() => onNavigate('home')}
+            onClick={() => window.scrollTo(0, 0)}
           >
             <div className="flex flex-col items-center">
               <span className="text-[8px] md:text-[11px] font-black tracking-widest text-orange-500 uppercase border-b border-orange-500/50 pb-0.5 leading-none">
@@ -60,22 +58,28 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <span className="text-orange-500 ml-0.5">LIFE</span>
               </h1>
             </div>
-          </div>
+          </Link>
 
           {/* Desktop Menu */}
           <div className="hidden lg:flex items-center space-x-1">
             {navItems.map((item) => (
-              <button
+              <NavLink
                 key={item.id}
-                onClick={() => onNavigate(item.id)}
-                className={`px-3 py-2 rounded-lg flex items-center space-x-2 text-[11px] font-bold uppercase tracking-wider transition-all ${currentPage === item.id
+                to={item.path}
+                className={({ isActive }) => 
+                  `px-3 py-2 rounded-lg flex items-center space-x-2 text-[11px] font-bold uppercase tracking-wider transition-all ${isActive
                   ? 'text-orange-500 bg-slate-200/50 dark:bg-white/5'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/5'
-                  }`}
+                  }`
+                }
               >
-                <item.icon size={14} className={currentPage === item.id ? 'text-orange-500' : 'text-slate-500 dark:text-slate-400'} />
-                <span>{item.label}</span>
-              </button>
+                {({ isActive }) => (
+                  <>
+                    <item.icon size={14} className={isActive ? 'text-orange-500' : 'text-slate-500 dark:text-slate-400'} />
+                    <span>{item.label}</span>
+                  </>
+                )}
+              </NavLink>
             ))}
 
             <div className="h-5 w-px bg-orange-500/20 mx-3"></div>
@@ -83,27 +87,29 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Auth Buttons / Profile */}
             {isAuthenticated ? (
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => onNavigate('profile')}
-                  className={`p-2.5 rounded-full transition-all flex items-center gap-2 border ${currentPage === 'profile'
+                <NavLink
+                  to="/perfil"
+                  className={({ isActive }) => 
+                    `p-2.5 rounded-full transition-all flex items-center gap-2 border ${isActive
                     ? 'border-orange-500 text-orange-500 bg-orange-500/10'
                     : 'border-orange-500/20 text-slate-500 dark:text-slate-400 hover:text-orange-500 dark:hover:text-orange-500 hover:bg-slate-200 dark:hover:bg-white/5'
-                    }`}
+                    }`
+                  }
                   title="Meu Perfil"
                 >
                   <User size={18} />
-                </button>
+                </NavLink>
               </div>
             ) : (
               <div className="flex items-center gap-2 ml-2">
                 <button
-                  onClick={() => onOpenAuth('login')}
+                  onClick={() => setAuthModal(true, 'login')}
                   className="text-[11px] font-black uppercase tracking-widest px-4 py-2 text-slate-500 dark:text-slate-400 hover:text-orange-500 dark:hover:text-orange-500 transition-colors"
                 >
                   Entrar
                 </button>
                 <button
-                  onClick={() => onOpenAuth('register')}
+                  onClick={() => setAuthModal(true, 'register')}
                   className="text-[11px] font-black uppercase tracking-widest px-5 py-2.5 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-all shadow-lg shadow-amber-900/10 border border-orange-500/50"
                 >
                   Criar conta
@@ -146,31 +152,39 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <div className="px-6 py-6 space-y-2">
               {navItems.map((item) => (
-                <button
+                <NavLink
                   key={item.id}
-                  onClick={() => { onNavigate(item.id); setIsOpen(false); }}
-                  className={`flex items-center space-x-4 w-full px-5 py-4 rounded-xl text-sm font-black uppercase tracking-widest transition-all ${currentPage === item.id ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5'
-                    }`}
+                  to={item.path}
+                  onClick={() => setIsOpen(false)}
+                  className={({ isActive }) => 
+                    `flex items-center space-x-4 w-full px-5 py-4 rounded-xl text-sm font-black uppercase tracking-widest transition-all ${isActive ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5'}`
+                  }
                 >
-                   <item.icon size={20} className={currentPage === item.id ? 'text-orange-500' : 'text-slate-500 dark:text-slate-400'} />
-                  <span>{item.label}</span>
-                </button>
+                  {({ isActive }) => (
+                    <>
+                      <item.icon size={20} className={isActive ? 'text-orange-500' : 'text-slate-500 dark:text-slate-400'} />
+                      <span>{item.label}</span>
+                    </>
+                  )}
+                </NavLink>
               ))}
 
               {/* Mobile Auth Section */}
               <div className="pt-6 mt-6 border-t border-orange-500/20 space-y-3">
                 {isAuthenticated ? (
                   <>
-                    <button
-                      onClick={() => { onNavigate('profile'); setIsOpen(false); }}
-                      className={`flex items-center space-x-4 w-full px-5 py-4 rounded-xl text-sm font-black uppercase tracking-widest ${currentPage === 'profile' ? 'bg-orange-500/10 text-orange-500' : 'text-slate-500 dark:text-slate-400'
-                        }`}
+                    <NavLink
+                      to="/perfil"
+                      onClick={() => setIsOpen(false)}
+                      className={({ isActive }) => 
+                        `flex items-center space-x-4 w-full px-5 py-4 rounded-xl text-sm font-black uppercase tracking-widest ${isActive ? 'bg-orange-500/10 text-orange-500' : 'text-slate-500 dark:text-slate-400'}`
+                      }
                     >
                       <User size={20} />
                       <span>Meu Perfil</span>
-                    </button>
+                    </NavLink>
                     <button
-                      onClick={() => { onLogout(); setIsOpen(false); }}
+                      onClick={() => { handleLogout(); setIsOpen(false); }}
                       className="flex items-center space-x-4 w-full px-5 py-4 rounded-xl text-sm font-black uppercase tracking-widest text-red-400 hover:bg-red-400/5 transition-colors"
                     >
                       <LogOut size={20} />
@@ -180,14 +194,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                 ) : (
                   <div className="grid grid-cols-1 gap-3">
                     <button
-                      onClick={() => { onOpenAuth('login'); setIsOpen(false); }}
+                      onClick={() => { setAuthModal(true, 'login'); setIsOpen(false); }}
                       className="flex items-center justify-center gap-3 w-full py-4 text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white border border-orange-500/20 rounded-2xl bg-slate-100 dark:bg-white/5"
                     >
                       <LogIn size={18} className="text-orange-500" />
                       Entrar
                     </button>
                     <button
-                      onClick={() => { onOpenAuth('register'); setIsOpen(false); }}
+                      onClick={() => { setAuthModal(true, 'register'); setIsOpen(false); }}
                       className="flex items-center justify-center gap-3 w-full py-4 text-xs font-black uppercase tracking-widest bg-orange-500 text-white rounded-2xl shadow-xl shadow-amber-900/20 active:scale-95 transition-all"
                     >
                       <UserPlus size={18} />
@@ -202,21 +216,21 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 px-5">Legal & Apoio</h4>
                 <div className="space-y-1">
                   <button
-                    onClick={() => { onOpenLegal('privacy'); setIsOpen(false); }}
+                    onClick={() => { onOpenLegal?.('privacy'); setIsOpen(false); }}
                     className="flex items-center space-x-4 w-full px-5 py-3 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5 transition-all"
                   >
                     <ShieldCheck size={18} />
                     <span>Privacidade</span>
                   </button>
                   <button
-                    onClick={() => { onOpenLegal('terms'); setIsOpen(false); }}
+                    onClick={() => { onOpenLegal?.('terms'); setIsOpen(false); }}
                     className="flex items-center space-x-4 w-full px-5 py-3 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5 transition-all"
                   >
                     <FileText size={18} />
                     <span>Termos de Uso</span>
                   </button>
                   <button
-                    onClick={() => { onOpenLegal('data'); setIsOpen(false); }}
+                    onClick={() => { onOpenLegal?.('data'); setIsOpen(false); }}
                     className="flex items-center space-x-4 w-full px-5 py-3 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5 transition-all"
                   >
                     <Lock size={18} />

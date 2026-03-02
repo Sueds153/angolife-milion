@@ -1,14 +1,14 @@
 
 import React, { useEffect, useState } from 'react';
-import { SupabaseService } from '../services/supabaseService';
+import { NewsService } from '../services/news.service';
 import { NewsArticle } from '../types';
 import { ExternalLink, Calendar, AlertTriangle, Eye, Flame, Lock, ChevronRight, X, Clock, Zap, Newspaper, ArrowRight } from 'lucide-react';
 import { RewardedAd } from '../components/AdOverlays';
 import { AdBanner } from '../components/AdBanner';
 
+import { useAppStore } from '../store/useAppStore';
+
 interface NewsPageProps {
-  isAuthenticated: boolean;
-  onRequireAuth: () => void;
   onRequestReward?: (callback: () => void) => void;
 }
 
@@ -59,7 +59,9 @@ const NewsImage: React.FC<{ src?: string; alt: string; className?: string; aspec
   );
 };
 
-export const NewsPage: React.FC<NewsPageProps> = ({ isAuthenticated, onRequireAuth }) => {
+export const NewsPage: React.FC<NewsPageProps> = ({ onRequestReward }) => {
+  const { isAuthenticated, setAuthModal } = useAppStore();
+  const onRequireAuth = () => setAuthModal(true, 'login');
   const [news, setNews] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
@@ -101,7 +103,7 @@ export const NewsPage: React.FC<NewsPageProps> = ({ isAuthenticated, onRequireAu
       }
 
       setLoading(true);
-      const data = await SupabaseService.getNews();
+      const data = await NewsService.getNews();
       setNews(data);
       setLoading(false);
 

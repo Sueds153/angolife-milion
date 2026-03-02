@@ -1,7 +1,14 @@
-
 import React, { useState, useEffect } from 'react';
-import { SupabaseService } from '../services/supabaseService';
+import { useAppStore } from '../store/useAppStore';
+import { useNavigate } from 'react-router-dom';
+import { JobsService } from '../services/jobs.service';
+import { NewsService } from '../services/news.service';
+import { DealsService } from '../services/deals.service';
+import { ExchangeService } from '../services/exchange.service';
+import { AdminService } from '../services/admin.service';
+import { SubscriptionService } from '../services/subscription.service';
 import { NotificationService } from '../services/notificationService';
+import { supabase } from '../services/supabaseClient';
 import { UserProfile, Job, NewsArticle, ProductDeal } from '../types';
 import { Lock } from 'lucide-react';
 import { AdminJobsSection } from '../components/admin/AdminJobsSection';
@@ -18,12 +25,9 @@ import { AdminNewDealModal } from '../components/admin/AdminNewDealModal';
 import { AdminEditDealModal } from '../components/admin/AdminEditDealModal';
 
 
-interface AdminPageProps {
-  user: UserProfile | null;
-  onNavigate: (page: any) => void;
-}
-
-export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
+export const AdminPage: React.FC = () => {
+  const { user } = useAppStore();
+  const navigate = useNavigate();
 
 
   const [activeTab, setActiveTab] = useState<'overview' | 'jobs' | 'news' | 'exchange' | 'deals' | 'cv'>('overview');
@@ -107,14 +111,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
     loadExchangeRates();
 
     // Ativação de Realtime para atualizações automáticas
-    const channel = SupabaseService.getSupabaseInstance().channel('admin-realtime')
+    const channel = supabase.channel('admin-realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs' }, () => loadPendingJobs())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'news_articles' }, () => loadPendingNews())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'product_deals' }, () => loadPendingDeals())
       .subscribe();
 
     return () => {
-      SupabaseService.getSupabaseInstance().removeChannel(channel);
+      supabase.removeChannel(channel);
     };
   }, []);
 
@@ -135,14 +139,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
   const [rates, setRates] = useState<any[]>([]);
   const loadExchangeRates = async () => {
     setLoading(true);
-    const data = await SupabaseService.getRates();
+    const data = await ExchangeService.getRates();
     setRates(data);
     setLoading(false);
   };
 
   const handleUpdateRate = async (currency: 'USD' | 'EUR', buy: number, sell: number) => {
     setLoading(true);
-    const success = await SupabaseService.updateInformalRate(currency, buy, sell);
+    const success = await ExchangeService.updateInformalRate(currency, buy, sell);
     if (success) {
       alert(`Taxa de ${currency} atualizada com sucesso!`);
       loadExchangeRates();
@@ -155,7 +159,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
   const loadPendingJobs = async () => {
     try {
       setLoading(true);
-      const data = await SupabaseService.getPendingJobs();
+      const data = await JobsService.getPendingJobs();
       console.log('🔍 [Admin/Jobs] Dados Recebidos:', data);
       setPendingJobs(data);
     } catch (error) {
@@ -170,7 +174,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
     if (!confirm('Deseja publicar esta vaga na AngoLife?')) return;
     setLoading(true);
     console.log('✅ Tentando aprovar vaga:', id);
-    const success = await SupabaseService.approveJob(id, true);
+    const success = await JobsService.approveJob(id, true);
     if (success) {
       setPendingJobs(prev => prev.filter(job => job.id !== id));
       alert('Vaga publicada com sucesso!');
@@ -183,7 +187,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
   const loadPendingDeals = async () => {
     try {
       setLoading(true);
-      const data = await SupabaseService.getPendingDeals();
+      const data = await DealsService.getPendingDeals();
       console.log('🔍 [Admin/Deals] Dados Recebidos:', data);
       setPendingDeals(data);
     } catch (error) {
@@ -201,9 +205,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
 
     // Se vier do Modal Edit
     if (dealToApprove) {
-      // Simular um mock Update pois não criámos 'updateDeal' no SupabaseService, entao reprovamos e criamos um aprovado.
-      await SupabaseService.approveDeal(id, false);
-      await SupabaseService.submitDeal({
+      // Simular um mock Update: reprovamos e criamos um aprovado.
+      await DealsService.approveDeal(id, false);
+      await DealsService.submitDeal({
         ...dealToApprove,
         status: 'approved',
         verified: true,
@@ -212,7 +216,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
       success = true;
       setShowEditDealModal(false);
     } else {
-      await SupabaseService.approveDeal(id, true);
+      await DealsService.approveDeal(id, true);
       success = true;
     }
 
@@ -226,7 +230,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
   const handleRejectDeal = async (id: string) => {
     if (!confirm('Deseja rejeitar este desconto?')) return;
     setLoading(true);
-    await SupabaseService.approveDeal(id, false);
+    await DealsService.approveDeal(id, false);
     setPendingDeals(prev => prev.filter(deal => deal.id !== id));
     setLoading(false);
   };
@@ -238,10 +242,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
     setLoading(true);
     let uploadedUrl = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80';
     if (dealImageFile) {
-      uploadedUrl = await SupabaseService.uploadDiscountImage(dealImageFile) || uploadedUrl;
+      uploadedUrl = await DealsService.uploadDiscountImage(dealImageFile) || uploadedUrl;
     }
 
-    await SupabaseService.submitDeal({
+    await DealsService.submitDeal({
       title: newDeal.title,
       store: newDeal.store,
       storeNumber: newDeal.storeNumber,
@@ -270,7 +274,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
   const handleApproveAll = async () => {
     if (!confirm(`Deseja publicar TODAS as ${pendingJobs.length} vagas pendentes?`)) return;
     setLoading(true);
-    const success = await SupabaseService.approveAllJobs();
+    const success = await JobsService.approveAllJobs();
     if (success) {
       setPendingJobs([]);
       alert('Todas as vagas foram publicadas com sucesso!');
@@ -282,7 +286,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
   };
 
   const handleToggleVerification = async (id: string, currentStatus: boolean) => {
-    const success = await SupabaseService.toggleJobVerification(id, !currentStatus);
+    const success = await JobsService.toggleJobVerification(id, !currentStatus);
     if (success) {
       setPendingJobs(prev => prev.map(job =>
         job.id === id ? { ...job, isVerified: !currentStatus } : job
@@ -295,7 +299,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
   const handleReject = async (id: string) => {
     if (!confirm('Deseja remover esta vaga permanentemente?')) return;
     setLoading(true);
-    const success = await SupabaseService.approveJob(id, false);
+    const success = await JobsService.approveJob(id, false);
     if (success) {
       setPendingJobs(prev => prev.filter(job => job.id !== id));
     } else {
@@ -307,7 +311,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
   const loadPendingNews = async () => {
     try {
       setLoading(true);
-      const data = await SupabaseService.getPendingNews();
+      const data = await NewsService.getPendingNews();
       console.log('🔍 [Admin/News] Dados Recebidos:', data);
       setPendingNews(data);
     } catch (error) {
@@ -322,7 +326,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
     try {
       setLoading(true);
       console.log('✅ Tentando aprovar notícia:', id);
-      const result = await SupabaseService.approveNews(id, true);
+      const result = await NewsService.approveNews(id, true);
       if (result.success) {
         setPendingNews(prev => prev.filter(news => news.id !== id));
         // Apenas Toast no futuro, por agora alert discreto
@@ -342,7 +346,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
     if (!confirm(`Deseja publicar TODAS as ${pendingNews.length} notícias pendentes?`)) return;
     try {
       setLoading(true);
-      const result = await SupabaseService.approveAllNews();
+      const result = await NewsService.approveAllNews();
       if (result.success) {
         setPendingNews([]);
         alert('Todas as notícias foram publicadas com sucesso!');
@@ -361,7 +365,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
   const handleRejectNews = async (id: string) => {
     if (!confirm('Deseja remover esta notícia?')) return;
     setLoading(true);
-    const success = await SupabaseService.approveNews(id, false);
+    const success = await NewsService.approveNews(id, false);
     if (success) {
       setPendingNews(prev => prev.filter(news => news.id !== id));
     } else {
@@ -379,7 +383,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
     e.preventDefault();
     if (!editingNews) return;
     setLoading(true);
-    const success = await SupabaseService.updateNews(editingNews.id, editingNews);
+    const success = await NewsService.updateNews(editingNews.id, editingNews);
     if (success) {
       alert('Notícia atualizada com sucesso!');
       setShowEditNewsModal(false);
@@ -393,7 +397,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
   const handleDeleteNews = async (id: string) => {
     if (!confirm('Deseja eliminar esta notícia permanentemente?')) return;
     setLoading(true);
-    const success = await SupabaseService.deleteNews(id);
+    const success = await NewsService.deleteNews(id);
     if (success) {
       setPendingNews(prev => prev.filter(news => news.id !== id));
       alert('Notícia eliminada com sucesso.');
@@ -411,7 +415,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
     }
     setLoading(true);
     const summary = newNews.summary || newNews.body.substring(0, 150) + '...';
-    const success = await SupabaseService.createNews({
+    const success = await NewsService.createNews({
       title: newNews.title,
       summary: summary,
       category: newNews.category,
@@ -432,7 +436,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
 
   const handleSyncNews = async () => {
     setLoading(true);
-    const count = await SupabaseService.triggerNewsScraper();
+    const count = await AdminService.triggerNewsScraper();
     if (count > 0) {
       alert(`${count} novas notícias adicionadas para revisão!`);
       loadPendingNews();
@@ -444,7 +448,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
 
   const handleSyncJobs = async () => {
     setLoading(true);
-    const count = await SupabaseService.triggerJobScraper();
+    const count = await AdminService.triggerJobScraper();
     if (count > 0) {
       alert(`${count} novas vagas adicionadas para revisão!`);
       loadPendingJobs();
@@ -462,7 +466,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
     }
 
     setLoading(true);
-    const success = await SupabaseService.createJob({
+    const success = await JobsService.createJob({
       title: newJob.title,
       company: newJob.company,
       location: newJob.location,
@@ -510,7 +514,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
 
   const loadCvSubscriptions = async () => {
     setIsLoadingCvSubs(true);
-    const data = await SupabaseService.getCVSubscriptions();
+    const data = await SubscriptionService.getCVSubscriptions();
     setCvSubscriptions(data);
     setIsLoadingCvSubs(false);
   };
@@ -519,7 +523,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
     const confirmed = window.confirm("Aprovar este pagamento e libertar Premium?");
     if (!confirmed) return;
 
-    const success = await SupabaseService.approveCVSubscription(id, userId);
+    const success = await SubscriptionService.approveCVSubscription(id, userId);
     if (success) {
       alert("Pagamento aprovado! Utilizador agora é Premium.");
       loadCvSubscriptions();
@@ -533,7 +537,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
     if (!confirmed) return;
 
     try {
-      const { error } = await SupabaseService.getSupabaseInstance()
+      const { error } = await supabase
         .from('cv_subscriptions')
         .update({ status: 'rejeitado' })
         .eq('id', id);
@@ -556,7 +560,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
         <h2 className="text-xl font-black mb-4 text-slate-900 dark:text-white uppercase tracking-tight">Acesso Restrito</h2>
         <p className="text-slate-500 text-center max-w-xs mb-6">Esta área é reservada para administradores da AngoLife.</p>
         <button
-          onClick={() => onNavigate('home')}
+          onClick={() => navigate('/')}
           className="bg-slate-900 dark:bg-amber-500 text-white px-6 py-3 rounded-xl font-bold uppercase text-xs tracking-widest transition-all active:scale-95"
           title="Voltar ao Início"
         >
@@ -641,7 +645,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ user, onNavigate }) => {
           loading={loading}
           handleSyncDeals={async () => {
             setLoading(true);
-            const count = await SupabaseService.triggerDealsScraper();
+            const count = await AdminService.triggerDealsScraper();
             if (count > 0) {
               alert(`${count} novas ofertas capturadas pela IA para sua revisão!`);
               loadPendingDeals();

@@ -1,17 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { pdf } from '@react-pdf/renderer';
+import { CVDocument } from '../components/CVDocument';
 import { Download, ChevronRight, ChevronLeft, Sparkles, Plus, Trash2, User, Briefcase, GraduationCap, Award, FileText, Lock, Star, Check, Zap, Crown, CreditCard, Calendar, Clock, X } from 'lucide-react';
 import { GeminiService } from '../services/gemini';
-import { SupabaseService } from '../services/supabaseService';
+import { SubscriptionService } from '../services/subscription.service';
+import { StorageService } from '../services/storage.service';
 import { CVData, CVExperience, CVEducation, UserProfile } from '../types';
 import { CVTemplateSelector, CVTemplateType, TEMPLATE_OPTIONS } from '../components/cv-templates/CVTemplateSelector';
 
-interface CVBuilderPageProps {
-  isAuthenticated: boolean;
-  userProfile?: UserProfile;
-  onRequireAuth: () => void;
-  onUpgrade: (plan: 'pack3' | 'monthly' | 'yearly') => void;
-  onDecrementCredit?: () => void;
-}
+import { useAppStore } from '../store/useAppStore';
 
 const initialCV: CVData = {
   fullName: '',
@@ -25,7 +22,27 @@ const initialCV: CVData = {
   skills: []
 };
 
-export const CVBuilderPage: React.FC<CVBuilderPageProps> = ({ isAuthenticated, userProfile, onRequireAuth, onUpgrade, onDecrementCredit }) => {
+export const CVBuilderPage: React.FC = () => {
+  const { user, setUser, isAuthenticated, setAuthModal } = useAppStore();
+  
+  const onRequireAuth = () => setAuthModal(true, 'login');
+  
+  const onUpgrade = (plan: 'pack3' | 'monthly' | 'yearly') => {
+    if (!user) return;
+    const now = Date.now();
+    let updatedUser = { ...user };
+    if (plan === 'pack3') updatedUser.cvCredits = (updatedUser.cvCredits || 0) + 3;
+    else {
+      updatedUser.isPremium = true;
+      updatedUser.subscriptionType = plan === 'monthly' ? 'monthly' : 'yearly';
+      updatedUser.premiumExpiry = now + (plan === 'monthly' ? 30 : 365) * 24 * 60 * 60 * 1000;
+    }
+    setUser(updatedUser);
+  };
+
+  const onDecrementCredit = () => {
+    if (user) setUser({ ...user, cvCredits: Math.max(0, user.cvCredits - 1) });
+  };
   const [step, setStep] = useState(1);
   const [cv, setCv] = useState<CVData>({ ...initialCV, photoUrl: '' });
   const [isImproving, setIsImproving] = useState(false);
@@ -67,8 +84,8 @@ export const CVBuilderPage: React.FC<CVBuilderPageProps> = ({ isAuthenticated, u
   const strengthColor = cvStrength < 30 ? 'bg-red-500' : cvStrength < 60 ? 'bg-amber-500' : cvStrength < 85 ? 'bg-brand-gold' : 'bg-emerald-500';
 
   // Check Access
-  const hasCredits = (userProfile?.cvCredits || 0) > 0;
-  const isPremiumValid = userProfile?.isAdmin || (userProfile?.isPremium && (userProfile.premiumExpiry || 0) > Date.now());
+  const hasCredits = (user?.cvCredits || 0) > 0;
+  const isPremiumValid = user?.isAdmin || (user?.isPremium && (user.premiumExpiry || 0) > Date.now());
   const canDownload = isAuthenticated && (isPremiumValid || hasCredits);
 
   // Helper for Input Changes
@@ -130,15 +147,22 @@ export const CVBuilderPage: React.FC<CVBuilderPageProps> = ({ isAuthenticated, u
     }
   };
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
     if (!isAuthenticated) { onRequireAuth(); return; }
 
     if (canDownload) {
       if (!isPremiumValid && hasCredits && onDecrementCredit) {
         onDecrementCredit();
-        alert(`1 Crédito usado. Restam ${userProfile!.cvCredits - 1} créditos.`);
+        alert(`1 Crédito usado. Restam ${user!.cvCredits - 1} créditos.`);
       }
-      window.print();
+      
+      const blob = await pdf(<CVDocument data={cv} />).toBlob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `CV_${cv.fullName.replace(/\s+/g, '_') || 'AngoLife'}.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
     } else {
       setShowPaywall(true);
     }
@@ -163,19 +187,19 @@ export const CVBuilderPage: React.FC<CVBuilderPageProps> = ({ isAuthenticated, u
   const handleSubmitPayment = async () => {
     if (!isAuthenticated) { onRequireAuth(); return; }
     if (!receiptFile) { alert('Por favor, carregue o comprovativo de pagamento.'); return; }
-    if (!userProfile?.id) { alert('Erro: utilizador não identificado. Por favor, volte a fazer login.'); return; }
+    if (!user?.id) { alert('Erro: utilizador não identificado. Por favor, volte a fazer login.'); return; }
 
     setIsUploadingReceipt(true);
     try {
       // 1. Upload receipt to storage
-      const publicUrl = await SupabaseService.uploadReceipt(receiptFile);
+      const publicUrl = await StorageService.uploadReceipt(receiptFile);
       console.log('[Payment] Upload URL:', publicUrl);
 
       if (!publicUrl) throw new Error('Erro no upload do ficheiro');
 
       // 2. Create subscription record
-      const success = await SupabaseService.submitCVSubscription(
-        userProfile.id,
+      const success = await SubscriptionService.submitCVSubscription(
+        user.id,
         selectedPlan,
         publicUrl
       );
@@ -540,7 +564,7 @@ export const CVBuilderPage: React.FC<CVBuilderPageProps> = ({ isAuthenticated, u
                   <div className="text-right mr-2 hidden md:block">
                     <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Estado da conta</div>
                     {isPremiumValid && <div className="text-xs font-black text-emerald-500 uppercase">Premium Ativo</div>}
-                    {!isPremiumValid && hasCredits && <div className="text-xs font-black text-brand-gold uppercase">{userProfile?.cvCredits} Créditos</div>}
+                    {!isPremiumValid && hasCredits && <div className="text-xs font-black text-brand-gold uppercase">{user?.cvCredits} Créditos</div>}
                     {!canDownload && <div className="text-xs font-black text-red-500 uppercase">Sem Acesso</div>}
                   </div>
                   <button

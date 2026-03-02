@@ -1,5 +1,5 @@
-
 import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
     ArrowLeft,
     BadgeCheck,
@@ -13,16 +13,12 @@ import {
     MessageCircle,
     FileText,
 } from 'lucide-react';
-import { SupabaseService } from '../services/supabaseService';
+import { DealsService } from '../services/deals.service';
 import { AdBanner } from '../components/AdBanner';
 import { ProductDeal, UserProfile } from '../types';
-
-// ─── Interfaces ───────────────────────────────────────────────────────────────
-
 interface DealDetailPageProps {
-    /** Objeto deal completo vindo da lista (funciona para deals AI + Supabase) */
-    deal: ProductDeal;
-    onBack: () => void;
+    /** Objeto deal opcional (se vier da lista para loading instantâneo) */
+    deal?: ProductDeal | null;
     user: UserProfile | null;
 }
 
@@ -39,11 +35,15 @@ function resolveImage(deal: ProductDeal): string {
 
 // ─── Componente Principal ─────────────────────────────────────────────────────
 
-export const DealDetailPage: React.FC<DealDetailPageProps> = ({ deal: initialDeal, onBack, user }) => {
+export const DealDetailPage: React.FC<DealDetailPageProps> = ({ deal: initialDeal, user }) => {
+    const { id } = useParams<{ id: string }>();
+    const navigate = useNavigate();
+    
     // Começa com os dados já disponíveis da lista — zero loading para data básica
-    const [deal, setDeal] = useState<ProductDeal>(initialDeal);
+    const [deal, setDeal] = useState<ProductDeal | null>(initialDeal || null);
     const [enriching, setEnriching] = useState(true);
-    const [localViews, setLocalViews] = useState((initialDeal.views ?? 0) + 1);
+    const [localViews, setLocalViews] = useState((initialDeal?.views ?? 0) + 1);
+    const [error, setError] = useState<string | null>(null);
 
     // ── Enriquecimento em background: busca dados extra do Supabase ────────────
     useEffect(() => {
@@ -56,7 +56,7 @@ export const DealDetailPage: React.FC<DealDetailPageProps> = ({ deal: initialDea
             const looksLikeAiId = /^d\d+$/.test(initialDeal.id);
 
             if (!looksLikeAiId) {
-                const supabaseData = await SupabaseService.getDealById(initialDeal.id);
+                const supabaseData = await DealsService.getDealById(initialDeal.id);
                 if (!cancelled && supabaseData) {
                     // Merge: mantém o que já temos e substitui apenas os campos que chegaram do Supabase
                     setDeal(prev => ({
@@ -73,7 +73,7 @@ export const DealDetailPage: React.FC<DealDetailPageProps> = ({ deal: initialDea
 
             // Incrementar views em background (fire & forget)
             if (!looksLikeAiId) {
-                SupabaseService.incrementDealViews(initialDeal.id).catch(() => { });
+                DealsService.incrementDealViews(initialDeal.id).catch(() => { });
             }
         };
 
@@ -107,6 +107,7 @@ export const DealDetailPage: React.FC<DealDetailPageProps> = ({ deal: initialDea
     };
 
     const handleMap = () => {
+        if (!deal) return;
         const query = encodeURIComponent(`${deal.store} ${deal.location}`);
         window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
     };
@@ -145,7 +146,7 @@ export const DealDetailPage: React.FC<DealDetailPageProps> = ({ deal: initialDea
 
                 {/* Botão Voltar */}
                 <button
-                    onClick={onBack}
+                    onClick={() => navigate('/ofertas')}
                     aria-label="Voltar à lista de ofertas"
                     className="absolute top-4 left-4 z-10 bg-black/50 backdrop-blur-sm text-white p-2.5 rounded-full active:scale-90 transition-all hover:bg-black/70 border border-white/20"
                 >

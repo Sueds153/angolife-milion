@@ -1,18 +1,33 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { User, Briefcase, Tag, Camera, Award, Share2, MessageCircle, CheckCircle2, Bell, BellOff, RefreshCw, DollarSign, ChevronRight, Edit3, Save, Star, History, Download, ShieldCheck, Heart, Link as LinkIcon } from 'lucide-react';
 import { UserProfile, Job } from '../types';
 import { NotificationService } from '../services/notificationService';
-import { SupabaseService } from '../services/supabaseService';
+import { AuthService } from '../services/auth.service';
+import { JobsService } from '../services/jobs.service';
+import { OrderService } from '../services/order.service';
+import { StorageService } from '../services/storage.service';
 import { APP_CONFIG } from '../constants';
+import { useAppStore } from '../store/useAppStore';
 
-interface ProfilePageProps {
-  user: UserProfile;
-  onLogout: () => void;
-  onUpdateUser: (updates: Partial<UserProfile>) => void;
-  onNavigate: (page: any) => void;
-}
+export const ProfilePage: React.FC = () => {
+  const { user, setUser, setIsAuthenticated } = useAppStore();
+  const navigate = useNavigate();
 
-export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onLogout, onUpdateUser, onNavigate }) => {
+  const onLogout = async () => {
+    await AuthService.signOut();
+    setUser(null);
+    setIsAuthenticated(false);
+    navigate('/');
+  };
+
+  const onUpdateUser = (updates: Partial<UserProfile>) => {
+    if (user) {
+      setUser({ ...user, ...updates });
+    }
+  };
+
+  if (!user) return null;
   const [profileImage, setProfileImage] = useState<string | null>(user.avatarUrl || null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
@@ -31,7 +46,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onLogout, onUpda
     const fetchOrders = async () => {
       if (user.email) {
         setLoading(true);
-        const data = await SupabaseService.getUserOrders(user.email);
+        const data = await OrderService.getUserOrders(user.email);
         setOrders(data);
         setLoading(false);
       }
@@ -46,7 +61,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onLogout, onUpda
     const fetchSavedJobs = async () => {
       if (user.savedJobs && user.savedJobs.length > 0) {
         setLoadingJobs(true);
-        const jobs = await SupabaseService.getJobsByIds(user.savedJobs);
+        const jobs = await JobsService.getJobsByIds(user.savedJobs);
         setSavedJobsData(jobs);
         setLoadingJobs(false);
       }
@@ -59,7 +74,14 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onLogout, onUpda
 
   useEffect(() => {
     setNotificationPermission(NotificationService.checkPermission());
-  }, []);
+    
+    // Inicializar Web Push se suportado
+    if (user?.id) {
+      NotificationService.initWebPush(user.id).then(sub => {
+        if (sub) setNotificationPermission('granted');
+      });
+    }
+  }, [user?.id]);
 
   const handleSaveProfile = async () => {
     if (!user.id) return;
@@ -69,14 +91,14 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onLogout, onUpda
     
     // 1. Upload photo if selected
     if (selectedFile) {
-      const uploadedUrl = await SupabaseService.uploadAvatar(selectedFile);
+      const uploadedUrl = await StorageService.uploadAvatar(selectedFile);
       if (uploadedUrl) {
         avatarUrl = uploadedUrl;
       }
     }
 
     // 2. Update profile
-    const { error } = await SupabaseService.auth.updateProfile(user.id, {
+    const { error } = await AuthService.updateProfile(user.id, {
       full_name: editName,
       phone: editPhone,
       avatar_url: avatarUrl
@@ -109,10 +131,31 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onLogout, onUpda
   }, [profileProgress]);
 
   const handleEnableNotifications = async () => {
-    const granted = await NotificationService.requestPermission();
-    setNotificationPermission(granted ? 'granted' : 'denied');
-    if (granted) {
-      NotificationService.sendNativeNotification('Notificações Ativadas', 'Você receberá alertas de mercado e vagas urgentes.');
+    try {
+      if (!user) return;
+      
+      const granted = await NotificationService.requestPermission();
+      if (!granted) {
+        setNotificationPermission('denied');
+        return;
+      }
+      
+      await NotificationService.subscribeUser(user.id);
+      setNotificationPermission('granted');
+      NotificationService.sendNativeNotification('Notificações Ativadas', 'Você receberá alertas de mercado e vagas urgentes em segundo plano.');
+    } catch (error) {
+      console.error('Erro ao ativar notificações push:', error);
+      alert('Não foi possível ativar as notificações push. Verifique se o seu navegador suporta esta funcionalidade.');
+    }
+  };
+
+  const handleDisableNotifications = async () => {
+    try {
+      if (!user) return;
+      await NotificationService.unsubscribeUser(user.id);
+      setNotificationPermission('default');
+    } catch (error) {
+      console.error('Erro ao desativar notificações:', error);
     }
   };
 
@@ -353,19 +396,27 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onLogout, onUpda
            
            <div className="mt-8">
              {notificationPermission === 'granted' ? (
-               <div className="bg-emerald-500/5 text-emerald-600 p-5 rounded-2xl flex items-center justify-between border border-emerald-500/20">
-                  <div className="flex items-center gap-3">
-                    <CheckCircle2 size={18} className="animate-pulse" />
-                    <span className="text-[10px] font-black uppercase tracking-widest">Push Notificações Ativas</span>
-                  </div>
-                  <span className="bg-emerald-500 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-tighter">OK</span>
+               <div className="space-y-4">
+                 <div className="bg-emerald-500/5 text-emerald-600 p-5 rounded-2xl flex items-center justify-between border border-emerald-500/20">
+                    <div className="flex items-center gap-3">
+                      <CheckCircle2 size={18} className="animate-pulse" />
+                      <span className="text-[10px] font-black uppercase tracking-widest">Web Push Ativo</span>
+                    </div>
+                    <span className="bg-emerald-500 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-tighter">OK</span>
+                 </div>
+                 <button 
+                   onClick={handleDisableNotifications}
+                   className="w-full text-[9px] font-black text-slate-400 uppercase tracking-widest hover:text-red-500 transition-colors"
+                 >
+                   Desativar Notificações em Segundo Plano
+                 </button>
                </div>
              ) : (
                <button 
                  onClick={handleEnableNotifications}
                  className="w-full bg-slate-950 dark:bg-white text-white dark:text-slate-950 py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3"
                >
-                 <Bell size={18} /> Ativar Alertas de Mercado
+                 <Bell size={18} /> Ativar Notificações Real-Time
                </button>
              )}
            </div>
@@ -389,7 +440,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, onLogout, onUpda
                   {savedJobsData.map((job) => (
                     <div 
                       key={job.id} 
-                      onClick={() => onNavigate({ name: 'job-details', params: { job } })}
+                      onClick={() => navigate('/vagas')}
                       className="p-4 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 flex items-center justify-between group hover:border-orange-500/30 transition-all cursor-pointer"
                     >
                        <div className="flex items-center gap-4">
