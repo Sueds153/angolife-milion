@@ -7,6 +7,8 @@ import { DealsService } from '../services/deals.service';
 import { JobsService } from '../services/jobs.service';
 import { ExchangeRate, Job, ProductDeal } from '../types';
 import { APP_CONFIG } from '../constants';
+import { PARTNER_ADS } from '../constants/ads';
+import { AdBanner } from '../components/AdBanner';
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -18,17 +20,8 @@ export const HomePage: React.FC = () => {
   const [heroImageIndex, setHeroImageIndex] = useState(0);
   const [adImageIndex, setAdImageIndex] = useState(0);
 
-  const heroImages = [
-    "https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=1600&q=80",
-    "https://images.unsplash.com/photo-1531384441138-2736e62e0919?w=1600&q=80",
-    "https://images.unsplash.com/photo-1573164574572-cb391716a1b7?w=1600&q=80"
-  ];
-
-  const adImages = [
-    "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=1600&q=80",
-    "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?w=1600&q=80",
-    "https://images.unsplash.com/photo-1589156191108-c762ff4b96ab?w=1600&q=80"
-  ];
+  const heroImages = PARTNER_ADS.heroBanners.map(b => b.imageUrl);
+  const adImages = PARTNER_ADS.partnerBanners.filter(b => b.isActive).map(b => b.imageUrl);
 
   useEffect(() => {
     const heroInterval = setInterval(() => {
@@ -192,6 +185,11 @@ export const HomePage: React.FC = () => {
             </button>
           </div>
         </div>
+      </div>
+      
+      {/* Banner de Publicidade Final */}
+      <div className="pt-4 md:pt-8">
+        <AdBanner format="leaderboard" />
       </div>
     </div>
   );

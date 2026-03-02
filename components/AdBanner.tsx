@@ -1,12 +1,15 @@
-
 import React from 'react';
 import { Info, Sparkles } from 'lucide-react';
+import { PARTNER_ADS } from '../constants/ads';
 
 interface AdBannerProps {
   format: 'leaderboard' | 'rectangle' | 'skyscraper' | 'sticky-footer';
 }
 
 export const AdBanner: React.FC<AdBannerProps> = ({ format }) => {
+  const isGoogleEnabled = PARTNER_ADS.googleAds.enabled;
+  const adSlot = PARTNER_ADS.googleAds.slots[format as keyof typeof PARTNER_ADS.googleAds.slots];
+
   const getStyles = () => {
     switch (format) {
       case 'leaderboard': return 'h-24 w-full max-w-[728px] mx-auto my-2 rounded-xl'; 
@@ -18,6 +21,20 @@ export const AdBanner: React.FC<AdBannerProps> = ({ format }) => {
   };
 
   const isSticky = format === 'sticky-footer';
+
+  // Se o Google Ads estiver ativo, injeta o script/ins (simulado aqui para frontend)
+  if (isGoogleEnabled && adSlot) {
+    return (
+      <div className={`flex items-center justify-center overflow-hidden ${getStyles()}`}>
+        <ins className="adsbygoogle"
+             style={{ display: 'block' }}
+             data-ad-client={PARTNER_ADS.googleAds.client}
+             data-ad-slot={adSlot}
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+      </div>
+    );
+  }
 
   return (
     <div className={`bg-white dark:bg-slate-950 flex flex-col items-center justify-center relative overflow-hidden transition-all ${getStyles()} ${!isSticky ? 'gold-border-subtle shadow-lg' : ''} backdrop-blur-sm`}>
