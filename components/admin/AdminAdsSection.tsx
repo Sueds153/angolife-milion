@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Monitor, Plus, Trash2, Edit2, Check, X, ExternalLink, Image as ImageIcon, Video, Settings, Save, Globe, MessageCircle } from 'lucide-react';
+import { Monitor, Plus, Trash2, Edit2, Check, X, ExternalLink, Image as ImageIcon, Video, Settings, Save, Globe, MessageCircle, Clock, MapPin, Layout } from 'lucide-react';
 import { Ad, SystemSettings, AdsService } from '../../services/ads.service';
+import { AdminAdModal } from './AdminAdModal';
 
 interface AdminAdsSectionProps {
   ads: Ad[];
@@ -19,6 +20,18 @@ export const AdminAdsSection: React.FC<AdminAdsSectionProps> = ({
 }) => {
   const [isEditingSettings, setIsEditingSettings] = useState(false);
   const [editedSettings, setEditedSettings] = useState<SystemSettings | null>(settings);
+  const [isAdModalOpen, setIsAdModalOpen] = useState(false);
+  const [editingAd, setEditingAd] = useState<Ad | null>(null);
+
+  const handleOpenNewAd = () => {
+    setEditingAd(null);
+    setIsAdModalOpen(true);
+  };
+
+  const handleEditAd = (ad: Ad) => {
+    setEditingAd(ad);
+    setIsAdModalOpen(true);
+  };
 
   const handleSaveSettings = async () => {
     if (!editedSettings) return;
@@ -64,8 +77,9 @@ export const AdminAdsSection: React.FC<AdminAdsSectionProps> = ({
           </div>
         </div>
         <button
-          className="w-full md:w-auto bg-brand-gold text-slate-900 px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-amber-500/10"
-          onClick={() => alert("Funcionalidade de Novo Anúncio em desenvolvimento. Por favor, use o SQL para inserções em massa por agora.")}
+          className="w-full md:w-auto bg-brand-gold text-slate-950 px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-amber-500/10"
+          onClick={handleOpenNewAd}
+          title="Criar Novo Anúncio"
         >
           <Plus size={16} /> Novo Anúncio
         </button>
@@ -192,8 +206,17 @@ export const AdminAdsSection: React.FC<AdminAdsSectionProps> = ({
                     <span className={`text-[7px] font-black uppercase px-2 py-0.5 rounded-full ${ad.type === 'hero' ? 'bg-purple-500/10 text-purple-600' : 'bg-blue-500/10 text-blue-600'}`}>
                       {ad.type}
                     </span>
-                    <span className="text-[7px] font-black uppercase bg-slate-100 dark:bg-white/10 px-2 py-0.5 rounded-full text-slate-500">
-                      {ad.media_type}
+                    <span className="text-[7px] font-black uppercase bg-slate-100 dark:bg-white/10 px-2 py-0.5 rounded-full text-slate-500 flex items-center gap-1">
+                      {ad.media_type === 'video' ? <Video size={8}/> : <ImageIcon size={8}/>} {ad.media_type}
+                    </span>
+                    <span className="text-[7px] font-black uppercase bg-amber-500/10 text-amber-600 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <Layout size={8}/> {ad.format}
+                    </span>
+                    <span className="text-[7px] font-black uppercase bg-emerald-500/10 text-emerald-600 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <MapPin size={8}/> {ad.location}
+                    </span>
+                    <span className="text-[7px] font-black uppercase bg-slate-100 dark:bg-white/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <Clock size={8}/> {ad.duration_seconds}s
                     </span>
                   </div>
                   <h5 className="font-black text-xs uppercase truncate text-slate-800 dark:text-white">
@@ -206,6 +229,13 @@ export const AdminAdsSection: React.FC<AdminAdsSectionProps> = ({
 
                 {/* Actions */}
                 <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => handleEditAd(ad)}
+                    className="p-2 bg-slate-100 dark:bg-white/5 text-slate-500 hover:text-brand-gold rounded-xl transition-all"
+                    title="Editar Anúncio"
+                  >
+                    <Edit2 size={16} />
+                  </button>
                   <button 
                     onClick={() => handleToggleActive(ad.id, ad.is_active)}
                     className={`p-2 rounded-xl transition-all ${ad.is_active ? 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-400'}`}
@@ -243,6 +273,13 @@ export const AdminAdsSection: React.FC<AdminAdsSectionProps> = ({
           </div>
         </div>
       </div>
+
+      <AdminAdModal 
+        isOpen={isAdModalOpen}
+        onClose={() => setIsAdModalOpen(false)}
+        onSuccess={onRefresh}
+        editingAd={editingAd}
+      />
     </div>
   );
 };

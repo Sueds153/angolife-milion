@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Briefcase, ShoppingBag, DollarSign, ChevronRight, MessageCircle, Activity, Volume2, VolumeX } from 'lucide-react';
+import { ArrowRight, Briefcase, ShoppingBag, DollarSign, ChevronRight, MessageCircle, Activity, Volume2, VolumeX, X } from 'lucide-react';
 import { ExchangeService } from '../services/exchange.service';
 import { DealsService } from '../services/deals.service';
 import { JobsService } from '../services/jobs.service';
@@ -21,31 +21,46 @@ export const HomePage: React.FC = () => {
   const [isMuted, setIsMuted] = useState(true);
   
   const [ads, setAds] = useState<Ad[]>([]);
+  const [showInterstitial, setShowInterstitial] = useState(false);
+  const [interstitialAd, setInterstitialAd] = useState<Ad | null>(null);
+  const [showRewarded, setShowRewarded] = useState(false);
+  const [rewardedAd, setRewardedAd] = useState<Ad | null>(null);
 
   const [heroImageIndex, setHeroImageIndex] = useState(0);
   const [adImageIndex, setAdImageIndex] = useState(0);
 
   // Derivar banners dos ads carregados ou usar fallback estático
   const heroBanners = ads.length > 0 
-    ? ads.filter(a => a.type === 'hero' && a.is_active) 
+    ? ads.filter(a => a.type === 'hero' && a.is_active && (a.location === 'home' || a.location === 'all') && a.format === 'banner') 
     : PARTNER_ADS.heroBanners;
     
   const adBanners = ads.length > 0 
-    ? ads.filter(a => a.type === 'partner' && a.is_active) 
+    ? ads.filter(a => a.type === 'partner' && a.is_active && (a.location === 'home' || a.location === 'all') && a.format === 'banner') 
     : PARTNER_ADS.partnerBanners.filter(b => b.isActive);
 
   useEffect(() => {
     // Só inicia intervalos se houver banners
     if (heroBanners.length === 0 || adBanners.length === 0) return;
 
+    // Pega a duração do banner atual ou usa 6s padrão
+    const heroDuration = (heroBanners[heroImageIndex]?.duration_seconds || 6) * 1000;
+    const adDuration = (adBanners[adImageIndex]?.duration_seconds || 5) * 1000;
+
     const heroInterval = setInterval(() => {
       setHeroImageIndex((prev) => (prev + 1) % heroBanners.length);
-    }, 6000);
+    }, heroDuration);
 
     const adInterval = setInterval(() => {
       setAdImageIndex((prev) => (prev + 1) % adBanners.length);
-    }, 5000);
+    }, adDuration);
 
+    return () => {
+      clearInterval(heroInterval);
+      clearInterval(adInterval);
+    };
+  }, [heroBanners.length, adBanners.length, heroImageIndex, adImageIndex]);
+
+  useEffect(() => {
     const loadDashboardData = async () => {
       setLoading(true);
       try {
@@ -53,14 +68,30 @@ export const HomePage: React.FC = () => {
           ExchangeService.getRates(),
           DealsService.getDeals(false),
           JobsService.getJobs(false),
-          AdsService.getAds().catch(() => []), // Fallback se falhar
+          AdsService.getAds().catch(() => []), 
           AdsService.getSettings().catch(() => null)
         ]);
         
         setRates(ratesData);
         setFeaturedDeals(dealsData.slice(0, 2));
         setFeaturedJobs(jobsData.slice(0, 3));
-        if (adsData.length > 0) setAds(adsData);
+        
+        if (adsData.length > 0) {
+          setAds(adsData);
+          // Verificar se há Interstitial para Home
+          const interstitial = adsData.find(a => a.is_active && a.format === 'interstitial' && (a.location === 'home' || a.location === 'all'));
+          if (interstitial) {
+            setInterstitialAd(interstitial);
+            // Mostrar após 3 segundos
+            setTimeout(() => setShowInterstitial(true), 3000);
+          }
+          
+          // Verificar se há Rewarded para Home
+          const rewarded = adsData.find(a => a.is_active && a.format === 'rewarded' && (a.location === 'home' || a.location === 'all'));
+          if (rewarded) {
+            setRewardedAd(rewarded);
+          }
+        }
         if (settingsData) setSystemSettings(settingsData);
         
       } catch (error) {
@@ -71,14 +102,10 @@ export const HomePage: React.FC = () => {
     };
 
     loadDashboardData();
-    return () => {
-      clearInterval(heroInterval);
-      clearInterval(adInterval);
-    };
-  }, []);
+  }, [setSystemSettings]);
 
   const handleWhatsAppContact = () => {
-    const phone = APP_CONFIG.WHATSAPP_NUMBER; 
+    const phone = systemSettings?.contact_info.whatsapp || APP_CONFIG.WHATSAPP_NUMBER; 
     const message = "Olá! Gostaria de saber mais sobre as opções de publicidade premium no Angolife para o meu negócio.";
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
   };
@@ -87,6 +114,101 @@ export const HomePage: React.FC = () => {
 
   return (
     <div className="space-y-6 md:space-y-12 animate-fade-in">
+      {/* Interstitial Ad Overlay */}
+      {showInterstitial && interstitialAd && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in">
+          <div className="relative w-full max-w-lg bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-2xl gold-border-subtle">
+            <button 
+              onClick={() => setShowInterstitial(false)}
+              className="absolute top-6 right-6 z-10 p-2 bg-black/40 hover:bg-black/60 rounded-full text-white transition-all"
+            >
+              <X size={20} />
+            </button>
+            <div className="aspect-[4/5] relative">
+              {interstitialAd.media_type === 'video' ? (
+                <video 
+                  src={interstitialAd.video_url} 
+                  poster={interstitialAd.image_url}
+                  autoPlay 
+                  loop 
+                  muted={isMuted}
+                  playsInline
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <img src={interstitialAd.image_url} className="w-full h-full object-cover" alt="interstitial" />
+              )}
+              <div className="absolute inset-x-0 bottom-0 p-8 bg-gradient-to-t from-black via-black/60 to-transparent">
+                <span className="text-[10px] font-black text-brand-gold uppercase tracking-[0.2em] mb-2 block animate-pulse">Publicidade Exclusiva</span>
+                <h3 className="text-2xl font-black text-white uppercase mb-4">{interstitialAd.company_name}</h3>
+                <button 
+                  onClick={() => {
+                    if (interstitialAd.link) window.open(interstitialAd.link, '_blank');
+                    setShowInterstitial(false);
+                  }}
+                  className="w-full bg-brand-gold text-slate-950 py-4 rounded-2xl font-black uppercase text-xs tracking-widest shadow-lg active:scale-95 transition-all"
+                >
+                  Saber Mais
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rewarded Ad Floating Trigger & Modal */}
+      {rewardedAd && (
+        <>
+          <button 
+            onClick={() => setShowRewarded(true)}
+            className="fixed bottom-24 right-6 z-[150] bg-brand-gold text-slate-950 p-4 rounded-full shadow-2xl animate-bounce hover:scale-110 active:scale-95 transition-all text-[10px] font-black uppercase tracking-tight flex items-center gap-2"
+            title="Ver Oferta Especial"
+          >
+            <DollarSign size={16} /> Ganhar Bónus
+          </button>
+
+          {showRewarded && (
+            <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/95 animate-fade-in backdrop-blur-md">
+              <div className="bg-slate-900 w-full max-w-sm rounded-[3rem] overflow-hidden border border-brand-gold/30 shadow-brand-gold/10 shadow-2xl">
+                <div className="p-8 text-center space-y-6">
+                  <div className="w-20 h-20 bg-brand-gold/10 rounded-full flex items-center justify-center text-brand-gold mx-auto">
+                    <DollarSign size={40} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-black text-white uppercase mb-2">Oferta Exclusiva</h3>
+                    <p className="text-slate-400 text-xs font-bold leading-relaxed px-4">Veja este anúncio premium da <span className="text-brand-gold">{rewardedAd.company_name}</span> para desbloquear a sua recompensa.</p>
+                  </div>
+                  
+                  <div className="rounded-2xl overflow-hidden border border-white/5 aspect-video">
+                    {rewardedAd.media_type === 'video' ? (
+                      <video 
+                        src={rewardedAd.video_url} 
+                        poster={rewardedAd.image_url}
+                        autoPlay 
+                        muted={isMuted}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <img src={rewardedAd.image_url} className="w-full h-full object-cover" alt="rewarded" />
+                    )}
+                  </div>
+
+                  <button 
+                    onClick={() => {
+                      if (rewardedAd.link) window.open(rewardedAd.link, '_blank');
+                      setShowRewarded(false);
+                    }}
+                    className="w-full bg-brand-gold text-slate-950 py-4 rounded-2xl font-black uppercase text-xs tracking-widest shadow-lg shadow-amber-500/20 active:scale-95 transition-all"
+                  >
+                    Resgatar Bónus
+                  </button>
+                  <button onClick={() => setShowRewarded(false)} className="text-slate-500 text-[10px] font-black uppercase tracking-widest hover:text-white transition-colors">Fechar</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
       {/* Hero Section Dynamic - Mobile Optimized Height */}
       <div className="relative rounded-[1.5rem] md:rounded-[3rem] overflow-hidden bg-slate-950 shadow-2xl min-h-[380px] md:min-h-[600px] flex items-center group gold-border-subtle">
         <div className="absolute inset-0 z-0">

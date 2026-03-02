@@ -4,6 +4,9 @@ export interface Ad {
   id: string;
   type: 'hero' | 'partner';
   media_type: 'image' | 'video';
+  format: 'banner' | 'interstitial' | 'rewarded';
+  location: 'home' | 'jobs' | 'exchange' | 'all';
+  duration_seconds: number;
   image_url: string;
   video_url?: string;
   link?: string;
