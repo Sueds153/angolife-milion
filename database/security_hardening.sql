@@ -18,7 +18,9 @@ create policy "Users manage own subscriptions" on public.push_subscriptions for 
 alter table public.jobs enable row level security;
 drop policy if exists "Anyone can view approved jobs" on public.jobs;
 create policy "Anyone can view approved jobs" on public.jobs for
-select using (status = 'approved');
+select using (
+        status in ('publicado', 'published', 'aprovado', 'approved')
+    );
 drop policy if exists "Admins manage jobs" on public.jobs;
 create policy "Admins manage jobs" on public.jobs for all using (
     exists (
@@ -28,13 +30,13 @@ create policy "Admins manage jobs" on public.jobs for all using (
             and is_admin = true
     )
 );
--- 4. Tabela de NOTÍCIAS (News)
-alter table public.news enable row level security;
-drop policy if exists "Anyone can view news" on public.news;
-create policy "Anyone can view news" on public.news for
+-- 4. Tabela de NOTÍCIAS (news_articles)
+alter table public.news_articles enable row level security;
+drop policy if exists "Anyone can view news" on public.news_articles;
+create policy "Anyone can view news" on public.news_articles for
 select using (true);
-drop policy if exists "Admins manage news" on public.news;
-create policy "Admins manage news" on public.news for all using (
+drop policy if exists "Admins manage news" on public.news_articles;
+create policy "Admins manage news" on public.news_articles for all using (
     exists (
         select 1
         from profiles
@@ -42,11 +44,20 @@ create policy "Admins manage news" on public.news for all using (
             and is_admin = true
     )
 );
--- 5. Tabela de OFERTAS (Deals)
-alter table public.deals enable row level security;
-drop policy if exists "Anyone can view active deals" on public.deals;
-create policy "Anyone can view active deals" on public.deals for
+-- 5. Tabela de OFERTAS (product_deals)
+alter table public.product_deals enable row level security;
+drop policy if exists "Anyone can view active deals" on public.product_deals;
+create policy "Anyone can view active deals" on public.product_deals for
 select using (true);
+drop policy if exists "Admins manage deals" on public.product_deals;
+create policy "Admins manage deals" on public.product_deals for all using (
+    exists (
+        select 1
+        from profiles
+        where id = auth.uid()
+            and is_admin = true
+    )
+);
 -- 6. Tabela de ORDENS (Orders/Exchange/CV Purchase)
 alter table public.orders enable row level security;
 drop policy if exists "Users view own orders" on public.orders;
