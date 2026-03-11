@@ -23,8 +23,8 @@ export const TradeTerminal: React.FC<TradeTerminalProps> = ({
   const estimatedTotalFormatted = estimatedTotal.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' });
 
   return (
-    <div className="sticky top-24 bg-white dark:bg-slate-900 rounded-[2.5rem] border border-orange-500/20 p-8 shadow-sm">
-      <div className="flex items-center justify-between mb-8 pb-4 border-b border-orange-500/10">
+    <div className="sticky top-24 bg-white dark:bg-slate-900 rounded-[2rem] md:rounded-[2.5rem] border border-orange-500/20 p-5 md:p-8 shadow-sm">
+      <div className="flex items-center justify-between mb-5 md:mb-8 pb-4 border-b border-orange-500/10">
         <div className="flex items-center gap-3">
           <Activity size={20} className="text-[orange-500]" />
           <h3 className="font-black text-xl text-slate-900 dark:text-white uppercase tracking-tighter">Terminal</h3>

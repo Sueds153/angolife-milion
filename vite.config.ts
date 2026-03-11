@@ -1,6 +1,7 @@
 import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 import javascriptObfuscator from 'vite-plugin-javascript-obfuscator';
 
 export default defineConfig(({ mode }) => {
@@ -10,9 +11,11 @@ export default defineConfig(({ mode }) => {
     return {
       server: {
         port: 3000,
-        host: '0.0.0.0',
+        // 🔐 SEGURANÇA: restrito a localhost. Usar '0.0.0.0' apenas para debug em dispositivo móvel.
+        host: 'localhost',
       },
       plugins: [
+        tailwindcss(),
         react(),
         isProd ? javascriptObfuscator({
           include: [/\.(js|ts|tsx)$/],
@@ -35,6 +38,21 @@ export default defineConfig(({ mode }) => {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
+      },
+      build: {
+        minify: 'terser',
+        terserOptions: {
+          compress: {
+            drop_console: isProd,
+            drop_debugger: isProd
+          }
+        }
+      },
+      test: {
+        globals: true,
+        environment: 'jsdom',
+        setupFiles: './vitest-setup.ts',
       }
     };
 });
+

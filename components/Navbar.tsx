@@ -15,6 +15,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenLegal }) => {
     user, isAuthenticated, isDarkMode, toggleTheme, setAuthModal 
   } = useAppStore();
 
+
   const handleLogout = async () => {
     await AuthService.signOut();
     useAppStore.getState().setUser(null);
@@ -38,7 +39,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenLegal }) => {
   }
 
   return (
-    <nav className="bg-white/95 dark:bg-slate-900/95 text-slate-900 dark:text-white shadow-sm sticky top-0 z-[100] border-b border-orange-500/20 transition-colors duration-300 backdrop-blur-md pt-safe print:hidden">
+    <>
+      <nav className="bg-white/95 dark:bg-slate-900/95 text-slate-900 dark:text-white shadow-sm sticky top-0 z-[100] border-b border-orange-500/20 transition-colors duration-300 backdrop-blur-md pt-safe print:hidden">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16 md:h-20">
           {/* Brand Section */}
@@ -142,10 +144,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenLegal }) => {
           </div>
         </div>
       </div>
+    </nav>
 
       {/* Mobile Menu Overlay - Fully Responsive */}
       {isOpen && (
-        <div className="lg:hidden fixed inset-0 top-[calc(64px+var(--sat))] bg-slate-950/60 backdrop-blur-sm z-40 animate-fade-in" onClick={() => setIsOpen(false)}>
+        <div className="lg:hidden fixed inset-0 top-[calc(64px+var(--sat))] bg-slate-950/80 backdrop-blur-sm z-[130] animate-fade-in" onClick={() => setIsOpen(false)}>
           <div
             className="bg-white dark:bg-slate-900 w-full shadow-2xl border-t border-orange-500/20 animate-slide-up max-h-[calc(100vh-64px-var(--sat))] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
@@ -242,6 +245,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenLegal }) => {
           </div>
         </div>
       )}
-    </nav>
+    </>
   );
 };

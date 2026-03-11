@@ -55,12 +55,29 @@ export const AuthService = {
   },
 
   updateProfile: async (userId: string, updates: any) => {
-    const dbUpdates: any = { ...updates };
-    if (updates.fullName) dbUpdates.full_name = updates.fullName;
-    if (updates.avatarUrl) dbUpdates.avatar_url = updates.avatarUrl;
-    if (updates.savedJobs) dbUpdates.saved_jobs = updates.savedJobs;
+    // 🔐 SEGURANÇA: whitelist explícita de campos que o utilizador pode atualizar.
+    // Campos de privilégio (is_admin, is_premium, cv_credits, account_type) são
+    // geridos exclusivamente por serviços server-side (subscription, referral Edge Function).
+    const ALLOWED_USER_FIELDS = [
+      'full_name', 'avatar_url', 'saved_jobs',
+      'application_history', 'cv_history', 'phone', 'bio', 'location'
+    ];
+
+    const dbUpdates: Record<string, any> = {};
+
+    // Mapear aliases de camelCase para snake_case
+    if (updates.fullName)           dbUpdates.full_name = updates.fullName;
+    if (updates.avatarUrl)          dbUpdates.avatar_url = updates.avatarUrl;
+    if (updates.savedJobs)          dbUpdates.saved_jobs = updates.savedJobs;
     if (updates.applicationHistory) dbUpdates.application_history = updates.applicationHistory;
-    if (updates.cvHistory) dbUpdates.cv_history = updates.cvHistory;
+    if (updates.cvHistory)          dbUpdates.cv_history = updates.cvHistory;
+
+    // Incluir apenas campos snake_case que estão na whitelist
+    for (const [key, value] of Object.entries(updates)) {
+      if (ALLOWED_USER_FIELDS.includes(key) && !(key in dbUpdates)) {
+        dbUpdates[key] = value;
+      }
+    }
 
     const { data, error } = await supabase
       .from("profiles")

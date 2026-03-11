@@ -56,29 +56,29 @@ export const ConversionSimulator: React.FC<ConversionSimulatorProps> = ({
   };
 
   return (
-    <div className="bg-slate-100 dark:bg-slate-900 rounded-[2.5rem] border border-orange-500/20 p-10 shadow-sm relative overflow-hidden transition-colors">
+    <div className="bg-slate-100 dark:bg-slate-900 rounded-[2rem] md:rounded-[2.5rem] border border-orange-500/20 p-5 md:p-10 shadow-sm relative overflow-hidden transition-colors">
       {!isAuthenticated && (
         <LockedOverlay title="Simulador Elite" onRequireAuth={onRequireAuth} />
       )}
       <div className={!isAuthenticated ? "blur-md pointer-events-none" : ""}>
-        <div className="flex items-center gap-3 mb-10">
-          <Calculator className="text-[orange-500]" size={28} />
-          <h3 className="text-2xl font-black uppercase text-white tracking-widest">
+        <div className="flex items-center gap-3 mb-6 md:mb-10">
+          <Calculator className="text-[orange-500]" size={24} />
+          <h3 className="text-lg md:text-2xl font-black uppercase text-slate-900 dark:text-white tracking-widest leading-tight">
             SIMULADOR DE CONVERSÃO
           </h3>
         </div>
 
-        <div className="flex justify-center mb-10">
-          <div className="bg-slate-200 dark:bg-black p-1.5 rounded-2xl flex border border-orange-500/10 shadow-inner">
+        <div className="flex justify-center mb-6 md:mb-10">
+          <div className="bg-slate-200 dark:bg-black p-1 md:p-1.5 rounded-2xl flex w-full border border-orange-500/10 shadow-inner">
             <button
               onClick={() => setIsOfficial(true)}
-              className={`px-10 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${isOfficial ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm" : "text-slate-500 dark:text-slate-400"}`}
+              className={`flex-1 px-4 md:px-10 py-2.5 md:py-3 rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] transition-all ${isOfficial ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm" : "text-slate-500 dark:text-slate-400"}`}
             >
               BANCOS (BNA)
             </button>
             <button
               onClick={() => setIsOfficial(false)}
-              className={`px-10 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${!isOfficial ? "bg-[orange-500] text-white shadow-lg" : "text-slate-500 dark:text-slate-400"}`}
+              className={`flex-1 px-4 md:px-10 py-2.5 md:py-3 rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] transition-all ${!isOfficial ? "bg-[orange-500] text-white shadow-lg" : "text-slate-500 dark:text-slate-400"}`}
             >
               MERCADO INFORMAL
             </button>
@@ -86,16 +86,16 @@ export const ConversionSimulator: React.FC<ConversionSimulatorProps> = ({
         </div>
 
         <div className="space-y-6">
-          <div className="bg-white dark:bg-black p-6 md:p-8 rounded-[2rem] border border-orange-500/20 shadow-sm">
+          <div className="bg-white dark:bg-black p-4 md:p-8 rounded-[1.5rem] md:rounded-[2rem] border border-orange-500/20 shadow-sm">
             <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4 block">
               VOCÊ ENVIA
             </span>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 md:gap-4">
               <input
                 type="number"
                 value={baseAmount}
                 onChange={(e) => setBaseAmount(Number(e.target.value))}
-                className="w-full bg-transparent text-3xl md:text-5xl font-black text-slate-900 dark:text-white outline-none"
+                className="w-full bg-transparent text-2xl md:text-5xl font-black text-slate-900 dark:text-white outline-none min-w-0"
                 title="Enviar"
               />
               <div className="relative" onClick={(e) => e.stopPropagation()}>
@@ -162,13 +162,13 @@ export const ConversionSimulator: React.FC<ConversionSimulatorProps> = ({
             </button>
           </div>
 
-          <div className="bg-white dark:bg-black p-6 md:p-8 rounded-[2rem] border border-orange-500/20 shadow-sm">
+          <div className="bg-white dark:bg-black p-4 md:p-8 rounded-[1.5rem] md:rounded-[2rem] border border-orange-500/20 shadow-sm">
             <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4 block">
               VOCÊ RECEBE
             </span>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 md:gap-4">
               <div
-                className="w-full text-2xl md:text-5xl font-black text-[orange-500] truncate"
+                className="w-full text-2xl md:text-5xl font-black text-[orange-500] truncate min-w-0"
                 title={calculateConversion()}
               >
                 {calculateConversion()}
@@ -226,7 +226,7 @@ export const ConversionSimulator: React.FC<ConversionSimulatorProps> = ({
           </div>
         </div>
 
-        <div className="mt-10 pt-8 border-t border-orange-500/20 flex justify-between items-center px-4">
+        <div className="mt-6 md:mt-10 pt-6 md:pt-8 border-t border-orange-500/20 flex flex-wrap justify-between items-center gap-2 px-2 md:px-4">
           <div className="flex items-center gap-2 text-[orange-500] text-[10px] font-black uppercase tracking-widest">
             <Sparkles size={14} /> Melhor taxa garantida
           </div>

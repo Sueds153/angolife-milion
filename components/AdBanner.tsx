@@ -50,17 +50,28 @@ export const AdBanner: React.FC<AdBannerProps> = ({ format }) => {
         </div>
       </div>
 
-      <div className="w-full h-full flex items-center justify-between px-4 group cursor-pointer hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
+      <div 
+        className="w-full h-full flex items-center justify-between px-4 group cursor-pointer hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors"
+        onClick={() => {
+          // Fallback actions
+          if (format === 'leaderboard') window.location.href = '/vagas';
+          if (format === 'rectangle') window.location.href = '/cambio';
+        }}
+      >
          <div className="flex items-center gap-3">
             <div className="p-1.5 bg-brand-gold/10 rounded-lg text-brand-gold">
               <Sparkles size={isSticky ? 12 : 18} />
             </div>
             <div className="flex flex-col">
               <span className={`font-black text-brand-gold uppercase tracking-tighter ${isSticky ? 'text-[9px]' : 'text-sm'}`}>
-                Publicidade Premium
+                {format === 'leaderboard' ? 'Publica a tua Vaga Agora' : 
+                 format === 'rectangle' ? 'Câmbio em Tempo Real' : 
+                 'Publicidade AngoLife'}
               </span>
               <p className={`text-slate-400 font-bold ${isSticky ? 'text-[7px]' : 'text-[9px] mt-0.5'}`}>
-                Toque para explorar ofertas exclusivas
+                {format === 'leaderboard' ? 'Alcança milhares de candidatos em Angola' : 
+                 format === 'rectangle' ? 'Vê as últimas cotações do dia' : 
+                 'Toca para explorar ofertas exclusivas'}
               </p>
             </div>
          </div>

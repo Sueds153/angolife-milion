@@ -18,28 +18,52 @@ export const NotificationService = {
     return permission === 'granted';
   },
 
-  sendNativeNotification: (title: string, body: string) => {
-    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-      const now = new Date();
-      const today = now.toISOString().split('T')[0];
+  sendNativeNotification: async (title: string, body: string, userId?: string) => {
+    if (typeof window === 'undefined' || !('Notification' in window) || Notification.permission !== 'granted') {
+      return;
+    }
+
+    // 🔐 SEGURANÇA: Rate-limit verificado no servidor (tabela notification_rate_limit).
+    // Impede bypass via limpeza do localStorage.
+    if (userId) {
+      try {
+        const { data: allowed, error } = await supabase
+          .rpc('check_notification_limit', { p_user_id: userId, p_limit: 2 });
+
+        if (error || !allowed) {
+          console.log('Push notification skipped: Server-side daily limit reached.');
+          return;
+        }
+      } catch {
+        // Fallback para localStorage se offline ou RPC indisponível
+        const today = new Date().toISOString().split('T')[0];
+        const sentinel = `notif_count_${today}`;
+        const currentCount = Number(localStorage.getItem(sentinel)) || 0;
+        if (currentCount >= 2) {
+          console.log('Push notification skipped: Offline limit reached (2/2).');
+          return;
+        }
+        localStorage.setItem(sentinel, (currentCount + 1).toString());
+      }
+    } else {
+      // Sem userId (utilizador anónimo): apenas localStorage
+      const today = new Date().toISOString().split('T')[0];
       const sentinel = `notif_count_${today}`;
       const currentCount = Number(localStorage.getItem(sentinel)) || 0;
-
       if (currentCount >= 2) {
         console.log('Push notification skipped: Daily limit reached (2/2).');
         return;
       }
-
-      const options: any = {
-        body,
-        icon: '/favicon.ico',
-        badge: '/favicon.ico',
-        vibrate: [200, 100, 200],
-      };
-      
-      new Notification(title, options);
       localStorage.setItem(sentinel, (currentCount + 1).toString());
     }
+
+    const options: NotificationOptions & { vibrate?: number[] } = {
+      body,
+      icon: '/favicon.ico',
+      badge: '/favicon.ico',
+      vibrate: [200, 100, 200],
+    };
+    new Notification(title, options);
   },
 
   checkPermission: (): NotificationPermission => {

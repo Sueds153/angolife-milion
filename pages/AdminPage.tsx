@@ -602,67 +602,64 @@ export const AdminPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-8 animate-slide-up pb-20">
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4 stack-narrow">
+    <div className="space-y-6 animate-slide-up pb-20">
+      <div className="flex flex-col md:flex-row justify-between items-start gap-2">
         <div className="pt-safe w-full md:w-auto">
           <h2 className="text-fluid-h2 font-black text-orange-500 uppercase tracking-tight leading-tight">Painel Admin</h2>
           <p className="text-slate-500 dark:text-slate-400 font-medium text-[10px] md:text-sm uppercase tracking-widest mt-1">Gerindo a AngoLife com precisão.</p>
           
           <AdminDiagnostic user={user} />
         </div>
-        <div className="scroll-x-touch flex flex-nowrap-shrink-0 gap-2 pb-4 -mx-4 px-4 scrollbar-none">
+      </div>
+
+      {/* Tab Navigation — full-width scroll on mobile */}
+      <div className="w-full overflow-x-auto no-scrollbar">
+        <div className="flex gap-2 pb-2 flex-nowrap">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === 'overview' ? 'bg-orange-500 text-white shadow-lg' : 'bg-white dark:bg-white/5 text-slate-500 border border-orange-500/10'}`}
+            className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap shrink-0 ${activeTab === 'overview' ? 'bg-orange-500 text-white shadow-lg' : 'bg-white dark:bg-white/5 text-slate-500 border border-orange-500/10'}`}
             title="Ver Visão Geral"
           >
             Geral
           </button>
           <button
             onClick={() => setActiveTab('jobs')}
-            className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === 'jobs' ? 'bg-orange-500 text-white shadow-lg' : 'bg-white dark:bg-white/5 text-slate-500 border border-orange-500/10'}`}
+            className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap shrink-0 ${activeTab === 'jobs' ? 'bg-orange-500 text-white shadow-lg' : 'bg-white dark:bg-white/5 text-slate-500 border border-orange-500/10'}`}
             title="Gerir Vagas"
           >
             Vagas
           </button>
           <button
             onClick={() => setActiveTab('news')}
-            className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === 'news' ? 'bg-orange-500 text-white shadow-lg' : 'bg-white dark:bg-white/5 text-slate-500 border border-orange-500/10'}`}
+            className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap shrink-0 ${activeTab === 'news' ? 'bg-orange-500 text-white shadow-lg' : 'bg-white dark:bg-white/5 text-slate-500 border border-orange-500/10'}`}
             title="Gerir Notícias"
           >
             Notícias
           </button>
           <button
             onClick={() => setActiveTab('deals')}
-            className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === 'deals' ? 'bg-orange-500 text-white shadow-lg' : 'bg-white dark:bg-white/5 text-slate-500 border border-orange-500/10'}`}
+            className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap shrink-0 ${activeTab === 'deals' ? 'bg-orange-500 text-white shadow-lg' : 'bg-white dark:bg-white/5 text-slate-500 border border-orange-500/10'}`}
             title="Gerir Descontos"
           >
             Descontos
           </button>
           <button
             onClick={() => setActiveTab('exchange')}
-            className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === 'exchange' ? 'bg-orange-500 text-white shadow-lg' : 'bg-white dark:bg-white/5 text-slate-500 border border-orange-500/10'}`}
+            className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap shrink-0 ${activeTab === 'exchange' ? 'bg-orange-500 text-white shadow-lg' : 'bg-white dark:bg-white/5 text-slate-500 border border-orange-500/10'}`}
             title="Gerir Câmbio"
           >
             Câmbio
           </button>
           <button
             onClick={() => setActiveTab('cv')}
-            className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === 'cv' ? 'bg-orange-500 text-white shadow-lg' : 'bg-white dark:bg-white/5 text-slate-500 border border-orange-500/10'}`}
+            className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap shrink-0 ${activeTab === 'cv' ? 'bg-orange-500 text-white shadow-lg' : 'bg-white dark:bg-white/5 text-slate-500 border border-orange-500/10'}`}
             title="Validar CVs"
           >
             CVs
           </button>
           <button
             onClick={() => setActiveTab('ads')}
-            className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === 'ads' ? 'bg-orange-500 text-white shadow-lg' : 'bg-white dark:bg-white/5 text-slate-500 border border-orange-500/10'}`}
-            title="Gerir Publicidade"
-          >
-            Publicidade
-          </button>
-          <button
-            onClick={() => setActiveTab('ads')}
-            className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === 'ads' ? 'bg-orange-500 text-white shadow-lg' : 'bg-white dark:bg-white/5 text-slate-500 border border-orange-500/10'}`}
+            className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap shrink-0 ${activeTab === 'ads' ? 'bg-orange-500 text-white shadow-lg' : 'bg-white dark:bg-white/5 text-slate-500 border border-orange-500/10'}`}
             title="Gerir Publicidade"
           >
             Publicidade

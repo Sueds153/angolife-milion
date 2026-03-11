@@ -74,39 +74,36 @@ export const AdminJobsSection: React.FC<AdminJobsSectionProps> = ({
 }) => {
   return (
     <div className="space-y-6">
-      <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-orange-500/10 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4 stack-narrow">
+      <div className="bg-white dark:bg-slate-900 p-5 md:p-8 rounded-3xl border border-orange-500/10 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6 stack-narrow">
         <div className="flex items-center gap-4 w-full md:w-auto">
           <div className="w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-500 shrink-0">
             <Briefcase size={24} />
           </div>
-          <div>
-            <h3 className="font-black text-lg uppercase leading-tight">Gestão de Empregos</h3>
-            <p className="text-xs text-slate-500">{pendingJobs.length} vagas pendentes de aprovação.</p>
+          <div className="min-w-0">
+            <h3 className="font-black text-lg md:text-xl uppercase leading-tight truncate">Gestão de Empregos</h3>
+            <p className="text-[10px] md:text-xs text-slate-500 font-bold uppercase tracking-wider">{pendingJobs.length} vagas pendentes</p>
           </div>
         </div>
-        <div className="scroll-x-touch flex flex-nowrap lg:flex-row gap-2 w-full md:w-auto pb-2 lg:pb-0 -mx-2 px-2 no-scrollbar">
+        <div className="flex flex-wrap gap-2 w-full md:w-auto">
           <button
             onClick={handleApproveAll}
             disabled={loading || pendingJobs.length === 0}
-            title="Publicar Todas as Vagas Pendentes"
-            className="shrink-0 bg-emerald-500 text-white px-4 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-emerald-600 active:scale-95 transition-all disabled:opacity-50 shadow-lg shadow-emerald-500/20"
+            className="flex-1 md:flex-none justify-center bg-emerald-500 text-white px-5 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-600 active:scale-95 transition-all disabled:opacity-50 shadow-lg shadow-emerald-500/20"
           >
-            <Check size={16} /> Publicar Tudo
+            <Check size={16} /> Tudo
           </button>
           <button
             onClick={handleSyncJobs}
             disabled={loading}
-            title="Sincronizar Vagas via IA"
-            className="shrink-0 bg-brand-gold text-slate-900 px-4 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+            className="flex-1 md:flex-none justify-center bg-brand-gold text-slate-900 px-5 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
           >
-            <RefreshCw className={loading ? 'animate-spin' : ''} size={16} /> Sincronizar
+            <RefreshCw className={loading ? 'animate-spin' : ''} size={16} /> Sync
           </button>
           <button
             onClick={() => setShowNewJobModal(true)}
-            title="Criar Nova Vaga Manualmente"
-            className="shrink-0 bg-slate-900 dark:bg-white text-white dark:text-slate-950 px-4 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:scale-105 active:scale-95 transition-all"
+            className="flex-1 md:flex-none justify-center bg-slate-900 dark:bg-white text-white dark:text-slate-950 px-5 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 hover:scale-105 active:scale-95 transition-all"
           >
-            <Plus size={16} /> Nova Vaga
+            <Plus size={16} /> Nova
           </button>
         </div>
       </div>
@@ -189,11 +186,11 @@ export const AdminJobsSection: React.FC<AdminJobsSectionProps> = ({
                 </div>
 
                 {/* Botões de Ação */}
-                <div className="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0 w-full lg:w-auto lg:pt-14">
-                  <div className="flex gap-2 w-full lg:w-auto">
+                <div className="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0 w-full lg:w-48">
+                  <div className="flex gap-2 w-full">
                     <button
                       onClick={() => handleToggleVerification(job.id, job.isVerified || false)}
-                      className={`p-3 md:p-4 rounded-xl transition-all border ${job.isVerified ? 'bg-amber-500/10 text-amber-500 border-amber-500/30' : 'bg-slate-100 dark:bg-white/5 text-slate-400 border-transparent'}`}
+                      className={`p-4 rounded-2xl transition-all border ${job.isVerified ? 'bg-amber-500/10 text-amber-500 border-amber-500/30' : 'bg-slate-100 dark:bg-white/5 text-slate-400 border-transparent'}`}
                       title={job.isVerified ? "Remover Verificação" : "Verificar Empresa"}
                     >
                       <ShieldCheck size={20} />
@@ -201,16 +198,14 @@ export const AdminJobsSection: React.FC<AdminJobsSectionProps> = ({
                     <button
                       onClick={() => handleApprove(job.id)}
                       disabled={loading}
-                      className="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all shadow-xl shadow-emerald-500/20 active:scale-95 flex-1"
-                      title="✅ Publicar Vaga Agora"
+                      className="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-4 rounded-2xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all shadow-xl shadow-emerald-500/20 active:scale-95 flex-1"
                     >
                       <Check size={18} /> Publicar
                     </button>
                   </div>
                   <button
                     onClick={() => handleReject(job.id)}
-                    className="bg-slate-100 dark:bg-white/5 text-slate-400 hover:bg-red-500 hover:text-white px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all active:scale-95 w-full lg:w-auto border border-slate-200 dark:border-white/5"
-                    title="Rejeitar Vaga Permanentemente"
+                    className="bg-slate-100 dark:bg-white/5 text-slate-400 hover:bg-red-500 hover:text-white px-6 py-4 rounded-2xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all active:scale-95 w-full border border-slate-200 dark:border-white/5"
                   >
                     <X size={18} /> Rejeitar
                   </button>

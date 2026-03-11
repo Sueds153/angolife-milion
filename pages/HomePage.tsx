@@ -10,6 +10,7 @@ import { PARTNER_ADS } from '../constants/ads';
 import { AdBanner } from '../components/AdBanner';
 import { AdsService, Ad } from '../services/ads.service';
 import { useAppStore } from '../store/useAppStore';
+import { Helmet } from 'react-helmet-async';
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -114,6 +115,11 @@ export const HomePage: React.FC = () => {
 
   return (
     <div className="space-y-6 md:space-y-12 animate-fade-in">
+      <Helmet>
+        <title>Angolife Su-Golden | Inteligência de Mercado e Elite em Angola</title>
+        <meta name="description" content="Lidere a economia nacional com a Angolife Su-Golden. Câmbio em tempo real, vagas de elite e as melhores ofertas do mercado angolano." />
+        <meta name="keywords" content="vagas angola, cambio angola, economia angola, empregos angola, mercado angolano, su-golden" />
+      </Helmet>
       {/* Interstitial Ad Overlay */}
       {showInterstitial && interstitialAd && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in">
@@ -222,11 +228,11 @@ export const HomePage: React.FC = () => {
       <div className="relative rounded-[1.5rem] md:rounded-[3rem] overflow-hidden bg-slate-950 shadow-2xl min-h-[380px] md:min-h-[600px] flex items-center group gold-border-subtle">
         <div className="absolute inset-0 z-0">
           {heroBanners.map((banner, idx) => (
-            banner.mediaType === 'video' ? (
+            (banner.mediaType === 'video' || (banner as any).media_type === 'video') ? (
               <video 
                 key={idx}
-                src={banner.videoUrl} 
-                poster={banner.imageUrl}
+                src={banner.videoUrl || (banner as any).video_url} 
+                poster={banner.imageUrl || (banner as any).image_url}
                 autoPlay 
                 muted={isMuted}
                 loop 
@@ -236,7 +242,7 @@ export const HomePage: React.FC = () => {
             ) : (
               <img 
                 key={idx}
-                src={banner.imageUrl} 
+                src={banner.imageUrl || (banner as any).image_url} 
                 alt={banner.title} 
                 className={`absolute inset-0 w-full h-full object-cover transition-all duration-[3000ms] ease-in-out ${heroImageIndex === idx ? 'opacity-40 scale-110 translate-x-0' : 'opacity-0 scale-100 translate-x-4'}`}
               />
@@ -255,8 +261,8 @@ export const HomePage: React.FC = () => {
           )}
         </div>
         
-        <div className="relative z-10 p-6 md:p-16 max-w-4xl w-full">
-          <div className="inline-flex items-center gap-2 bg-brand-gold/20 border border-brand-gold/40 backdrop-blur-xl px-3 py-1.5 rounded-full text-brand-gold text-[7px] md:text-[10px] font-black uppercase tracking-[0.2em] mb-4 md:mb-10 shadow-lg">
+        <div className="relative z-10 p-6 md:p-24 max-w-5xl w-full">
+          <div className="inline-flex items-center gap-2 bg-brand-gold/20 border border-brand-gold/40 backdrop-blur-xl px-4 py-2 rounded-full text-brand-gold text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] mb-6 md:mb-12 shadow-lg">
             <Activity size={10} className="animate-pulse" />
             MERCADO EM TEMPO REAL
           </div>
@@ -281,8 +287,8 @@ export const HomePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Stats Dashboard - Responsive Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
+      {/* Stats Dashboard - Intelligent Adaptive Grid */}
+      <div className="grid-adaptive">
         <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] p-5 md:p-10 shadow-xl cursor-pointer group gold-border-subtle active:scale-[0.98] transition-all" onClick={() => navigate('/cambio')}>
           <div className="flex justify-between items-center mb-4 md:mb-6">
             <div className="w-10 h-10 md:w-14 md:h-14 bg-brand-gold/5 rounded-xl text-brand-gold flex items-center justify-center">
@@ -305,7 +311,7 @@ export const HomePage: React.FC = () => {
           <span className="text-2xl md:text-5xl font-black text-brand-gold">{featuredJobs.length}+ <span className="text-xs md:text-sm font-bold text-slate-400">Abertas</span></span>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] p-5 md:p-10 shadow-xl cursor-pointer group lg:col-span-1 sm:col-span-2 gold-border-subtle active:scale-[0.98] transition-all" onClick={() => navigate('/ofertas')}>
+        <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] p-5 md:p-10 shadow-xl cursor-pointer group gold-border-subtle active:scale-[0.98] transition-all" onClick={() => navigate('/ofertas')}>
           <div className="flex justify-between items-center mb-4 md:mb-6">
             <div className="w-10 h-10 md:w-14 md:h-14 bg-brand-gold/10 rounded-xl text-brand-gold flex items-center justify-center">
               <ShoppingBag className="w-5 h-5 md:w-7 md:h-7" />
@@ -321,11 +327,11 @@ export const HomePage: React.FC = () => {
       <div className="relative rounded-[1.5rem] md:rounded-[4rem] overflow-hidden bg-black shadow-2xl group transition-all gold-border-subtle min-h-[400px] md:min-h-[500px] flex items-center">
         <div className="absolute inset-0 z-0">
           {adBanners.map((banner, idx) => (
-            banner.mediaType === 'video' ? (
+            (banner.mediaType === 'video' || (banner as any).media_type === 'video') ? (
               <video 
                 key={idx}
-                src={banner.videoUrl} 
-                poster={banner.imageUrl}
+                src={banner.videoUrl || (banner as any).video_url} 
+                poster={banner.imageUrl || (banner as any).image_url}
                 autoPlay 
                 muted={isMuted}
                 loop 
@@ -335,8 +341,8 @@ export const HomePage: React.FC = () => {
             ) : (
               <img 
                 key={idx}
-                src={banner.imageUrl} 
-                alt={banner.companyName} 
+                src={banner.imageUrl || (banner as any).image_url} 
+                alt={(banner as any).companyName || (banner as any).company_name} 
                 className={`absolute inset-0 w-full h-full object-cover transition-all duration-[4000ms] ${adImageIndex === idx ? 'opacity-60 scale-105 blur-none' : 'opacity-0 scale-100'}`}
               />
             )

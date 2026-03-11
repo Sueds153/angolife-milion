@@ -38,9 +38,12 @@ export const OrderService = {
       .select("*", { count: 'exact', head: true })
       .gte("created_at", twentyFourHoursAgo);
 
-    return error ? 0 : (count || 0) + 12;
+    // 🔐 SEGURANÇA: valor real sem inflação artificial.
+    return error ? 0 : (count || 0);
   },
 
+  // 🔐 SEGURANÇA: requer sessão de admin (protegido por RLS "Admins view all orders").
+  // Dados financeiros nunca são retornados a utilizadores sem permissão.
   getLatestOrders: async (limit: number = 5): Promise<any[]> => {
     const { data, error } = await supabase
       .from("orders")
@@ -48,10 +51,11 @@ export const OrderService = {
       .order("created_at", { ascending: false })
       .limit(limit);
 
+    // Se RLS bloquear (sem sessão admin), retorna lista vazia sem expor dados
     if (error) return [];
     return data.map(o => ({
       name: o.full_name?.split(' ')[0] || 'Utilizador',
-      wallet: o.wallet,
+      wallet: o.wallet ? `${o.wallet.slice(0, 4)}...` : '—',  // mascarar wallet parcialmente
       amount: o.amount,
       currency: o.currency,
       type: o.order_type === 'venda' ? 'sell' : 'buy',

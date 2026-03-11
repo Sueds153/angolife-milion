@@ -24,6 +24,7 @@ import { APP_CONFIG } from '../constants';
 
 import { UserProfile } from '../types';
 import { useAppStore } from '../store/useAppStore';
+import { Helmet } from 'react-helmet-async';
 
 interface ExchangePageProps {
   onRequestReward?: (callback: () => void) => void;
@@ -411,6 +412,11 @@ export const ExchangePage: React.FC<ExchangePageProps> = ({ onRequestReward }) =
 
   return (
     <div className="space-y-8 animate-fade-in pb-20">
+      <Helmet>
+        <title>Câmbio em Dia Angola | Angolife Su-Golden</title>
+        <meta name="description" content="Acompanhe o câmbio formal e informal em Angola em tempo real. Converta Kwanza para Dólar ou Euro com as melhores taxas do mercado." />
+        <meta name="keywords" content="cambio angola, kwanza dolar, kwanza euro, mercado informal angola, cambio rua luanda" />
+      </Helmet>
       <LiveFeed />
       {activeOrderId && <OrderCard orderId={activeOrderId} onComplete={() => { supabase.from('orders').select('*').eq('id', activeOrderId).single().then(({ data }) => { setActiveOrder(data); setIsFeedbackModalOpen(true); }); }} />}
 

@@ -133,6 +133,22 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
             </div>
 
             <div className="space-y-2">
+              <label htmlFor="ad-type" className="text-[10px] font-black uppercase text-slate-400 ml-1">Tipo de Anúncio</label>
+              <div className="relative">
+                <Layout size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                <select 
+                  id="ad-type"
+                  value={formData.type}
+                  onChange={(e) => setFormData({...formData, type: e.target.value as any})}
+                  className="w-full bg-slate-50 dark:bg-white/5 border-none rounded-2xl p-4 pl-10 text-xs font-bold appearance-none focus:ring-2 focus:ring-brand-gold/50"
+                >
+                  <option value="partner">Anúncio de Parceiro</option>
+                  <option value="hero">Destaque Principal (Hero)</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
               <label htmlFor="ad-format" className="text-[10px] font-black uppercase text-slate-400 ml-1">Formato do Anúncio</label>
               <div className="relative">
                 <Layout size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />

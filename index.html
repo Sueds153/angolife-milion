@@ -6,6 +6,17 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
+    <script>
+      (function() {
+        try {
+          const theme = localStorage.getItem('theme');
+          const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (theme === 'dark' || (theme !== 'light' && supportDarkMode)) {
+            document.documentElement.classList.add('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
     <title>Angolife - Super Aplicativo de Angola</title>
     <meta
       name="description"
@@ -52,52 +63,6 @@
       property="twitter:image"
       content="https://angolife.app/og-image.jpg"
     />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            colors: {
-              brand: {
-                gold: "#F59E0B",
-                dark: "#0F172A",
-                light: "#F8FAFC",
-              },
-            },
-            animation: {
-              "fade-in": "fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
-              "slide-up": "slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
-              float: "float 25s ease-in-out infinite",
-              drift: "drift 20s linear infinite",
-            },
-            keyframes: {
-              fadeIn: {
-                "0%": { opacity: "0" },
-                "100%": { opacity: "1" },
-              },
-              slideUp: {
-                "0%": { transform: "translateY(10px)", opacity: "0" },
-                "100%": { transform: "translateY(0)", opacity: "1" },
-              },
-              float: {
-                "0%, 100%": { transform: "translate(0, 0)" },
-                "50%": { transform: "translate(1%, 2%)" },
-              },
-              drift: {
-                "0%": { transform: "translateY(0) rotate(0deg)", opacity: 0 },
-                "20%": { opacity: 0.3 },
-                "80%": { opacity: 0.3 },
-                "100%": {
-                  transform: "translateY(-100vh) rotate(180deg)",
-                  opacity: 0,
-                },
-              },
-            },
-          },
-        },
-      };
-    </script>
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
       rel="stylesheet"
@@ -111,7 +76,8 @@
       }
 
       * {
-        transition-property: background-color, border-color, color, box-shadow;
+        /* Only theme-related properties get a global transition; layout props (width, height, transform) are NOT globally transitioned to avoid jitter */
+        transition-property: background-color, border-color, color;
         transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
         transition-duration: 300ms;
         -webkit-tap-highlight-color: transparent;
@@ -174,7 +140,7 @@
       }
     </style>
 
-    <link rel="stylesheet" href="/index.css" />
+
 
     <!-- Google AdSense -->
     <script
@@ -182,6 +148,8 @@
       src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
       crossorigin="anonymous"
     ></script>
+    <!-- Plausible Analytics -->
+    <script defer data-domain="angolife.app" src="https://plausible.io/js/script.js"></script>
   </head>
   <body class="noise-bg overflow-x-hidden">
     <div id="root"></div>

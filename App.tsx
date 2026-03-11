@@ -1,17 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate, NavLink } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { Background } from './components/Background';
-import { HomePage } from './pages/HomePage';
-import { JobsPage } from './pages/JobsPage';
-import { ExchangePage } from './pages/ExchangePage';
-import { DealsPage } from './pages/DealsPage';
-import { NewsPage } from './pages/NewsPage';
-import { AdminPage } from './pages/AdminPage';
-import { ProfilePage } from './pages/ProfilePage';
-import { CVBuilderPage } from './pages/CVBuilderPage';
-import { DealDetailPage } from './pages/DealDetailPage';
 import { AdBanner } from './components/AdBanner';
 import { InterstitialAd, RewardedAd } from './components/AdOverlays';
 import { AuthModal } from './components/AuthModal';
@@ -24,8 +15,20 @@ import { DealsService } from './services/deals.service';
 import { UserProfile, AppNotification, ProductDeal } from './types';
 import { Home, Briefcase, DollarSign, Tag, Newspaper, FileText } from 'lucide-react';
 import { LegalModals } from './components/LegalModals';
+import { BottomNav } from './components/BottomNav';
 import { useAppStore } from './store/useAppStore';
+import { OnboardingModal } from './components/OnboardingModal';
 
+// Lazy loaded pages for performance
+const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })));
+const JobsPage = lazy(() => import('./pages/JobsPage').then(m => ({ default: m.JobsPage })));
+const ExchangePage = lazy(() => import('./pages/ExchangePage').then(m => ({ default: m.ExchangePage })));
+const DealsPage = lazy(() => import('./pages/DealsPage').then(m => ({ default: m.DealsPage })));
+const NewsPage = lazy(() => import('./pages/NewsPage').then(m => ({ default: m.NewsPage })));
+const AdminPage = lazy(() => import('./pages/AdminPage').then(m => ({ default: m.AdminPage })));
+const ProfilePage = lazy(() => import('./pages/ProfilePage').then(m => ({ default: m.ProfilePage })));
+const CVBuilderPage = lazy(() => import('./pages/CVBuilderPage').then(m => ({ default: m.CVBuilderPage })));
+const DealDetailPage = lazy(() => import('./pages/DealDetailPage').then(m => ({ default: m.DealDetailPage })));
 type Page = 'home' | 'jobs' | 'exchange' | 'deals' | 'news' | 'admin' | 'profile' | 'cv-builder';
 
 const App: React.FC = () => {
@@ -55,6 +58,15 @@ const App: React.FC = () => {
 
   const [showRewardAd, setShowRewardAd] = useState(false);
   const [rewardCallback, setRewardCallback] = useState<(() => void) | null>(null);
+
+  // Sync Dark Mode with DOM
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
 
   // Auth Listener & Profile Fetching
   useEffect(() => {
@@ -204,7 +216,7 @@ const App: React.FC = () => {
   const showStickyAd = !(user?.isPremium || user?.isAdmin);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-900 flex justify-center overflow-x-hidden text-slate-900 dark:text-white transition-colors duration-300 print:bg-white print:text-black">
+    <div className="min-h-screen bg-white dark:bg-slate-900 flex justify-center text-slate-900 dark:text-white transition-colors duration-300 print:bg-white print:text-black">
       <div className="print:hidden"><Background /></div>
 
       <div className="w-full lg:max-w-7xl xl:max-w-screen-2xl mx-auto print:max-w-none bg-white dark:bg-slate-900 min-h-screen shadow-2xl md:shadow-none print:shadow-none flex flex-col relative text-slate-900 dark:text-white transition-all duration-500">
@@ -218,11 +230,18 @@ const App: React.FC = () => {
           />
         ))}
 
+        <OnboardingModal />
+
         <Navbar />
 
         <main className="flex-grow flex flex-col pt-safe">
           <div className="flex-grow container py-6 animate-fade-in print:p-0">
-            <Routes>
+            <Suspense fallback={
+              <div className="flex-grow flex items-center justify-center min-h-[50vh]">
+                <div className="w-12 h-12 border-4 border-orange-500/20 border-t-orange-500 rounded-full animate-spin"></div>
+              </div>
+            }>
+              <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/vagas" element={
                 <JobsPage
@@ -293,37 +312,15 @@ const App: React.FC = () => {
               <Route path="/perfil" element={user ? <ProfilePage /> : <Navigate to="/" replace />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
+            </Suspense>
           </div>
 
           <div className="print:hidden"><Footer onOpenLegal={openLegalModal} /></div>
-
-          <div className={`${showStickyAd ? 'h-[110px]' : 'h-[75px]'} bg-transparent md:hidden lg:hidden print:hidden`}></div>
+          {/* Spacer: always compensates for the bottom nav + optional sticky ad height on mobile */}
+          <div className={`${showStickyAd ? 'h-[140px]' : 'h-[80px]'} md:hidden print:hidden`} />
         </main>
 
-        {/* Mobile Nav */}
-        <nav className={`fixed bottom-0 left-1/2 -translate-x-1/2 md:hidden w-full max-w-lg bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-orange-500/10 z-[120] flex justify-around items-center px-4 py-3 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.1)] print:hidden ${showStickyAd ? 'mb-[50px]' : 'mb-0'}`}>
-          {[
-            { id: 'home', label: 'Início', icon: Home, path: '/' },
-            { id: 'jobs', label: 'Vagas', icon: Briefcase, path: '/vagas' },
-            { id: 'cv-builder', label: 'CV', icon: FileText, path: '/cv-criador' },
-            { id: 'exchange', label: 'Câmbio', icon: DollarSign, path: '/cambio' },
-            { id: 'deals', label: 'Ofertas', icon: Tag, path: '/ofertas' },
-          ].map((item) => (
-            <NavLink
-              key={item.id}
-              to={item.path}
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className={({ isActive }) => `flex flex-col items-center justify-center min-w-[60px] py-1 transition-all active:scale-95 ${isActive ? 'text-orange-500' : 'text-slate-500 dark:text-slate-400 opacity-70 hover:opacity-100'}`}
-            >
-              {({ isActive }) => (
-                <>
-                  <item.icon size={22} strokeWidth={isActive ? 2.5 : 2} />
-                  <span className={`text-[9px] font-black uppercase tracking-tighter mt-1 transition-opacity ${isActive ? 'opacity-100' : 'opacity-60'}`}>{item.label}</span>
-                </>
-              )}
-            </NavLink>
-          ))}
-        </nav>
+        <BottomNav showStickyAd={showStickyAd} />
 
         {showStickyAd && (
           <div className="fixed bottom-0 left-1/2 -translate-x-1/2 md:hidden w-full max-w-lg z-[110] bg-white dark:bg-black border-t border-orange-500/10 shadow-2xl print:hidden">

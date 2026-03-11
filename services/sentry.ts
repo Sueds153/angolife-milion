@@ -1,5 +1,4 @@
 import * as Sentry from "@sentry/react";
-import { BrowserTracing } from "@sentry/tracing";
 
 /**
  * Initializes Sentry for error tracking and performance monitoring.
@@ -15,7 +14,7 @@ export const initSentry = () => {
 
   Sentry.init({
     dsn,
-    integrations: [new BrowserTracing()],
+    integrations: [Sentry.browserTracingIntegration()],
     
     // Performance Monitoring
     tracesSampleRate: 1.0, // Capture 100% of the transactions (adjust for production)

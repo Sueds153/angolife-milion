@@ -7,6 +7,7 @@ import { RewardedAd } from '../components/AdOverlays';
 import { AdBanner } from '../components/AdBanner';
 
 import { useAppStore } from '../store/useAppStore';
+import { Helmet } from 'react-helmet-async';
 
 interface NewsPageProps {
   onRequestReward?: (callback: () => void) => void;
@@ -168,6 +169,11 @@ export const NewsPage: React.FC<NewsPageProps> = ({ onRequestReward }) => {
 
   return (
     <div className="space-y-6 animate-fade-in pb-20">
+      <Helmet>
+        <title>Notícias Secretas de Angola | Angolife Su-Golden</title>
+        <meta name="description" content="Acesse informações exclusivas e notícias de última hora sobre a economia e política de Angola. O que ninguém lhe conta, você encontra aqui." />
+        <meta name="keywords" content="noticias angola, segredos angola, economia angola hoje, politica angola" />
+      </Helmet>
       <div className="flex flex-col gap-1 mb-4 w-full stack-narrow">
         <h2 className="text-fluid-h2 font-black text-brand-gold uppercase tracking-tighter flex flex-wrap items-center gap-2 leading-tight">
            <Flame className="fill-brand-gold text-brand-gold shrink-0" />
