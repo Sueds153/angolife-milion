@@ -131,7 +131,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenLegal }) => {
           <div className="lg:hidden flex items-center gap-3">
             <button
               onClick={toggleTheme}
-              className="p-2 text-slate-300"
+              className="p-2 text-slate-500 dark:text-slate-300"
             >
               {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
             </button>

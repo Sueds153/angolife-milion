@@ -5,7 +5,7 @@ export const Background: React.FC = () => {
   return (
     <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none select-none">
       {/* Mesh Gradient Layer */}
-      <div className="absolute inset-0 bg-white dark:bg-[#020617] transition-colors duration-1000">
+      <div className="absolute inset-0 bg-white dark:bg-[#020617] transition-colors duration-300">
         {/* Subtle dynamic orbs with brand colors */}
         <div className="absolute top-[-10%] left-[-5%] w-[50%] h-[50%] bg-brand-gold/10 dark:bg-brand-gold/[0.04] rounded-full blur-[140px] animate-float" />
         <div className="absolute bottom-[-15%] right-[-5%] w-[60%] h-[60%] bg-[#CC092F]/[0.03] dark:bg-[#CC092F]/[0.015] rounded-full blur-[140px] animate-float animate-delay-float" />

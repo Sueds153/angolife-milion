@@ -51,11 +51,6 @@ export const useAppStore = create<AppState>((set) => ({
 
   setDarkMode: (isDark) => {
     localStorage.setItem("theme", isDark ? "dark" : "light");
-    if (isDark) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
     set({ isDarkMode: isDark });
   },
 
@@ -63,11 +58,6 @@ export const useAppStore = create<AppState>((set) => ({
     set((state) => {
       const newDark = !state.isDarkMode;
       localStorage.setItem("theme", newDark ? "dark" : "light");
-      if (newDark) {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-      }
       return { isDarkMode: newDark };
     }),
 
