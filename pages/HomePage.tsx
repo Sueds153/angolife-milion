@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Briefcase, ShoppingBag, DollarSign, ChevronRight, MessageCircle, Activity, Volume2, VolumeX, X } from 'lucide-react';
+import { ArrowRight, Briefcase, ShoppingBag, DollarSign, ChevronRight, MessageCircle, Activity, Volume2, VolumeX, X, Newspaper, FileText, Tag, Users, Shield, Zap, Star, TrendingUp, Quote, CheckCircle } from 'lucide-react';
 import { ExchangeService } from '../services/exchange.service';
 import { DealsService } from '../services/deals.service';
 import { JobsService } from '../services/jobs.service';
@@ -12,6 +12,17 @@ import { AdsService, Ad } from '../services/ads.service';
 import { useAppStore } from '../store/useAppStore';
 import { Helmet } from 'react-helmet-async';
 
+const TICKER_MESSAGES = [
+  { icon: '🔴', text: 'AO VIVO • 247 pessoas a consultar o câmbio agora' },
+  { icon: '⚡', text: 'João M. acabou de se candidatar a uma vaga em Luanda' },
+  { icon: '📰', text: '3 novas notícias publicadas nos últimos 30 minutos' },
+  { icon: '💼', text: 'Vaga de Engenheiro publicada há 12 min — Sê o primeiro!' },
+  { icon: '💰', text: 'Taxa USD hoje é a melhor da semana. Não deixes escapar.' },
+  { icon: '🎯', text: 'Ana F. poupou 15 000 Kz usando o câmbio da Angolife' },
+  { icon: '📄', text: 'Pedro S. criou o CV e passou na entrevista no dia seguinte' },
+  { icon: '🛍️', text: 'Nova promoção exclusiva disponível — por tempo limitado!' },
+];
+
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const { systemSettings, setSystemSettings } = useAppStore();
@@ -20,6 +31,7 @@ export const HomePage: React.FC = () => {
   const [featuredDeals, setFeaturedDeals] = useState<ProductDeal[]>([]);
   const [loading, setLoading] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
+  const [tickerIndex, setTickerIndex] = useState(0);
   
   const [ads, setAds] = useState<Ad[]>([]);
   const [showInterstitial, setShowInterstitial] = useState(false);
@@ -112,6 +124,13 @@ export const HomePage: React.FC = () => {
   };
 
   const usdRate = rates.find(r => r.currency === 'USD');
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTickerIndex(prev => (prev + 1) % TICKER_MESSAGES.length);
+    }, 3500);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="space-y-6 md:space-y-12 animate-fade-in">
@@ -287,6 +306,37 @@ export const HomePage: React.FC = () => {
         </div>
       </div>
 
+      {/* ── LIVE TICKER — Prova Social + Urgência ── */}
+      <div className="overflow-hidden rounded-2xl bg-slate-900 dark:bg-black border border-orange-500/20 shadow-lg relative">
+        <div className="flex items-center gap-3">
+          <div className="flex-shrink-0 bg-orange-500 px-4 py-3 flex items-center gap-2">
+            <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+            <span className="text-[9px] font-black text-white uppercase tracking-widest whitespace-nowrap">AO VIVO</span>
+          </div>
+          <div className="flex-1 overflow-hidden py-3 relative">
+            <div
+              key={tickerIndex}
+              className="flex items-center gap-3 animate-fade-in"
+            >
+              <span className="text-lg leading-none">{TICKER_MESSAGES[tickerIndex].icon}</span>
+              <span className="text-[11px] font-bold text-slate-200 uppercase tracking-wide whitespace-nowrap">
+                {TICKER_MESSAGES[tickerIndex].text}
+              </span>
+            </div>
+          </div>
+          <div className="flex-shrink-0 flex gap-1.5 px-4">
+            {TICKER_MESSAGES.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setTickerIndex(i)}
+                className={`w-1.5 h-1.5 rounded-full transition-all ${i === tickerIndex ? 'bg-orange-500 w-4' : 'bg-slate-600 hover:bg-slate-400'}`}
+                aria-label={`Mensagem ${i + 1}`}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Stats Dashboard - Intelligent Adaptive Grid */}
       <div className="grid-adaptive">
         <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] p-5 md:p-10 shadow-xl cursor-pointer group gold-border-subtle active:scale-[0.98] transition-all" onClick={() => navigate('/cambio')}>
@@ -320,6 +370,199 @@ export const HomePage: React.FC = () => {
           </div>
           <span className="text-[8px] md:text-[11px] text-slate-400 font-black uppercase tracking-widest block mb-1">Promoções</span>
           <span className="text-2xl md:text-5xl font-black text-brand-gold">{featuredDeals.length} <span className="text-xs md:text-sm font-bold text-slate-400">Destaques</span></span>
+        </div>
+      </div>
+
+      {/* ── POR QUE A ANGOLIFE? — Autoridade + Reciprocidade ── */}
+      <div className="relative overflow-hidden rounded-[2rem] bg-white dark:bg-slate-900 border border-orange-500/10 shadow-xl p-6 md:p-12">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-brand-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
+        <div className="relative z-10">
+          <p className="text-[9px] font-black text-brand-gold uppercase tracking-[0.25em] mb-3">A Tua Plataforma de Confiança</p>
+          <h2 className="text-fluid-h2 font-black text-slate-900 dark:text-white uppercase tracking-tight mb-8">
+            Por que <span className="text-brand-gold">milhares</span> escolhem a Angolife?
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+            {[
+              { icon: TrendingUp, title: '#1 em Angola', desc: 'A plataforma de referência para o mercado angolano', color: 'text-brand-gold' },
+              { icon: Zap, title: 'Gratuito Para Sempre', desc: 'Acesso completo a câmbio, vagas e notícias sem pagar nada', color: 'text-green-400' },
+              { icon: Shield, title: '100% Seguro', desc: 'Os teus dados protegidos com encriptação de nível bancário', color: 'text-blue-400' },
+            ].map((item) => (
+              <div key={item.title} className="flex flex-col items-start p-5 rounded-[1.5rem] bg-slate-50 dark:bg-white/5 border border-orange-500/10 hover:border-brand-gold/30 transition-all group">
+                <div className={`w-12 h-12 rounded-2xl bg-brand-gold/10 flex items-center justify-center mb-4 ${item.color}`}>
+                  <item.icon size={22} />
+                </div>
+                <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight mb-2">{item.title}</h3>
+                <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── VITRINE DE FUNCIONALIDADES — FOMO + Descoberta ── */}
+      <div>
+        <div className="text-center mb-8">
+          <p className="text-[9px] font-black text-brand-gold uppercase tracking-[0.25em] mb-2">Tudo num só lugar</p>
+          <h2 className="text-fluid-h2 font-black text-slate-900 dark:text-white uppercase tracking-tight">
+            O que podes fazer <span className="text-brand-gold">agora</span>
+          </h2>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[
+            {
+              icon: DollarSign,
+              label: 'Câmbio em Tempo Real',
+              desc: 'Acompanha a taxa formal e informal ao minuto. Compra ou vende divisas com segurança.',
+              cta: 'Ver taxas agora',
+              path: '/cambio',
+              badge: '🔴 AO VIVO',
+              highlight: true,
+            },
+            {
+              icon: Briefcase,
+              label: 'Vagas de Elite',
+              desc: 'As melhores ofertas de emprego em Angola, de Luanda a todas as províncias.',
+              cta: 'Explorar vagas',
+              path: '/vagas',
+              badge: '⚡ NOVO',
+              highlight: false,
+            },
+            {
+              icon: FileText,
+              label: 'Criar CV com IA',
+              desc: 'Cria um CV profissional em minutos com a ajuda da nossa inteligência artificial.',
+              cta: 'Criar o meu CV',
+              path: '/cv-criador',
+              badge: '✨ IA',
+              highlight: false,
+            },
+            {
+              icon: Newspaper,
+              label: 'Notícias Angola',
+              desc: 'Fica a par do que acontece em Angola antes de toda a gente.',
+              cta: 'Ler notícias',
+              path: '/noticias',
+              badge: '📰 HOJE',
+              highlight: false,
+            },
+            {
+              icon: Tag,
+              label: 'Descontos Exclusivos',
+              desc: 'Promoções e ofertas das melhores marcas e lojas de Angola — por tempo limitado.',
+              cta: 'Ver promoções',
+              path: '/ofertas',
+              badge: '🛍️ LIMITADO',
+              highlight: false,
+            },
+            {
+              icon: Users,
+              label: 'Comunidade Elite',
+              desc: 'Faz parte da rede exclusiva de angolanos que lideram o mercado nacional.',
+              cta: 'Criar conta grátis',
+              path: '/perfil',
+              badge: '🏆 GRÁTIS',
+              highlight: false,
+            },
+          ].map((feature) => (
+            <div
+              key={feature.path}
+              onClick={() => navigate(feature.path)}
+              className={`group relative cursor-pointer rounded-[2rem] p-6 border transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl active:scale-95 ${
+                feature.highlight
+                  ? 'bg-slate-900 dark:bg-black border-brand-gold/30 shadow-xl shadow-amber-500/10'
+                  : 'bg-white dark:bg-slate-900 border-orange-500/10 hover:border-brand-gold/30 shadow-lg'
+              }`}
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
+                  feature.highlight ? 'bg-brand-gold text-slate-950' : 'bg-brand-gold/10 text-brand-gold'
+                }`}>
+                  <feature.icon size={22} />
+                </div>
+                <span className={`text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full border ${
+                  feature.highlight
+                    ? 'border-brand-gold/40 text-brand-gold bg-brand-gold/10'
+                    : 'border-orange-500/20 text-orange-400 bg-orange-500/5'
+                }`}>
+                  {feature.badge}
+                </span>
+              </div>
+              <h3 className={`text-sm font-black uppercase tracking-tight mb-2 ${
+                feature.highlight ? 'text-white' : 'text-slate-900 dark:text-white'
+              }`}>{feature.label}</h3>
+              <p className={`text-[11px] font-medium leading-relaxed mb-4 ${
+                feature.highlight ? 'text-slate-400' : 'text-slate-500 dark:text-slate-400'
+              }`}>{feature.desc}</p>
+              <div className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest ${
+                feature.highlight ? 'text-brand-gold' : 'text-orange-500'
+              } group-hover:gap-3 transition-all`}>
+                {feature.cta} <ArrowRight size={12} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── DEPOIMENTOS — Prova Social + Identificação ── */}
+      <div className="relative overflow-hidden rounded-[2rem] bg-slate-50 dark:bg-slate-900/60 border border-orange-500/10 p-6 md:p-12">
+        <div className="text-center mb-8">
+          <p className="text-[9px] font-black text-brand-gold uppercase tracking-[0.25em] mb-2">Histórias Reais</p>
+          <h2 className="text-fluid-h2 font-black text-slate-900 dark:text-white uppercase tracking-tight">
+            O que dizem os nossos <span className="text-brand-gold">utilizadores</span>
+          </h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[
+            {
+              quote: 'Consegui o meu emprego em 3 dias após ver a vaga aqui. Nunca pensei que fosse tão fácil.',
+              name: 'Carlos M.',
+              city: 'Luanda',
+              role: 'Engenheiro Civil',
+              stars: 5,
+            },
+            {
+              quote: 'Poupei mais de 15 000 Kz por semana só por acompanhar a taxa informal pelo app.',
+              name: 'Ana F.',
+              city: 'Benguela',
+              role: 'Empresária',
+              stars: 5,
+            },
+            {
+              quote: 'O CV que criei aqui com a IA foi o que me fez passar na entrevista. Recomendo a todos.',
+              name: 'Pedro S.',
+              city: 'Huambo',
+              role: 'Técnico de TI',
+              stars: 5,
+            },
+          ].map((t) => (
+            <div key={t.name} className="bg-white dark:bg-slate-800/80 rounded-[1.5rem] p-6 border border-orange-500/10 shadow-sm hover:shadow-md transition-all">
+              <Quote size={20} className="text-brand-gold mb-4 opacity-60" />
+              <p className="text-[12px] font-medium text-slate-700 dark:text-slate-300 leading-relaxed mb-5 italic">&ldquo;{t.quote}&rdquo;</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-wide">{t.name}</p>
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{t.role} · {t.city}</p>
+                </div>
+                <div className="flex gap-0.5">
+                  {Array.from({ length: t.stars }).map((_, i) => (
+                    <Star key={i} size={12} className="fill-brand-gold text-brand-gold" />
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* CTA Final — Loss Aversion */}
+        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 pt-8 border-t border-orange-500/10">
+          <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500 dark:text-slate-400">
+            <CheckCircle size={16} className="text-green-400" /> Acesso gratuito imediato
+          </div>
+          <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500 dark:text-slate-400">
+            <CheckCircle size={16} className="text-green-400" /> Sem cartão de crédito
+          </div>
+          <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500 dark:text-slate-400">
+            <CheckCircle size={16} className="text-green-400" /> Cancela quando quiseres
+          </div>
         </div>
       </div>
 

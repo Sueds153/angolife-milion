@@ -198,11 +198,10 @@ a.btn {
 
 /* No-scrollbar utility (used broadly) */
 .no-scrollbar {
-  scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE/Edge */
 }
 .no-scrollbar::-webkit-scrollbar {
-  display: none; /* Chrome/Safari */
+  display: none; /* Chrome/Safari/Firefox */
 }
 
 /* Forced Stacking for narrow devices requested ( < 380px ) */
@@ -225,7 +224,6 @@ a.btn {
   display: flex;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
   gap: 1rem;
   padding: 0.5rem 0;
 }
