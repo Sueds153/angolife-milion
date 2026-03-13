@@ -11,6 +11,7 @@ interface State {
 }
 
 export class ErrorBoundary extends Component<Props, State> {
+  declare props: Props & { children: ReactNode };
   public state: State = { hasError: false, error: null };
 
   public static getDerivedStateFromError(error: Error): State {
@@ -21,7 +22,7 @@ export class ErrorBoundary extends Component<Props, State> {
     console.error('Uncaught error:', error, errorInfo);
   }
 
-  public render() {
+  public render(): ReactNode {
     if (this.state.hasError) {
       return (
         <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center p-8 text-center font-sans">

@@ -7,10 +7,21 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Scraper log files
+jobs_scraper.log
+news_scraper.log
+scraper/logs/
+
+# Environment variables — NEVER commit these
+.env
+.env.*
+.env.local
+.env.*.local
+
+# Build output
 node_modules
 dist
 dist-ssr
-*.local
 
 # Editor directories and files
 .vscode/*
