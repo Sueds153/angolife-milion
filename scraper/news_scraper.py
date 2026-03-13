@@ -90,8 +90,8 @@ SITES_CONFIG: Dict[str, dict] = {
     "Expansão": {
         "base_url": "https://www.expansao.co.ao",
         "list_url": "https://www.expansao.co.ao/economia/ultimas.html",
-        "article_selector": "h3, article, .detalhe, .K2Teaser",
-        "title_selector": "a",
+        "article_selector": ".t-am, article, .detalhe",
+        "title_selector": ".t-am-title, .t-am-overlay-i, h3, h2",
         "link_selector": "a",
         "fixed_category": "Economia",
     },
@@ -101,10 +101,14 @@ SITES_CONFIG: Dict[str, dict] = {
     "Jornal de Angola": {
         "base_url": "https://www.jornaldeangola.ao",
         "list_url": "https://www.jornaldeangola.ao/ao/noticias/",
-        "article_selector": "h3, .title, .news-card, .td-module-title",
-        "title_selector": "a",
+        "article_selector": "article, .td-module-container, .td-block-span12, .entry-title",
+        "title_selector": "h1, h2, h3, .entry-title, a",
         "link_selector": "a",
         "fixed_category": "Angola",
+        "extra_headers": {
+            "Referer": "https://www.google.com/",
+            "Accept-Language": "pt-PT,pt;q=0.9,en;q=0.8"
+        }
     },
 
     # ── 3. TPA (Televisão Pública de Angola) ──────────────────────────────
@@ -120,9 +124,9 @@ SITES_CONFIG: Dict[str, dict] = {
 
     # ── 4. TV GIRASSOL ────────────────────────────────────────────────────
     "TV Girassol": {
-        "base_url": "https://redegirassol.com",
-        "list_url": "https://redegirassol.com/giranoticia/",
-        "article_selector": "article, .post, .jeg_post, .news-item",
+        "base_url": "https://www.giranoticias.com",
+        "list_url": "https://www.giranoticias.com/",
+        "article_selector": "article, .post, .card, .noticia, .jeg_post",
         "title_selector": "h2, h3, .jeg_post_title",
         "link_selector": "a",
         "fixed_category": "Oficial",
@@ -132,11 +136,18 @@ SITES_CONFIG: Dict[str, dict] = {
     "ANGOP": {
         "base_url": "https://www.angop.ao",
         "list_url": "https://www.angop.ao/angola/pt_pt/noticias/",
-        "article_selector": ".news_item, article, .item, a[href*='/noticias/']",
-        "title_selector": "h3, h2, .item-title, .news-title",
+        "article_selector": "article, .news-item, .item, a[href*='/noticias/'], .jeg_post",
+        "title_selector": "h1, h2, h3, .title",
         "link_selector": "a",
-        "fixed_category": "Urgente",
-        "referer": "https://www.google.com/",
+        "fixed_category": "Angola",
+        "extra_headers": {
+            "Accept-Encoding": "gzip, deflate",
+            "Referer": "https://www.google.com/",
+            "Sec-Fetch-Mode": "navigate",
+            "Accept-Language": "pt-PT,pt;q=0.9",
+            "Sec-Fetch-Site": "cross-site",
+        },
+        "verify_ssl": False,
     },
 
     # ── 6. NOVO JORNAL ────────────────────────────────────────────────────
@@ -176,7 +187,7 @@ SITES_CONFIG: Dict[str, dict] = {
     "Angonotícias": {
         "base_url": "https://www.angonoticias.com",
         "list_url": "https://www.angonoticias.com/Artigos/canal/2/generalista",
-        "article_selector": "a[href*='/Artigos/item/']",
+        "article_selector": "a[href*='/Artigos/item/'], article h3",
         "title_selector": ".",
         "link_selector": ".",
         "fixed_category": "Angola",
@@ -190,6 +201,11 @@ SITES_CONFIG: Dict[str, dict] = {
         "title_selector": "h1, h2, h3, h4, .post-title, a",
         "link_selector": "a",
         "fixed_category": "Geral",
+        "extra_headers": {
+            "Referer": "https://www.google.com/",
+            "Upgrade-Insecure-Requests": "1"
+        },
+        "verify_ssl": False,
     },
 }
 
@@ -244,27 +260,25 @@ class SupabaseRestClient:
 # MOTOR PRINCIPAL - CLASSE AngoNewsScraper
 # ─────────────────────────────────────────────
 class AngoNewsScraper:
+    DEFAULT_HEADERS = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+        "Accept-Language": "pt-PT,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+        "Accept-Encoding": "gzip, deflate",
+        "Upgrade-Insecure-Requests": "1",
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "none",
+        "Sec-Fetch-User": "?1",
+        "Cache-Control": "max-age=0",
+        "Connection": "keep-alive",
+    }
+
     def __init__(self, db: SupabaseRestClient):
         self.db = db
         # Sessão com User-Agent real Chrome 122 — evita bloqueios 403
         self.session = requests.Session()
-        self.session.headers.update({
-            "User-Agent": (
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/122.0.0.0 Safari/537.36"
-            ),
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-            "Accept-Language": "pt-PT,pt;q=0.9,en-US;q=0.8,en;q=0.7",
-            "Accept-Encoding": "gzip, deflate, br",
-            "Upgrade-Insecure-Requests": "1",
-            "Sec-Fetch-Dest": "document",
-            "Sec-Fetch-Mode": "navigate",
-            "Sec-Fetch-Site": "none",
-            "Sec-Fetch-User": "?1",
-            "Cache-Control": "max-age=0",
-            "Connection": "keep-alive",
-        })
+        self.session.headers.update(self.DEFAULT_HEADERS)
         self.stats = {"processed": 0, "saved": 0, "skipped_dup": 0, "errors": 0}
 
     # ── Normalização de URLs relativas ────────────────────────────────────
@@ -363,6 +377,8 @@ class AngoNewsScraper:
             headers = self.session.headers.copy()
             if "referer" in cfg:
                 headers["Referer"] = cfg["referer"]
+            if "extra_headers" in cfg:
+                headers.update(cfg["extra_headers"])
             
             resp = self.session.get(cfg["list_url"], timeout=20, verify=verify, headers=headers)
             resp.raise_for_status()
@@ -372,8 +388,8 @@ class AngoNewsScraper:
             if not articles:
                 log.warning(f"  ⚠️  Nenhum artigo encontrado. Seletor: '{cfg['article_selector']}'.")
                 # Depuração: Mostrar pedaço do HTML se não encontrar nada
-                snippet = soup.prettify()[:500].replace("\n", " ")
-                log.debug(f"  Snippet do HTML: {snippet}")
+                snippet = soup.prettify()[:1000].replace("\n", " ")
+                log.debug(f"  Snippet do HTML ({site_name}): {snippet}")
                 self.stats["errors"] += 1
                 return
 
@@ -414,7 +430,11 @@ class AngoNewsScraper:
                         # Fallback: usar o próprio texto do card se o título falhar
                         title = art.get_text(strip=True)
                         if not title or len(title) < 5:
+                            log.debug(f"      ⏭️  Título muito curto ou vazio em {site_name}")
                             continue
+
+                    # Limpeza de título
+                    title = re.sub(r'\s+', ' ', title).strip()
 
                     log.info(f"  ✨ Capturando: {title[:65]}...")
 
