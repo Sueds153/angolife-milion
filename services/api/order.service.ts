@@ -13,10 +13,9 @@ export const OrderService = {
       .single();
 
     if (error) {
-      if (error.code === "42501" || error.message?.includes("row-level security")) {
-        throw new Error("Erro de conexão segura. Por favor, recarregue a página.");
-      }
-      return null;
+      // Log the full error for debugging, then throw so callers can react
+      console.error('[OrderService] createOrder error:', error.code, error.message, error.details);
+      throw new Error(error.message || 'Erro ao registar ordem no Supabase.');
     }
     return data.id;
   },

@@ -347,7 +347,7 @@ export const ExchangePage: React.FC<ExchangePageProps> = ({ onRequestReward }) =
       payment_method: formData.paymentMethod,
       status: 'pending',
       proof_url: proofUrl,
-      type: tradeAction,
+      order_type: tradeAction,  // ✅ FIX: campo correto da tabela orders no Supabase
       bank: tradeAction === 'sell' ? formData.bank : null,
       iban: tradeAction === 'sell' ? ServiceUtils.sanitize(formData.iban) : null,
       account_holder: tradeAction === 'sell' ? ServiceUtils.sanitize(formData.accountHolder) : null,
@@ -357,6 +357,13 @@ export const ExchangePage: React.FC<ExchangePageProps> = ({ onRequestReward }) =
     try {
       const orderId = await OrderService.createOrder(orderData);
       
+      if (!orderId) {
+        // Erro silencioso do Supabase (ex: schema mismatch, RLS)
+        // Redireciona para WhatsApp manual sem bloquear o utilizador
+        console.warn('Order not registered in DB — falling back to manual WhatsApp flow.');
+        return { orderId: null };
+      }
+
       // Mostramos Interstitial se permitido
       if (AdService.canShowInterstitial()) {
         setTimeout(() => {
@@ -366,10 +373,8 @@ export const ExchangePage: React.FC<ExchangePageProps> = ({ onRequestReward }) =
 
       return { orderId };
     } catch (error: any) {
-      console.error(error);
-      const errorMsg = "Erro no registro. Redirecionando para suporte manual...";
-      alert(errorMsg);
-      // Retornamos um orderId fake para o link manual
+      console.error('Exchange order error:', error?.message || error);
+      // Não bloqueamos o utilizador — redireciona para WhatsApp manual
       return { orderId: null };
     }
   };
