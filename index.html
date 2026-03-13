@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt">
+<html lang="pt-AO">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -126,6 +126,30 @@
         background: rgba(245, 158, 11, 0.2);
         border-radius: 10px;
       }
+
+      /* Loading screen */
+      body {
+        background-color: #0f172a;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+      }
+      .app-loading {
+        display: flex;
+        height: 100vh;
+        width: 100vw;
+        align-items: center;
+        justify-content: center;
+        background-color: #0f172a;
+        color: white;
+        font-family: sans-serif;
+      }
+      .app-loading-inner {
+        text-align: center;
+      }
+      .app-loading-title {
+        color: #f59e0b;
+      }
     </style>
 
     <!-- Google AdSense -->
@@ -137,22 +161,11 @@
     <!-- Plausible Analytics -->
     <script defer data-domain="angolife.app" src="https://plausible.io/js/script.js"></script>
   </head>
-  <body class="noise-bg overflow-x-hidden" style="background-color: #0f172a; margin: 0; padding: 0;">
+  <body class="noise-bg overflow-x-hidden">
     <div id="root">
-      <div
-        style="
-          display: flex;
-          height: 100vh;
-          width: 100vw;
-          align-items: center;
-          justify-content: center;
-          background-color: #0f172a;
-          color: white;
-          font-family: sans-serif;
-        "
-      >
-        <div style="text-align: center">
-          <h1 style="color: #f59e0b">ANGOLIFE</h1>
+      <div class="app-loading">
+        <div class="app-loading-inner">
+          <h1 class="app-loading-title">ANGOLIFE</h1>
           <p>A carregar aplicação...</p>
         </div>
       </div>
