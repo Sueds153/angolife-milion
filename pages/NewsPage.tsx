@@ -1,10 +1,10 @@
 
 import React, { useEffect, useState } from 'react';
-import { NewsService } from '../services/news.service';
+import { NewsService } from '../services/api/news.service';
 import { NewsArticle } from '../types';
 import { ExternalLink, Calendar, AlertTriangle, Eye, Flame, Lock, ChevronRight, X, Clock, Zap, Newspaper, ArrowRight } from 'lucide-react';
-import { RewardedAd } from '../components/AdOverlays';
-import { AdBanner } from '../components/AdBanner';
+import { RewardedAd } from '../components/ads/AdOverlays';
+import { AdBanner } from '../components/ads/AdBanner';
 
 import { useAppStore } from '../store/useAppStore';
 import { Helmet } from 'react-helmet-async';

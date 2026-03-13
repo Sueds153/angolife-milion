@@ -1,23 +1,23 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate, NavLink } from 'react-router-dom';
-import { Navbar } from './components/Navbar';
-import { Footer } from './components/Footer';
-import { Background } from './components/Background';
-import { AdBanner } from './components/AdBanner';
-import { InterstitialAd, RewardedAd } from './components/AdOverlays';
-import { AuthModal } from './components/AuthModal';
-import { NotificationToast } from './components/NotificationToast';
-import { NotificationService } from './services/notificationService';
-import { AuthService } from './services/auth.service';
-import { JobsService } from './services/jobs.service';
-import { NewsService } from './services/news.service';
-import { DealsService } from './services/deals.service';
+import { Navbar } from './components/layout/Navbar';
+import { Footer } from './components/layout/Footer';
+import { Background } from './components/layout/Background';
+import { AdBanner } from './components/ads/AdBanner';
+import { InterstitialAd, RewardedAd } from './components/ads/AdOverlays';
+import { AuthModal } from './components/modals/AuthModal';
+import { NotificationToast } from './components/ui/NotificationToast';
+import { NotificationService } from './services/integrations/notificationService';
+import { AuthService } from './services/core/auth.service';
+import { JobsService } from './services/api/jobs.service';
+import { NewsService } from './services/api/news.service';
+import { DealsService } from './services/api/deals.service';
 import { UserProfile, AppNotification, ProductDeal } from './types';
 import { Home, Briefcase, DollarSign, Tag, Newspaper, FileText } from 'lucide-react';
-import { LegalModals } from './components/LegalModals';
-import { BottomNav } from './components/BottomNav';
+import { LegalModals } from './components/modals/LegalModals';
+import { BottomNav } from './components/layout/BottomNav';
 import { useAppStore } from './store/useAppStore';
-import { OnboardingModal } from './components/OnboardingModal';
+import { OnboardingModal } from './components/modals/OnboardingModal';
 
 // Lazy loaded pages for performance
 const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })));

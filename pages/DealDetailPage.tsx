@@ -13,8 +13,8 @@ import {
     MessageCircle,
     FileText,
 } from 'lucide-react';
-import { DealsService } from '../services/deals.service';
-import { AdBanner } from '../components/AdBanner';
+import { DealsService } from '../services/api/deals.service';
+import { AdBanner } from '../components/ads/AdBanner';
 import { ProductDeal, UserProfile } from '../types';
 interface DealDetailPageProps {
     /** Objeto deal opcional (se vier da lista para loading instantâneo) */

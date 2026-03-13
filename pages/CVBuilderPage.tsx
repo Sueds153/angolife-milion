@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { pdf } from '@react-pdf/renderer';
-import { CVDocument } from '../components/CVDocument';
+import { CVDocument } from '../components/cv/CVDocument';
 import { Download, ChevronRight, ChevronLeft, Sparkles, Plus, Trash2, User, Briefcase, GraduationCap, Award, FileText, Lock, Star, Check, Zap, Crown, CreditCard, Calendar, Clock, X } from 'lucide-react';
-import { GeminiService } from '../services/gemini';
-import { SubscriptionService } from '../services/subscription.service';
-import { StorageService } from '../services/storage.service';
+import { GeminiService } from '../services/integrations/gemini';
+import { SubscriptionService } from '../services/api/subscription.service';
+import { StorageService } from '../services/api/storage.service';
 import { CVData, CVExperience, CVEducation, UserProfile } from '../types';
-import { CVTemplateSelector, CVTemplateType, TEMPLATE_OPTIONS } from '../components/cv-templates/CVTemplateSelector';
+import { CVTemplateSelector, CVTemplateType, TEMPLATE_OPTIONS } from '../components/cv/CVTemplateSelector';
 
 import { useAppStore } from '../store/useAppStore';
 

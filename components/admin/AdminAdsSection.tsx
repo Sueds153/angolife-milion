@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Monitor, Plus, Trash2, Edit2, Check, X, ExternalLink, Image as ImageIcon, Video, Settings, Save, Globe, MessageCircle, Clock, MapPin, Layout } from 'lucide-react';
-import { Ad, SystemSettings, AdsService } from '../../services/ads.service';
+import { Ad, SystemSettings, AdsService } from '../../services/api/ads.service';
 import { AdminAdModal } from './AdminAdModal';
 
 interface AdminAdsSectionProps {

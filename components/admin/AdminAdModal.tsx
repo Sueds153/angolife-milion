@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, Image as ImageIcon, Video, Globe, Clock, Layout, MapPin } from 'lucide-react';
-import { Ad, AdsService } from '../../services/ads.service';
+import { Ad, AdsService } from '../../services/api/ads.service';
 
 interface AdminAdModalProps {
   isOpen: boolean;

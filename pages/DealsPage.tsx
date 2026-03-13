@@ -1,10 +1,10 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { Plus, ShoppingBag, MapPin, X, Camera, FileUp } from 'lucide-react';
-import { DealsService } from '../services/deals.service';
-import { GeminiService } from '../services/gemini';
+import { DealsService } from '../services/api/deals.service';
+import { GeminiService } from '../services/integrations/gemini';
 import { ProductDeal, UserProfile } from '../types';
-import { ShareButton } from '../components/ShareButton';
+import { ShareButton } from '../components/ui/ShareButton';
 import { useAppStore } from '../store/useAppStore';
 
 interface DealsPageProps {

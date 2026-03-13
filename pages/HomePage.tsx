@@ -1,14 +1,14 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Briefcase, ShoppingBag, DollarSign, ChevronRight, MessageCircle, Activity, Volume2, VolumeX, X, Newspaper, FileText, Tag, Users, Shield, Zap, Star, TrendingUp, Quote, CheckCircle } from 'lucide-react';
-import { ExchangeService } from '../services/exchange.service';
-import { DealsService } from '../services/deals.service';
-import { JobsService } from '../services/jobs.service';
+import { ExchangeService } from '../services/api/exchange.service';
+import { DealsService } from '../services/api/deals.service';
+import { JobsService } from '../services/api/jobs.service';
 import { ExchangeRate, Job, ProductDeal } from '../types';
-import { APP_CONFIG } from '../constants';
+import { APP_CONFIG } from '../constants/app';
 import { PARTNER_ADS } from '../constants/ads';
-import { AdBanner } from '../components/AdBanner';
-import { AdsService, Ad } from '../services/ads.service';
+import { AdBanner } from '../components/ads/AdBanner';
+import { AdsService, Ad } from '../services/api/ads.service';
 import { useAppStore } from '../store/useAppStore';
 import { Helmet } from 'react-helmet-async';
 

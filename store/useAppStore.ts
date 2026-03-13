@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { UserProfile, AppNotification } from "../types";
-import { SystemSettings } from "../services/ads.service";
+import { SystemSettings } from "../services/api/ads.service";
 
 interface AppState {
   // Auth State

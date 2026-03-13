@@ -2,12 +2,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Briefcase, Tag, Camera, Award, Share2, MessageCircle, CheckCircle2, Bell, BellOff, RefreshCw, DollarSign, ChevronRight, Edit3, Save, Star, History, Download, ShieldCheck, Heart, Link as LinkIcon } from 'lucide-react';
 import { UserProfile, Job } from '../types';
-import { NotificationService } from '../services/notificationService';
-import { AuthService } from '../services/auth.service';
-import { JobsService } from '../services/jobs.service';
-import { OrderService } from '../services/order.service';
-import { StorageService } from '../services/storage.service';
-import { APP_CONFIG } from '../constants';
+import { NotificationService } from '../services/integrations/notificationService';
+import { AuthService } from '../services/core/auth.service';
+import { JobsService } from '../services/api/jobs.service';
+import { OrderService } from '../services/api/order.service';
+import { StorageService } from '../services/api/storage.service';
+import { APP_CONFIG } from '../constants/app';
 import { useAppStore } from '../store/useAppStore';
 
 export const ProfilePage: React.FC = () => {

@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Search, ChevronRight, AlertTriangle, ShieldCheck, Clock } from 'lucide-react';
-import { JobsService } from '../services/jobs.service';
+import { JobsService } from '../services/api/jobs.service';
 import { Job, UserProfile } from '../types';
-import { AdBanner } from '../components/AdBanner';
+import { AdBanner } from '../components/ads/AdBanner';
 import { useAppStore } from '../store/useAppStore';
 import { useAds } from '../hooks/useAds';
-import { JobCard } from '../components/JobCard';
-import { JobDetailsModal } from '../components/JobDetailsModal';
-import { ServiceUtils } from '../services/utils';
+import { JobCard } from '../components/jobs/JobCard';
+import { JobDetailsModal } from '../components/jobs/JobDetailsModal';
+import { ServiceUtils } from '../services/utils/utils';
 import { Helmet } from 'react-helmet-async';
 
 interface JobsPageProps {
@@ -84,7 +84,7 @@ export const JobsPage: React.FC<JobsPageProps> = ({
 
         if (matches.length > 0) {
           const match = matches[0];
-          import('../services/notificationService').then(({ NotificationService }) => {
+          import('../services/integrations/notificationService').then(({ NotificationService }) => {
             NotificationService.sendNativeNotification(
               `Nova vaga de ${match.category || 'Emprego'} disponível!`,
               `${match.title} @ ${match.company}. Clica para ver.`
