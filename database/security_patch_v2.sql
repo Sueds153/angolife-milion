@@ -51,7 +51,8 @@ DROP POLICY IF EXISTS "Users manage own rate limit" ON public.notification_rate_
 CREATE POLICY "Users manage own rate limit" ON public.notification_rate_limit FOR ALL USING (auth.uid() = user_id);
 -- Função para verificar e incrementar o rate-limit de notificações
 -- Retorna TRUE se a notificação pode ser enviada, FALSE se o limite foi atingido
-CREATE OR REPLACE FUNCTION public.check_notification_limit(p_user_id UUID, p_limit INT DEFAULT 2) RETURNS BOOLEAN LANGUAGE plpgsql SECURITY DEFINER AS $$
+CREATE OR REPLACE FUNCTION public.check_notification_limit(p_user_id UUID, p_limit INT DEFAULT 2) RETURNS BOOLEAN LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public AS $$
 DECLARE v_count INT;
 BEGIN -- Inserir ou obter registo de hoje
 INSERT INTO public.notification_rate_limit (user_id, date, count)

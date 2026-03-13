@@ -76,3 +76,19 @@ Se fizer alterações e quiser garantir que não estragou nada, corra este coman
 npx tsc --noEmit
 ```
 Se o resultado for vazio, o código está correto e pronto para produção!
+
+---
+
+## 6. Segurança do Supabase
+Para manter o seu sistema seguro e livre de avisos no Dashboard do Supabase, siga estas recomendações:
+
+### Resolver o aviso "Function Search Path Mutable"
+Eu já atualizei o ficheiro [security_patch_v2.sql](file:///c:/Users/Administrator/Documents/angolife%20atualizado%20pro/angolife%20atualizado/angolife%20atualizado/angolife/database/security_patch_v2.sql).
+- **Ação**: Copie o conteúdo da função `check_notification_limit` desse ficheiro e execute-o novamente no "SQL Editor" do seu painel Supabase. Isso restringirá o caminho de busca e protegerá a função.
+
+### Resolver o aviso "Leaked Password Protection"
+Este aviso indica que o Supabase pode verificar se as palavras-passe dos seus utilizadores foram expostas em fugas de dados globais.
+- **Ação**: No painel do Supabase, vá a **Authentication** -> **Settings** -> **Security** e ative a opção **"Leaked password protection"**.
+
+### Resolver o aviso "Function Search Path Mutable" em funções AUTH
+Se aparecerem avisos sobre funções dentro do esquema `auth`, elas são geridas pelo Supabase, mas pode reforçá-las adicionando `SET search_path = public` na definição da função se as tiver criado manualmente.
