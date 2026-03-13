@@ -507,7 +507,7 @@ export const CVBuilderPage: React.FC = () => {
     <div className="min-h-screen pb-20 relative">
       <div className="flex flex-col md:flex-row gap-8 print:hidden">
         {/* LEFT SIDE: BUILDER FORM */}
-        <div className="w-full md:w-1/2 space-y-6 transition-all duration-500">
+        <div className="w-full md:w-1/2 space-y-6 transition-all duration-500 order-1">
           <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-[2rem] shadow-xl gold-border-subtle">
             <div className="flex justify-between items-center mb-8 border-b gold-border-b-subtle pb-4">
               <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Criador de CV</h2>
@@ -596,7 +596,7 @@ export const CVBuilderPage: React.FC = () => {
         </div>
 
         {/* RIGHT SIDE: LIVE PREVIEW */}
-        <div className="w-full md:w-1/2">
+        <div className="w-full md:w-1/2 order-2">
           <div className="sticky top-24">
             <div className="mb-8 space-y-4">
               <div className="flex items-center justify-between px-2">
@@ -630,10 +630,10 @@ export const CVBuilderPage: React.FC = () => {
             </div>
 
             {/* A4 PAPER SIMULATION */}
-            <div className="flex justify-center bg-slate-100 dark:bg-slate-800/50 p-6 md:p-10 rounded-[2.5rem] border gold-border-subtle overflow-hidden relative">
+            <div className="flex justify-center bg-slate-100 dark:bg-slate-800/50 p-4 sm:p-6 md:p-8 rounded-[2.5rem] border gold-border-subtle overflow-hidden relative">
               <div className="w-full max-w-[500px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] bg-white origin-top transition-transform duration-500 hover:scale-[1.02] relative">
                 <div className="aspect-[1/1.414] overflow-hidden select-none">
-                  <div className="w-[210mm] scale-[0.25] sm:scale-[0.35] md:scale-[0.45] lg:scale-[0.43] origin-top-left p-0 m-0">
+                  <div className="w-[210mm] scale-[0.38] sm:scale-[0.42] md:scale-[0.40] lg:scale-[0.43] xl:scale-[0.46] origin-top-left p-0 m-0">
                     <PreviewCV />
                   </div>
                 </div>
