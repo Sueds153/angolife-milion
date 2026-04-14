@@ -67,9 +67,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onShowInterstitial, onReques
         }
         if (settingsData) setSystemSettings(settingsData);
         
-      } catch (err) {
+      } catch (err: any) {
         console.error("Dashboard error", err);
-        setError("Não foi possível carregar os dados. Verifique a sua ligação ou as variáveis de ambiente.");
+        setError(`Erro de Ligação: ${err.message || "Verifique as variáveis VITE_ no Vercel/Netlify."}`);
       } finally {
         setLoading(false);
       }
