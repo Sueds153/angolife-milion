@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <script>
+      (function () {
+        try {
+          const theme = localStorage.getItem('theme');
+          const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (theme === 'dark' || (theme !== 'light' && supportDarkMode)) {
+            document.documentElement.classList.add('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <title>Angolife - Super Aplicativo de Angola</title>
+    <meta
+      name="description"
+      content="Angolife: O portal definitivo para empregos, câmbio informal (Kwanza/Dólar/Euro), notícias quentes e promoções em tempo real em Angola."
+    />
+    <meta
+      name="keywords"
+      content="Angola, Empregos, Câmbio, Kwanza, Dólar, Notícias, Promoções, Su-Golden, Luanda"
+    />
+    <meta name="author" content="Angolife" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#F59E0B" />
+
+    <!-- iOS Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="AngoLife" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://angolife.app/" />
+    <meta property="og:title" content="Angolife - Super Aplicativo de Angola" />
+    <meta
+      property="og:description"
+      content="Tudo o que precisas em Angola: Empregos, Taxas de Câmbio em tempo real, Notícias e Cupões de Desconto."
+    />
+    <meta property="og:image" content="https://angolife.app/og-image.jpg" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:title" content="Angolife - Super Aplicativo de Angola" />
+    <meta
+      property="twitter:description"
+      content="Câmbio informal, vagas de emprego e notícias atualizadas ao minuto."
+    />
+    <meta property="twitter:image" content="https://angolife.app/og-image.jpg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      * {
+        /* Only theme-related properties get a global transition; layout props (width, height, transform) are NOT globally transitioned to avoid jitter */
+        transition-property: background-color, border-color, color;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 300ms;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      /* Safe Areas for modern mobile devices */
+      .safe-pb {
+        padding-bottom: env(safe-area-inset-bottom);
+      }
+      .safe-pt {
+        padding-top: env(safe-area-inset-top);
+      }
+
+      .gold-border-subtle {
+        border: 1px solid rgba(245, 158, 11, 0.3) !important;
+      }
+      .dark .gold-border-subtle {
+        border: 1px solid rgba(245, 158, 11, 0.4) !important;
+      }
+
+      .gold-border-b-subtle {
+        border-bottom: 1px solid rgba(245, 158, 11, 0.3) !important;
+      }
+      .gold-border-t-subtle {
+        border-top: 1px solid rgba(245, 158, 11, 0.3) !important;
+      }
+
+      .glass {
+        background: rgba(255, 255, 255, 0.65);
+        -webkit-backdrop-filter: blur(16px);
+        backdrop-filter: blur(16px);
+      }
+      .dark .glass {
+        background: rgba(15, 23, 42, 0.5);
+      }
+
+      /* Noise Texture Overlay */
+      .noise-bg::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.015;
+        z-index: -1;
+        pointer-events: none;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3%3Ffilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      }
+
+      ::-webkit-scrollbar {
+        width: 4px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(245, 158, 11, 0.2);
+        border-radius: 10px;
+      }
+
+      /* Loading screen */
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #f8fafc;
+        color: #0f172a;
+      }
+      .dark body {
+        background-color: #020617;
+        color: #f8fafc;
+      }
+      .app-loading {
+        display: flex;
+        height: 100vh;
+        width: 100vw;
+        align-items: center;
+        justify-content: center;
+        background-color: inherit;
+        color: inherit;
+        font-family: sans-serif;
+      }
+      .app-loading-inner {
+        text-align: center;
+      }
+      .app-loading-title {
+        color: #f59e0b;
+      }
+    </style>
+
+    <!-- Google AdSense -->
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
+      crossorigin="anonymous"
+    ></script>
+    <!-- Plausible Analytics -->
+    <script defer data-domain="angolife.app" src="https://plausible.io/js/script.js"></script>
+  </head>
+  <body class="noise-bg">
+    <div id="root">
+      <div class="app-loading">
+        <div class="app-loading-inner">
+          <h1 class="app-loading-title">ANGOLIFE</h1>
+          <p>A carregar aplicação...</p>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://angolife.app/sitemap.xml
+
+# Bloquear pastas técnicas
+Disallow: /admin
+Disallow: /dist/
+Disallow: /node_modules/
+Disallow: /scraper/
+Disallow: /scripts/

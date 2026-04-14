@@ -1,0 +1,39 @@
+name: AngoNews Scraper v2 — Motor de Agregação (12 Fontes)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "scraper/**"
+      - ".github/workflows/news_scraper.yml"
+  schedule:
+    # 3x por dia para manter 12 fontes atualizadas
+    - cron: "0 6 * * *" # 06:00 UTC — manhã
+    - cron: "0 12 * * *" # 12:00 UTC — meio-dia
+    - cron: "0 18 * * *" # 18:00 UTC — tarde
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar Dependências
+        run: |
+          pip install -r scraper/requirements.txt
+
+      - name: Executar Scraper de Notícias
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          python scraper/news_scraper.py

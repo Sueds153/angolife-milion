@@ -1,0 +1,46 @@
+# Task List - AngoLife Modernization
+
+Track the progress of fixing layout issues, refactoring services, and migrating to standard routing.
+
+- [x] Fix Mobile Overflow in Exchange (Câmbio) Page
+  - [x] Investigate `ExchangePage.tsx` or its subcomponents.
+  - [x] Identify overflowing text in `ConversionSimulator` or relevant component.
+  - [x] Apply CSS fixes to handle long text or reduce font size on small screens.
+- [x] Fix Admin Job Card Layout Issues
+  - [x] Identify component for job items in Admin Panel.
+  - [x] Fix overlapping/overflowing text (e.g., job title and meta info).
+- [x] Implement Horizontal Scrolling for Mobile Overflow
+  - [x] Identify sections needing horizontal swipe (e.g., Stats, Rates, or Tabs enhancement).
+  - [x] Apply `.scroll-x-touch` and horizontal layout adjustments.
+- [x] Full App Analysis and Audit
+  - [x] Research main routing and services.
+  - [x] Identify performance and UX improvements.
+  - [x] Pinpoint potential missing features or security flaws.
+  - [x] Create `full_app_analysis.md` report.
+- [x] React Router Migration
+  - [x] Install `react-router-dom`.
+  - [x] Refactor `App.tsx` routing logic.
+  - [x] Update Navigation components.
+  - [x] Refactor `DealDetailPage.tsx` for deep linking.
+- [x] Service Refactoring
+  - [x] Split `supabaseService.ts` into modular files.
+  - [x] Update all components to use new services.
+  - [x] Delete legacy `supabaseService.ts`.
+- [x] Real Web Push Implementation
+  - [x] Create Service Worker.
+  - [x] Connect Push API to backend.
+  - [x] Generate VAPID keys and configure environment.
+- [x] State Management & CV Generator Modernization
+  - [x] Install `zustand` and `@react-pdf/renderer`.
+  - [x] Create `useAppStore.ts` (Zustand).
+  - [x] Refactor `App.tsx` to use global store.
+  - [x] Refactor `Navbar.tsx` and `ProfilePage.tsx` to use store.
+  - [x] Refactor Content Pages (`Jobs`, `Exchange`, `News`, etc.)
+  - [x] Implement `CVDocument.tsx` with `react-pdf`.
+  - [x] Update `CVBuilderPage.tsx` with PDF download.
+- [x] Verification
+  - [x] Manual verification of Auth state across all pages.
+  - [x] Manual verification of PDF download in CV Builder.
+  - [x] Verify prop drilling reduction.
+  - [ ] Create walkthrough of the changes.
+  - [ ] Final user testing.

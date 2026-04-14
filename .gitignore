@@ -1,0 +1,35 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Scraper log files
+jobs_scraper.log
+news_scraper.log
+scraper/logs/
+
+# Environment variables — NEVER commit these
+.env
+.env.*
+.env.local
+.env.*.local
+
+# Build output
+node_modules
+dist
+dist-ssr
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
