@@ -11,11 +11,15 @@ export const JobsService = {
     let query = supabase.from("jobs").select("*");
     if (!isAdmin) {
       query = query.or(
-        "status.eq.publicado,status.eq.published,status.eq.aprovado,status.eq.approved",
+        "status.eq.publicado,status.eq.published,status.eq.aprovado,status.eq.approved,status.eq.active,status.eq.ativo,status.is.null",
       );
     }
 
     const { data, error } = await query.order("posted_at", { ascending: false });
+    
+    if (data) {
+      console.log(`💼 [JobsService] Fetched ${data.length} jobs (Admin Mode: ${isAdmin})`);
+    }
     if (error) {
       console.error("Error fetching jobs:", error);
       return [];

@@ -11,7 +11,7 @@ export const NewsService = {
     let query = supabase.from("news_articles").select("*");
     if (!isAdmin) {
       query = query.or(
-        "status.eq.publicado,status.eq.published,status.eq.aprovado,status.eq.approved",
+        "status.eq.publicado,status.eq.published,status.eq.aprovado,status.eq.approved,status.eq.active,status.eq.ativo,status.is.null",
       );
     }
 

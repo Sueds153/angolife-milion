@@ -48,8 +48,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onShowInterstitial, onReques
       try {
         const [ratesData, dealsData, jobsData, adsData, settingsData] = await Promise.all([
           ExchangeService.getRates(),
-          DealsService.getDeals(false),
-          JobsService.getJobs(false),
+          DealsService.getDeals(user?.isAdmin || false),
+          JobsService.getJobs(user?.isAdmin || false),
           AdsService.getAds().catch(() => []), 
           AdsService.getSettings().catch(() => null)
         ]);
