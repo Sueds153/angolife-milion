@@ -111,10 +111,26 @@ const App: React.FC = () => {
             referralCode: profile.referral_code || profile.id?.substring(0, 8).toUpperCase()
           });
           setIsAuthenticated(true);
+        } else {
+          setUser({
+            id: sessionUser.id,
+            email: sessionUser.email,
+            fullName: sessionUser.email.split('@')[0],
+            isAdmin: false,
+            isPremium: false,
+            cvCredits: 0,
+            referralCount: 0,
+            accountType: 'free',
+            savedJobs: [],
+            applicationHistory: [],
+            cvHistory: [],
+            hasReferralDiscount: false,
+            referralCode: sessionUser.id?.substring(0, 8).toUpperCase() || 'ANGOLIFE'
+          } as UserProfile);
+          setIsAuthenticated(true);
         }
 
         // --- EMERGENCY ADMIN BYPASS ---
-        // Força Admin se o email for do proprietário (Útil se o DB profile falhar no deploy)
         const adminEmails = ['suedjosue@gmail.com', 'osuedjosu@gmail.com', 'josuemiguelsued@gmail.com'];
         if (sessionUser?.email && adminEmails.includes(sessionUser.email.toLowerCase())) {
           setUser((prev: any) => prev ? { ...prev, isAdmin: true } : prev);
@@ -141,6 +157,7 @@ const App: React.FC = () => {
   const [interstitialDuration, setInterstitialDuration] = useState(5);
   const [interstitialCallback, setInterstitialCallback] = useState<(() => void) | null>(null);
   const [onAdCancel, setOnAdCancel] = useState<(() => void) | null>(null);
+  const [lastInterstitialTime, setLastInterstitialTime] = useState(0);
   const [subscribedCategories, setSubscribedCategories] = useState<string[]>([]);
 
   // Connection Diagnostic
