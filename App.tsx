@@ -5,6 +5,7 @@ import { Footer } from './components/layout/Footer';
 import { Background } from './components/layout/Background';
 import { AdBanner } from './components/ads/AdBanner';
 import { InterstitialAd, RewardedAd } from './components/ads/AdOverlays';
+import { AD_CONFIG } from './constants/ads';
 import { AuthModal } from './components/modals/AuthModal';
 import { NotificationToast } from './components/ui/NotificationToast';
 import { NotificationService } from './services/integrations/notificationService';
@@ -133,7 +134,7 @@ const App: React.FC = () => {
         // --- EMERGENCY ADMIN BYPASS ---
         const adminEmails = ['suedjosue@gmail.com', 'osuedjosu@gmail.com', 'josuemiguelsued@gmail.com'];
         if (sessionUser?.email && adminEmails.includes(sessionUser.email.toLowerCase())) {
-          setUser((prev: any) => prev ? { ...prev, isAdmin: true } : prev);
+          setUser((prev: any) => prev ? ({ ...prev, isAdmin: true } as any) : prev);
           console.info("👑 EMERGENCY ADMIN ACTIVE: Control restored for", sessionUser.email);
         }
       } catch (err) {
