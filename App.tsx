@@ -240,6 +240,20 @@ const App: React.FC = () => {
 
   return (
     <div className={`min-h-screen overflow-x-hidden bg-white dark:bg-slate-900 flex justify-center text-slate-900 dark:text-white transition-colors duration-200 print:bg-white print:text-black ${isThemeSwitching ? 'theme-switching' : ''}`}>
+      {/* Diagnostic Indicator — Apenas visível em erro ou para Admin */}
+      {(!import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL.includes('placeholder')) && (
+        <div className="fixed top-0 left-0 w-full bg-red-600 text-white text-[10px] py-1 text-center z-[9999] font-bold uppercase tracking-widest animate-pulse">
+           ⚠️ LIGAÇÃO EM FALTA: Configure VITE_ no painel Vercel/Netlify!
+        </div>
+      )}
+
+      {user?.isAdmin && (
+        <div className="fixed bottom-4 left-4 bg-slate-900/80 backdrop-blur-md border border-brand-gold/20 p-2 rounded-lg z-50 text-[10px] text-brand-gold flex items-center gap-2 pointer-events-none">
+          <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)] animate-pulse"></div>
+          <span>API: {import.meta.env.VITE_SUPABASE_URL?.substring(0, 20)}...</span>
+        </div>
+      )}
+
       <div className="print:hidden"><Background /></div>
 
       <div className="w-full overflow-x-hidden lg:max-w-7xl xl:max-w-screen-2xl mx-auto print:max-w-none bg-white dark:bg-slate-900 min-h-screen shadow-2xl md:shadow-none print:shadow-none flex flex-col relative text-slate-900 dark:text-white transition-colors duration-200">
