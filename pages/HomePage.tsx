@@ -24,7 +24,7 @@ interface HomePageProps {
 }
 
 export const HomePage: React.FC<HomePageProps> = ({ onShowInterstitial, onRequestReward }) => {
-  const { setSystemSettings } = useAppStore();
+  const { setSystemSettings, user } = useAppStore();
   const [rates, setRates] = useState<ExchangeRate[]>([]);
   const [featuredJobs, setFeaturedJobs] = useState<Job[]>([]);
   const [featuredDeals, setFeaturedDeals] = useState<ProductDeal[]>([]);
