@@ -5,18 +5,26 @@
 
 -- 1. Incrementar contagem de candidaturas
 CREATE OR REPLACE FUNCTION increment_application_count(job_id UUID)
-RETURNS VOID AS $$
+RETURNS VOID 
+LANGUAGE plpgsql 
+SECURITY DEFINER
+SET search_path = public
+AS $$
 BEGIN
   UPDATE public.jobs
   SET application_count = COALESCE(application_count, 0) + 1
   WHERE id = job_id;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 -- 2. Incrementar contagem de denúncias e tratar auto-pendente
 -- Se uma vaga atingir 3 denúncias, ela volta para 'pending' para revisão
 CREATE OR REPLACE FUNCTION increment_report_count(job_id UUID)
-RETURNS VOID AS $$
+RETURNS VOID 
+LANGUAGE plpgsql 
+SECURITY DEFINER
+SET search_path = public
+AS $$
 DECLARE
   new_count INTEGER;
 BEGIN
@@ -31,4 +39,4 @@ BEGIN
     WHERE id = job_id;
   END IF;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;

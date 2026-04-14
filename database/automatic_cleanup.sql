@@ -8,7 +8,11 @@ CREATE EXTENSION IF NOT EXISTS pg_cron;
 
 -- 2. Criar a função de limpeza
 CREATE OR REPLACE FUNCTION maintenance_cleanup_task()
-RETURNS VOID AS $$
+RETURNS VOID 
+LANGUAGE plpgsql 
+SECURITY DEFINER
+SET search_path = public
+AS $$
 BEGIN
     -- REMOVER VAGAS COM MAIS DE 30 DIAS
     DELETE FROM public.jobs
@@ -24,7 +28,7 @@ BEGIN
 
     RAISE NOTICE 'Manutenção concluída: Dados obsoletos removidos.';
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 -- 3. Agendar a tarefa para correr todos os dias (meia-noite)
 -- Nota: O pg_cron usa o fuso horário do banco de dados (geralmente UTC)
