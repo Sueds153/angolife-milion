@@ -14,7 +14,7 @@ import { JobsService } from './services/api/jobs.service';
 import { NewsService } from './services/api/news.service';
 import { DealsService } from './services/api/deals.service';
 import { UserProfile, AppNotification, ProductDeal } from './types';
-import { Home, Briefcase, DollarSign, Tag, Newspaper, FileText } from 'lucide-react';
+import { Home, Briefcase, DollarSign, Tag, Newspaper, FileText, AlertTriangle } from 'lucide-react';
 import { LegalModals } from './components/modals/LegalModals';
 import { BottomNav } from './components/layout/BottomNav';
 import { useAppStore } from './store/useAppStore';
@@ -111,24 +111,14 @@ const App: React.FC = () => {
             referralCode: profile.referral_code || profile.id?.substring(0, 8).toUpperCase()
           });
           setIsAuthenticated(true);
-        } else {
-          setUser({
-            id: sessionUser.id,
-            email: sessionUser.email,
-            fullName: sessionUser.email.split('@')[0],
-            isAdmin: false,
-            isPremium: false,
-            cvCredits: 0,
-            referralCount: 0,
-            accountType: 'free',
-            savedJobs: [],
-            applicationHistory: [],
-            cvHistory: [],
-            hasReferralDiscount: false,
-            // Gera um código temporário até o perfil ser criado pelo trigger do Supabase
-            referralCode: sessionUser.id?.substring(0, 8).toUpperCase() || 'ANGOLIFE'
-          } as UserProfile);
-          setIsAuthenticated(true);
+        }
+
+        // --- EMERGENCY ADMIN BYPASS ---
+        // Força Admin se o email for do proprietário (Útil se o DB profile falhar no deploy)
+        const adminEmails = ['suedjosue@gmail.com', 'osuedjosu@gmail.com', 'josuemiguelsued@gmail.com'];
+        if (sessionUser?.email && adminEmails.includes(sessionUser.email.toLowerCase())) {
+          setUser((prev: any) => prev ? { ...prev, isAdmin: true } : prev);
+          console.info("👑 EMERGENCY ADMIN ACTIVE: Control restored for", sessionUser.email);
         }
       } catch (err) {
         console.error("Auth profile fetch error:", err);
@@ -151,8 +141,24 @@ const App: React.FC = () => {
   const [interstitialDuration, setInterstitialDuration] = useState(5);
   const [interstitialCallback, setInterstitialCallback] = useState<(() => void) | null>(null);
   const [onAdCancel, setOnAdCancel] = useState<(() => void) | null>(null);
-  const [lastInterstitialTime, setLastInterstitialTime] = useState(0);
   const [subscribedCategories, setSubscribedCategories] = useState<string[]>([]);
+
+  // Connection Diagnostic
+  useEffect(() => {
+    const url = import.meta.env.VITE_SUPABASE_URL;
+    if (!url || url.includes('placeholder')) {
+      console.error("❌ CRITICAL: Supabase URL is missing or placeholder!");
+      addNotification({
+        id: 'db-error',
+        title: 'Erro de Ligação',
+        message: 'O sistema não conseguiu detetar as chaves do base de dados. Verifique o painel do Vercel.',
+        type: 'market',
+        timestamp: Date.now()
+      });
+    } else {
+      console.log("✅ Supabase Client Initialized:", url.substring(0, 20) + "...");
+    }
+  }, []);
 
   // Real-time Update Checker via Supabase
   useEffect(() => {

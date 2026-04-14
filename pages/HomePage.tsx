@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { DollarSign, X } from 'lucide-react';
+import { DollarSign, X, AlertTriangle } from 'lucide-react';
 import { ExchangeService } from '../services/api/exchange.service';
 import { DealsService } from '../services/api/deals.service';
 import { JobsService } from '../services/api/jobs.service';
@@ -29,6 +29,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onShowInterstitial, onReques
   const [featuredJobs, setFeaturedJobs] = useState<Job[]>([]);
   const [featuredDeals, setFeaturedDeals] = useState<ProductDeal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isMuted, setIsMuted] = useState(true);
   
   const [ads, setAds] = useState<Ad[]>([]);
@@ -66,8 +67,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onShowInterstitial, onReques
         }
         if (settingsData) setSystemSettings(settingsData);
         
-      } catch (error) {
-        console.error("Dashboard error", error);
+      } catch (err) {
+        console.error("Dashboard error", err);
+        setError("Não foi possível carregar os dados. Verifique a sua ligação ou as variáveis de ambiente.");
       } finally {
         setLoading(false);
       }
@@ -86,6 +88,26 @@ export const HomePage: React.FC<HomePageProps> = ({ onShowInterstitial, onReques
           <div className="absolute inset-0 border-4 border-t-orange-500 rounded-full animate-spin"></div>
         </div>
         <p className="text-orange-500/60 font-black uppercase text-[10px] tracking-[0.3em] animate-pulse">Carregando Elite Angola</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex-grow flex flex-col items-center justify-center min-h-[60vh] p-8 text-center space-y-6 animate-fade-in">
+        <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center text-red-500">
+          <AlertTriangle size={40} />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-2xl font-black text-white uppercase">Falha na Ligação</h2>
+          <p className="text-slate-400 text-sm max-w-md mx-auto">{error}</p>
+        </div>
+        <button 
+          onClick={() => window.location.reload()}
+          className="px-8 py-3 bg-brand-gold text-slate-950 rounded-xl font-black uppercase text-xs tracking-widest hover:scale-105 active:scale-95 transition-all"
+        >
+          Tentar Novamente
+        </button>
       </div>
     );
   }
