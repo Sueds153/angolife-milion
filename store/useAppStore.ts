@@ -20,7 +20,7 @@ interface AppState {
   notifications: AppNotification[];
 
   // Actions
-  setUser: (user: UserProfile | null) => void;
+  setUser: (user: UserProfile | null | ((prev: UserProfile | null) => UserProfile | null)) => void;
   setIsAuthenticated: (status: boolean) => void;
   setIsAuthLoading: (status: boolean) => void;
   setDarkMode: (isDark: boolean) => void;
@@ -45,7 +45,10 @@ export const useAppStore = create<AppState>((set) => ({
   notifications: [],
   systemSettings: null,
 
-  setUser: (user) => set({ user }),
+  setUser: (user) =>
+    set((state) => ({
+      user: typeof user === "function" ? user(state.user) : user,
+    })),
   setIsAuthenticated: (isAuthenticated) => set({ isAuthenticated }),
   setIsAuthLoading: (isAuthLoading) => set({ isAuthLoading }),
 

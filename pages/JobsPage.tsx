@@ -38,8 +38,8 @@ export const JobsPage: React.FC<JobsPageProps> = ({
   const onUpdateUser = (updates: Partial<UserProfile>) => user && setUser({ ...user, ...updates });
   
   const { data: jobs = [], isLoading: loading, refetch: loadJobs } = useQuery({
-    queryKey: ['jobs'],
-    queryFn: () => JobsService.getJobs(false),
+    queryKey: ['jobs', isAdmin],
+    queryFn: () => JobsService.getJobs(isAdmin),
   });
 
   const [filter, setFilter] = useState('');

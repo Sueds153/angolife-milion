@@ -61,7 +61,7 @@ const NewsImage: React.FC<{ src?: string; alt: string; className?: string; aspec
 };
 
 export const NewsPage: React.FC<NewsPageProps> = ({ onRequestReward }) => {
-  const { isAuthenticated, setAuthModal } = useAppStore();
+  const { user, isAuthenticated, setAuthModal } = useAppStore();
   const onRequireAuth = () => setAuthModal(true, 'login');
   const [news, setNews] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
@@ -93,8 +93,8 @@ export const NewsPage: React.FC<NewsPageProps> = ({ onRequestReward }) => {
   const [contentUnlocked, setContentUnlocked] = useState(false);
 
   const { data: rawNews = [], isLoading: queryLoading } = useQuery({
-    queryKey: ['news'],
-    queryFn: () => NewsService.getNews(),
+    queryKey: ['news', user?.isAdmin],
+    queryFn: () => NewsService.getNews(user?.isAdmin),
     staleTime: 5 * 60 * 1000,
     retry: 2,
   });

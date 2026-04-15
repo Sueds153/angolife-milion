@@ -27,8 +27,8 @@ export const DealsPage: React.FC<DealsPageProps> = ({ onSelectDeal, onShowInters
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: deals = [], isLoading: loading, refetch: refetchDeals } = useQuery({
-    queryKey: ['deals'],
-    queryFn: () => DealsService.getDeals(false),
+    queryKey: ['deals', user?.isAdmin],
+    queryFn: () => DealsService.getDeals(user?.isAdmin),
     staleTime: 5 * 60 * 1000, // 5 minutes cache
   });
 

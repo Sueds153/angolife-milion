@@ -76,7 +76,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onShowInterstitial, onReques
     };
 
     loadDashboardData();
-  }, [setSystemSettings]);
+  }, [setSystemSettings, user]);
 
   const usdRate = rates.find(r => r.currency === 'USD');
 
