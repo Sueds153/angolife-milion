@@ -11,7 +11,7 @@ export const JobsService = {
     let query = supabase.from("jobs").select("*");
     if (!isAdmin) {
       query = query.or(
-        "status.eq.publicado,status.eq.published,status.eq.aprovado,status.eq.approved,status.eq.active,status.eq.ativo,status.is.null",
+        "status.eq.publicado,status.eq.published,status.eq.aprovado,status.eq.approved,status.eq.active,status.eq.ativo",
       );
     }
 
