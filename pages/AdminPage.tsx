@@ -126,7 +126,7 @@ export const AdminPage: React.FC = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [user?.isAdmin]);
 
   useEffect(() => {
     if (activeTab === 'jobs') {

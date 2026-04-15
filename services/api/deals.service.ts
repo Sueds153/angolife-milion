@@ -50,7 +50,7 @@ export const DealsService = {
       .from("product_deals")
       .select("*")
       .or(
-        "status.eq.pending,status.eq.Pending,status.eq.pendente,status.eq.Pendente",
+        "status.eq.pending,status.eq.Pending,status.eq.pendente,status.eq.Pendente,status.is.null",
       );
 
     if (error) {

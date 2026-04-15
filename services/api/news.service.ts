@@ -39,7 +39,7 @@ export const NewsService = {
       .from("news_articles")
       .select("*")
       .or(
-        "status.eq.pendente,status.eq.Pendente,status.eq.pending,status.eq.Pending",
+        "status.eq.pendente,status.eq.Pendente,status.eq.pending,status.eq.Pending,status.is.null",
       )
       .order("published_at", { ascending: false });
 

@@ -51,7 +51,7 @@ export const JobsService = {
       .from("jobs")
       .select("*")
       .or(
-        "status.eq.pendente,status.eq.Pendente,status.eq.pending,status.eq.Pending",
+        "status.eq.pendente,status.eq.Pendente,status.eq.pending,status.eq.Pending,status.is.null",
       );
 
     if (error) {
