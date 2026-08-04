@@ -1,7 +1,6 @@
 import React from 'react';
 import { X, ShieldCheck, Plus, Award, Mail, Share2 } from 'lucide-react';
 import { Job } from '../../types';
-import { useAppStore } from '../../store/useAppStore';
 import { JobLogo } from './JobLogo';
 import { ServiceUtils } from '../../services/utils/utils';
 

@@ -1,9 +1,6 @@
-import React, { useRef } from 'react';
-import { ChevronDown, CheckCircle, ArrowRightLeft, MessageCircle } from 'lucide-react';
-import { ExchangeRate } from '../../types';
-import { useAppStore } from '../../store/useAppStore';
-import { OrderService } from '../../services/api/order.service';
-import { NotificationService } from '../../services/integrations/notificationService';
+import React from 'react';
+import { ChevronDown, CheckCircle, MessageCircle } from 'lucide-react';
+import { ExchangeRate, CheckoutFormData } from '../../types';
 import { APP_CONFIG } from '../../constants/app';
 import { ExchangeStepIdentity } from './ExchangeStepIdentity';
 import { ExchangeStepTerms } from './ExchangeStepTerms';
@@ -16,8 +13,8 @@ interface ExchangeCheckoutModalProps {
   tradeAmount: string;
   tradeCurrency: 'USD' | 'EUR';
   rates: ExchangeRate[];
-  formData: any;
-  setFormData: (data: any) => void;
+  formData: CheckoutFormData;
+  setFormData: (data: CheckoutFormData) => void;
   currentStep: number;
   setCurrentStep: (step: number) => void;
   timeLeft: number;
@@ -66,8 +63,6 @@ export const ExchangeCheckoutModal: React.FC<ExchangeCheckoutModalProps> = ({
   handleCopy,
   formatTime
 }) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   if (!isOpen) return null;
 
   const currentRateValue = tradeAction === 'buy' ? (rates.find(r => r.currency === tradeCurrency)?.informalSell || 0) : (rates.find(r => r.currency === tradeCurrency)?.informalBuy || 0);

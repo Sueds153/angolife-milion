@@ -1,7 +1,6 @@
 import React from 'react';
 import { ArrowDownCircle, ArrowUpCircle, MessageCircle } from 'lucide-react';
 import { ExchangeRate } from '../../types';
-import { OrderService } from '../../services/api/order.service';
 import { LockedOverlay } from '../ui/LockedOverlay';
 
 interface DirectTradeSectionProps {
@@ -61,8 +60,8 @@ export const DirectTradeSection: React.FC<DirectTradeSectionProps> = ({
           <div className="space-y-4">
             <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] ml-4">MOEDA</label>
             <div className="flex gap-4">
-              {['USD', 'EUR'].map(cur => (
-                <button key={cur} onClick={() => setTradeCurrency(cur as any)} className={`flex-1 py-4 md:py-6 rounded-2xl font-black text-base md:text-lg border-2 transition-all ${tradeCurrency === cur ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white border-orange-500/30 shadow-2xl shadow-orange-500/10' : 'bg-slate-100 dark:bg-slate-800/50 border-orange-500/10 text-slate-500'}`}>{cur}</button>
+              {(['USD', 'EUR'] as const).map(cur => (
+                <button key={cur} onClick={() => setTradeCurrency(cur)} className={`flex-1 py-4 md:py-6 rounded-2xl font-black text-base md:text-lg border-2 transition-all ${tradeCurrency === cur ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white border-orange-500/30 shadow-2xl shadow-orange-500/10' : 'bg-slate-100 dark:bg-slate-800/50 border-orange-500/10 text-slate-500'}`}>{cur}</button>
               ))}
             </div>
           </div>

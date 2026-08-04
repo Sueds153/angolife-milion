@@ -6,8 +6,6 @@ import {
   Sparkles,
 } from "lucide-react";
 import { ExchangeRate } from '../../types';
-import { useAppStore } from '../../store/useAppStore';
-import { GeminiService } from '../../services/integrations/gemini';
 import { LockedOverlay } from "../ui/LockedOverlay";
 
 interface ConversionSimulatorProps {

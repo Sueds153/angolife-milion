@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { X, Play, Clock, Award } from 'lucide-react';
+import { X, Clock, Award } from 'lucide-react';
 
 interface InterstitialAdProps {
   onClose: () => void;
@@ -10,12 +10,15 @@ interface InterstitialAdProps {
 export const InterstitialAd: React.FC<InterstitialAdProps> = ({ onClose, duration = 5 }) => {
   const [canClose, setCanClose] = useState(false);
   const [timeLeft, setTimeLeft] = useState(duration);
+  const [prevDuration, setPrevDuration] = useState(duration);
 
-  useEffect(() => {
-    // Reset timer if duration changes or on mount
+  if (prevDuration !== duration) {
+    setPrevDuration(duration);
     setTimeLeft(duration);
     setCanClose(false);
-    
+  }
+
+  useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
@@ -27,7 +30,7 @@ export const InterstitialAd: React.FC<InterstitialAdProps> = ({ onClose, duratio
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [duration]);
+  }, []);
 
   return (
     <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-black/95 backdrop-blur-md animate-fade-in p-4">

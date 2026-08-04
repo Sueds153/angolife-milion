@@ -6,6 +6,18 @@ import { supabase } from "../core/supabaseClient";
 import { NewsArticle } from "../../types";
 import { ServiceUtils } from "../utils/utils";
 
+interface NewsRow {
+  id: string;
+  titulo: string;
+  resumo: string;
+  fonte: string;
+  url_origem: string;
+  categoria: string;
+  published_at: string;
+  status: string;
+  imagem_url?: string;
+}
+
 export const NewsService = {
   getNews: async (isAdmin: boolean = false): Promise<NewsArticle[]> => {
     let query = supabase.from("news_articles").select("*");
@@ -21,7 +33,7 @@ export const NewsService = {
       return [];
     }
 
-    return data.map((n: any) => ({
+    return data.map((n: NewsRow): NewsArticle => ({
       id: n.id,
       title: n.titulo,
       summary: n.resumo,
@@ -29,7 +41,7 @@ export const NewsService = {
       url: n.url_origem,
       category: n.categoria,
       publishedAt: n.published_at,
-      status: ServiceUtils.mapStatus(n.status) as any,
+      status: ServiceUtils.mapStatus(n.status),
       imageUrl: n.imagem_url,
     }));
   },
@@ -48,7 +60,7 @@ export const NewsService = {
       return [];
     }
 
-    return data.map((n: any) => ({
+    return data.map((n: NewsRow): NewsArticle => ({
       id: n.id,
       title: n.titulo,
       summary: n.resumo,
@@ -57,7 +69,7 @@ export const NewsService = {
       category: n.categoria,
       publishedAt: n.published_at,
       imageUrl: n.imagem_url,
-      status: ServiceUtils.mapStatus(n.status) as any,
+      status: ServiceUtils.mapStatus(n.status),
     }));
   },
 

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Briefcase, Check, RefreshCw, Plus, Building, MapPin, Clock, Mail, ShieldCheck, X, HardHat, Store, Send } from 'lucide-react';
+import { Briefcase, Check, RefreshCw, Plus, Building, MapPin, Clock, Mail, ShieldCheck, X, HardHat, Store } from 'lucide-react';
 import { Job } from '../../types';
 
 interface AdminJobsSectionProps {

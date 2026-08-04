@@ -132,3 +132,17 @@ export interface CVData {
   education: CVEducation[];
   skills: string[];
 }
+
+export interface CheckoutFormData {
+  fullName: string;
+  age: string;
+  gender: string;
+  wallet: string;
+  coordinates: string;
+  bank: string;
+  iban: string;
+  accountHolder: string;
+  termsAccepted?: boolean;
+  rateGuaranteeAccepted?: boolean;
+}
+

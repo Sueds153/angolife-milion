@@ -4,8 +4,50 @@
 
 import { supabase } from "../core/supabaseClient";
 
+export interface NewOrder {
+  full_name?: string | null;
+  age?: string | number | null;
+  gender?: string | null;
+  wallet?: string | null;
+  coordinates?: string | null;
+  amount?: number;
+  currency?: string;
+  total_kz?: number;
+  payment_method?: string;
+  status?: string;
+  proof_url?: string | null;
+  order_type?: string;
+  bank?: string | null;
+  iban?: string | null;
+  account_holder?: string | null;
+  user_email?: string | null;
+}
+
+export interface OrderRow {
+  id: string;
+  full_name?: string | null;
+  wallet?: string | null;
+  amount?: string | number | null;
+  currency?: string;
+  order_type?: string | null;
+  type?: string | null;
+  bank?: string | null;
+  status?: string | null;
+  total_kz?: number | null;
+  created_at?: string;
+}
+
+export interface LatestOrder {
+  name: string;
+  wallet: string;
+  amount: string | number;
+  currency: string;
+  type: 'buy' | 'sell';
+  bank?: string;
+}
+
 export const OrderService = {
-  createOrder: async (order: any): Promise<string | null> => {
+  createOrder: async (order: NewOrder): Promise<string | null> => {
     const { data, error } = await supabase
       .from("orders")
       .insert([order])
@@ -20,7 +62,7 @@ export const OrderService = {
     return data.id;
   },
 
-  getUserOrders: async (email: string): Promise<any[]> => {
+  getUserOrders: async (email: string): Promise<OrderRow[]> => {
     const { data, error } = await supabase
       .from("orders")
       .select("*")
@@ -43,7 +85,7 @@ export const OrderService = {
 
   // 🔐 SEGURANÇA: requer sessão de admin (protegido por RLS "Admins view all orders").
   // Dados financeiros nunca são retornados a utilizadores sem permissão.
-  getLatestOrders: async (limit: number = 5): Promise<any[]> => {
+  getLatestOrders: async (limit: number = 5): Promise<LatestOrder[]> => {
     const { data, error } = await supabase
       .from("orders")
       .select("full_name, wallet, amount, currency, order_type, bank")

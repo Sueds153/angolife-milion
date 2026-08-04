@@ -1,10 +1,11 @@
 import React from 'react';
 import { Shield } from 'lucide-react';
+import { CheckoutFormData } from '../../types';
 
 interface ExchangeStepTermsProps {
   tradeAction: 'buy' | 'sell';
-  formData: any;
-  setFormData: (data: any) => void;
+  formData: CheckoutFormData;
+  setFormData: (data: CheckoutFormData) => void;
   setIsTermsModalOpen: (open: boolean) => void;
 }
 

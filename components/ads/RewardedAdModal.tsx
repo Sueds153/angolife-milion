@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { X, Zap, Play, Loader2, MessageCircle } from 'lucide-react';
 
 interface RewardedAdModalProps {
@@ -24,6 +24,8 @@ export const RewardedAdModal: React.FC<RewardedAdModalProps> = ({
 }) => {
   const [isWatchingRewardAd, setIsWatchingRewardAd] = useState(false);
   const [showRedirectButton, setShowRedirectButton] = useState(false);
+  const [adId] = useState(() => `REW-${Math.random().toString(36).substring(7).toUpperCase()}`);
+  const [prevOpen, setPrevOpen] = useState(isOpen);
 
   // Interstitial States
   // 'idle': Initial state
@@ -34,10 +36,20 @@ export const RewardedAdModal: React.FC<RewardedAdModalProps> = ({
   const [interstitialTimer, setInterstitialTimer] = useState(5);
   const [rewardTimer, setRewardTimer] = useState(15);
 
+  // Reset interstitial state when modal opens
+  if (prevOpen !== isOpen) {
+    setPrevOpen(isOpen);
+    if (isOpen) {
+      setInterstitialState('idle');
+      setInterstitialTimer(5);
+      setShowRedirectButton(false);
+    }
+  }
+
   // Test ID for Interstitial
   const ADMOB_INTERSTITIAL_ID = 'ca-app-pub-3940256069387121/1033173712';
 
-  const handleFinalRedirect = (overrideLink?: string | null) => {
+  const handleFinalRedirect = useCallback((overrideLink?: string | null) => {
     const finalLink = overrideLink || whatsappLink;
     if (finalLink) {
       const openedWindow = window.open(finalLink, '_blank');
@@ -50,7 +62,7 @@ export const RewardedAdModal: React.FC<RewardedAdModalProps> = ({
         onClose();
       }
     }
-  };
+  }, [whatsappLink, onFinalize, onClose]);
 
   const handleWatchRewardAd = async () => {
     setIsWatchingRewardAd(true);
@@ -67,11 +79,13 @@ export const RewardedAdModal: React.FC<RewardedAdModalProps> = ({
     }, 1000);
 
     // Salvamos o timer para limpar se o modal fechar bruscamente
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any)._rewardTimer = timer;
   };
 
   useEffect(() => {
     return () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if ((window as any)._rewardTimer) clearInterval((window as any)._rewardTimer);
     };
   }, []);
@@ -93,10 +107,6 @@ export const RewardedAdModal: React.FC<RewardedAdModalProps> = ({
   // Simulate Pre-load on mount/open
   useEffect(() => {
     if (isOpen) {
-      setInterstitialState('idle'); // Reset on open
-      setInterstitialTimer(5);
-      setShowRedirectButton(false);
-
       // Simulate Pre-load taking 1-2 seconds
       const preloadTime = Math.random() * 1000 + 500;
       const timer = setTimeout(() => {
@@ -137,9 +147,10 @@ export const RewardedAdModal: React.FC<RewardedAdModalProps> = ({
   // Sovereign Trigger: When timer hits 0, execute skip (which opens WhatsApp)
   useEffect(() => {
     if (interstitialState === 'showing' && interstitialTimer === 0) {
-      handleFinalRedirect();
+      const raf = requestAnimationFrame(() => handleFinalRedirect());
+      return () => cancelAnimationFrame(raf);
     }
-  }, [interstitialTimer, interstitialState, whatsappLink]);
+  }, [interstitialTimer, interstitialState, whatsappLink, handleFinalRedirect]);
 
   // Effect to catch late load if user is waiting
   useEffect(() => {
@@ -231,7 +242,7 @@ export const RewardedAdModal: React.FC<RewardedAdModalProps> = ({
           <span>Angolife Network | REWARDED VIDEO</span>
           <div className="flex items-center gap-2">
             <Zap size={10} className="text-orange-500" />
-            <span>AD ID: REW-{Math.random().toString(36).substring(7).toUpperCase()}</span>
+            <span>AD ID: {adId}</span>
           </div>
         </div>
 

@@ -4,6 +4,13 @@
 
 import { supabase } from "./supabaseClient";
 import { ReferralService } from "../api/referral.service";
+import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
+import type { UserProfile } from "../../types";
+
+type ProfileUpdates = Partial<UserProfile> & {
+  bio?: string;
+  [key: string]: unknown;
+};
 
 export const AuthService = {
   signUp: async (email: string, password: string, fullName: string, invitedBy?: string) => {
@@ -54,7 +61,7 @@ export const AuthService = {
     return { data, error };
   },
 
-  updateProfile: async (userId: string, updates: any) => {
+  updateProfile: async (userId: string, updates: ProfileUpdates) => {
     // 🔐 SEGURANÇA: whitelist explícita de campos que o utilizador pode atualizar.
     // Campos de privilégio (is_admin, is_premium, cv_credits, account_type) são
     // geridos exclusivamente por serviços server-side (subscription, referral Edge Function).
@@ -63,7 +70,7 @@ export const AuthService = {
       'application_history', 'cv_history', 'phone', 'bio', 'location'
     ];
 
-    const dbUpdates: Record<string, any> = {};
+    const dbUpdates: Record<string, unknown> = {};
 
     // Mapear aliases de camelCase para snake_case
     if (updates.fullName)           dbUpdates.full_name = updates.fullName;
@@ -86,7 +93,7 @@ export const AuthService = {
     return { data, error };
   },
 
-  onAuthStateChange: (callback: (event: any, session: any) => void) => {
+  onAuthStateChange: (callback: (event: AuthChangeEvent, session: Session | null) => void) => {
     return supabase.auth.onAuthStateChange(callback);
   },
 };

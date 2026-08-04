@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Briefcase, ShoppingBag, DollarSign, ChevronRight, MessageCircle, Activity, Volume2, VolumeX, X, Newspaper, FileText, Tag, Users, Shield, Zap, Star, TrendingUp, Quote, CheckCircle } from 'lucide-react';
 import { ExchangeService } from '../services/api/exchange.service';
@@ -11,6 +11,23 @@ import { AdBanner } from '../components/ads/AdBanner';
 import { AdsService, Ad } from '../services/api/ads.service';
 import { useAppStore } from '../store/useAppStore';
 import { Helmet } from 'react-helmet-async';
+
+interface HomeBanner {
+  mediaType?: string;
+  media_type?: string;
+  videoUrl?: string;
+  video_url?: string;
+  imageUrl?: string;
+  image_url?: string;
+  title?: string;
+  companyName?: string;
+  company_name?: string;
+  duration_seconds?: number;
+  is_active?: boolean;
+  location?: string;
+  format?: string;
+  link?: string;
+}
 
 const TICKER_MESSAGES = [
   { icon: '🔴', text: 'AO VIVO • 247 pessoas a consultar o câmbio agora' },
@@ -29,7 +46,7 @@ export const HomePage: React.FC = () => {
   const [rates, setRates] = useState<ExchangeRate[]>([]);
   const [featuredJobs, setFeaturedJobs] = useState<Job[]>([]);
   const [featuredDeals, setFeaturedDeals] = useState<ProductDeal[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
   const [tickerIndex, setTickerIndex] = useState(0);
   
@@ -43,13 +60,13 @@ export const HomePage: React.FC = () => {
   const [adImageIndex, setAdImageIndex] = useState(0);
 
   // Derivar banners dos ads carregados ou usar fallback estático
-  const heroBanners = ads.length > 0 
+  const heroBanners: HomeBanner[] = useMemo(() => ads.length > 0 
     ? ads.filter(a => a.type === 'hero' && a.is_active && (a.location === 'home' || a.location === 'all') && a.format === 'banner') 
-    : PARTNER_ADS.heroBanners;
+    : PARTNER_ADS.heroBanners, [ads]);
     
-  const adBanners = ads.length > 0 
+  const adBanners: HomeBanner[] = useMemo(() => ads.length > 0 
     ? ads.filter(a => a.type === 'partner' && a.is_active && (a.location === 'home' || a.location === 'all') && a.format === 'banner') 
-    : PARTNER_ADS.partnerBanners.filter(b => b.isActive);
+    : PARTNER_ADS.partnerBanners.filter(b => b.isActive), [ads]);
 
   useEffect(() => {
     // Só inicia intervalos se houver banners
@@ -71,7 +88,7 @@ export const HomePage: React.FC = () => {
       clearInterval(heroInterval);
       clearInterval(adInterval);
     };
-  }, [heroBanners.length, adBanners.length, heroImageIndex, adImageIndex]);
+  }, [heroBanners, adBanners, heroImageIndex, adImageIndex]);
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -247,11 +264,11 @@ export const HomePage: React.FC = () => {
       <div className="relative rounded-[1.5rem] md:rounded-[3rem] overflow-hidden bg-slate-950 shadow-2xl min-h-[380px] md:min-h-[600px] flex items-center group gold-border-subtle">
         <div className="absolute inset-0 z-0">
           {heroBanners.map((banner, idx) => (
-            (banner.mediaType === 'video' || (banner as any).media_type === 'video') ? (
+            (banner.mediaType === 'video' || banner.media_type === 'video') ? (
               <video 
                 key={idx}
-                src={banner.videoUrl || (banner as any).video_url} 
-                poster={banner.imageUrl || (banner as any).image_url}
+                src={banner.videoUrl || banner.video_url} 
+                poster={banner.imageUrl || banner.image_url}
                 autoPlay 
                 muted={isMuted}
                 loop 
@@ -261,7 +278,7 @@ export const HomePage: React.FC = () => {
             ) : (
               <img 
                 key={idx}
-                src={banner.imageUrl || (banner as any).image_url} 
+                src={banner.imageUrl || banner.image_url} 
                 alt={banner.title} 
                 className={`absolute inset-0 w-full h-full object-cover transition-all duration-[3000ms] ease-in-out ${heroImageIndex === idx ? 'opacity-40 scale-110 translate-x-0' : 'opacity-0 scale-100 translate-x-4'}`}
               />
@@ -570,11 +587,11 @@ export const HomePage: React.FC = () => {
       <div className="relative rounded-[1.5rem] md:rounded-[4rem] overflow-hidden bg-black shadow-2xl group transition-all gold-border-subtle min-h-[400px] md:min-h-[500px] flex items-center">
         <div className="absolute inset-0 z-0">
           {adBanners.map((banner, idx) => (
-            (banner.mediaType === 'video' || (banner as any).media_type === 'video') ? (
+            (banner.mediaType === 'video' || banner.media_type === 'video') ? (
               <video 
                 key={idx}
-                src={banner.videoUrl || (banner as any).video_url} 
-                poster={banner.imageUrl || (banner as any).image_url}
+                src={banner.videoUrl || banner.video_url} 
+                poster={banner.imageUrl || banner.image_url}
                 autoPlay 
                 muted={isMuted}
                 loop 
@@ -584,8 +601,8 @@ export const HomePage: React.FC = () => {
             ) : (
               <img 
                 key={idx}
-                src={banner.imageUrl || (banner as any).image_url} 
-                alt={(banner as any).companyName || (banner as any).company_name} 
+                src={banner.imageUrl || banner.image_url} 
+                alt={banner.companyName || banner.company_name} 
                 className={`absolute inset-0 w-full h-full object-cover transition-all duration-[4000ms] ${adImageIndex === idx ? 'opacity-60 scale-105 blur-none' : 'opacity-0 scale-100'}`}
               />
             )

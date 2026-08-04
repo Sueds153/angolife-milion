@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail, Phone, MapPin, Linkedin, Globe } from 'lucide-react';
+import { Mail, Phone, MapPin } from 'lucide-react';
 import { TemplateSharedProps } from './CVTemplateSelector';
 import '../../styles/cv-templates.css';
 

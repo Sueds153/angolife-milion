@@ -1,12 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { pdf } from '@react-pdf/renderer';
 import { CVDocument } from '../components/cv/CVDocument';
-import { Download, ChevronRight, ChevronLeft, Sparkles, Plus, Trash2, User, Briefcase, GraduationCap, Award, FileText, Lock, Star, Check, Zap, Crown, CreditCard, Calendar, Clock, X } from 'lucide-react';
+import { Download, ChevronRight, ChevronLeft, Sparkles, Plus, Trash2, User, Briefcase, GraduationCap, Award, FileText, Lock, Check, Zap, Crown, CreditCard, Calendar, Clock, X } from 'lucide-react';
 import { GeminiService } from '../services/integrations/gemini';
 import { SubscriptionService } from '../services/api/subscription.service';
 import { StorageService } from '../services/api/storage.service';
-import { CVData, CVExperience, CVEducation, UserProfile } from '../types';
-import { CVTemplateSelector, CVTemplateType, TEMPLATE_OPTIONS } from '../components/cv/CVTemplateSelector';
+import { CVData, CVExperience, CVEducation } from '../types';
+import { CVTemplateSelector, CVTemplateType } from '../components/cv/CVTemplateSelector';
+import { TEMPLATE_OPTIONS } from '../components/cv/templateOptions';
 
 import { useAppStore } from '../store/useAppStore';
 
@@ -27,19 +28,6 @@ export const CVBuilderPage: React.FC = () => {
   
   const onRequireAuth = () => setAuthModal(true, 'login');
   
-  const onUpgrade = (plan: 'pack3' | 'monthly' | 'yearly') => {
-    if (!user) return;
-    const now = Date.now();
-    let updatedUser = { ...user };
-    if (plan === 'pack3') updatedUser.cvCredits = (updatedUser.cvCredits || 0) + 3;
-    else {
-      updatedUser.isPremium = true;
-      updatedUser.subscriptionType = plan === 'monthly' ? 'monthly' : 'yearly';
-      updatedUser.premiumExpiry = now + (plan === 'monthly' ? 30 : 365) * 24 * 60 * 60 * 1000;
-    }
-    setUser(updatedUser);
-  };
-
   const onDecrementCredit = () => {
     if (user) setUser({ ...user, cvCredits: Math.max(0, user.cvCredits - 1) });
   };
@@ -47,15 +35,12 @@ export const CVBuilderPage: React.FC = () => {
   const [cv, setCv] = useState<CVData>({ ...initialCV, photoUrl: '' });
   const [isImproving, setIsImproving] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<'pack3' | 'monthly' | 'yearly'>('monthly');
-  const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [isUploadingReceipt, setIsUploadingReceipt] = useState(false);
   const [paymentStep, setPaymentStep] = useState<'plans' | 'checkout' | 'pending'>('plans');
-  const [showNotification, setShowNotification] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<CVTemplateType>('classic');
   const [educationFirst, setEducationFirst] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const strengthRef = useRef<HTMLDivElement>(null);
 
   // --- CV STRENGTH METER ---
@@ -89,7 +74,7 @@ export const CVBuilderPage: React.FC = () => {
   const canDownload = isAuthenticated && (isPremiumValid || hasCredits);
 
   // Helper for Input Changes
-  const updateField = (field: keyof CVData, value: any) => {
+  const updateField = <K extends keyof CVData>(field: K, value: CVData[K]) => {
     setCv(prev => ({ ...prev, [field]: value }));
   };
 
@@ -122,7 +107,7 @@ export const CVBuilderPage: React.FC = () => {
     updateField('experiences', cv.experiences.filter(e => e.id !== id));
   };
 
-  const updateExperience = (id: string, field: keyof CVExperience, value: any) => {
+  const updateExperience = <K extends keyof CVExperience>(id: string, field: K, value: CVExperience[K]) => {
     const newExp = cv.experiences.map(e => e.id === id ? { ...e, [field]: value } : e);
     updateField('experiences', newExp);
   };
@@ -132,7 +117,7 @@ export const CVBuilderPage: React.FC = () => {
     updateField('education', [...cv.education, newEdu]);
   };
 
-  const updateEducation = (id: string, field: keyof CVEducation, value: any) => {
+  const updateEducation = <K extends keyof CVEducation>(id: string, field: K, value: CVEducation[K]) => {
     const newEdu = cv.education.map(e => e.id === id ? { ...e, [field]: value } : e);
     updateField('education', newEdu);
   };
@@ -211,9 +196,9 @@ export const CVBuilderPage: React.FC = () => {
       } else {
         throw new Error('Erro ao registar subscrição');
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('[Payment] Error:', error);
-      alert(`Erro ao processar pagamento: ${error?.message || 'Tente novamente.'}`);
+      alert(`Erro ao processar pagamento: ${(error as Error)?.message || 'Tente novamente.'}`);
     } finally {
       setIsUploadingReceipt(false);
     }
@@ -367,7 +352,7 @@ export const CVBuilderPage: React.FC = () => {
         </div>
       )}
 
-      {cv.experiences.map((exp, idx) => (
+      {cv.experiences.map((exp) => (
         <div key={exp.id} className="bg-white dark:bg-slate-900 border gold-border-subtle p-6 rounded-2xl space-y-4 shadow-sm relative">
           <button onClick={() => removeExperience(exp.id)} className="absolute top-4 right-4 text-slate-400 hover:text-red-500" aria-label="Remover Experiência"><Trash2 size={18} /></button>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -866,8 +851,3 @@ export const CVBuilderPage: React.FC = () => {
     </div>
   );
 };
-
-// Simple CloseIcon replacement for the Skills section
-const CloseIcon = ({ size }: { size: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-);

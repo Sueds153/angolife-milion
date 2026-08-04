@@ -1,47 +1,93 @@
-const CACHE_NAME = 'angolife-v1';
-const ASSETS_TO_CACHE = [
+const CACHE_NAME = 'angolife-v2';
+const PRECACHE_ASSETS = [
   '/',
-  '/index.html',
   '/manifest.json',
   '/icon-192.png',
-  '/icon-512.png',
-  '/index.css'
+  '/icon-512.png'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(PRECACHE_ASSETS))
+      .then(() => self.skipWaiting())
   );
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME) {
-            return caches.delete(cache);
-          }
-        })
-      );
-    })
+    caches.keys()
+      .then((cacheNames) =>
+        Promise.all(
+          cacheNames
+            .filter((name) => name !== CACHE_NAME)
+            .map((name) => caches.delete(name))
+        )
+      )
+      .then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    })
-  );
+  const { request } = event;
+
+  if (request.method !== 'GET') return;
+
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return;
+
+  // Navigation requests: network-first so users always get fresh content.
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put('/', copy));
+          return response;
+        })
+        .catch(() =>
+          caches.match('/').then((cached) => cached || Response.error())
+        )
+    );
+    return;
+  }
+
+  // Hashed build assets (/assets/*): cache-first for speed.
+  if (url.pathname.startsWith('/assets/')) {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        if (cached) return cached;
+        return fetch(request).then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+          return response;
+        });
+      })
+    );
+    return;
+  }
+
+  // Static public files (manifest, icons): stale-while-revalidate.
+  if (url.pathname === '/manifest.json' || url.pathname.startsWith('/icon-')) {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        const network = fetch(request)
+          .then((response) => {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+            return response;
+          })
+          .catch(() => cached);
+        return cached || network;
+      })
+    );
+  }
 });
 
 // Real Web Push Implementation
 self.addEventListener('push', (event) => {
   let data = { title: 'AngoLife', body: 'Nova atualização disponível!' };
-  
+
   if (event.data) {
     try {
       data = event.data.json();

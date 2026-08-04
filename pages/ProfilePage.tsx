@@ -1,13 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Briefcase, Tag, Camera, Award, Share2, MessageCircle, CheckCircle2, Bell, BellOff, RefreshCw, DollarSign, ChevronRight, Edit3, Save, Star, History, Download, ShieldCheck, Heart, Link as LinkIcon } from 'lucide-react';
+import { User, Briefcase, Camera, Award, MessageCircle, CheckCircle2, Bell, RefreshCw, DollarSign, ChevronRight, Edit3, Save, Star, History, Download, ShieldCheck, Heart, Link as LinkIcon } from 'lucide-react';
 import { UserProfile, Job } from '../types';
 import { NotificationService } from '../services/integrations/notificationService';
 import { AuthService } from '../services/core/auth.service';
 import { JobsService } from '../services/api/jobs.service';
-import { OrderService } from '../services/api/order.service';
+import { OrderService, OrderRow } from '../services/api/order.service';
 import { StorageService } from '../services/api/storage.service';
-import { APP_CONFIG } from '../constants/app';
 import { useAppStore } from '../store/useAppStore';
 
 export const ProfilePage: React.FC = () => {
@@ -27,17 +26,16 @@ export const ProfilePage: React.FC = () => {
     }
   };
 
-  if (!user) return null;
-  const [profileImage, setProfileImage] = useState<string | null>(user.avatarUrl || null);
+  const [profileImage, setProfileImage] = useState<string | null>(user?.avatarUrl || null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
-  const [orders, setOrders] = useState<any[]>([]);
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>(() => NotificationService.checkPermission());
+  const [orders, setOrders] = useState<OrderRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [editName, setEditName] = useState(user.fullName || '');
-  const [editPhone, setEditPhone] = useState(user.phone || '');
+  const [editName, setEditName] = useState(user?.fullName || '');
+  const [editPhone, setEditPhone] = useState(user?.phone || '');
   const [saving, setSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
@@ -73,8 +71,6 @@ export const ProfilePage: React.FC = () => {
   const formattedName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
 
   useEffect(() => {
-    setNotificationPermission(NotificationService.checkPermission());
-    
     // Inicializar Web Push se suportado
     if (user?.id) {
       NotificationService.isSubscribed().then(isSub => {
@@ -188,10 +184,7 @@ export const ProfilePage: React.FC = () => {
     }
   };
 
-  const handleClaimAdReward = () => {
-    const message = `Olá Su-Golden! Quero o meu bónus de Embaixador Angolife (${user.email}). Já comecei a partilhar com os mambos!`;
-    window.open(`https://wa.me/${APP_CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
-  };
+  if (!user) return null;
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-slide-up pb-20 px-4 sm:px-0">
@@ -542,7 +535,7 @@ export const ProfilePage: React.FC = () => {
           </div>
         ) : (
           <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar-orange">
-            {orders.map((order: any) => (
+            {orders.map((order) => (
               <div key={order.id} className="flex items-center justify-between p-6 bg-slate-50 dark:bg-black/20 rounded-3xl border border-slate-100 dark:border-white/5 hover:border-orange-500/40 transition-all group shadow-sm">
                 <div className="flex items-center gap-4">
                   <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border shadow-inner ${order.type === 'buy' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-orange-500/10 text-orange-500 border-orange-500/20'}`}>

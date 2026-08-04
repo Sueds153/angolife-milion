@@ -6,6 +6,29 @@ import { supabase } from "../core/supabaseClient";
 import { ProductDeal } from "../../types";
 import { ServiceUtils } from "../utils/utils";
 
+interface DealRow {
+  id: string;
+  title: string;
+  store: string;
+  store_number?: string;
+  phone?: string;
+  original_price: number;
+  discount_price: number;
+  location: string;
+  description: string;
+  image_placeholder: string;
+  image_url?: string;
+  url?: string;
+  category?: string;
+  status: string;
+  submitted_by: string;
+  created_at: string;
+  views?: number;
+  likes?: number;
+  verified?: boolean;
+  is_admin?: boolean;
+}
+
 export const DealsService = {
   getDeals: async (isAdmin: boolean = false): Promise<ProductDeal[]> => {
     let query = supabase.from("product_deals").select("*");
@@ -22,22 +45,25 @@ export const DealsService = {
       return [];
     }
 
-    return data.map((d: any) => ({
-      ...d,
-      id: d.id,
-      title: d.title,
-      store: d.store,
-      originalPrice: d.original_price,
-      discountPrice: d.discount_price,
-      location: d.location,
-      description: d.description,
-      imagePlaceholder: d.image_placeholder,
-      url: d.url,
-      category: d.category,
-      status: ServiceUtils.mapStatus(d.status) === "published" ? "approved" : (ServiceUtils.mapStatus(d.status) as any),
-      submittedBy: d.submitted_by,
-      createdAt: d.created_at,
-    }));
+    return data.map((d: DealRow): ProductDeal => {
+      const mappedStatus = ServiceUtils.mapStatus(d.status);
+      return {
+        ...d,
+        id: d.id,
+        title: d.title,
+        store: d.store,
+        originalPrice: d.original_price,
+        discountPrice: d.discount_price,
+        location: d.location,
+        description: d.description,
+        imagePlaceholder: d.image_placeholder,
+        url: d.url,
+        category: d.category,
+        status: mappedStatus === "published" ? "approved" : mappedStatus,
+        submittedBy: d.submitted_by,
+        createdAt: d.created_at,
+      };
+    });
   },
 
   getPendingDeals: async (): Promise<ProductDeal[]> => {
@@ -53,7 +79,7 @@ export const DealsService = {
       return [];
     }
 
-    return data.map((d: any) => ({
+    return data.map((d: DealRow): ProductDeal => ({
       ...d,
       id: d.id,
       title: d.title,
@@ -114,6 +140,7 @@ export const DealsService = {
       return null;
     }
 
+    const mappedStatus = ServiceUtils.mapStatus(data.status);
     return {
       id: data.id,
       title: data.title,
@@ -129,7 +156,7 @@ export const DealsService = {
       imageUrl: data.image_url,
       url: data.url,
       category: data.category,
-      status: ServiceUtils.mapStatus(data.status) === "published" ? "approved" : (ServiceUtils.mapStatus(data.status) as any),
+      status: mappedStatus === "published" ? "approved" : mappedStatus,
       submittedBy: data.submitted_by,
       createdAt: data.created_at,
       views: data.views ?? 0,

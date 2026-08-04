@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
     ArrowLeft,
     BadgeCheck,
@@ -9,7 +9,6 @@ import {
     MapPin,
     Store,
     Tag,
-    Loader2,
     MessageCircle,
     FileText,
 } from 'lucide-react';
@@ -35,15 +34,13 @@ function resolveImage(deal: ProductDeal): string {
 
 // ─── Componente Principal ─────────────────────────────────────────────────────
 
-export const DealDetailPage: React.FC<DealDetailPageProps> = ({ deal: initialDeal, user }) => {
-    const { id } = useParams<{ id: string }>();
+export const DealDetailPage: React.FC<DealDetailPageProps> = ({ deal: initialDeal }) => {
     const navigate = useNavigate();
     
     // Começa com os dados já disponíveis da lista — zero loading para data básica
     const [deal, setDeal] = useState<ProductDeal | null>(initialDeal || null);
     const [enriching, setEnriching] = useState(true);
     const [localViews, setLocalViews] = useState((initialDeal?.views ?? 0) + 1);
-    const [error, setError] = useState<string | null>(null);
 
     // ── Enriquecimento em background: busca dados extra do Supabase ────────────
     useEffect(() => {

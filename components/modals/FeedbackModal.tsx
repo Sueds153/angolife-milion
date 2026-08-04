@@ -2,8 +2,16 @@ import React, { useState } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
 import { Star, CheckCircle, Send, MessageSquare } from 'lucide-react';
 
+interface FeedbackOrder {
+  id: string;
+  amount: string | number;
+  currency: string;
+  wallet: string;
+  total_kz?: number;
+}
+
 interface FeedbackModalProps {
-  order: any;
+  order: FeedbackOrder;
   isOpen: boolean;
   onClose: () => void;
 }

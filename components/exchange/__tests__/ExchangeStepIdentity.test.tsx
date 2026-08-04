@@ -29,7 +29,6 @@ describe('ExchangeStepIdentity', () => {
   };
 
   it('renders the component with correct information', () => {
-    // @ts-ignore - Ignore props types for simple test
     render(<ExchangeStepIdentity {...mockProps} />);
     
     expect(screen.getByText(/Passo 1: Identificação/i)).toBeInTheDocument();
@@ -44,8 +43,7 @@ describe('ExchangeStepIdentity', () => {
       formData: { ...mockFormData, fullName: '' }
     };
     
-    // @ts-ignore
-    render(<ExchangeStepIdentity {...propsWithErrors} />);
+render(<ExchangeStepIdentity {...propsWithErrors} />);
     
     expect(screen.getByText(/Campo obrigatório/i)).toBeInTheDocument();
   });

@@ -49,7 +49,7 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
       if (editingAd?.id) {
         await AdsService.updateAd(editingAd.id, formData);
       } else {
-        await AdsService.createAd(formData as any);
+        await AdsService.createAd(formData as Omit<Ad, 'id' | 'display_order'>);
       }
       onSuccess();
       onClose();
@@ -121,7 +121,7 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
                 <select 
                   id="ad-location"
                   value={formData.location}
-                  onChange={(e) => setFormData({...formData, location: e.target.value as any})}
+                  onChange={(e) => setFormData({...formData, location: e.target.value as Ad['location']})}
                   className="w-full bg-slate-50 dark:bg-white/5 border-none rounded-2xl p-4 pl-10 text-xs font-bold appearance-none focus:ring-2 focus:ring-brand-gold/50"
                 >
                   <option value="home">Página Inicial</option>
@@ -139,7 +139,7 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
                 <select 
                   id="ad-type"
                   value={formData.type}
-                  onChange={(e) => setFormData({...formData, type: e.target.value as any})}
+                  onChange={(e) => setFormData({...formData, type: e.target.value as Ad['type']})}
                   className="w-full bg-slate-50 dark:bg-white/5 border-none rounded-2xl p-4 pl-10 text-xs font-bold appearance-none focus:ring-2 focus:ring-brand-gold/50"
                 >
                   <option value="partner">Anúncio de Parceiro</option>
@@ -155,7 +155,7 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
                 <select 
                   id="ad-format"
                   value={formData.format}
-                  onChange={(e) => setFormData({...formData, format: e.target.value as any})}
+                  onChange={(e) => setFormData({...formData, format: e.target.value as Ad['format']})}
                   className="w-full bg-slate-50 dark:bg-white/5 border-none rounded-2xl p-4 pl-10 text-xs font-bold appearance-none focus:ring-2 focus:ring-brand-gold/50"
                 >
                   <option value="banner">Banner (Carrossel)</option>

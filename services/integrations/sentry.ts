@@ -32,9 +32,9 @@ export const initSentry = () => {
   console.log("Sentry monitoring initialized.");
 };
 
-export const captureError = (error: any, context?: any) => {
+export const captureError = (error: unknown, context?: unknown) => {
   if (import.meta.env.VITE_SENTRY_DSN) {
-    Sentry.captureException(error, { extra: context });
+    Sentry.captureException(error, context ? { extra: { context } } : undefined);
   } else {
     console.error("Error captured:", error, context);
   }

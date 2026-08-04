@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { RefreshCw, X, MessageCircle } from 'lucide-react';
+import { RefreshCw, X } from 'lucide-react';
 import { ExchangeRatesGrid } from '../components/exchange/ExchangeRatesGrid';
 import { ConversionSimulator } from '../components/exchange/ConversionSimulator';
 import { TradeTerminal } from '../components/exchange/TradeTerminal';
@@ -8,11 +8,10 @@ import { DirectTradeSection } from '../components/exchange/DirectTradeSection';
 import { ExchangeCheckoutModal } from '../components/exchange/ExchangeCheckoutModal';
 import { TermsModal } from '../components/modals/TermsModal';
 import { ExchangeService } from '../services/api/exchange.service';
-import { OrderService } from '../services/api/order.service';
+import { OrderService, OrderRow } from '../services/api/order.service';
 import { StorageService } from '../services/api/storage.service';
 import { ServiceUtils } from '../services/utils/utils';
 import { supabase } from '../services/core/supabaseClient';
-import { GeminiService } from '../services/integrations/gemini';
 import { ExchangeRate } from '../types';
 import { LiveFeed } from '../components/ui/LiveFeed';
 import { OrderCard } from '../components/exchange/OrderCard';
@@ -22,19 +21,14 @@ import { RewardedAdModal } from '../components/ads/RewardedAdModal';
 import { AdService } from '../services/api/adService';
 import { APP_CONFIG } from '../constants/app';
 
-import { UserProfile } from '../types';
 import { useAppStore } from '../store/useAppStore';
 import { Helmet } from 'react-helmet-async';
 
-interface ExchangePageProps {
-  onRequestReward?: (callback: () => void) => void;
-}
-
-export const ExchangePage: React.FC<ExchangePageProps> = ({ onRequestReward }) => {
-  const { user, isAuthenticated, isDarkMode, setAuthModal } = useAppStore();
+export const ExchangePage: React.FC = () => {
+  const { user, isAuthenticated, setAuthModal } = useAppStore();
   const onRequireAuth = () => setAuthModal(true, 'login');
   const [rates, setRates] = useState<ExchangeRate[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'view' | 'trade'>('view');
 
   // Converter States
@@ -83,7 +77,7 @@ export const ExchangePage: React.FC<ExchangePageProps> = ({ onRequestReward }) =
 
   const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
-  const [activeOrder, setActiveOrder] = useState<any>(null);
+  const [activeOrder, setActiveOrder] = useState<OrderRow | null>(null);
   const [activeParticipants, setActiveParticipants] = useState<number>(0);
   const [showRecoveryBanner, setShowRecoveryBanner] = useState(true);
 
@@ -91,11 +85,10 @@ export const ExchangePage: React.FC<ExchangePageProps> = ({ onRequestReward }) =
   const [isRewardedAdModalOpen, setIsRewardedAdModalOpen] = useState(false);
   const [hasPriorityReward, setHasPriorityReward] = useState(false);
   const [whatsappLink, setWhatsappLink] = useState<string | null>(null);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
-    if (isCheckoutOpen && timeLeft > 0) {
+    if (isCheckoutOpen) {
       timer = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 1) {
@@ -107,7 +100,7 @@ export const ExchangePage: React.FC<ExchangePageProps> = ({ onRequestReward }) =
       }, 1000);
     }
     return () => clearInterval(timer);
-  }, [isCheckoutOpen]); // Only restart if the modal opens/closes
+  }, [isCheckoutOpen]);
 
   useEffect(() => {
     const init = async () => {
@@ -265,6 +258,16 @@ export const ExchangePage: React.FC<ExchangePageProps> = ({ onRequestReward }) =
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
+  // Derived UI Formats - MOVIDO PARA CIMA PARA ESTAR DISPONÍVEL EM getWhatsappLink
+  const currentRateValue = tradeAction === 'buy' ? (rates.find(r => r.currency === tradeCurrency)?.informalSell || 0) : (rates.find(r => r.currency === tradeCurrency)?.informalBuy || 0);
+  
+  const discountThreshold = 30;
+  const isEligibleForDiscount = (parseFloat(tradeAmount) || 0) >= discountThreshold && user?.hasReferralDiscount;
+  const discountFactor = isEligibleForDiscount ? 0.95 : 1; // 5% discount
+
+  const totalKz = Math.round(((parseFloat(tradeAmount) || 0) * currentRateValue * discountFactor) * 100) / 100;
+  const totalKzFormatted = totalKz.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' });
+
   const getWhatsappLink = (orderId: string, isPriority: boolean) => {
     const phone = APP_CONFIG.WHATSAPP_NUMBER;
     let message = "";
@@ -284,7 +287,7 @@ export const ExchangePage: React.FC<ExchangePageProps> = ({ onRequestReward }) =
     const isPriority = hasPriorityReward || AdService.hasActiveReward();
     const result = await executeFinalizeTrade();
     
-    if (result) {
+    if (result && result.orderId) {
       const { orderId } = result;
       setActiveOrderId(orderId);
       const link = getWhatsappLink(orderId, isPriority);
@@ -297,6 +300,12 @@ export const ExchangePage: React.FC<ExchangePageProps> = ({ onRequestReward }) =
         window.open(link, '_blank');
         finalizeCleanup();
       }
+    } else if (result && !result.orderId) {
+      // Fallback: ordem não registada no DB, mas geramos link manual
+      const fallbackId = `MANUAL-${Date.now().toString().slice(-6)}`;
+      const link = getWhatsappLink(fallbackId, isPriority);
+      setWhatsappLink(link);
+      setIsRewardedAdModalOpen(true);
     }
   };
 
@@ -372,48 +381,12 @@ export const ExchangePage: React.FC<ExchangePageProps> = ({ onRequestReward }) =
       }
 
       return { orderId };
-    } catch (error: any) {
-      console.error('Exchange order error:', error?.message || error);
+    } catch (error) {
+      console.error('Exchange order error:', (error as Error)?.message || error);
       // Não bloqueamos o utilizador — redireciona para WhatsApp manual
       return { orderId: null };
     }
   };
-
-
-  const currentTradeRate = rates.find(r => r.currency === tradeCurrency);
-  const estimatedTotal = Math.round(((parseFloat(terminalAmount) || 0) * (tradeType === 'buy' ? (rates.find(r => r.currency === 'USD')?.informalSell || 0) : (rates.find(r => r.currency === 'USD')?.informalBuy || 0))) * 100) / 100;
-  const estimatedTotalFormatted = estimatedTotal.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' });
-
-  // Derived UI Formats
-  // Derived UI Formats
-  const currentRateValue = tradeAction === 'buy' ? (rates.find(r => r.currency === tradeCurrency)?.informalSell || 0) : (rates.find(r => r.currency === tradeCurrency)?.informalBuy || 0);
-  
-  const discountThreshold = 30;
-  const isEligibleForDiscount = (parseFloat(tradeAmount) || 0) >= discountThreshold && user?.hasReferralDiscount;
-  const discountFactor = isEligibleForDiscount ? 0.95 : 1; // 5% discount
-
-  const totalKz = Math.round(((parseFloat(tradeAmount) || 0) * currentRateValue * discountFactor) * 100) / 100;
-  const totalKzFormatted = totalKz.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' });
-  
-  const originalTotalKz = Math.round(((parseFloat(tradeAmount) || 0) * currentRateValue) * 100) / 100;
-  const savingsAmount = originalTotalKz - totalKz;
-  const savingsFormatted = savingsAmount.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' });
-
-  const rateData = rates.find(r => r.currency === tradeCurrency);
-  const isRateValid = (rateData?.informalSell || 0) > (rateData?.informalBuy || 0) && (rateData?.informalBuy || 0) > 0;
-
-  const isStep1Valid = () => {
-    const commonValid = formData.fullName.trim() !== '' && formData.age.trim() !== '';
-    if (tradeAction === 'buy') {
-      return commonValid && formData.coordinates.trim() !== '';
-    } else {
-      return commonValid &&
-        formData.iban.length === 25 &&
-        formData.iban.startsWith('AO06') &&
-        formData.accountHolder.trim() !== '';
-    }
-  };
-
 
   return (
     <div className="space-y-8 animate-fade-in pb-20">
@@ -423,7 +396,7 @@ export const ExchangePage: React.FC<ExchangePageProps> = ({ onRequestReward }) =
         <meta name="keywords" content="cambio angola, kwanza dolar, kwanza euro, mercado informal angola, cambio rua luanda" />
       </Helmet>
       <LiveFeed />
-      {activeOrderId && <OrderCard orderId={activeOrderId} onComplete={() => { supabase.from('orders').select('*').eq('id', activeOrderId).single().then(({ data }) => { setActiveOrder(data); setIsFeedbackModalOpen(true); }); }} />}
+      {activeOrderId && <OrderCard orderId={activeOrderId} whatsappLink={whatsappLink} timeLeft={timeLeft} onComplete={() => { supabase.from('orders').select('*').eq('id', activeOrderId).single().then(({ data }) => { setActiveOrder(data); setIsFeedbackModalOpen(true); }); }} />}
 
       {/* Session Recovery Banner */}
       {!activeOrderId && showRecoveryBanner && localStorage.getItem('ANGOLIFE_EXCHANGE_SESSION') && (

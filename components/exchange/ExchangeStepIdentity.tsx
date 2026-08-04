@@ -1,5 +1,6 @@
 import React from "react";
 import { ArrowRightLeft, Sparkles } from "lucide-react";
+import { CheckoutFormData } from "../../types";
 
 interface ExchangeStepIdentityProps {
   tradeAction: "buy" | "sell";
@@ -8,8 +9,8 @@ interface ExchangeStepIdentityProps {
   totalKzFormatted: string;
   currentRateValue: number;
   isRateValid: boolean;
-  formData: any;
-  setFormData: (data: any) => void;
+  formData: CheckoutFormData;
+  setFormData: (data: CheckoutFormData) => void;
   showStep1Errors: boolean;
   savingsFormatted: string;
 }

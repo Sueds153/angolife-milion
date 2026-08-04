@@ -2,18 +2,20 @@
 import React from 'react';
 import { X } from 'lucide-react';
 
+export interface NewNewsFormState {
+  title: string;
+  category: string;
+  imageUrl: string;
+  summary: string;
+  body: string;
+}
+
 interface AdminNewNewsModalProps {
   isOpen: boolean;
   onClose: () => void;
   handleCreateNews: (e: React.FormEvent) => void;
-  newNews: {
-    title: string;
-    category: string;
-    imageUrl: string;
-    summary: string;
-    body: string;
-  };
-  setNewNews: React.Dispatch<React.SetStateAction<any>>;
+  newNews: NewNewsFormState;
+  setNewNews: React.Dispatch<React.SetStateAction<NewNewsFormState>>;
 }
 
 export const AdminNewNewsModal: React.FC<AdminNewNewsModalProps> = ({

@@ -78,7 +78,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, 
           onLogin(email);
         }
       }
-    } catch (err) {
+    } catch {
       setErrorMsg('Ocorreu um erro inesperado. Verifique a sua ligação.');
     } finally {
       setIsLoading(false);
@@ -100,7 +100,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, 
       } else {
         alert('As instruções de recuperação foram enviadas para o seu e-mail.');
       }
-    } catch (err) {
+    } catch {
       setErrorMsg('Erro de ligação ao servidor.');
     } finally {
       setIsLoading(false);

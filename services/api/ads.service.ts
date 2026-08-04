@@ -49,12 +49,12 @@ export const AdsService = {
     
     if (error) throw error;
     
-    const settings: any = {};
+    const settings: Record<string, unknown> = {};
     data.forEach(item => {
       settings[item.key] = item.value;
     });
     
-    return settings as SystemSettings;
+    return settings as unknown as SystemSettings;
   },
 
   async updateAd(id: string, updates: Partial<Ad>) {
@@ -85,7 +85,7 @@ export const AdsService = {
     if (error) throw error;
   },
 
-  async updateSetting(key: string, value: any) {
+  async updateSetting(key: string, value: unknown) {
     const { error } = await supabase
       .from('system_settings')
       .upsert({ key, value, updated_at: new Date().toISOString() });

@@ -6,6 +6,33 @@ import { supabase } from "../core/supabaseClient";
 import { Job } from "../../types";
 import { ServiceUtils } from "../utils/utils";
 
+interface JobRow {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  type: string;
+  salary?: string;
+  description: string;
+  posted_at: string;
+  requirements?: string[];
+  source_url?: string;
+  application_email?: string;
+  status: string;
+  imagem_url?: string;
+  categoria?: string;
+  fonte?: string;
+  is_verified?: boolean;
+  application_count?: number;
+}
+
+export interface ApplicationEntry {
+  jobId: string;
+  date: string;
+  title: string;
+  company?: string;
+}
+
 export const JobsService = {
   getJobs: async (isAdmin: boolean = false): Promise<Job[]> => {
     let query = supabase.from("jobs").select("*");
@@ -21,7 +48,7 @@ export const JobsService = {
       return [];
     }
 
-    return data.map((j: any) => ({
+    return data.map((j: JobRow): Job => ({
       id: j.id,
       title: j.title,
       company: j.company,
@@ -33,7 +60,7 @@ export const JobsService = {
       requirements: j.requirements || [],
       sourceUrl: j.source_url,
       applicationEmail: j.application_email,
-      status: ServiceUtils.mapStatus(j.status) as any,
+      status: ServiceUtils.mapStatus(j.status),
       imageUrl: j.imagem_url,
       category: j.categoria,
       source: j.fonte,
@@ -55,7 +82,7 @@ export const JobsService = {
       return [];
     }
 
-    return data.map((j: any) => ({
+    return data.map((j: JobRow): Job => ({
       id: j.id,
       title: j.title,
       company: j.company,
@@ -67,7 +94,7 @@ export const JobsService = {
       requirements: j.requirements || [],
       sourceUrl: j.source_url,
       applicationEmail: j.application_email,
-      status: ServiceUtils.mapStatus(j.status) as any,
+      status: ServiceUtils.mapStatus(j.status),
       imageUrl: j.imagem_url,
       category: j.categoria,
       source: j.fonte,
@@ -147,7 +174,7 @@ export const JobsService = {
       requirements: data.requirements || [],
       sourceUrl: data.source_url,
       applicationEmail: data.application_email,
-      status: ServiceUtils.mapStatus(data.status) as any,
+      status: ServiceUtils.mapStatus(data.status),
       imageUrl: data.imagem_url,
       category: data.categoria,
       source: data.fonte,
@@ -163,7 +190,7 @@ export const JobsService = {
       .in("id", ids);
 
     if (error || !data) return [];
-    return data.map((j: any) => ({
+    return data.map((j: JobRow): Job => ({
       id: j.id,
       title: j.title,
       company: j.company,
@@ -175,7 +202,7 @@ export const JobsService = {
       requirements: j.requirements || [],
       sourceUrl: j.source_url,
       applicationEmail: j.application_email,
-      status: ServiceUtils.mapStatus(j.status) as any,
+      status: ServiceUtils.mapStatus(j.status),
       imageUrl: j.imagem_url,
       category: j.categoria,
       source: j.fonte,
@@ -207,7 +234,7 @@ export const JobsService = {
     if (fetchError || !job) return;
 
     const newCount = (job.report_count || 0) + 1;
-    const updateData: any = { report_count: newCount };
+    const updateData: Record<string, unknown> = { report_count: newCount };
     if (newCount >= 3) {
       updateData.status = "pending";
     }
@@ -229,7 +256,7 @@ export const JobsService = {
     return newList;
   },
 
-  submitJobApplication: async (userId: string, currentHistory: any[], job: Job): Promise<any[]> => {
+  submitJobApplication: async (userId: string, currentHistory: ApplicationEntry[], job: Job): Promise<ApplicationEntry[]> => {
     const newEntry = {
       jobId: job.id,
       title: job.title,

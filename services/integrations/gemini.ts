@@ -10,7 +10,7 @@ import { supabase } from "../core/supabaseClient";
 // This prevents exposing API keys in the frontend bundle.
 
 // Simple cache to prevent redundant hits within a session
-const cache: Record<string, { data: any; timestamp: number }> = {};
+const cache: Record<string, { data: unknown; timestamp: number }> = {};
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
 const getCachedData = <T>(key: string): T | null => {
@@ -21,7 +21,7 @@ const getCachedData = <T>(key: string): T | null => {
   return null;
 };
 
-const setCachedData = (key: string, data: any) => {
+const setCachedData = (key: string, data: unknown) => {
   cache[key] = { data, timestamp: Date.now() };
 };
 
@@ -181,7 +181,7 @@ Recomendação: O momento é de cautela. Observe as flutuações nas primeiras h
 `;
 
 // Helper to call Supabase Edge Functions
-async function callEdgeProxy(action: string, payload: any = {}) {
+async function callEdgeProxy(action: string, payload: Record<string, unknown> = {}) {
   const { data, error } = await supabase.functions.invoke('gemini-proxy', {
     body: { action, ...payload }
   });
@@ -198,7 +198,7 @@ export const GeminiService = {
       const { jobs } = await callEdgeProxy('fetchJobs');
       setCachedData("jobs", jobs);
       return jobs;
-    } catch (error: any) {
+    } catch (error) {
       console.error("Gemini Job Fetch Error:", error);
       return FALLBACK_JOBS;
     }
@@ -212,7 +212,7 @@ export const GeminiService = {
       const { deals } = await callEdgeProxy('fetchDeals');
       setCachedData("deals", deals);
       return deals;
-    } catch (error: any) {
+    } catch (error) {
       console.error("Gemini Deals Fetch Error:", error);
       return FALLBACK_DEALS;
     }
@@ -226,7 +226,7 @@ export const GeminiService = {
       const { news } = await callEdgeProxy('fetchNews');
       setCachedData("news", news);
       return news;
-    } catch (error: any) {
+    } catch (error) {
       console.error("Gemini News Fetch Error:", error);
       return FALLBACK_NEWS;
     }
@@ -240,7 +240,7 @@ export const GeminiService = {
       const { analysis } = await callEdgeProxy('fetchMarketAnalysis');
       setCachedData("market-analysis", analysis);
       return analysis;
-    } catch (error: any) {
+    } catch (error) {
       console.error("Gemini Market Analysis Error:", error);
       return FALLBACK_ANALYSIS;
     }

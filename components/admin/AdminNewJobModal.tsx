@@ -2,22 +2,24 @@
 import React from 'react';
 import { X, Plus, Send } from 'lucide-react';
 
+export interface NewJobFormState {
+  title: string;
+  company: string;
+  location: string;
+  type: string;
+  description: string;
+  applicationEmail: string;
+  requirements: string[];
+  newRequirement: string;
+}
+
 interface AdminNewJobModalProps {
   isOpen: boolean;
   onClose: () => void;
   loading: boolean;
   handleCreateJob: (e: React.FormEvent) => void;
-  newJob: {
-    title: string;
-    company: string;
-    location: string;
-    type: string;
-    description: string;
-    applicationEmail: string;
-    requirements: string[];
-    newRequirement: string;
-  };
-  setNewJob: React.Dispatch<React.SetStateAction<any>>;
+  newJob: NewJobFormState;
+  setNewJob: React.Dispatch<React.SetStateAction<NewJobFormState>>;
   addRequirement: () => void;
   removeRequirement: (index: number) => void;
 }

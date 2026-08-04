@@ -1,7 +1,6 @@
 import React from 'react';
 import { MapPin, Clock, ShieldCheck, Heart, AlertTriangle, Share2 } from 'lucide-react';
 import { Job } from '../../types';
-import { useAppStore } from '../../store/useAppStore';
 import { JobLogo } from './JobLogo';
 
 interface JobCardProps {

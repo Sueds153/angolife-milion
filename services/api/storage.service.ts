@@ -22,7 +22,7 @@ export const StorageService = {
         .getPublicUrl(data.path);
 
       return publicUrl;
-    } catch (err) {
+    } catch {
       return null;
     }
   },

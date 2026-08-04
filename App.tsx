@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
-import { Routes, Route, useNavigate, useLocation, Navigate, NavLink } from 'react-router-dom';
+import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import { Background } from './components/layout/Background';
@@ -11,9 +11,8 @@ import { NotificationService } from './services/integrations/notificationService
 import { AuthService } from './services/core/auth.service';
 import { JobsService } from './services/api/jobs.service';
 import { NewsService } from './services/api/news.service';
-import { DealsService } from './services/api/deals.service';
+import type { User } from '@supabase/supabase-js';
 import { UserProfile, AppNotification, ProductDeal } from './types';
-import { Home, Briefcase, DollarSign, Tag, Newspaper, FileText } from 'lucide-react';
 import { LegalModals } from './components/modals/LegalModals';
 import { BottomNav } from './components/layout/BottomNav';
 import { useAppStore } from './store/useAppStore';
@@ -35,8 +34,8 @@ const App: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { 
-    user, setUser, isAuthenticated, setIsAuthenticated, setIsAuthLoading,
-    isDarkMode, toggleTheme,
+    user, setUser, setIsAuthenticated, setIsAuthLoading,
+    isDarkMode,
     isAuthModalOpen, authMode, setAuthModal,
     notifications, addNotification, removeNotification
   } = useAppStore();
@@ -56,7 +55,6 @@ const App: React.FC = () => {
   const currentPage = getPageFromPath(location.pathname);
   const [selectedDeal, setSelectedDeal] = useState<ProductDeal | null>(null);
 
-  const [showRewardAd, setShowRewardAd] = useState(false);
   const [rewardCallback, setRewardCallback] = useState<(() => void) | null>(null);
 
   // Sync Dark Mode with DOM
@@ -70,7 +68,7 @@ const App: React.FC = () => {
 
   // Auth Listener & Profile Fetching
   useEffect(() => {
-    const fetchProfile = async (sessionUser: any) => {
+    const fetchProfile = async (sessionUser: User | null) => {
       if (!sessionUser) {
         setUser(null);
         setIsAuthenticated(false);
@@ -125,7 +123,7 @@ const App: React.FC = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [setAuthModal, setIsAuthLoading, setIsAuthenticated, setUser]);
 
   const [showInterstitial, setShowInterstitial] = useState(false);
   const [interstitialDuration, setInterstitialDuration] = useState(5);

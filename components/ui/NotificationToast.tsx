@@ -13,13 +13,16 @@ export const NotificationToast: React.FC<NotificationToastProps> = ({ notificati
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    setIsVisible(true);
+    const raf = requestAnimationFrame(() => setIsVisible(true));
     const timer = setTimeout(() => {
       setIsVisible(false);
       setTimeout(onClose, 300); // Wait for exit animation
     }, 6000); // 6 seconds display
 
-    return () => clearTimeout(timer);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(timer);
+    };
   }, [notification, onClose]);
 
   const getIcon = () => {

@@ -3,12 +3,23 @@ import React from 'react';
 import { Tag, X, FileUp, RefreshCw, Save } from 'lucide-react';
 import { ProductDeal } from '../../types';
 
+export interface NewDealFormState {
+  title: string;
+  store: string;
+  storeNumber: string;
+  originalPrice: number;
+  discountPrice: number;
+  location: string;
+  description: string;
+  category: string;
+}
+
 interface AdminNewDealModalProps {
   isOpen: boolean;
   onClose: () => void;
   handleCreateDealFast: (e: React.FormEvent) => void;
   newDeal: Partial<ProductDeal>;
-  setNewDeal: React.Dispatch<React.SetStateAction<any>>;
+  setNewDeal: React.Dispatch<React.SetStateAction<NewDealFormState>>;
   dealFileInputRef: React.RefObject<HTMLInputElement>;
   handleDealImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   dealImagePreview: string | null;

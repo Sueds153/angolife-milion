@@ -1,6 +1,5 @@
 import React, { useRef } from 'react';
 import { RefreshCw, Copy, ChevronDown, Sparkles, MessageCircle, CheckCircle, Upload } from 'lucide-react';
-import { StorageService } from '../../services/api/storage.service';
 import { APP_CONFIG } from '../../constants/app';
 
 interface ExchangeStepPaymentProps {

@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { NewsService } from '../services/api/news.service';
 import { NewsArticle } from '../types';
-import { ExternalLink, Calendar, AlertTriangle, Eye, Flame, Lock, ChevronRight, X, Clock, Zap, Newspaper, ArrowRight } from 'lucide-react';
+import { ExternalLink, Calendar, Eye, Flame, Lock, X, Clock, Zap, Newspaper, ArrowRight } from 'lucide-react';
 import { RewardedAd } from '../components/ads/AdOverlays';
 import { AdBanner } from '../components/ads/AdBanner';
 
@@ -60,7 +60,7 @@ const NewsImage: React.FC<{ src?: string; alt: string; className?: string; aspec
   );
 };
 
-export const NewsPage: React.FC<NewsPageProps> = ({ onRequestReward }) => {
+export const NewsPage: React.FC<NewsPageProps> = () => {
   const { isAuthenticated, setAuthModal } = useAppStore();
   const onRequireAuth = () => setAuthModal(true, 'login');
   const [news, setNews] = useState<NewsArticle[]>([]);
@@ -205,7 +205,7 @@ export const NewsPage: React.FC<NewsPageProps> = ({ onRequestReward }) => {
             <div className="col-span-full py-20 text-center text-slate-500 font-bold uppercase tracking-widest">
               Nenhuma notícia publicada ainda.
             </div>
-          ) : news.map((item, index) => (
+          ) : news.map((item) => (
             <div 
                key={item.id} 
                onClick={() => handleArticleClick(item)}

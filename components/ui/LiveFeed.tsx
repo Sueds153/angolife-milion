@@ -2,10 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { Activity } from 'lucide-react';
 import { OrderService } from '../../services/api/order.service';
 
+interface FeedItem {
+  type: string;
+  name: string;
+  amount: string | number;
+  currency?: string;
+  wallet?: string;
+  bank?: string;
+}
+
 export const LiveFeed = () => {
-  const [currentFeed, setCurrentFeed] = useState<any>(null);
+  const [currentFeed, setCurrentFeed] = useState<FeedItem | null>(null);
   const [isVisible, setIsVisible] = useState(false);
-  const [orderQueue, setOrderQueue] = useState<any[]>([]);
+  const [orderQueue, setOrderQueue] = useState<FeedItem[]>([]);
 
   useEffect(() => {
     const fetchOrders = async () => {

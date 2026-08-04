@@ -6,10 +6,10 @@ import { NewsService } from '../services/api/news.service';
 import { DealsService } from '../services/api/deals.service';
 import { ExchangeService } from '../services/api/exchange.service';
 import { AdminService } from '../services/core/admin.service';
-import { SubscriptionService } from '../services/api/subscription.service';
+import { SubscriptionService, CVSubscriptionRow } from '../services/api/subscription.service';
 import { NotificationService } from '../services/integrations/notificationService';
 import { supabase } from '../services/core/supabaseClient';
-import { UserProfile, Job, NewsArticle, ProductDeal } from '../types';
+import { Job, NewsArticle, ProductDeal, ExchangeRate } from '../types';
 import { Lock } from 'lucide-react';
 import { AdminJobsSection } from '../components/admin/AdminJobsSection';
 import { AdminNewsSection } from '../components/admin/AdminNewsSection';
@@ -25,7 +25,6 @@ import { AdminNewDealModal } from '../components/admin/AdminNewDealModal';
 import { AdminEditDealModal } from '../components/admin/AdminEditDealModal';
 import { AdsService, Ad, SystemSettings } from '../services/api/ads.service';
 import { AdminAdsSection } from '../components/admin/AdminAdsSection';
-import { Monitor } from 'lucide-react';
 
 
 export const AdminPage: React.FC = () => {
@@ -47,7 +46,7 @@ export const AdminPage: React.FC = () => {
   const [showEditDealModal, setShowEditDealModal] = useState(false);
   const [editingDeal, setEditingDeal] = useState<ProductDeal | null>(null);
   const [showNewDealModal, setShowNewDealModal] = useState(false);
-  const [cvSubscriptions, setCvSubscriptions] = useState<any[]>([]);
+  const [cvSubscriptions, setCvSubscriptions] = useState<CVSubscriptionRow[]>([]);
   const [isLoadingCvSubs, setIsLoadingCvSubs] = useState(false);
 
   // Form State
@@ -142,7 +141,7 @@ export const AdminPage: React.FC = () => {
     }
   }, [activeTab]);
 
-  const [rates, setRates] = useState<any[]>([]);
+  const [rates, setRates] = useState<ExchangeRate[]>([]);
   const loadExchangeRates = async () => {
     setLoading(true);
     const data = await ExchangeService.getRates();
@@ -218,7 +217,7 @@ export const AdminPage: React.FC = () => {
         status: 'approved',
         verified: true,
         is_admin: true
-      } as any);
+      } as ProductDeal);
       success = true;
       setShowEditDealModal(false);
     } else {
@@ -266,7 +265,7 @@ export const AdminPage: React.FC = () => {
       status: 'approved',
       verified: true,
       is_admin: true
-    } as any);
+    } as ProductDeal);
 
     alert('Oferta publicada diretamente pelo Painel Admin!');
     setShowNewDealModal(false);
@@ -368,18 +367,6 @@ export const AdminPage: React.FC = () => {
     }
   };
 
-  const handleRejectNews = async (id: string) => {
-    if (!confirm('Deseja remover esta notícia?')) return;
-    setLoading(true);
-    const success = await NewsService.approveNews(id, false);
-    if (success) {
-      setPendingNews(prev => prev.filter(news => news.id !== id));
-    } else {
-      alert('Erro ao rejeitar notícia.');
-    }
-    setLoading(false);
-  };
-
   const handleEditNews = (news: NewsArticle) => {
     setEditingNews(news);
     setShowEditNewsModal(true);
@@ -427,7 +414,7 @@ export const AdminPage: React.FC = () => {
       category: newNews.category,
       imageUrl: newNews.imageUrl,
       body: newNews.body
-    } as any);
+    } as Partial<NewsArticle>);
 
     if (success) {
       alert(`Notícia sobre ${newNews.category} publicada com sucesso!`);
@@ -573,7 +560,7 @@ export const AdminPage: React.FC = () => {
     }
   };
 
-  const handleUpdateSetting = async (key: string, value: any) => {
+  const handleUpdateSetting = async (key: string, value: unknown) => {
     try {
       await AdsService.updateSetting(key, value);
       loadAdsData();

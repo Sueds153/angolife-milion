@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, ChevronRight, Briefcase, DollarSign, Newspaper, Sparkles, CheckCircle2 } from 'lucide-react';
+import { X, ChevronRight, Briefcase, DollarSign, Sparkles } from 'lucide-react';
 
 export const OnboardingModal: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);

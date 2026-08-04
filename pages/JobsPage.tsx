@@ -11,7 +11,6 @@ import { ServiceUtils } from '../services/utils/utils';
 import { Helmet } from 'react-helmet-async';
 
 interface JobsPageProps {
-  onNavigate?: (page: any) => void;
   onRequestReward?: (onSuccess: () => void, onCancel: () => void) => void;
   onShowInterstitial?: (callback: () => void) => void;
   subscribedCategories?: string[];
@@ -24,14 +23,12 @@ const PROVINCES = [
 ];
 
 export const JobsPage: React.FC<JobsPageProps> = ({ 
-  onNavigate,
   onRequestReward, 
   onShowInterstitial, 
   subscribedCategories = [], 
   onToggleSubscription 
 }) => {
   const { user, setUser, isAuthenticated, setAuthModal } = useAppStore();
-  const isAdmin = user?.isAdmin || false;
   const onRequireAuth = () => setAuthModal(true, 'login');
   const onUpdateUser = (updates: Partial<UserProfile>) => user && setUser({ ...user, ...updates });
   

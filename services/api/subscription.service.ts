@@ -5,6 +5,16 @@
 import { supabase } from "../core/supabaseClient";
 import { ServiceUtils } from "../utils/utils";
 
+export interface CVSubscriptionRow {
+  id: string;
+  user_id: string;
+  status: string;
+  created_at?: string;
+  url_comprovativo?: string | null;
+  plano_escolhido?: string | null;
+  profiles?: { email?: string; full_name?: string } | null;
+}
+
 export const SubscriptionService = {
   submitCVSubscription: async (
     userId: string,
@@ -22,14 +32,14 @@ export const SubscriptionService = {
     return !error;
   },
 
-  getCVSubscriptions: async (): Promise<any[]> => {
+  getCVSubscriptions: async (): Promise<CVSubscriptionRow[]> => {
     const { data, error } = await supabase
       .from("subscriptions_pending")
       .select("*, profiles(email, full_name)")
       .order("created_at", { ascending: false });
 
     if (error) return [];
-    return data.map((sub: any) => ({
+    return data.map((sub: CVSubscriptionRow): CVSubscriptionRow => ({
       ...sub,
       status: ServiceUtils.mapStatus(sub.status)
     }));

@@ -1,33 +1,48 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
-import { Clock, Eye, Send, CheckCircle, ArrowRight } from 'lucide-react';
+import { Clock, Eye, Send, ArrowRight, ExternalLink } from 'lucide-react';
 
 interface OrderCardProps {
   orderId: string;
   onComplete: () => void;
+  whatsappLink?: string;
+  timeLeft?: number;
 }
 
-export const OrderCard: React.FC<OrderCardProps> = ({ orderId, onComplete }) => {
-  const [order, setOrder] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [timeLeft, setTimeLeft] = useState(900); // 15 mins default
+interface OrderStatusRow {
+  status: string;
+  amount: number;
+  currency: string;
+  wallet: string;
+}
 
+export const OrderCard: React.FC<OrderCardProps> = ({ orderId, onComplete, whatsappLink, timeLeft: parentTimeLeft }) => {
+  const [order, setOrder] = useState<OrderStatusRow | null>(null);
+  const [loading, setLoading] = useState(true);
+  
+  // Use parent timeLeft if provided, otherwise use local state
+  const [localTimeLeft, setLocalTimeLeft] = useState(900);
+  const timeLeft = parentTimeLeft ?? localTimeLeft;
+
+  // Local timer only runs when no parent timeLeft
   useEffect(() => {
+    if (parentTimeLeft !== undefined) return;
+    
     const timer = setInterval(() => {
-      setTimeLeft(prev => prev > 0 ? prev - 1 : 0);
+      setLocalTimeLeft(prev => prev > 0 ? prev - 1 : 0);
     }, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [parentTimeLeft]);
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
-    return `${m}:${s.toString().padStart(2, '0')}`;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
   useEffect(() => {
     const fetchOrder = async () => {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('orders')
         .select('*')
         .eq('id', orderId)
@@ -121,25 +136,25 @@ export const OrderCard: React.FC<OrderCardProps> = ({ orderId, onComplete }) => 
                 <span className="text-[10px] font-black text-white">{formatTime(timeLeft)}</span>
              </div>
           </div>
-          <div className="flex gap-2">
-            {order.status === 'pending' && (
-              <button 
-                onClick={() => {
-                   // Simulamos a finalização abrindo o WhatsApp se o link existir (gerado pelo parent)
-                   const savedSession = localStorage.getItem('ANGOLIFE_EXCHANGE_SESSION');
-                   if (savedSession) {
-                      // O link já foi gerado na ExchangePage, mas aqui apenas alertamos para usar o suporte manual ou re-abrir.
-                      // Idealmente, a ExchangePage deve passar o whatsappLink se ativo
-                      alert("Por favor, finalize a transação no modal de Checkout.");
-                   }
-                }}
+<div className="flex gap-2">
+            {order.status === 'pending' && whatsappLink && (
+              <button
+                onClick={() => window.open(whatsappLink, '_blank')}
                 className="bg-orange-500 text-black px-3 py-1.5 rounded-lg text-[10px] font-black uppercase flex items-center gap-1 hover:scale-105 transition-transform"
+              >
+                <ExternalLink size={10} /> Finalizar no WhatsApp
+              </button>
+            )}
+            {order.status === 'pending' && !whatsappLink && (
+              <button
+                onClick={() => alert("Link do WhatsApp não disponível. Por favor, finalize a transação no modal de Checkout.")}
+                className="bg-orange-500/50 text-black px-3 py-1.5 rounded-lg text-[10px] font-black uppercase flex items-center gap-1 hover:scale-105 transition-transform cursor-not-allowed opacity-70"
               >
                 Finalizar Agora
               </button>
             )}
             {order.status === 'sent' && (
-              <button 
+              <button
                 onClick={onComplete}
                 className="bg-green-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase flex items-center gap-1 hover:scale-105 transition-transform"
               >

@@ -8,7 +8,7 @@ interface AdminAdsSectionProps {
   settings: SystemSettings | null;
   loading: boolean;
   onRefresh: () => void;
-  onUpdateSetting: (key: string, value: any) => void;
+  onUpdateSetting: (key: string, value: unknown) => void;
 }
 
 export const AdminAdsSection: React.FC<AdminAdsSectionProps> = ({

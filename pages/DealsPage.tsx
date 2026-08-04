@@ -1,10 +1,8 @@
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Plus, ShoppingBag, MapPin, X, Camera, FileUp } from 'lucide-react';
+import { Plus, ShoppingBag, X, Camera, FileUp } from 'lucide-react';
 import { DealsService } from '../services/api/deals.service';
-import { GeminiService } from '../services/integrations/gemini';
-import { ProductDeal, UserProfile } from '../types';
-import { ShareButton } from '../components/ui/ShareButton';
+import { ProductDeal } from '../types';
 import { useAppStore } from '../store/useAppStore';
 
 interface DealsPageProps {
@@ -124,10 +122,9 @@ export const DealsPage: React.FC<DealsPageProps> = ({ onSelectDeal, onShowInters
         imagePlaceholder: uploadedUrl,
         imageUrl: uploadedUrl,
         submittedBy: userName,
-        status: isUserAdmin ? 'approved' : 'pending',
         verified: isUserAdmin,
         is_admin: isUserAdmin
-      } as any);
+      });
 
       setIsUploading(false);
       setIsModalOpen(false);

@@ -3,8 +3,16 @@
  */
 
 import { supabase } from "../core/supabaseClient";
-import { ServiceUtils } from "../utils/utils";
 import { ExchangeRate } from "../../types";
+
+interface ExchangeRateRow {
+  currency: 'USD' | 'EUR';
+  formal_buy: number;
+  formal_sell: number;
+  informal_buy: number;
+  informal_sell: number;
+  last_updated: string;
+}
 
 export const ExchangeService = {
   getRates: async (): Promise<ExchangeRate[]> => {
@@ -15,7 +23,7 @@ export const ExchangeService = {
       return [];
     }
 
-    return data.map((r: any) => ({
+    return data.map((r: ExchangeRateRow) => ({
       currency: r.currency,
       formalBuy: r.formal_buy,
       formalSell: r.formal_sell,

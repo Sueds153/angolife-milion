@@ -53,7 +53,7 @@ export const NativeAd: React.FC<NativeAdProps> = ({ className = '' }) => {
             target="_blank"
             rel="noopener noreferrer"
             className="px-4 py-2 bg-[#F59E0B]/10 hover:bg-[#F59E0B]/20 border border-[#F59E0B]/30 rounded-xl text-[10px] font-black text-[#F59E0B] uppercase tracking-widest transition-all hover:scale-105"
-            onClick={(e) => {
+            onClick={() => {
               // PLACEHOLDER: Track ad click
               console.log('📊 Native ad clicked');
               // In production, report to ad provider
