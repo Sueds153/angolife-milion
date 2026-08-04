@@ -45,7 +45,7 @@ export const HomePage: React.FC = () => {
   const [rates, setRates] = useState<ExchangeRate[]>([]);
   const [featuredJobs, setFeaturedJobs] = useState<Job[]>([]);
   const [featuredDeals, setFeaturedDeals] = useState<ProductDeal[]>([]);
-  const [, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
   const [tickerIndex, setTickerIndex] = useState(0);
   
