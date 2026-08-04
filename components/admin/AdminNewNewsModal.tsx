@@ -7,7 +7,8 @@ export interface NewNewsFormState {
   category: string;
   imageUrl: string;
   summary: string;
-  body: string;
+  corpo: string;
+  is_priority: boolean;
 }
 
 interface AdminNewNewsModalProps {
@@ -94,16 +95,29 @@ export const AdminNewNewsModal: React.FC<AdminNewNewsModalProps> = ({
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Corpo da Notícia (Markdown ou HTML)</label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Corpo da Notícia (HTML)</label>
               <textarea
                 required
                 rows={6}
                 className="w-full px-6 py-4 bg-slate-50 dark:bg-white/5 border border-orange-500/10 rounded-2xl outline-none resize-none font-medium"
-                value={newNews.body}
-                onChange={e => setNewNews({ ...newNews, body: e.target.value })}
+                value={newNews.corpo}
+                onChange={e => setNewNews({ ...newNews, corpo: e.target.value })}
                 title="Conteúdo da Notícia"
-                placeholder="Escreva aqui o conteúdo completo..."
+                placeholder="Escreva aqui o conteúdo completo em HTML..."
               />
+            </div>
+
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="news-priority"
+                className="w-5 h-5 accent-orange-500"
+                checked={newNews.is_priority}
+                onChange={e => setNewNews({ ...newNews, is_priority: e.target.checked })}
+              />
+              <label htmlFor="news-priority" className="text-sm font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
+                Marcar como Urgente/Exclusivo (Prioridade)
+              </label>
             </div>
           </form>
         </div>

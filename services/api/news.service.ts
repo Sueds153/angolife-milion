@@ -10,12 +10,14 @@ interface NewsRow {
   id: string;
   titulo: string;
   resumo: string;
+  corpo: string;
   fonte: string;
   url_origem: string;
   categoria: string;
   published_at: string;
   status: string;
   imagem_url?: string;
+  is_priority?: boolean;
 }
 
 export const NewsService = {
@@ -43,6 +45,9 @@ export const NewsService = {
       publishedAt: n.published_at,
       status: ServiceUtils.mapStatus(n.status),
       imageUrl: n.imagem_url,
+      body: n.corpo,
+      is_priority: n.is_priority,
+      isSecret: n.is_priority, // Legacy: priority = secret/exclusive
     }));
   },
 
@@ -69,6 +74,9 @@ export const NewsService = {
       category: n.categoria,
       publishedAt: n.published_at,
       imageUrl: n.imagem_url,
+      body: n.corpo,
+      is_priority: n.is_priority,
+      isSecret: n.is_priority,
       status: ServiceUtils.mapStatus(n.status),
     }));
   },
@@ -114,10 +122,12 @@ export const NewsService = {
       .update({
         titulo: news.title,
         resumo: news.summary,
+        corpo: news.body,
         fonte: news.source,
         url_origem: news.url,
         categoria: news.category,
         imagem_url: news.imageUrl,
+        is_priority: news.is_priority,
       })
       .eq("id", id);
     return !error;
@@ -133,12 +143,14 @@ export const NewsService = {
       {
         titulo: news.title,
         resumo: news.summary,
+        corpo: news.body,
         fonte: news.source || "AngoLife",
         url_origem: news.url || "",
         categoria: news.category,
         imagem_url: news.imageUrl,
         status: "publicado",
         published_at: new Date().toISOString(),
+        is_priority: news.is_priority || false,
       },
     ]);
     return !error;

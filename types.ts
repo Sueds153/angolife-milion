@@ -69,6 +69,14 @@ export interface NewsArticle {
   publishedAt: string;
   status: "pending" | "published" | "approved" | "rejected";
   imageUrl?: string;
+  /** Corpo completo da notícia (HTML) — usado no modal detail */
+  body?: string;
+  /** Flag de prioridade/urgência (BNA, Última Hora, etc.) */
+  is_priority?: boolean;
+  /** Flag para marcar como "Segredo/Exclusivo" no feed */
+  isSecret?: boolean;
+  /** URL da imagem og:image do artigo original */
+  originalImageUrl?: string;
 }
 
 export interface UserProfile {

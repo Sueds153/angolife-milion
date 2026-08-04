@@ -5,6 +5,7 @@ import { NewsArticle } from '../types';
 import { ExternalLink, Calendar, Eye, Flame, Lock, X, Clock, Zap, Newspaper, ArrowRight } from 'lucide-react';
 import { RewardedAd } from '../components/ads/AdOverlays';
 import { AdBanner } from '../components/ads/AdBanner';
+import { ServiceUtils } from '../services/utils/utils';
 
 import { useAppStore } from '../store/useAppStore';
 import { Helmet } from 'react-helmet-async';
@@ -21,7 +22,20 @@ const getCategoryStyle = (category: string) => {
   if (cat.includes('urgente') || cat.includes('alerta')) return 'bg-red-600 text-white animate-pulse';
   if (cat.includes('segredo') || cat.includes('bombástico')) return 'bg-purple-600 text-white';
   if (cat.includes('exclusivo')) return 'bg-brand-gold text-slate-900';
+  if (cat.includes('economia')) return 'bg-emerald-600 text-white';
+  if (cat.includes('oportunidades')) return 'bg-blue-600 text-white';
+  if (cat.includes('investigação') || cat.includes('investigacao')) return 'bg-indigo-600 text-white';
+  if (cat.includes('oficial')) return 'bg-slate-700 text-white';
+  if (cat.includes('cultura')) return 'bg-pink-600 text-white';
+  if (cat.includes('sociedade')) return 'bg-orange-600 text-white';
+  if (cat.includes('angola')) return 'bg-amber-700 text-white';
+  if (cat.includes('utilidade')) return 'bg-teal-600 text-white';
+  if (cat.includes('geral')) return 'bg-slate-600 text-white';
   return 'bg-slate-800 text-white';
+};
+
+const formatPublishedAt = (dateString: string) => {
+  return ServiceUtils.formatRelativeDate(dateString);
 };
 
 const NewsImage: React.FC<{ src?: string; alt: string; className?: string; aspect?: '16/9' | '21/9' }> = ({ src, alt, className = "", aspect = '16/9' }) => {
@@ -227,11 +241,9 @@ export const NewsPage: React.FC<NewsPageProps> = () => {
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60 z-10"></div>
                   
                   <div className="absolute top-4 right-4 z-20 flex flex-col gap-2 items-end">
-                    {item.category === 'BUSINESS' && (
-                      <span className="bg-brand-gold text-brand-dark text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-lg shadow-lg">
-                        Business
-                      </span>
-                    )}
+                    <span className={`px-2 py-1 rounded-lg shadow-lg text-[10px] font-black uppercase tracking-widest ${getCategoryStyle(item.category)}`}>
+                      {item.category}
+                    </span>
                     {item.isSecret && (
                       <span className="bg-red-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-lg shadow-lg flex items-center gap-1 animate-pulse">
                         <Lock size={10} /> Segredo
@@ -244,7 +256,7 @@ export const NewsPage: React.FC<NewsPageProps> = () => {
                       {item.source}
                     </span>
                     <span className="text-[10px] font-bold text-white/60 flex items-center gap-1">
-                      <Clock size={10} /> Há 2h
+                      <Clock size={10} /> {formatPublishedAt(item.publishedAt)}
                     </span>
                   </div>
                </div>
@@ -310,14 +322,14 @@ export const NewsPage: React.FC<NewsPageProps> = () => {
                  <h1 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter leading-none mb-6">
                     {selectedArticle.title}
                  </h1>
-                 <div className="flex flex-wrap items-center gap-4 text-slate-400 border-y border-white/5 py-4 mb-8">
-                    <span className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
-                       <Eye size={14} className="shrink-0" /> Fonte: {selectedArticle.source}
-                    </span>
-                    <span className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
-                       <Calendar size={14} className="shrink-0" /> {selectedArticle.publishedAt}
-                    </span>
-                 </div>
+<div className="flex flex-wrap items-center gap-4 text-slate-400 border-y border-white/5 py-4 mb-8">
+                     <span className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
+                        <Eye size={14} className="shrink-0" /> Fonte: {selectedArticle.source}
+                     </span>
+                     <span className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
+                        <Calendar size={14} className="shrink-0" /> {formatPublishedAt(selectedArticle.publishedAt)}
+                     </span>
+                  </div>
 
                  {/* BANNER ADAPTATIVO - Entre o título e o corpo */}
                  <div className="mb-8">
@@ -337,32 +349,44 @@ export const NewsPage: React.FC<NewsPageProps> = () => {
                     {selectedArticle.summary}
                  </p>
                  
-                 {/* CORPO COMPLETO - Bloqueado até ver o Rewarded Video */}
-                 {contentUnlocked ? (
-                   <div className="text-slate-300 space-y-6 font-medium leading-loose text-lg">
-                      <p>
-                         Informações exclusivas obtidas pelo Angolife indicam movimentos estratégicos nos bastidores que podem alterar completamente o cenário atual. Fontes próximas confirmam que a situação descrita é apenas a ponta do iceberg.
-                      </p>
-                      <p>
-                         "A maioria das pessoas não está a ver o que está por vir", afirmou um analista de mercado que preferiu não ser identificado. Os dados preliminares sugerem um impacto direto nas próximas 48 horas.
-                      </p>
-                      <p>
-                         Especialistas recomendam cautela e atenção redobrada. Se os rumores se confirmarem, estaremos diante de um dos maiores eventos do ano no setor. Continue a acompanhar o Angolife para atualizações em tempo real sobre este desenvolvimento.
-                      </p>
-                   </div>
-                 ) : (
-                   /* PAYWALL - O utilizador precisa de ver o vídeo para desbloquear */
-                   <div className="relative">
-                      {/* Preview desfocado do conteúdo */}
-                      <div className="text-slate-300 space-y-6 font-medium leading-loose text-lg select-none blur-[6px] pointer-events-none">
-                         <p>
-                            Informações exclusivas obtidas pelo Angolife indicam movimentos estratégicos nos bastidores que podem alterar completamente o cenário atual. Fontes próximas confirmam que a situação descrita é apenas a ponta do iceberg.
-                         </p>
-                         <p>
-                            "A maioria das pessoas não está a ver o que está por vir", afirmou um analista de mercado que preferiu não ser identificado.
-                         </p>
-                      </div>
-                      {/* Overlay de bloqueio */}
+{/* CORPO COMPLETO - Bloqueado até ver o Rewarded Video */}
+                  {contentUnlocked ? (
+                    <div className="text-slate-300 space-y-6 font-medium leading-loose text-lg prose prose-invert max-w-none">
+                       {selectedArticle.body ? (
+                         <div dangerouslySetInnerHTML={{ __html: selectedArticle.body }} />
+                       ) : (
+                         <>
+                           <p>
+                              Informações exclusivas obtidas pelo Angolife indicam movimentos estratégicos nos bastidores que podem alterar completamente o cenário atual. Fontes próximas confirmam que a situação descrita é apenas a ponta do iceberg.
+                           </p>
+                           <p>
+                              "A maioria das pessoas não está a ver o que está por vir", afirmou um analista de mercado que preferiu não ser identificado. Os dados preliminares sugerem um impacto direto nas próximas 48 horas.
+                           </p>
+                           <p>
+                              Especialistas recomendam cautela e atenção redobrada. Se os rumores se confirmarem, estaremos diante de um dos maiores eventos do ano no setor. Continue a acompanhar o Angolife para atualizações em tempo real sobre este desenvolvimento.
+                           </p>
+                         </>
+                       )}
+                    </div>
+) : (
+                    /* PAYWALL - O utilizador precisa de ver o vídeo para desbloquear */
+                    <div className="relative">
+                       {/* Preview desfocado do conteúdo */}
+                       <div className="text-slate-300 space-y-6 font-medium leading-loose text-lg prose prose-invert max-w-none select-none blur-[6px] pointer-events-none">
+                          {selectedArticle.body ? (
+                            <div dangerouslySetInnerHTML={{ __html: selectedArticle.body }} />
+                          ) : (
+                            <>
+                              <p>
+                                 Informações exclusivas obtidas pelo Angolife indicam movimentos estratégicos nos bastidores que podem alterar completamente o cenário atual. Fontes próximas confirmam que a situação descrita é apenas a ponta do iceberg.
+                              </p>
+                              <p>
+                                 "A maioria das pessoas não está a ver o que está por vir", afirmou um analista de mercado que preferiu não ser identificado.
+                              </p>
+                            </>
+                          )}
+                       </div>
+                       {/* Overlay de bloqueio */}
                       <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent rounded-xl py-12">
                          <div className="text-center max-w-xs">
                             <div className="w-14 h-14 bg-brand-gold/10 border border-brand-gold/30 rounded-2xl flex items-center justify-center mx-auto mb-4">

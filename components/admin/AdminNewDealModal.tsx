@@ -7,6 +7,7 @@ export interface NewDealFormState {
   title: string;
   store: string;
   storeNumber: string;
+  phone: string;
   originalPrice: number;
   discountPrice: number;
   location: string;
@@ -64,6 +65,16 @@ export const AdminNewDealModal: React.FC<AdminNewDealModalProps> = ({
             <div className="space-y-1">
               <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Loja</label>
               <input required className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-800 transition-all text-slate-900 dark:text-white" placeholder="Nome da loja..." value={newDeal.store || ''} onChange={e => setNewDeal({ ...newDeal, store: e.target.value })} title="Nome da Loja" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Contacto Loja</label>
+                <input className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-800 transition-all text-slate-900 dark:text-white" placeholder="Telefone (opcional)" value={newDeal.storeNumber || ''} onChange={e => setNewDeal({ ...newDeal, storeNumber: e.target.value })} title="Telefone da Loja" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Telefone Extra</label>
+                <input className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-800 transition-all text-slate-900 dark:text-white" placeholder="Outro contacto (opcional)" value={newDeal.phone || ''} onChange={e => setNewDeal({ ...newDeal, phone: e.target.value })} title="Telefone Extra" />
+              </div>
             </div>
             <div className="space-y-1">
               <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Localização</label>

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Crown, RefreshCw, Check, X, User, Phone, Mail, Clock } from 'lucide-react';
+import { Crown, RefreshCw, Check, X, User, Phone, Mail, Clock, FileText, AlertCircle } from 'lucide-react';
 
 interface CVSubscription {
   id: string;
@@ -10,6 +10,8 @@ interface CVSubscription {
   email: string;
   status: string;
   created_at: string;
+  plano_escolhido?: string | null;
+  url_comprovativo?: string | null;
 }
 
 interface AdminCVSectionProps {
@@ -80,6 +82,19 @@ export const AdminCVSection: React.FC<AdminCVSectionProps> = ({
                 <div className="flex items-center gap-2 text-xs text-slate-400 italic">
                   <Clock size={14} /> Solicitado em {new Date(sub.created_at).toLocaleDateString('pt-AO')}
                 </div>
+                {sub.plano_escolhido && (
+                  <div className="flex items-center gap-2 text-xs text-slate-500">
+                    <Crown size={14} className="text-amber-500" /> Plano: {sub.plano_escolhido}
+                  </div>
+                )}
+                {sub.url_comprovativo && (
+                  <div className="flex items-center gap-2 text-xs">
+                    <FileText size={14} className="text-blue-500" />
+                    <a href={sub.url_comprovativo} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline text-[10px] font-bold">
+                      Ver Comprovativo
+                    </a>
+                  </div>
+                )}
               </div>
 
               {sub.status === 'pending' && (

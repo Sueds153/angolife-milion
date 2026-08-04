@@ -48,7 +48,12 @@ create policy "Admins manage news" on public.news_articles for all using (
 alter table public.product_deals enable row level security;
 drop policy if exists "Anyone can view active deals" on public.product_deals;
 create policy "Anyone can view active deals" on public.product_deals for
-select using (true);
+select using (
+    status IN ('approved','aprovado','publicado','published')
+);
+drop policy if exists "Authed users can submit deals" on public.product_deals;
+create policy "Authed users can submit deals" on public.product_deals for
+insert with check (auth.uid() IS NOT NULL);
 drop policy if exists "Admins manage deals" on public.product_deals;
 create policy "Admins manage deals" on public.product_deals for all using (
     exists (

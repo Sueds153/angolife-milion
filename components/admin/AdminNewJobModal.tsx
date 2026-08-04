@@ -7,10 +7,15 @@ export interface NewJobFormState {
   company: string;
   location: string;
   type: string;
+  salary: string;
   description: string;
   applicationEmail: string;
   requirements: string[];
   newRequirement: string;
+  category: string;
+  source: string;
+  sourceUrl: string;
+  isVerified: boolean;
 }
 
 interface AdminNewJobModalProps {
@@ -105,6 +110,40 @@ export const AdminNewJobModal: React.FC<AdminNewJobModalProps> = ({
                 <option value="Freelance">Freelance</option>
               </select>
             </div>
+            <div className="space-y-1">
+              <label htmlFor="job-salary" className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Salário (Opcional)</label>
+              <input
+                id="job-salary"
+                type="text"
+                placeholder="Ex: 500.000 Kz/mês ou A combinar"
+                className="w-full px-5 py-4 bg-slate-50 dark:bg-white/5 border border-orange-500/10 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500/20 text-slate-900 dark:text-white"
+                value={newJob.salary}
+                onChange={e => setNewJob({ ...newJob, salary: e.target.value })}
+                title="Faixa Salarial"
+              />
+            </div>
+            <div className="space-y-1">
+              <label htmlFor="job-category" className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Categoria</label>
+              <select
+                id="job-category"
+                className="w-full px-5 py-4 bg-slate-50 dark:bg-white/5 border border-orange-500/10 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500/20 text-slate-900 dark:text-white appearance-none"
+                value={newJob.category}
+                onChange={e => setNewJob({ ...newJob, category: e.target.value })}
+                title="Categoria da Vaga"
+              >
+                <option value="Tecnologia">Tecnologia</option>
+                <option value="Gestão">Gestão</option>
+                <option value="Finanças">Finanças</option>
+                <option value="Saúde">Saúde</option>
+                <option value="Engenharia">Engenharia</option>
+                <option value="Educação">Educação</option>
+                <option value="Logística">Logística</option>
+                <option value="Limpeza & Serviços">Limpeza & Serviços</option>
+                <option value="Vendas & Marketing">Vendas & Marketing</option>
+                <option value="Concurso Público">Concurso Público</option>
+                <option value="Geral">Geral</option>
+              </select>
+            </div>
             <div className="col-span-full space-y-1">
               <label htmlFor="job-email" className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">E-mail para Candidatura *</label>
               <input
@@ -117,6 +156,54 @@ export const AdminNewJobModal: React.FC<AdminNewJobModalProps> = ({
                 onChange={e => setNewJob({ ...newJob, applicationEmail: e.target.value })}
                 title="Canal de Candidatura"
               />
+            </div>
+            <div className="space-y-1">
+              <label htmlFor="job-source" className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Fonte</label>
+              <input
+                id="job-source"
+                type="text"
+                placeholder="AngoLife"
+                className="w-full px-5 py-4 bg-slate-50 dark:bg-white/5 border border-orange-500/10 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500/20 text-slate-900 dark:text-white"
+                value={newJob.source}
+                onChange={e => setNewJob({ ...newJob, source: e.target.value })}
+                title="Fonte da Vaga"
+              />
+            </div>
+            <div className="space-y-1">
+              <label htmlFor="job-source-url" className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">URL de Origem (Opcional)</label>
+              <input
+                id="job-source-url"
+                type="url"
+                placeholder="https://..."
+                className="w-full px-5 py-4 bg-slate-50 dark:bg-white/5 border border-orange-500/10 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500/20 text-slate-900 dark:text-white"
+                value={newJob.sourceUrl}
+                onChange={e => setNewJob({ ...newJob, sourceUrl: e.target.value })}
+                title="Link Original da Vaga"
+              />
+            </div>
+            <div className="space-y-1">
+              <label htmlFor="job-image-url" className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">URL da Imagem (Opcional)</label>
+              <input
+                id="job-image-url"
+                type="url"
+                placeholder="https://..."
+                className="w-full px-5 py-4 bg-slate-50 dark:bg-white/5 border border-orange-500/10 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500/20 text-slate-900 dark:text-white"
+                value={newJob.imageUrl || ''}
+                onChange={e => setNewJob({ ...newJob, imageUrl: e.target.value })}
+                title="Link da Imagem de Capa"
+              />
+            </div>
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="job-verified"
+                className="w-5 h-5 accent-orange-500"
+                checked={newJob.isVerified}
+                onChange={e => setNewJob({ ...newJob, isVerified: e.target.checked })}
+              />
+              <label htmlFor="job-verified" className="text-sm font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
+                Marcar como Verificada
+              </label>
             </div>
             <div className="col-span-full space-y-1">
               <label htmlFor="job-desc" className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Descrição</label>

@@ -320,6 +320,47 @@ class AngoJobScraper:
         match = self.EMAIL_REGEX.search(text or "")
         return match.group(0) if match else None
 
+    # ── Extração de Salário ──────────────────────────────────────────────────
+    def _extract_salary(self, soup: BeautifulSoup) -> Optional[str]:
+        """Extrai salário: meta tags → schema.org → texto visível com padrões conhecidos."""
+        # Nível 1: meta tags
+        salary_meta = soup.find("meta", property="og:salary") or soup.find("meta", attrs={"name": "salary"})
+        if salary_meta and salary_meta.get("content"):
+            return salary_meta["content"].strip()
+        
+        # Nível 2: schema.org JobPosting
+        salary_script = soup.find("script", type="application/ld+json")
+        if salary_script:
+            try:
+                import json
+                data = json.loads(salary_script.string)
+                if isinstance(data, dict) and data.get("@type") == "JobPosting":
+                    salary = data.get("baseSalary")
+                    if salary and isinstance(salary, dict):
+                        value = salary.get("value", {}).get("value")
+                        currency = salary.get("value", {}).get("currency", "Kz")
+                        if value:
+                            return f"{value} {currency}"
+            except Exception:
+                pass
+        
+        # Nível 3: Busca por padrões no texto
+        text = soup.get_text()
+        patterns = [
+            r'[\d.,]+\s*[KM]?[kzKZ]\s*/?\s*m[eê]s',
+            r'[\d.,]+\s*[KM]?[kzKZ](?!\w)',
+            r'[Aa]\s*[Cc]ombinar',
+            r'[Cc]ompetitiv[oa]',
+            r'[Nn]egoci[aá]vel',
+            r'[Ss]al[aá]rio\s*:?\s*[\d.,]+\s*[KM]?[kzKZ]',
+        ]
+        for pattern in patterns:
+            match = re.search(pattern, text, re.IGNORECASE)
+            if match:
+                return match.group(0).strip()
+        
+        return None
+
     def _human_delay(self, delay_range: tuple):
         """Simula atraso humano aleatório entre requests."""
         secs = random.uniform(*delay_range)
@@ -529,6 +570,7 @@ class AngoJobScraper:
             requirements_list = []
             image_url = ""
             email = ""
+            salary = ""
 
             if cfg.get("detail_enabled") and job_url:
                 self._human_delay(cfg.get("request_delay_range", (2, 4)))
@@ -553,6 +595,9 @@ class AngoJobScraper:
                     
                     # Email por Regex na descrição profunda
                     email = self._extract_email(detail_soup.get_text())
+                    
+                    # Salário
+                    salary = self._extract_salary(detail_soup)
             
             # 5. Fallbacks e Limpeza
             if not image_url:
@@ -569,13 +614,14 @@ class AngoJobScraper:
                 "company": company[:255],
                 "location": location[:255],
                 "description": description[:5000],
-                "requirements": requirements_list, # Enviado como ARRAY JSON para o Supabase
+                "requirements": requirements_list,
                 "application_email": email[:255],
                 "imagem_url": image_url,
                 "source_url": job_url,
                 "categoria": categoria,
                 "status": "pendente",
                 "posted_at": datetime.now(timezone.utc).isoformat(),
+                "salary": salary or None,
             }
 
             return self.db.insert("jobs", payload)

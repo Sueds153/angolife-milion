@@ -24,6 +24,7 @@ interface JobRow {
   fonte?: string;
   is_verified?: boolean;
   application_count?: number;
+  report_count?: number;
 }
 
 export interface ApplicationEntry {
@@ -66,6 +67,7 @@ export const JobsService = {
       source: j.fonte,
       isVerified: j.is_verified || false,
       applicationCount: j.application_count || 0,
+      reportCount: j.report_count || 0,
     }));
   },
 
@@ -99,6 +101,8 @@ export const JobsService = {
       category: j.categoria,
       source: j.fonte,
       isVerified: j.is_verified,
+      applicationCount: j.application_count,
+      reportCount: j.report_count,
     }));
   },
 
@@ -136,6 +140,11 @@ export const JobsService = {
         description: job.description,
         requirements: job.requirements,
         application_email: job.applicationEmail,
+        source_url: job.sourceUrl,
+        imagem_url: job.imageUrl,
+        categoria: job.category,
+        fonte: job.source,
+        is_verified: job.isVerified,
         status: "publicado",
         posted_at: new Date().toISOString(),
       },
@@ -178,6 +187,9 @@ export const JobsService = {
       imageUrl: data.imagem_url,
       category: data.categoria,
       source: data.fonte,
+      isVerified: data.is_verified || false,
+      applicationCount: data.application_count || 0,
+      reportCount: data.report_count || 0,
     };
   },
 
@@ -206,6 +218,9 @@ export const JobsService = {
       imageUrl: j.imagem_url,
       category: j.categoria,
       source: j.fonte,
+      isVerified: j.is_verified || false,
+      applicationCount: j.application_count || 0,
+      reportCount: j.report_count || 0,
     }));
   },
 

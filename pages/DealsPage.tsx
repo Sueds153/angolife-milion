@@ -189,7 +189,7 @@ export const DealsPage: React.FC<DealsPageProps> = ({ onSelectDeal, onShowInters
                 <div className="h-48 overflow-hidden relative">
                   <img src={deal.imageUrl} alt={deal.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                   <div className="absolute top-3 right-3 bg-red-500 text-white text-[10px] font-black px-2 py-1 rounded-lg shadow-lg">
-                    -{Math.round(((deal.originalPrice - deal.price) / deal.originalPrice) * 100)}%
+                    -{Math.round(((deal.originalPrice - deal.discountPrice) / deal.originalPrice) * 100)}%
                   </div>
 
                 </div>

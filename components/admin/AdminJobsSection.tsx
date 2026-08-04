@@ -1,7 +1,8 @@
 
 import React, { useState } from 'react';
-import { Briefcase, Check, RefreshCw, Plus, Building, MapPin, Clock, Mail, ShieldCheck, X, HardHat, Store } from 'lucide-react';
+import { Briefcase, Check, RefreshCw, Plus, Building, MapPin, Clock, Mail, ShieldCheck, X, HardHat, Store, Edit3 } from 'lucide-react';
 import { Job } from '../../types';
+import { AdminEditJobModal } from './AdminEditJobModal';
 
 interface AdminJobsSectionProps {
   pendingJobs: Job[];
@@ -10,6 +11,8 @@ interface AdminJobsSectionProps {
   handleApproveAll: () => void;
   handleSyncJobs: () => void;
   setShowNewJobModal: (show: boolean) => void;
+  setShowEditJobModal: (show: boolean) => void;
+  setEditingJob: (job: Job) => void;
   handleToggleVerification: (id: string, currentStatus: boolean) => void;
   handleReject: (id: string) => void;
 }

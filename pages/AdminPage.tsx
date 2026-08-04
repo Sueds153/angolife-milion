@@ -21,6 +21,7 @@ import { AdminDiagnostic } from '../components/admin/AdminDiagnostic';
 import { AdminNewJobModal } from '../components/admin/AdminNewJobModal';
 import { AdminNewNewsModal } from '../components/admin/AdminNewNewsModal';
 import { AdminEditNewsModal } from '../components/admin/AdminEditNewsModal';
+import { AdminEditJobModal } from '../components/admin/AdminEditJobModal';
 import { AdminNewDealModal } from '../components/admin/AdminNewDealModal';
 import { AdminEditDealModal } from '../components/admin/AdminEditDealModal';
 import { AdsService, Ad, SystemSettings } from '../services/api/ads.service';
@@ -40,6 +41,8 @@ export const AdminPage: React.FC = () => {
   const [systemSettings, setSystemSettings] = useState<SystemSettings | null>(null);
   const [loading, setLoading] = useState(false);
   const [showNewJobModal, setShowNewJobModal] = useState(false);
+  const [showEditJobModal, setShowEditJobModal] = useState(false);
+  const [editingJob, setEditingJob] = useState<Job | null>(null);
   const [showNewNewsModal, setShowNewNewsModal] = useState(false);
   const [showEditNewsModal, setShowEditNewsModal] = useState(false);
   const [editingNews, setEditingNews] = useState<NewsArticle | null>(null);
@@ -55,22 +58,29 @@ export const AdminPage: React.FC = () => {
     company: '',
     location: '',
     type: 'Tempo Inteiro',
+    salary: '',
     applicationEmail: '',
     description: '',
     requirements: [] as string[],
-    newRequirement: ''
+    newRequirement: '',
+    category: 'Geral',
+    source: 'AngoLife',
+    sourceUrl: '',
+    imageUrl: '',
+    isVerified: false
   });
 
   const [newNews, setNewNews] = useState({
     title: '',
     category: 'Utilidade',
-    body: '',
+    corpo: '',
     imageUrl: '',
-    summary: ''
+    summary: '',
+    is_priority: false
   });
 
   const [newDeal, setNewDeal] = useState({
-    title: '', store: '', storeNumber: '', originalPrice: 0, discountPrice: 0, location: '', description: '', category: 'Alimentação'
+    title: '', store: '', storeNumber: '', phone: '', originalPrice: 0, discountPrice: 0, location: '', description: '', category: 'Alimentação'
   });
   const [dealImageFile, setDealImageFile] = useState<File | null>(null);
   const [dealImagePreview, setDealImagePreview] = useState<string | null>(null);
@@ -189,6 +199,11 @@ export const AdminPage: React.FC = () => {
     setLoading(false);
   };
 
+  const handleEditJob = (job: Job) => {
+    setEditingJob(job);
+    setShowEditJobModal(true);
+  };
+
   const loadPendingDeals = async () => {
     try {
       setLoading(true);
@@ -254,6 +269,7 @@ export const AdminPage: React.FC = () => {
       title: newDeal.title,
       store: newDeal.store,
       storeNumber: newDeal.storeNumber,
+      phone: newDeal.phone,
       originalPrice: newDeal.originalPrice || newDeal.discountPrice,
       discountPrice: newDeal.discountPrice,
       location: newDeal.location,
@@ -262,14 +278,13 @@ export const AdminPage: React.FC = () => {
       imagePlaceholder: uploadedUrl,
       imageUrl: uploadedUrl,
       submittedBy: 'Admin',
-      status: 'approved',
       verified: true,
       is_admin: true
-    } as ProductDeal);
+    });
 
     alert('Oferta publicada diretamente pelo Painel Admin!');
     setShowNewDealModal(false);
-    setNewDeal({ title: '', store: '', storeNumber: '', originalPrice: 0, discountPrice: 0, location: '', description: '', category: 'Alimentação' });
+    setNewDeal({ title: '', store: '', storeNumber: '', phone: '', originalPrice: 0, discountPrice: 0, location: '', description: '', category: 'Alimentação' });
     setDealImageFile(null);
     setDealImagePreview(null);
     setLoading(false);
@@ -402,24 +417,25 @@ export const AdminPage: React.FC = () => {
 
   const handleCreateNews = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newNews.title || !newNews.body) {
+    if (!newNews.title || !newNews.corpo) {
       alert('Preencha o título e o corpo da notícia.');
       return;
     }
     setLoading(true);
-    const summary = newNews.summary || newNews.body.substring(0, 150) + '...';
+    const summary = newNews.summary || newNews.corpo.substring(0, 150) + '...';
     const success = await NewsService.createNews({
       title: newNews.title,
       summary: summary,
       category: newNews.category,
       imageUrl: newNews.imageUrl,
-      body: newNews.body
+      corpo: newNews.corpo,
+      is_priority: newNews.is_priority
     } as Partial<NewsArticle>);
 
     if (success) {
       alert(`Notícia sobre ${newNews.category} publicada com sucesso!`);
       setShowNewNewsModal(false);
-      setNewNews({ title: '', category: 'Utilidade', body: '', imageUrl: '', summary: '' });
+      setNewNews({ title: '', category: 'Utilidade', corpo: '', imageUrl: '', summary: '', is_priority: false });
       loadPendingNews();
     } else {
       alert('Erro ao criar notícia.');
@@ -464,9 +480,15 @@ export const AdminPage: React.FC = () => {
       company: newJob.company,
       location: newJob.location,
       type: newJob.type,
+      salary: newJob.salary,
       applicationEmail: newJob.applicationEmail,
       description: newJob.description,
-      requirements: newJob.requirements
+      requirements: newJob.requirements,
+      sourceUrl: newJob.sourceUrl,
+      imageUrl: newJob.imageUrl,
+      category: newJob.category,
+      source: newJob.source,
+      isVerified: newJob.isVerified
     });
 
     if (success) {
@@ -477,10 +499,15 @@ export const AdminPage: React.FC = () => {
         company: '',
         location: '',
         type: 'Tempo Inteiro',
+        salary: '',
         applicationEmail: '',
         description: '',
         requirements: [],
-        newRequirement: ''
+        newRequirement: '',
+        category: 'Geral',
+        source: 'AngoLife',
+        sourceUrl: '',
+        isVerified: false
       });
     } else {
       alert('Erro ao criar vaga.');
@@ -661,6 +688,8 @@ export const AdminPage: React.FC = () => {
           handleApproveAll={handleApproveAll}
           handleSyncJobs={handleSyncJobs}
           setShowNewJobModal={setShowNewJobModal}
+          setShowEditJobModal={setShowEditJobModal}
+          setEditingJob={setEditingJob}
           handleToggleVerification={handleToggleVerification}
           handleApprove={handleApprove}
           handleReject={handleReject}
@@ -765,6 +794,15 @@ export const AdminPage: React.FC = () => {
         handleUpdateNews={handleUpdateNews}
         editingNews={editingNews}
         setEditingNews={setEditingNews}
+      />
+
+      <AdminEditJobModal
+        isOpen={showEditJobModal}
+        onClose={() => setShowEditJobModal(false)}
+        handleApproveJob={handleApprove}
+        editingJob={editingJob}
+        setEditingJob={setEditingJob}
+        loading={loading}
       />
 
       {/* ADS TAB */}

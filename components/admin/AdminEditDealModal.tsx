@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Edit3, X, RefreshCw, Save } from 'lucide-react';
+import { Edit3, X, RefreshCw, Save, MapPin, Store, Tag, Phone } from 'lucide-react';
 import { ProductDeal } from '../../types';
 
 interface AdminEditDealModalProps {
@@ -50,6 +50,20 @@ export const AdminEditDealModal: React.FC<AdminEditDealModalProps> = ({
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Contacto Loja</label>
+                <input className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-brand-dark focus:bg-white dark:focus:bg-slate-800 transition-all text-slate-900 dark:text-white" placeholder="Telefone (opcional)" value={editingDeal.storeNumber || ''} onChange={e => setEditingDeal({ ...editingDeal, storeNumber: e.target.value })} title="Telefone da Loja" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Telefone Extra</label>
+                <input className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-brand-dark focus:bg-white dark:focus:bg-slate-800 transition-all text-slate-900 dark:text-white" placeholder="Outro contacto (opcional)" value={editingDeal.phone || ''} onChange={e => setEditingDeal({ ...editingDeal, phone: e.target.value })} title="Telefone Extra" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Localização</label>
+              <input required className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-brand-dark focus:bg-white dark:focus:bg-slate-800 transition-all text-slate-900 dark:text-white" placeholder="Localização base..." value={editingDeal.location || ''} onChange={e => setEditingDeal({ ...editingDeal, location: e.target.value })} title="Localização da Loja" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Preço (Desconto)</label>
                 <input type="number" required className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-brand-dark transition-all text-slate-900 dark:text-white" placeholder="Ex: 5000" value={editingDeal.discountPrice || ''} onChange={e => setEditingDeal({ ...editingDeal, discountPrice: Number(e.target.value) })} title="Editar Preço com Desconto" />
               </div>
@@ -59,8 +73,30 @@ export const AdminEditDealModal: React.FC<AdminEditDealModalProps> = ({
               </div>
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Descrição</label>
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Categoria</label>
+              <select className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-brand-dark transition-all text-slate-900 dark:text-white appearance-none" value={editingDeal.category || 'Alimentação'} onChange={e => setEditingDeal({ ...editingDeal, category: e.target.value })} title="Categoria">
+                <option value="Alimentação">Alimentação</option>
+                <option value="Eletrónicos">Eletrónicos</option>
+                <option value="Higiene e Limpeza">Higiene e Limpeza</option>
+                <option value="Moda e Acessórios">Moda e Acessórios</option>
+                <option value="Outros">Outros</option>
+              </select>
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Descrição / Folheto</label>
               <textarea required rows={4} className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-brand-dark resize-none transition-all text-slate-900 dark:text-white" placeholder="Detalhes da oferta..." value={editingDeal.description || ''} onChange={e => setEditingDeal({ ...editingDeal, description: e.target.value })} title="Editar Descrição" />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Imagem Promocional (Máx 150kb WeBP)</label>
+              <div className="w-full h-40 border border-dashed border-brand-dark/40 rounded-2xl flex flex-col items-center justify-center bg-slate-50 dark:bg-white/5 relative overflow-hidden">
+                {editingDeal.imageUrl ? (
+                  <img src={editingDeal.imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                    <span className="text-[10px] font-bold uppercase">Sem imagem</span>
+                  </div>
+                )}
+              </div>
             </div>
           </form>
         </div>
