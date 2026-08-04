@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Briefcase, Check, RefreshCw, Plus, Building, MapPin, Clock, Mail, ShieldCheck, X, HardHat, Store, Edit3 } from 'lucide-react';
+import { Briefcase, Check, RefreshCw, Plus, Building, MapPin, Clock, Mail, ShieldCheck, X, HardHat, Store } from 'lucide-react';
 import { Job } from '../../types';
 import { AdminEditJobModal } from './AdminEditJobModal';
 
@@ -199,6 +199,13 @@ export const AdminJobsSection: React.FC<AdminJobsSectionProps> = ({
                       <ShieldCheck size={20} />
                     </button>
                     <button
+                      onClick={() => { setEditingJob(job); setShowEditJobModal(true); }}
+                      className="p-4 rounded-2xl transition-all border bg-blue-500/10 text-blue-500 border-blue-500/30 hover:bg-blue-500/20"
+                      title="Editar Vaga"
+                    >
+                      <Edit3 size={20} />
+                    </button>
+                    <button
                       onClick={() => handleApprove(job.id)}
                       disabled={loading}
                       className="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-4 rounded-2xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all shadow-xl shadow-emerald-500/20 active:scale-95 flex-1"
@@ -223,8 +230,17 @@ export const AdminJobsSection: React.FC<AdminJobsSectionProps> = ({
             <Check size={32} />
           </div>
           <p className="font-bold text-slate-400 uppercase tracking-widest text-xs">Tudo limpo! Sem vagas pendentes.</p>
-        </div>
+</div>
       )}
+
+      <AdminEditJobModal
+        isOpen={showEditJobModal}
+        onClose={() => setShowEditJobModal(false)}
+        handleApproveJob={handleApprove}
+        editingJob={editingJob}
+        setEditingJob={setEditingJob}
+        loading={loading}
+      />
     </div>
   );
 };

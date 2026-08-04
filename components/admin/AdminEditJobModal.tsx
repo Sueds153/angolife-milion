@@ -1,5 +1,5 @@
 import React from 'react';
-import { Edit3, X, RefreshCw, Save } from 'lucide-react';
+import { Edit3, X, Save } from 'lucide-react';
 import { Job } from '../../types';
 
 interface AdminEditJobModalProps {

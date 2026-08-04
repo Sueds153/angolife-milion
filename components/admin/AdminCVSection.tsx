@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Crown, RefreshCw, Check, X, User, Phone, Mail, Clock, FileText, AlertCircle } from 'lucide-react';
+import { Crown, RefreshCw, Check, X, User, Phone, Mail, Clock, FileText } from 'lucide-react';
 
 interface CVSubscription {
   id: string;

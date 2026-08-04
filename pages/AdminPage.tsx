@@ -199,11 +199,6 @@ export const AdminPage: React.FC = () => {
     setLoading(false);
   };
 
-  const handleEditJob = (job: Job) => {
-    setEditingJob(job);
-    setShowEditJobModal(true);
-  };
-
   const loadPendingDeals = async () => {
     try {
       setLoading(true);

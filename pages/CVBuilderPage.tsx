@@ -80,11 +80,11 @@ export const CVBuilderPage: React.FC = () => {
   const canDownload = isAuthenticated && (isPremiumValid || hasCredits);
 
   // AI Enhance Gate Logic
-  const canUseAI = () => {
+  const canUseAI = useCallback(() => {
     if (user?.isAdmin) return true;
     if (isPremiumValid) return true; // Bronze, Prata, Ouro
     return aiUsageCount < 2; // Free = 2/mês
-  };
+  }, [user?.isAdmin, isPremiumValid, aiUsageCount]);
 
   // Helper for Input Changes
   const updateField = useCallback(<K extends keyof CVData>(field: K, value: CVData[K]) => {

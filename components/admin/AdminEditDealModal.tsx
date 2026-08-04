@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Edit3, X, RefreshCw, Save, MapPin, Store, Tag, Phone } from 'lucide-react';
+import { Edit3, X, RefreshCw, Save } from 'lucide-react';
 import { ProductDeal } from '../../types';
 
 interface AdminEditDealModalProps {

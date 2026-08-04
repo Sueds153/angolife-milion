@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { Users, Briefcase, Newspaper, Tag, Crown, TrendingUp } from 'lucide-react';
+import { Briefcase, Newspaper, Tag, Crown, TrendingUp } from 'lucide-react';
 import { JobsService } from '../../services/api/jobs.service';
 import { NewsService } from '../../services/api/news.service';
 import { DealsService } from '../../services/api/deals.service';
@@ -17,11 +17,9 @@ export const AdminOverview: React.FC = () => {
     cvSubscriptions: 0,
     pendingCVSubs: 0,
   });
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadMetrics = async () => {
-      setLoading(true);
       try {
         const [allJobs, pendingJobs, allNews, pendingNews, allDeals, pendingDeals, cvSubs] = await Promise.all([
           JobsService.getJobs(true),
@@ -45,8 +43,6 @@ export const AdminOverview: React.FC = () => {
         });
       } catch (error) {
         console.error('Error loading admin metrics:', error);
-      } finally {
-        setLoading(false);
       }
     };
 
