@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail, Phone, MapPin, User } from 'lucide-react';
+import { Mail, Phone, MapPin } from 'lucide-react';
 import { TemplateSharedProps } from './CVTemplateSelector';
 import '../../styles/cv-templates.css';
 
@@ -71,47 +71,38 @@ export const ClassicTemplate: React.FC<TemplateSharedProps> = ({ cv, educationFi
         );
     };
 
+    // Centered Executive Header
+    const renderExecutiveHeader = () => (
+        <div className="executive-header">
+            <h1 className="executive-name">{cv.fullName || 'Seu Nome'}</h1>
+            {cv.title && <div className="executive-title">{cv.title}</div>}
+            {(cv.email || cv.phone || cv.location) && (
+                <div className="executive-contacts">
+                    {cv.phone && (
+                        <span className="executive-contact">
+                            <Phone size={14} /> {cv.phone}
+                        </span>
+                    )}
+                    {cv.email && (
+                        <span className="executive-contact">
+                            <Mail size={14} /> {cv.email}
+                        </span>
+                    )}
+                    {cv.location && (
+                        <span className="executive-contact">
+                            <MapPin size={14} /> {cv.location}
+                        </span>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+
     return (
         <div className="cv-template-container">
             <div className="classic-wrapper">
-                {/* Top Header */}
-                <div className="classic-header-row">
-                    <div className="classic-header-left">
-                        <h1 className="classic-name">{cv.fullName || 'Seu Nome'}</h1>
-                        <div className="classic-role">{cv.title || 'Profissional Especializado'}</div>
-
-                        {(cv.email || cv.phone || cv.location) && (
-                            <div className="classic-contacts">
-                                {cv.phone && (
-                                    <div className="classic-contact-item">
-                                        <Phone size={14} /> {cv.phone}
-                                    </div>
-                                )}
-                                {cv.email && (
-                                    <div className="classic-contact-item">
-                                        <Mail size={14} /> {cv.email}
-                                    </div>
-                                )}
-                                {cv.location && (
-                                    <div className="classic-contact-item">
-                                        <MapPin size={14} /> {cv.location}
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="classic-header-right">
-                        <div className="classic-circle-bg" />
-                        {cv.photoUrl ? (
-                            <img src={cv.photoUrl} alt="Foto" className="classic-photo" />
-                        ) : (
-                            <div className="classic-photo classic-photo-fallback">
-                                <User size={50} color="#1e40af" />
-                            </div>
-                        )}
-                    </div>
-                </div>
+                {/* Centered Executive Header (replaces old header-row with photo) */}
+                {renderExecutiveHeader()}
 
                 {/* Body 2 Columns */}
                 <div className="classic-body-row">

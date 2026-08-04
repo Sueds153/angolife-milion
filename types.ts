@@ -127,7 +127,6 @@ export interface CVData {
   phone: string;
   location: string;
   summary: string;
-  photoUrl?: string;
   experiences: CVExperience[];
   education: CVEducation[];
   skills: string[];

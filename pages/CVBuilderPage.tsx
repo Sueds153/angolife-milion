@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { pdf } from '@react-pdf/renderer';
 import { CVDocument } from '../components/cv/CVDocument';
 import { Download, ChevronRight, ChevronLeft, Sparkles, Plus, Trash2, User, Briefcase, GraduationCap, Award, FileText, Lock, Check, Zap, Crown, CreditCard, Calendar, Clock, X } from 'lucide-react';
@@ -26,13 +26,16 @@ const initialCV: CVData = {
 export const CVBuilderPage: React.FC = () => {
   const { user, setUser, isAuthenticated, setAuthModal } = useAppStore();
   
-  const onRequireAuth = () => setAuthModal(true, 'login');
+  const onRequireAuth = useCallback(() => setAuthModal(true, 'login'), [setAuthModal]);
   
-  const onDecrementCredit = () => {
-    if (user) setUser({ ...user, cvCredits: Math.max(0, user.cvCredits - 1) });
-  };
+  const onDecrementCredit = useCallback(() => {
+    const currentUser = useAppStore.getState().user;
+    if (currentUser) {
+      setUser({ ...currentUser, cvCredits: Math.max(0, currentUser.cvCredits - 1) });
+    }
+  }, [setUser]);
   const [step, setStep] = useState(1);
-  const [cv, setCv] = useState<CVData>({ ...initialCV, photoUrl: '' });
+  const [cv, setCv] = useState<CVData>(initialCV);
   const [isImproving, setIsImproving] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<'pack3' | 'monthly' | 'yearly'>('monthly');
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
@@ -41,10 +44,13 @@ export const CVBuilderPage: React.FC = () => {
   const [showPaywall, setShowPaywall] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<CVTemplateType>('classic');
   const [educationFirst, setEducationFirst] = useState(false);
+  const [aiUsageCount, setAiUsageCount] = useState(() =>
+    Number(localStorage.getItem('ai_optimizations_month') || 0)
+  );
   const strengthRef = useRef<HTMLDivElement>(null);
 
-  // --- CV STRENGTH METER ---
-  const cvStrength = (() => {
+  // --- CV STRENGTH METER (useMemo for reactive updates) ---
+  const cvStrength = useMemo(() => {
     let score = 0;
     if (cv.fullName.trim()) score += 10;
     if (cv.email.trim()) score += 5;
@@ -57,7 +63,7 @@ export const CVBuilderPage: React.FC = () => {
     if (cv.education.length > 0) score += 10;
     if (cv.skills.length >= 3) score += 10;
     return score;
-  })();
+  }, [cv]);
 
   useEffect(() => {
     if (strengthRef.current) {
@@ -73,13 +79,20 @@ export const CVBuilderPage: React.FC = () => {
   const isPremiumValid = user?.isAdmin || (user?.isPremium && (user.premiumExpiry || 0) > Date.now());
   const canDownload = isAuthenticated && (isPremiumValid || hasCredits);
 
-  // Helper for Input Changes
-  const updateField = <K extends keyof CVData>(field: K, value: CVData[K]) => {
-    setCv(prev => ({ ...prev, [field]: value }));
+  // AI Enhance Gate Logic
+  const canUseAI = () => {
+    if (user?.isAdmin) return true;
+    if (isPremiumValid) return true; // Bronze, Prata, Ouro
+    return aiUsageCount < 2; // Free = 2/mês
   };
 
+  // Helper for Input Changes
+  const updateField = useCallback(<K extends keyof CVData>(field: K, value: CVData[K]) => {
+    setCv(prev => ({ ...prev, [field]: value }));
+  }, []);
+
   // AI Helper Functions
-  const improveText = async (text: string, type: 'summary' | 'description', expId?: string) => {
+  const improveText = useCallback(async (text: string, type: 'summary' | 'description', expId?: string) => {
     if (!isAuthenticated) { onRequireAuth(); return; }
     if (!text) return;
 
@@ -89,11 +102,13 @@ export const CVBuilderPage: React.FC = () => {
     if (type === 'summary') {
       updateField('summary', optimized);
     } else if (type === 'description' && expId) {
-      const newExp = cv.experiences.map(e => e.id === expId ? { ...e, description: optimized } : e);
-      updateField('experiences', newExp);
+      setCv(prev => ({
+        ...prev,
+        experiences: prev.experiences.map(e => e.id === expId ? { ...e, description: optimized } : e)
+      }));
     }
     setIsImproving(false);
-  };
+  }, [isAuthenticated, onRequireAuth, updateField]);
 
   const addExperience = () => {
     const newExp: CVExperience = {
@@ -153,17 +168,6 @@ export const CVBuilderPage: React.FC = () => {
     }
   };
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        updateField('photoUrl', reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   const handleReceiptUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) setReceiptFile(file);
@@ -204,6 +208,66 @@ export const CVBuilderPage: React.FC = () => {
     }
   };
 
+  // Increment AI usage counter (Free tier: 2/month) with monthly reset
+  const incrementAIUsage = useCallback(() => {
+    const now = new Date();
+    const currentMonth = `${now.getFullYear()}-${now.getMonth()}`;
+    const storedMonth = localStorage.getItem('ai_usage_month');
+    if (storedMonth !== currentMonth) {
+      localStorage.setItem('ai_usage_month', currentMonth);
+      localStorage.setItem('ai_optimizations_month', '1');
+      setAiUsageCount(1);
+    } else {
+      const next = aiUsageCount + 1;
+      localStorage.setItem('ai_optimizations_month', String(next));
+      setAiUsageCount(next);
+    }
+  }, [aiUsageCount]);
+
+  // "Otimizar Textos com IA (ATS)" - improve summary + each experience description + categorize skills
+  const handleEnhanceAll = useCallback(async () => {
+    if (!isAuthenticated) { onRequireAuth(); return; }
+    if (!canUseAI()) { setShowPaywall(true); return; }
+    if (!cv.summary.trim() && cv.experiences.length === 0) {
+      alert('Adicione um resumo ou experiência antes de otimizar.');
+      return;
+    }
+
+    setIsImproving(true);
+    try {
+      const result = await GeminiService.improveCVSections({
+        summary: cv.summary,
+        experiences: cv.experiences,
+        skills: cv.skills,
+      });
+
+      setCv(prev => ({
+        ...prev,
+        summary: result.summary?.trim() || prev.summary,
+        experiences: prev.experiences.map((exp, i) =>
+          result.experiences?.[i]?.trim() ? { ...exp, description: result.experiences[i] } : exp
+        ),
+        skills: [
+          ...(result.skills?.technical || []),
+          ...(result.skills?.soft || []),
+          ...(result.skills?.languages || []),
+          ...(result.skills?.tools || []),
+        ],
+      }));
+
+      // Free users consume one optimization credit; premium/admin unlimited
+      if (!isPremiumValid && !user?.isAdmin) {
+        incrementAIUsage();
+      }
+      alert('Textos otimizados com sucesso! Revise na pré-visualização.');
+    } catch (error) {
+      console.error('[EnhanceAll] Error:', error);
+      alert('Erro ao otimizar com IA. Tente novamente.');
+    } finally {
+      setIsImproving(false);
+    }
+  }, [isAuthenticated, onRequireAuth, canUseAI, cv, isPremiumValid, user?.isAdmin, incrementAIUsage]);
+
   // --- STEPS RENDERING ---
   const renderStep1 = () => (
     <div className="space-y-6 animate-fade-in">
@@ -232,31 +296,6 @@ export const CVBuilderPage: React.FC = () => {
           />
         </div>
         <div className="space-y-1 md:col-span-2">
-          <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Foto de Perfil</label>
-          <div className="flex items-center gap-4">
-            <div className="w-20 h-20 rounded-xl bg-slate-100 dark:bg-white/5 border-2 border-dashed border-slate-300 dark:border-white/10 flex items-center justify-center overflow-hidden">
-              {cv.photoUrl ? (
-                <img src={cv.photoUrl} alt="Preview" className="w-full h-full object-cover" />
-              ) : (
-                <User className="text-slate-300" size={32} />
-              )}
-            </div>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handlePhotoUpload}
-              className="hidden"
-              id="photo-upload"
-            />
-            <label
-              htmlFor="photo-upload"
-              className="bg-brand-gold/10 text-brand-gold px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest cursor-pointer hover:bg-brand-gold/20"
-            >
-              Escolher Foto
-            </label>
-          </div>
-        </div>
-        <div className="space-y-1">
           <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Email</label>
           <input
             className="w-full bg-slate-50 dark:bg-white/5 border gold-border-subtle p-3 rounded-xl outline-none"
@@ -306,27 +345,61 @@ export const CVBuilderPage: React.FC = () => {
     </div>
   );
 
-  const renderStep5 = () => (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex justify-between items-center">
-        <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Resumo Profissional Final</label>
-        <button
-          onClick={() => improveText(cv.summary, 'summary')}
-          disabled={isImproving || !cv.summary}
-          className="text-[9px] font-black uppercase tracking-widest text-brand-gold flex items-center gap-1 hover:text-amber-600 disabled:opacity-50"
-        >
-          <Sparkles size={12} /> {isImproving ? 'Otimizando...' : 'Melhorar com IA'}
-        </button>
+  const renderStep5 = () => {
+    const aiUnlocked = canUseAI();
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <div className="flex justify-between items-center">
+          <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Resumo Profissional Final</label>
+          <button
+            onClick={() => improveText(cv.summary, 'summary')}
+            disabled={isImproving || !cv.summary}
+            className="text-[9px] font-black uppercase tracking-widest text-brand-gold flex items-center gap-1 hover:text-amber-600 disabled:opacity-50"
+          >
+            <Sparkles size={12} /> {isImproving ? 'Otimizando...' : 'Melhorar com IA'}
+          </button>
+        </div>
+        <textarea
+          className="w-full bg-slate-50 dark:bg-white/5 border gold-border-subtle p-3 rounded-xl outline-none h-64 resize-none"
+          value={cv.summary}
+          onChange={e => updateField('summary', e.target.value)}
+          placeholder="Escreva um breve resumo sobre a sua carreira..."
+        />
+        <p className="text-[10px] text-slate-400">💡 Dica: Mencione anos de experiência, sector e o principal valor que entrega ao empregador.</p>
+
+        {/* AI Optimization Button - "Otimizar Textos com IA (ATS)" */}
+        <div className="rounded-2xl border-2 border-dashed border-brand-gold/40 bg-brand-gold/5 p-6 text-center space-y-3">
+          <div className="flex items-center justify-center gap-2 text-brand-gold">
+            <Sparkles size={20} />
+            <span className="text-sm font-black uppercase tracking-widest">Otimizar Textos com IA (ATS)</span>
+          </div>
+          {aiUnlocked ? (
+            <>
+              <p className="text-xs text-slate-500 font-medium">
+                {isPremiumValid || user?.isAdmin
+                  ? 'Acesso Ilimitado (Plano Premium Ativo)'
+                  : `${Math.max(0, 2 - aiUsageCount)} de 2 otimizações gratuitas restantes este mês`}
+              </p>
+              <button
+                onClick={handleEnhanceAll}
+                disabled={isImproving || (!cv.summary.trim() && cv.experiences.length === 0)}
+                className="bg-brand-gold text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg flex items-center justify-center gap-2 hover:bg-amber-600 disabled:opacity-50 w-full mx-auto"
+              >
+                <Sparkles size={16} /> {isImproving ? 'Otimizando tudo...' : 'Otimizar Tudo com IA'}
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => setShowPaywall(true)}
+              className="bg-slate-900 text-brand-gold px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 w-full mx-auto"
+            >
+              <Lock size={14} /> Desbloquear IA Premium
+            </button>
+          )}
+        </div>
       </div>
-      <textarea
-        className="w-full bg-slate-50 dark:bg-white/5 border gold-border-subtle p-3 rounded-xl outline-none h-64 resize-none"
-        value={cv.summary}
-        onChange={e => updateField('summary', e.target.value)}
-        placeholder="Escreva um breve resumo sobre a sua carreira..."
-      />
-      <p className="text-[10px] text-slate-400">💡 Dica: Mencione anos de experiência, sector e o principal valor que entrega ao empregador.</p>
-    </div>
-  );
+    );
+  };
 
   const renderStep2 = () => (
     <div className="space-y-6 animate-fade-in">

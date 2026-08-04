@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail, Phone, MapPin, User } from 'lucide-react';
+import { Mail, Phone, MapPin } from 'lucide-react';
 import { TemplateSharedProps } from './CVTemplateSelector';
 import '../../styles/cv-templates.css';
 
@@ -51,18 +51,40 @@ export const ModernTemplate: React.FC<TemplateSharedProps> = ({ cv, educationFir
         );
     };
 
-    return (
-        <div className="cv-template-container">
-            {/* Sidebar (30%) */}
-            <div className="modern-sidebar">
-                <div className="modern-photo-container">
-                    {cv.photoUrl ? (
-                        <img src={cv.photoUrl} alt="Foto de Perfil" />
-                    ) : (
-                        <User size={64} color="#1a237e" />
+    // Centered Executive Header
+    const renderExecutiveHeader = () => (
+        <div className="executive-header">
+            <h1 className="executive-name">{cv.fullName || 'Seu Nome'}</h1>
+            {cv.title && <div className="executive-title">{cv.title}</div>}
+            {(cv.email || cv.phone || cv.location) && (
+                <div className="executive-contacts">
+                    {cv.phone && (
+                        <span className="executive-contact">
+                            <Phone size={14} /> {cv.phone}
+                        </span>
+                    )}
+                    {cv.email && (
+                        <span className="executive-contact">
+                            <Mail size={14} /> {cv.email}
+                        </span>
+                    )}
+                    {cv.location && (
+                        <span className="executive-contact">
+                            <MapPin size={14} /> {cv.location}
+                        </span>
                     )}
                 </div>
+            )}
+        </div>
+    );
 
+    return (
+        <div className="cv-template-container">
+            {/* Centered Executive Header */}
+            {renderExecutiveHeader()}
+
+            {/* Sidebar (30%) */}
+            <div className="modern-sidebar">
                 {/* Contactos */}
                 {(cv.email || cv.phone || cv.location) && (
                     <div>
@@ -103,12 +125,6 @@ export const ModernTemplate: React.FC<TemplateSharedProps> = ({ cv, educationFir
 
             {/* Main Content (70%) */}
             <div className="modern-main">
-                <div className="modern-header">
-                    <h1 className="modern-name">{cv.fullName || 'Seu Nome'}</h1>
-                    {/* Title / Role */}
-                    {cv.title && <div className="modern-role">{cv.title}</div>}
-                </div>
-
                 {/* Sobre Mim */}
                 {cv.summary && (
                     <div className="modern-section">

@@ -51,18 +51,40 @@ export const TechnicalTemplate: React.FC<TemplateSharedProps> = ({ cv, education
         );
     };
 
-    return (
-        <div className="cv-template-container">
-            {/* Sidebar (30% with gradient and rounded corners) */}
-            <div className="creative-sidebar">
-                <div className="creative-photo-container">
-                    {cv.photoUrl ? (
-                        <img src={cv.photoUrl} alt="Foto de Perfil" />
-                    ) : (
-                        <div className="creative-photo-fallback" />
+    // Centered Executive Header
+    const renderExecutiveHeader = () => (
+        <div className="executive-header">
+            <h1 className="executive-name">{cv.fullName || 'Seu Nome'}</h1>
+            {cv.title && <div className="executive-title">{cv.title}</div>}
+            {(cv.email || cv.phone || cv.location) && (
+                <div className="executive-contacts">
+                    {cv.phone && (
+                        <span className="executive-contact">
+                            <Phone size={14} /> {cv.phone}
+                        </span>
+                    )}
+                    {cv.email && (
+                        <span className="executive-contact">
+                            <Mail size={14} /> {cv.email}
+                        </span>
+                    )}
+                    {cv.location && (
+                        <span className="executive-contact">
+                            <MapPin size={14} /> {cv.location}
+                        </span>
                     )}
                 </div>
+            )}
+        </div>
+    );
 
+    return (
+        <div className="cv-template-container">
+            {/* Centered Executive Header */}
+            {renderExecutiveHeader()}
+
+            {/* Sidebar (30% with gradient and rounded corners) */}
+            <div className="creative-sidebar">
                 {/* Contactos */}
                 {(cv.email || cv.phone || cv.location) && (
                     <div>
@@ -103,11 +125,6 @@ export const TechnicalTemplate: React.FC<TemplateSharedProps> = ({ cv, education
 
             {/* Main Content (70%) */}
             <div className="creative-main">
-                <div className="creative-header">
-                    <h1 className="creative-name">{cv.fullName || 'Seu Nome'}</h1>
-                    <div className="creative-role">{cv.title || 'Profissional Especializado'}</div>
-                </div>
-
                 {/* Sobre Mim / Resumo Profissional */}
                 {cv.summary && (
                     <div className="creative-summary">

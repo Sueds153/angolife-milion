@@ -78,6 +78,50 @@ serve(async (req: Request) => {
         break
       }
 
+      case 'improveCVSections': {
+        // Expects: payload = { summary: string, experiences: CVExperience[], skills: string[] }
+        const { summary, experiences, skills } = payload;
+
+        // Build prompt for batch optimization
+        const expDescriptions = experiences.map(e => e.description || '').join('\n---\n');
+        const skillsList = skills.join(', ');
+
+        const prompt = `Você é um especialista em otimização de CV para ATS (Sistema de Rastreamento de Candidatos) e mercado de trabalho angolano/internacional. 
+Otimize os textos abaixo para serem ATS-friendly, executivos, diretos e em Português de Angola (pt-AO).
+REGRAS CRÍTICAS:
+- NÃO invente empresas, cargos, datas, números ou resultados que não existam no texto original.
+- Preserve exatamente a estrutura/original. Apenas melhore o vocabulário, impacto e clareza.
+- Para skills: categorize em technical, soft, languages, tools.
+
+RETORNE APENAS JSON VÁLIDO no formato:
+{
+  "summary": "resumo otimizado",
+  "experiences": ["descrição otimizada exp 1", "descrição otimizada exp 2", ...],
+  "skills": {
+    "technical": ["skill1", "skill2", ...],
+    "soft": ["skill1", ...],
+    "languages": ["skill1", ...],
+    "tools": ["skill1", ...]
+  }
+}
+
+--- ENTRADA ---
+Resumo:
+${summary || '(não informado)'}
+
+Experiências (uma por linha, separe com ---):
+${expDescriptions || '(não informado)'}
+
+Skills (lista bruta):
+${skillsList || '(não informado)'}`;
+
+        const response = await model.generateContent(prompt);
+        let text = response.response.text().replace(/```json/g, '').replace(/```/g, '').trim();
+        const improved = JSON.parse(text);
+        resultData = { improved };
+        break;
+      }
+
       default:
         throw new Error('Ação inválida')
     }

@@ -1,20 +1,172 @@
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
 
-.cv-template-container {
-    font-family: 'Open Sans', 'Roboto', sans-serif;
-    color: #333;
+/* ============================================================
+   EXECUTIVE HEADER (centered, professional, no photo)
+   Shared across all templates
+   ============================================================ */
+.executive-header {
+    text-align: center;
+    padding: 30px 40px 20px;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 20px;
+}
+.executive-name {
+    font-size: 40px;
+    font-weight: 800;
+    color: #1e3a8a;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    line-height: 1.1;
+    margin: 0 0 8px;
+}
+.executive-title {
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 4px;
+    color: #64748b;
+    text-transform: uppercase;
+    margin: 0 0 16px;
+}
+.executive-contacts {
     display: flex;
-    min-height: 297mm;
-    width: 210mm;
-    margin: 0 auto;
-    background-color: white;
-    box-shadow: none;
-    box-sizing: border-box;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 24px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e40af;
+}
+.executive-contact {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ============================================================
+   PRINT OPTIMIZATION - lighten dark sidebars, remove gradients
+   ============================================================ */
+@media print {
+    /* Lighten modern sidebar */
+    .modern-sidebar {
+        background-color: #f1f5f9 !important;
+        color: #1e293b !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    .modern-sidebar-title {
+        border-bottom-color: rgba(30, 41, 59, 0.3) !important;
+        color: #1e293b !important;
+    }
+    .modern-skill-tag {
+        background-color: rgba(30, 41, 59, 0.1) !important;
+    }
+    .modern-contact-item {
+        color: #1e293b !important;
+    }
+
+    /* Lighten creative sidebar - remove gradient */
+    .creative-sidebar {
+        background: #f1f5f9 !important;
+        color: #1e293b !important;
+        border-top-right-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    .creative-sidebar-title {
+        color: #1e293b !important;
+        border-left-color: #1e3a8a !important;
+    }
+    .creative-photo-container {
+        display: none !important;
+    }
+    .creative-contact-item {
+        color: #1e293b !important;
+    }
+
+    /* Lighten minimalist sidebar */
+    .min-sidebar {
+        background-color: #f1f5f9 !important;
+        color: #1e293b !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    .min-sidebar-title {
+        border-bottom-color: rgba(30, 41, 59, 0.3) !important;
+        color: #1e293b !important;
+    }
+    .min-contact-item {
+        color: #1e293b !important;
+    }
+    .min-photo, .min-photo-fallback {
+        display: none !important;
+    }
+    .min-skill-item {
+        border-left-color: rgba(30, 41, 59, 0.3) !important;
+    }
+
+    /* Classic - lighten header line */
+    .classic-header-row {
+        border-bottom-color: #cbd5e1 !important;
+    }
+    .classic-circle-bg {
+        display: none !important;
+    }
+    .classic-photo, .classic-photo-fallback {
+        display: none !important;
+    }
+    .classic-header-right {
+        display: none !important;
+    }
+    .classic-header-left {
+        width: 100% !important;
+    }
+    .classic-name {
+        text-align: center !important;
+    }
+    .classic-role {
+        text-align: center !important;
+    }
+    .classic-contacts {
+        display: flex !important;
+        justify-content: center !important;
+        flex-wrap: wrap;
+        gap: 24px;
+    }
+    .classic-contact-item {
+        justify-content: center;
+    }
+    .classic-body-row {
+        gap: 30px !important;
+    }
+
+    /* Ensure executive header prints well */
+    .executive-header {
+        border-bottom-color: #cbd5e1 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    .executive-name {
+        color: #1e3a8a !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    .executive-title {
+        color: #64748b !important;
+    }
+    .executive-contacts {
+        color: #1e40af !important;
+    }
+
+    /* Ensure all text prints in dark colors */
+    body, .cv-template-container {
+        color: #1e293b !important;
+    }
 }
 
 /* ============================================================
    MODERNO TEMPLATE (ModernTemplate.tsx - Canva Image 2/6)
-============================================================ */
+   ============================================================ */
 .modern-sidebar {
     width: 32%;
     background-color: #1a237e;

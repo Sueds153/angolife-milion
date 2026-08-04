@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail, Phone, MapPin, User } from 'lucide-react';
+import { Mail, Phone, MapPin } from 'lucide-react';
 import { TemplateSharedProps } from './CVTemplateSelector';
 import '../../styles/cv-templates.css';
 
@@ -52,18 +52,40 @@ export const MinimalistTemplate: React.FC<TemplateSharedProps> = ({ cv, educatio
         );
     };
 
+    // Centered Executive Header
+    const renderExecutiveHeader = () => (
+        <div className="executive-header">
+            <h1 className="executive-name">{cv.fullName || 'Seu Nome'}</h1>
+            {cv.title && <div className="executive-title">{cv.title}</div>}
+            {(cv.email || cv.phone || cv.location) && (
+                <div className="executive-contacts">
+                    {cv.phone && (
+                        <span className="executive-contact">
+                            <Phone size={14} /> {cv.phone}
+                        </span>
+                    )}
+                    {cv.email && (
+                        <span className="executive-contact">
+                            <Mail size={14} /> {cv.email}
+                        </span>
+                    )}
+                    {cv.location && (
+                        <span className="executive-contact">
+                            <MapPin size={14} /> {cv.location}
+                        </span>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+
     return (
         <div className="cv-template-container">
+            {/* Centered Executive Header */}
+            {renderExecutiveHeader()}
+
             {/* Sidebar (Dark Blue/Left) */}
             <div className="min-sidebar">
-                {cv.photoUrl ? (
-                    <img src={cv.photoUrl} alt="Perfil" className="min-photo" />
-                ) : (
-                    <div className="min-photo-fallback">
-                        <User size={60} color="white" />
-                    </div>
-                )}
-
                 {/* Contactos */}
                 {(cv.email || cv.phone || cv.location) && (
                     <div>
@@ -106,11 +128,6 @@ export const MinimalistTemplate: React.FC<TemplateSharedProps> = ({ cv, educatio
 
             {/* Main Content */}
             <div className="min-main">
-                <div className="min-header">
-                    <h1 className="min-name">{cv.fullName || 'Seu Nome'}</h1>
-                    <div className="min-role">{cv.title || 'Candidato Profissional'}</div>
-                </div>
-
                 {/* Perfil / Summary */}
                 {cv.summary && (
                     <div className="min-summary">

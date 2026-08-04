@@ -258,5 +258,23 @@ export const GeminiService = {
       return originalText;
     }
   },
+
+  improveCVSections: async (data: {
+    summary: string;
+    experiences: CVExperience[];
+    skills: string[];
+  }): Promise<{
+    summary: string;
+    experiences: string[];
+    skills: { technical: string[]; soft: string[]; languages: string[]; tools: string[] };
+  }> => {
+    try {
+      const { improved } = await callEdgeProxy('improveCVSections', data);
+      return improved;
+    } catch (error) {
+      console.error("CV Sections Improvement Error:", error);
+      throw error;
+    }
+  },
 };
 

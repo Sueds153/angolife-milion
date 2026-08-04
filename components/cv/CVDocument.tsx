@@ -1,5 +1,5 @@
 import React from 'react';
-import { Page, Text, View, Document, StyleSheet, Font, Image } from '@react-pdf/renderer';
+import { Page, Text, View, Document, StyleSheet, Font } from '@react-pdf/renderer';
 import { CVData } from '../../types';
 
 // Register fonts if needed (using standard ones for compatibility)
@@ -24,12 +24,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#fbbf24',
     paddingBottom: 10,
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
   },
   headerLeft: {
     flex: 1,
+    alignItems: 'center',
+    textAlign: 'center',
   },
   name: {
     fontSize: 24,
@@ -48,12 +48,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 10,
-  },
-  photo: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    marginLeft: 20,
+    justifyContent: 'center',
   },
   section: {
     marginTop: 15,
@@ -120,9 +115,6 @@ export const CVDocument: React.FC<CVDocumentProps> = ({ data }) => (
             {data.location && <Text>Local: {data.location}</Text>}
           </View>
         </View>
-        {data.photoUrl && (
-          <Image src={data.photoUrl} style={styles.photo} />
-        )}
       </View>
 
       {/* Summary */}
