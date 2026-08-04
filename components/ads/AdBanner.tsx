@@ -32,7 +32,7 @@ export const AdBanner: React.FC<AdBannerProps> = ({ format }) => {
     return (
       <div className={`flex items-center justify-center overflow-hidden ${getStyles()}`}>
         <ins className="adsbygoogle block"
-             data-ad-client={PARTNER_ADS.googleAds.client}
+             data-ad-client={adsConfig.client}
              data-ad-slot={adSlot}
              data-ad-format="auto"
              data-full-width-responsive="true"></ins>

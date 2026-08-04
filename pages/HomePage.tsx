@@ -11,6 +11,7 @@ import { AdBanner } from '../components/ads/AdBanner';
 import { AdsService, Ad } from '../services/api/ads.service';
 import { useAppStore } from '../store/useAppStore';
 import { Helmet } from 'react-helmet-async';
+import { ErrorBoundary } from '../components/ui/ErrorBoundary';
 
 interface HomeBanner {
   mediaType?: string;
@@ -30,14 +31,12 @@ interface HomeBanner {
 }
 
 const TICKER_MESSAGES = [
-  { icon: '🔴', text: 'AO VIVO • 247 pessoas a consultar o câmbio agora' },
-  { icon: '⚡', text: 'João M. acabou de se candidatar a uma vaga em Luanda' },
-  { icon: '📰', text: '3 novas notícias publicadas nos últimos 30 minutos' },
-  { icon: '💼', text: 'Vaga de Engenheiro publicada há 12 min — Sê o primeiro!' },
-  { icon: '💰', text: 'Taxa USD hoje é a melhor da semana. Não deixes escapar.' },
-  { icon: '🎯', text: 'Ana F. poupou 15 000 Kz usando o câmbio da Angolife' },
-  { icon: '📄', text: 'Pedro S. criou o CV e passou na entrevista no dia seguinte' },
-  { icon: '🛍️', text: 'Nova promoção exclusiva disponível — por tempo limitado!' },
+  { icon: '📊', text: 'Dados de mercado atualizados em tempo real' },
+  { icon: '💼', text: 'Vagas atualizadas diariamente das maiores empresas' },
+  { icon: '📰', text: 'Notícias verificadas antes de publicar' },
+  { icon: '🛡️', text: 'Dados protegidos com encriptação bancária' },
+  { icon: '⚡', text: 'Câmbio informal atualizado a cada minuto' },
+  { icon: '🤝', text: 'Comunidade de +50.000 utilizadores ativos' },
 ];
 
 export const HomePage: React.FC = () => {
@@ -69,26 +68,29 @@ export const HomePage: React.FC = () => {
     : PARTNER_ADS.partnerBanners.filter(b => b.isActive), [ads]);
 
   useEffect(() => {
-    // Só inicia intervalos se houver banners
-    if (heroBanners.length === 0 || adBanners.length === 0) return;
+    // Carrega anúncios e configura rotação de banners
+    const setupBannerRotation = () => {
+      if (heroBanners.length === 0 || adBanners.length === 0) return;
 
-    // Pega a duração do banner atual ou usa 6s padrão
-    const heroDuration = (heroBanners[heroImageIndex]?.duration_seconds || 6) * 1000;
-    const adDuration = (adBanners[adImageIndex]?.duration_seconds || 5) * 1000;
+      // Hero banner rotation
+      const heroInterval = setInterval(() => {
+        setHeroImageIndex((prev) => (prev + 1) % heroBanners.length);
+      }, (heroBanners[0]?.duration_seconds || 6) * 1000);
 
-    const heroInterval = setInterval(() => {
-      setHeroImageIndex((prev) => (prev + 1) % heroBanners.length);
-    }, heroDuration);
+      // Ad banner rotation
+      const adInterval = setInterval(() => {
+        setAdImageIndex((prev) => (prev + 1) % adBanners.length);
+      }, (adBanners[0]?.duration_seconds || 5) * 1000);
 
-    const adInterval = setInterval(() => {
-      setAdImageIndex((prev) => (prev + 1) % adBanners.length);
-    }, adDuration);
-
-    return () => {
-      clearInterval(heroInterval);
-      clearInterval(adInterval);
+      return () => {
+        clearInterval(heroInterval);
+        clearInterval(adInterval);
+      };
     };
-  }, [heroBanners, adBanners, heroImageIndex, adImageIndex]);
+
+    const cleanup = setupBannerRotation();
+    return cleanup;
+  }, [heroBanners, adBanners]); // Remove heroImageIndex, adImageIndex from deps
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -98,8 +100,14 @@ export const HomePage: React.FC = () => {
           ExchangeService.getRates(),
           DealsService.getDeals(false),
           JobsService.getJobs(false),
-          AdsService.getAds().catch(() => []), 
-          AdsService.getSettings().catch(() => null)
+          AdsService.getAds().catch((err) => {
+            console.error('[HomePage] AdsService.getAds failed:', err);
+            return [];
+          }),
+          AdsService.getSettings().catch((err) => {
+            console.error('[HomePage] AdsService.getSettings failed:', err);
+            return null;
+          })
         ]);
         
         setRates(ratesData);
@@ -150,7 +158,8 @@ export const HomePage: React.FC = () => {
   }, []);
 
   return (
-    <div className="space-y-6 md:space-y-12 animate-fade-in">
+    <ErrorBoundary>
+      <div className="space-y-6 md:space-y-12 animate-fade-in">
       <Helmet>
         <title>Angolife Su-Golden | Inteligência de Mercado e Elite em Angola</title>
         <meta name="description" content="Lidere a economia nacional com a Angolife Su-Golden. Câmbio em tempo real, vagas de elite e as melhores ofertas do mercado angolano." />
@@ -355,8 +364,22 @@ export const HomePage: React.FC = () => {
       </div>
 
       {/* Stats Dashboard - Intelligent Adaptive Grid */}
-      <div className="grid-adaptive">
-        <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] p-5 md:p-10 shadow-xl cursor-pointer group gold-border-subtle active:scale-[0.98] transition-all" onClick={() => navigate('/cambio')}>
+      {loading ? (
+        <div className="grid-adaptive">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="bg-white dark:bg-slate-900 rounded-[1.5rem] p-5 md:p-10 shadow-xl gold-border-subtle animate-pulse">
+              <div className="flex justify-between items-center mb-4 md:mb-6">
+                <div className="w-10 h-10 md:w-14 md:h-14 bg-slate-200 dark:bg-white/10 rounded-xl" />
+                <div className="w-6 h-6 bg-slate-200 dark:bg-white/10 rounded" />
+              </div>
+              <div className="h-4 bg-slate-200 dark:bg-white/10 rounded w-1/4 mb-2" />
+              <div className="h-8 bg-slate-200 dark:bg-white/10 rounded w-1/2" />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="grid-adaptive">
+          <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] p-5 md:p-10 shadow-xl cursor-pointer group gold-border-subtle active:scale-[0.98] transition-all" onClick={() => navigate('/cambio')}>
           <div className="flex justify-between items-center mb-4 md:mb-6">
             <div className="w-10 h-10 md:w-14 md:h-14 bg-brand-gold/5 rounded-xl text-brand-gold flex items-center justify-center">
               <DollarSign className="w-5 h-5 md:w-7 md:h-7" />
@@ -387,8 +410,9 @@ export const HomePage: React.FC = () => {
           </div>
           <span className="text-[8px] md:text-[11px] text-slate-400 font-black uppercase tracking-widest block mb-1">Promoções</span>
           <span className="text-2xl md:text-5xl font-black text-brand-gold">{featuredDeals.length} <span className="text-xs md:text-sm font-bold text-slate-400">Destaques</span></span>
+</div>
         </div>
-      </div>
+      )}
 
       {/* ── POR QUE A ANGOLIFE? — Autoridade + Reciprocidade ── */}
       <div className="relative overflow-hidden rounded-[2rem] bg-white dark:bg-slate-900 border border-orange-500/10 shadow-xl p-6 md:p-12">
@@ -654,6 +678,7 @@ export const HomePage: React.FC = () => {
       <div className="pt-4 md:pt-8">
         <AdBanner format="leaderboard" />
       </div>
-    </div>
-  );
+</div>
+      </ErrorBoundary>
+    );
 };
