@@ -1,7 +1,8 @@
 import React from 'react';
-import { MapPin, Clock, ShieldCheck, Heart, AlertTriangle, Share2 } from 'lucide-react';
+import { MapPin, Clock, ShieldCheck, Heart, AlertTriangle, Share2, Banknote } from 'lucide-react';
 import { Job } from '../../types';
 import { JobLogo } from './JobLogo';
+import { JobUtils } from '../../services/utils/jobUtils';
 
 interface JobCardProps {
   job: Job;
@@ -40,6 +41,12 @@ export const JobCard: React.FC<JobCardProps> = ({
                 </span>
               </div>
             )}
+            {JobUtils.isFlaggedJob(job) && (
+              <div className="flex items-center gap-1.5 px-2 py-0.5 bg-amber-500/10 rounded-lg border border-amber-500/20 shrink-0">
+                <AlertTriangle size={14} className="text-amber-500" />
+                <span className="text-[8px] font-black text-amber-600 uppercase tracking-tighter">Não confirmada</span>
+              </div>
+            )}
           </div>
           <p className="text-[10px] text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest truncate">{job.company}</p>
         </div>
@@ -49,13 +56,19 @@ export const JobCard: React.FC<JobCardProps> = ({
         {job.location && (
           <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-white/5 text-[10px] font-black uppercase tracking-tight text-slate-700 dark:text-slate-300 border border-slate-200/50 dark:border-white/5">
             <MapPin size={12} className="text-orange-500" />
-            {job.location}
+            {JobUtils.normalizeLocation(job.location)}
           </div>
         )}
-        {job.type && (
+        {JobUtils.displayType(job) && (
           <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-white/5 text-[10px] font-black uppercase tracking-tight text-slate-700 dark:text-slate-300 border border-slate-200/50 dark:border-white/5">
             <Clock size={12} className="text-orange-500" />
-            {job.type}
+            {JobUtils.displayType(job)}
+          </div>
+        )}
+        {job.salary && (
+          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/5 text-[10px] font-black uppercase tracking-tight text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+            <Banknote size={12} className="text-emerald-500" />
+            {JobUtils.formatSalary(job.salary)}
           </div>
         )}
       </div>

@@ -3,6 +3,7 @@ import { X, ShieldCheck, Plus, Award, Mail, Share2 } from 'lucide-react';
 import { Job } from '../../types';
 import { JobLogo } from './JobLogo';
 import { ServiceUtils } from '../../services/utils/utils';
+import { JobUtils } from '../../services/utils/jobUtils';
 import { useScrollLock } from '../../hooks/useScrollLock';
 
 interface JobDetailsModalProps {
@@ -57,7 +58,11 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
                   <ShieldCheck size={28} className="text-amber-500 hidden md:block drop-shadow-sm" fill="currentColor" fillOpacity={0.3} />
                 )}
               </div>
-              <p className="text-slate-500 dark:text-slate-300 font-black uppercase text-[10px] md:text-sm tracking-[0.2em]">{job.company} • {job.location}</p>
+              <p className="text-slate-500 dark:text-slate-300 font-black uppercase text-[10px] md:text-sm tracking-[0.2em]">
+                {job.company} • {JobUtils.normalizeLocation(job.location)}
+                {JobUtils.displayType(job) && <span className="ml-2 text-orange-500">{JobUtils.displayType(job)}</span>}
+                {job.source && job.isVerified && <span className="ml-2 text-amber-500">Via {job.source}</span>}
+              </p>
             </div>
           </div>
 
@@ -104,6 +109,12 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
               <div className="bg-slate-900 dark:bg-orange-500 p-8 rounded-[2.5rem] shadow-2xl text-white dark:text-slate-950">
                 <h4 className="text-[10px] font-black uppercase tracking-widest mb-6 opacity-60">Candidatura Oficial</h4>
                 <div className="space-y-4">
+                  {job.salary && (
+                    <div className="p-4 bg-white/10 dark:bg-black/10 rounded-2xl border border-white/5">
+                      <span className="block text-[8px] font-black uppercase opacity-60 mb-1">Salário:</span>
+                      <span className="text-sm md:text-base font-black break-all">{JobUtils.formatSalary(job.salary)}</span>
+                    </div>
+                  )}
                   <div className="p-4 bg-white/10 dark:bg-black/10 rounded-2xl border border-white/5">
                     <span className="block text-[8px] font-black uppercase opacity-60 mb-1">E-mail para Envio:</span>
                     <span className="text-sm md:text-base font-black break-all">{job.applicationEmail}</span>

@@ -226,6 +226,35 @@ function categoryPlaceholder(title: string): string {
   return placeholders[cat] ?? placeholders["Geral"];
 }
 
+// ─────────────────────────────────────────────
+// TIPO / NOTÍCIAS / LOCALIZAÇÃO
+// ─────────────────────────────────────────────
+function inferType(title: string): string {
+  const t = title.toLowerCase();
+  if (/est[áa]gio|estagi[áa]ri|trainee|young graduate/.test(t)) return "Estágio";
+  if (/tempo indeterminado|tempo integral|full[- ]?time/.test(t)) return "Tempo Inteiro";
+  if (/tempo determinado/.test(t)) return "Tempo Determinado";
+  if (/contrato de servi[çc]os|presta[çc][ãa]o de servi[çc]os/.test(t)) return "Contrato de Serviços";
+  if (/part[- ]?time|meio per[íi]odo/.test(t)) return "Part-time";
+  if (/remoto|remote|h[íi]brido/.test(t)) return "Remoto";
+  if (/a definir/.test(t)) return "A definir";
+  return "";
+}
+
+const NEWS_PATTERNS = /est[aá] a construir|est[aã]o a construir|convidados? a publicar|mobiliza fam[ií]lias|v[ií]timas? de acidente|inaugur|adjudic|lan[çc]a concurso|lan[çc]a programa/i;
+
+function normalizeLocation(raw: string): string {
+  const parts: string[] = [];
+  for (const rawPart of (raw || "").split(",")) {
+    const part = rawPart.trim().replace(/\s{2,}/g, " ");
+    if (!part) continue;
+    if (parts.some((p) => p.toLowerCase() === part.toLowerCase())) continue;
+    parts.push(part);
+  }
+  if (parts.length > 1 && parts[parts.length - 1].toLowerCase() === "angola") parts.pop();
+  return parts.length > 0 ? parts.join(", ") : "Angola";
+}
+
 function extractImage($: cheerio.CheerioAPI, baseUrl: string): string | null {
   const og = $('meta[property="og:image"]').first().attr("content");
   if (og) return og;
@@ -351,13 +380,18 @@ async function processCard(
 
     if (!title) return false;
 
+    if (NEWS_PATTERNS.test(title)) {
+      stats.skipped++;
+      return false;
+    }
+
     if (await isDuplicateComposite(title, company)) {
       stats.skipped++;
       return false;
     }
 
     const locEl = cfg.location_selector ? card.find(cfg.location_selector).first() : null;
-    const location = locEl ? cleanText(locEl.text()) || "Angola" : "Angola";
+    const location = normalizeLocation(locEl ? cleanText(locEl.text()) || "Angola" : "Angola");
 
     let description = "";
     let requirementsList: string[] = [];
@@ -395,12 +429,14 @@ async function processCard(
       title: title.slice(0, 255),
       company: company.slice(0, 255),
       location: location.slice(0, 255),
+      type: inferType(title),
       description: description.slice(0, 5000),
       requirements: requirementsList,
       application_email: email.slice(0, 255),
       imagem_url: imageUrl,
       source_url: jobUrl,
       categoria,
+      fonte: siteName,
       status: "pendente",
       posted_at: new Date().toISOString(),
       salary,

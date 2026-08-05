@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Search, ChevronRight, AlertTriangle, ShieldCheck, Clock } from 'lucide-react';
 import { JobsService } from '../services/api/jobs.service';
 import { Job, UserProfile } from '../types';
@@ -8,6 +8,7 @@ import { useAds } from '../hooks/useAds';
 import { JobCard } from '../components/jobs/JobCard';
 import { JobDetailsModal } from '../components/jobs/JobDetailsModal';
 import { ServiceUtils } from '../services/utils/utils';
+import { JobUtils } from '../services/utils/jobUtils';
 import { Helmet } from 'react-helmet-async';
 
 interface JobsPageProps {
@@ -38,6 +39,7 @@ export const JobsPage: React.FC<JobsPageProps> = ({
   const [selectedProvince, setSelectedProvince] = useState('Todas');
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showFlagged, setShowFlagged] = useState(false);
   const JOBS_PER_PAGE = 12;
 
   const { 
@@ -163,7 +165,18 @@ export const JobsPage: React.FC<JobsPageProps> = ({
     loadJobs();
   };
 
-  const filteredJobs = jobs.filter(job => {
+  // Deduplicação + separação de vagas não confirmadas (notícias / Empresa Confidencial)
+  const { visibleJobs, flaggedJobs } = useMemo(() => {
+    const deduped = JobUtils.dedupeJobs(jobs);
+    return {
+      visibleJobs: deduped.filter(job => !JobUtils.isFlaggedJob(job)),
+      flaggedJobs: deduped.filter(job => JobUtils.isFlaggedJob(job)),
+    };
+  }, [jobs]);
+
+  const displayJobs = showFlagged ? [...visibleJobs, ...flaggedJobs] : visibleJobs;
+
+  const filteredJobs = displayJobs.filter(job => {
     const matchesSearch = job.title.toLowerCase().includes(filter.toLowerCase()) ||
       job.company.toLowerCase().includes(filter.toLowerCase());
 
@@ -182,13 +195,24 @@ export const JobsPage: React.FC<JobsPageProps> = ({
     const matchesProvince = selectedProvince === 'Todas' ||
       selectedProvince === 'Hoje 🔥' ||
       selectedProvince === 'Últimas 48h' ||
-      job.location.toLowerCase().includes(selectedProvince.toLowerCase());
+      JobUtils.detectProvince(job.location) === selectedProvince;
 
     return matchesSearch && matchesProvince && matchesTimeline;
   });
 
   const totalPages = Math.ceil(filteredJobs.length / JOBS_PER_PAGE);
   const paginatedJobs = filteredJobs.slice((currentPage - 1) * JOBS_PER_PAGE, currentPage * JOBS_PER_PAGE);
+
+  // Categorias dos alertas alinhadas às realmente presentes nas vagas
+  const alertCategories = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const job of jobs) {
+      const cat = job.category?.trim();
+      if (cat) counts.set(cat, (counts.get(cat) || 0) + 1);
+    }
+    const cats = Array.from(counts.entries()).sort((a, b) => b[1] - a[1]).map(([c]) => c);
+    return cats.length > 0 ? cats : ['Tecnologia', 'Gestão', 'Vendas & Marketing', 'Geral'];
+  }, [jobs]);
 
   return (
     <div className="space-y-6 md:space-y-8 animate-slide-up relative">
@@ -261,6 +285,23 @@ export const JobsPage: React.FC<JobsPageProps> = ({
         ))}
       </div>
 
+      {flaggedJobs.length > 0 && (
+        <div className="flex items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-500/20">
+          <p className="text-[9px] font-black text-amber-700 dark:text-amber-400 uppercase tracking-widest leading-tight">
+            {flaggedJobs.length} vaga{flaggedJobs.length > 1 ? 's' : ''} sem confirmação
+          </p>
+          <button
+            onClick={() => setShowFlagged(v => !v)}
+            className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all border ${showFlagged
+              ? 'bg-amber-500 text-white border-amber-500 shadow-lg shadow-amber-500/20'
+              : 'bg-white dark:bg-slate-900 text-amber-700 dark:text-amber-400 border-amber-500/30 hover:border-amber-500/60'
+              }`}
+          >
+            {showFlagged ? '✓ A mostrar' : 'Mostrar'}
+          </button>
+        </div>
+      )}
+
       <div className="bg-gradient-to-br from-slate-900 to-slate-800 dark:from-orange-500 dark:to-orange-600 p-6 md:p-8 rounded-[2.5rem] shadow-xl border border-orange-500/20 relative overflow-hidden group">
         <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform">
           <Clock size={80} className="text-white dark:text-slate-950" />
@@ -276,7 +317,7 @@ export const JobsPage: React.FC<JobsPageProps> = ({
             Recebe uma notificação assim que surgir uma vaga na tua área. Escolhe as categorias:
           </p>
           <div className="flex flex-wrap gap-2">
-            {['Motorista', 'Contabilidade', 'TI', 'Vendas', 'Engenharia'].map(cat => (
+            {alertCategories.map(cat => (
               <button
                 key={cat}
                 onClick={() => onToggleSubscription?.(cat)}
