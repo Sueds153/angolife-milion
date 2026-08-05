@@ -49,21 +49,12 @@ export const SubscriptionService = {
     id: string,
     userId: string,
   ): Promise<boolean> => {
-    const { error: subError } = await supabase
-      .from("subscriptions_pending")
-      .update({ status: "premium" })
-      .eq("id", id);
+    // Aprovação processada server-side (Edge Function com service_role) para
+    // garantir segurança: o cliente não pode alterar campos de privilégio.
+    const { error } = await supabase.functions.invoke("subscription-approve", {
+      body: { id, userId },
+    });
 
-    if (subError) return false;
-
-    const { error: profileError } = await supabase
-      .from("profiles")
-      .update({
-        is_premium: true,
-        account_type: "premium",
-      })
-      .eq("id", userId);
-
-    return !profileError;
+    return !error;
   },
 };

@@ -13,6 +13,7 @@ import { VideoUtils } from '../services/utils/videoUtils';
 import { useAppStore } from '../store/useAppStore';
 import { Helmet } from 'react-helmet-async';
 import { ErrorBoundary } from '../components/ui/ErrorBoundary';
+import { SitePreviewModal } from '../components/modals/SitePreviewModal';
 
 interface HomeBanner {
   mediaType?: string;
@@ -56,10 +57,15 @@ export const HomePage: React.FC = () => {
   const [showRewarded, setShowRewarded] = useState(false);
   const [rewardedAd, setRewardedAd] = useState<Ad | null>(null);
 
+  // Site Preview Modal State
+  const [showSitePreview, setShowSitePreview] = useState(false);
+  const [sitePreviewUrl, setSitePreviewUrl] = useState('');
+  const [sitePreviewTitle, setSitePreviewTitle] = useState<string | undefined>();
+  const [sitePreviewCompany, setSitePreviewCompany] = useState<string | undefined>();
+
   const [heroImageIndex, setHeroImageIndex] = useState(0);
   const [adImageIndex, setAdImageIndex] = useState(0);
 
-  // Derivar banners dos ads carregados ou usar fallback estático se não houver anúncios da categoria
   const heroBanners: HomeBanner[] = useMemo(() => {
     const filtered = ads.filter(a => a.type === 'hero' && a.is_active && (a.location === 'home' || a.location === 'all') && a.format === 'banner');
     return filtered.length > 0 ? filtered : PARTNER_ADS.heroBanners;
@@ -71,16 +77,13 @@ export const HomePage: React.FC = () => {
   }, [ads]);
 
   useEffect(() => {
-    // Carrega anúncios e configura rotação de banners
     const setupBannerRotation = () => {
       if (heroBanners.length === 0 || adBanners.length === 0) return;
 
-      // Hero banner rotation
       const heroInterval = setInterval(() => {
         setHeroImageIndex((prev) => (prev + 1) % heroBanners.length);
       }, (heroBanners[0]?.duration_seconds || 6) * 1000);
 
-      // Ad banner rotation
       const adInterval = setInterval(() => {
         setAdImageIndex((prev) => (prev + 1) % adBanners.length);
       }, (adBanners[0]?.duration_seconds || 5) * 1000);
@@ -121,15 +124,12 @@ export const HomePage: React.FC = () => {
           setAds(adsData);
           setActiveAds(adsData);
 
-          // Verificar se há Interstitial para Home
           const interstitial = adsData.find(a => a.is_active && a.format === 'interstitial' && (a.location === 'home' || a.location === 'all'));
           if (interstitial) {
             setInterstitialAd(interstitial);
-            // Mostrar após 3 segundos
             setTimeout(() => setShowInterstitial(true), 3000);
           }
           
-          // Verificar se há Rewarded para Home
           const rewarded = adsData.find(a => a.is_active && a.format === 'rewarded' && (a.location === 'home' || a.location === 'all'));
           if (rewarded) {
             setRewardedAd(rewarded);
@@ -146,6 +146,15 @@ export const HomePage: React.FC = () => {
 
     loadDashboardData();
   }, [setSystemSettings, setActiveAds]);
+
+  const handleBannerClick = (banner: HomeBanner) => {
+    if (banner.link) {
+      setSitePreviewUrl(banner.link);
+      setSitePreviewTitle(banner.title);
+      setSitePreviewCompany(banner.companyName || banner.company_name);
+      setShowSitePreview(true);
+    }
+  };
 
   const handleWhatsAppContact = () => {
     const phone = systemSettings?.contact_info.whatsapp || APP_CONFIG.WHATSAPP_NUMBER; 
@@ -170,6 +179,15 @@ export const HomePage: React.FC = () => {
         <meta name="description" content="Lidere a economia nacional com a Angolife Su-Golden. Câmbio em tempo real, vagas de elite e as melhores ofertas do mercado angolano." />
         <meta name="keywords" content="vagas angola, cambio angola, economia angola, empregos angola, mercado angolano, su-golden" />
       </Helmet>
+
+      {/* Site Preview Modal */}
+      <SitePreviewModal
+        isOpen={showSitePreview}
+        onClose={() => setShowSitePreview(false)}
+        url={sitePreviewUrl}
+        title={sitePreviewTitle}
+        companyName={sitePreviewCompany}
+      />
 
       {/* Interstitial Ad Overlay */}
       {showInterstitial && interstitialAd && (
@@ -213,12 +231,16 @@ export const HomePage: React.FC = () => {
                 <h3 className="text-2xl font-black text-white uppercase mb-4">{interstitialAd.company_name}</h3>
                 <button 
                   onClick={() => {
-                    if (interstitialAd.link) window.open(interstitialAd.link, '_blank');
+                    if (interstitialAd.link) {
+                      setSitePreviewUrl(interstitialAd.link);
+                      setSitePreviewCompany(interstitialAd.company_name);
+                      setShowSitePreview(true);
+                    }
                     setShowInterstitial(false);
                   }}
                   className="w-full bg-brand-gold text-slate-950 py-4 rounded-2xl font-black uppercase text-xs tracking-widest shadow-lg active:scale-95 transition-all"
                 >
-                  Saber Mais
+                  Ver Site / Oferta
                 </button>
               </div>
             </div>
@@ -276,12 +298,16 @@ export const HomePage: React.FC = () => {
 
                   <button 
                     onClick={() => {
-                      if (rewardedAd.link) window.open(rewardedAd.link, '_blank');
+                      if (rewardedAd.link) {
+                        setSitePreviewUrl(rewardedAd.link);
+                        setSitePreviewCompany(rewardedAd.company_name);
+                        setShowSitePreview(true);
+                      }
                       setShowRewarded(false);
                     }}
                     className="w-full bg-brand-gold text-slate-950 py-4 rounded-2xl font-black uppercase text-xs tracking-widest shadow-lg shadow-amber-500/20 active:scale-95 transition-all"
                   >
-                    Resgatar Bónus
+                    Resgatar Bónus & Ver Site
                   </button>
                   <button 
                     onClick={() => setShowRewarded(false)} 
@@ -299,7 +325,14 @@ export const HomePage: React.FC = () => {
       )}
 
       {/* Hero Section Dynamic - Mobile Optimized Height */}
-      <div className="relative rounded-[1.5rem] md:rounded-[3rem] overflow-hidden bg-slate-950 shadow-2xl min-h-[380px] md:min-h-[600px] flex items-center group gold-border-subtle">
+      <div 
+        onClick={() => {
+          if (heroBanners[heroImageIndex]) {
+            handleBannerClick(heroBanners[heroImageIndex]);
+          }
+        }}
+        className="relative rounded-[1.5rem] md:rounded-[3rem] overflow-hidden bg-slate-950 shadow-2xl min-h-[380px] md:min-h-[600px] flex items-center group gold-border-subtle cursor-pointer"
+      >
         <div className="absolute inset-0 z-0">
           {heroBanners.map((banner, idx) => {
             const isVideo = (banner.mediaType === 'video' || banner.media_type === 'video');
@@ -373,7 +406,7 @@ export const HomePage: React.FC = () => {
           
           <div className="flex flex-col sm:flex-row gap-3">
             <button 
-              onClick={() => navigate('/cambio')}
+              onClick={(e) => { e.stopPropagation(); navigate('/cambio'); }}
               className="w-full sm:w-auto bg-brand-gold hover:bg-amber-600 text-white font-black py-4 px-8 rounded-xl md:rounded-2xl transition-all flex items-center justify-center shadow-xl active:scale-95 text-[10px] md:text-sm uppercase tracking-widest border border-brand-gold/50 cursor-pointer"
             >
               Consultar Câmbio <ArrowRight size={16} className="ml-2" />
@@ -660,7 +693,7 @@ export const HomePage: React.FC = () => {
       <div 
         onClick={() => {
           if (adBanners[adImageIndex]?.link) {
-            window.open(adBanners[adImageIndex].link, '_blank');
+            handleBannerClick(adBanners[adImageIndex]);
           }
         }}
         className="relative rounded-[1.5rem] md:rounded-[4rem] overflow-hidden bg-black shadow-2xl group transition-all gold-border-subtle min-h-[400px] md:min-h-[500px] flex items-center cursor-pointer"

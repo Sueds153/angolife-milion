@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, Image as ImageIcon, Video, Globe, Clock, Layout, MapPin, Upload, Loader2, Play } from 'lucide-react';
+import { X, Save, Image as ImageIcon, Video, Globe, Clock, Layout, MapPin, Upload, Loader2, Sparkles, Wand2 } from 'lucide-react';
 import { Ad, AdsService } from '../../services/api/ads.service';
 import { StorageService } from '../../services/api/storage.service';
 import { VideoUtils } from '../../services/utils/videoUtils';
+import { UrlPreviewService } from '../../services/api/urlPreview.service';
 import { useScrollLock } from '../../hooks/useScrollLock';
 
 interface AdminAdModalProps {
@@ -20,6 +21,8 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [fetchingSite, setFetchingSite] = useState(false);
+
   const [formData, setFormData] = useState<Partial<Ad>>({
     type: 'partner',
     media_type: 'image',
@@ -30,6 +33,7 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
     display_order: 0,
     image_url: '',
     video_url: '',
+    link: '',
   });
 
   useScrollLock(isOpen);
@@ -48,9 +52,36 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
         display_order: 0,
         image_url: '',
         video_url: '',
+        link: '',
       });
     }
   }, [editingAd, isOpen]);
+
+  const handleFetchSiteMetadata = async () => {
+    if (!formData.link) {
+      alert("Por favor, insira o Link de Destino (ex: https://site.com) primeiro.");
+      return;
+    }
+
+    setFetchingSite(true);
+    try {
+      const meta = await UrlPreviewService.fetchMetadata(formData.link);
+      if (meta) {
+        setFormData(prev => ({
+          ...prev,
+          title: prev.title || meta.title,
+          company_name: prev.company_name || meta.companyName,
+          image_url: meta.imageUrl || prev.image_url,
+        }));
+      } else {
+        alert("Não foi possível puxar dados automáticos deste site. Pode carregar a mídia manualmente.");
+      }
+    } catch (err) {
+      console.error("Fetch site metadata error:", err);
+    } finally {
+      setFetchingSite(false);
+    }
+  };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, target: 'image' | 'video') => {
     const file = e.target.files?.[0];
@@ -65,7 +96,6 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
             ...prev,
             media_type: 'video',
             video_url: publicUrl,
-            // Fallback poster image if none exists
             image_url: prev.image_url || 'https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=1600&q=80',
           }));
         } else {
@@ -76,7 +106,7 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
           }));
         }
       } else {
-        alert('Não foi possível carregar o ficheiro. Verifique o tamanho do ficheiro.');
+        alert('Não foi possível carregar o ficheiro.');
       }
     } catch (err) {
       console.error('File upload error:', err);
@@ -93,12 +123,10 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
     try {
       const payload = { ...formData };
       
-      // Auto-fallback for image_url if media_type is video
       if (payload.media_type === 'video' && !payload.image_url) {
         payload.image_url = 'https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=1600&q=80';
       }
 
-      // Ensure required image_url exists
       if (!payload.image_url) {
         payload.image_url = 'https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=1600&q=80';
       }
@@ -112,7 +140,7 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
       onClose();
     } catch (error) {
       console.error("Save ad error", error);
-      alert("Erro ao guardar anúncio. Por favor tente novamente.");
+      alert("Erro ao guardar anúncio.");
     } finally {
       setLoading(false);
     }
@@ -137,7 +165,7 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
                 {editingAd ? 'Editar Anúncio' : 'Novo Anúncio de Publicidade'}
               </h3>
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                Carregue imagens ou vídeos para campanhas
+                Carregue mídias ou puxe automaticamente do site de destino
               </p>
             </div>
           </div>
@@ -156,9 +184,24 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
 
           {/* ── LIVE PREVIEW BOX ── */}
           <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase text-orange-400 tracking-wider block">
-              Pré-Visualização do Anúncio
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] font-black uppercase text-orange-400 tracking-wider">
+                Pré-Visualização do Anúncio (Preview do Site / Mídia)
+              </label>
+              {formData.link && (
+                <button
+                  type="button"
+                  onClick={handleFetchSiteMetadata}
+                  disabled={fetchingSite}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer"
+                  title="Puxar imagem e título diretamente da URL do site"
+                >
+                  {fetchingSite ? <Loader2 size={12} className="animate-spin" /> : <Wand2 size={12} />}
+                  <span>{fetchingSite ? 'A Puxar Site...' : 'Puxar Dados do Site 🪄'}</span>
+                </button>
+              )}
+            </div>
+
             <div className="relative aspect-video rounded-2xl overflow-hidden bg-slate-950 border border-white/10 flex items-center justify-center shadow-inner group">
               {formData.media_type === 'video' && formData.video_url ? (
                 embedInfo.isEmbed && embedInfo.embedUrl ? (
@@ -190,15 +233,57 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
                   <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                     Nenhuma imagem ou vídeo selecionado
                   </p>
+                  <p className="text-[10px] text-slate-600">
+                    Insira o link de destino abaixo para puxar a imagem do site automaticamente
+                  </p>
                 </div>
               )}
 
-              {uploading && (
-                <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center gap-2 text-orange-400 font-black text-xs uppercase tracking-widest">
+              {(uploading || fetchingSite) && (
+                <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center gap-2 text-orange-400 font-black text-xs uppercase tracking-widest z-10">
                   <Loader2 size={28} className="animate-spin text-orange-500" />
-                  <span>A carregar ficheiro...</span>
+                  <span>{fetchingSite ? 'A Puxar Imagem & Título do Site...' : 'A Carregar Ficheiro...'}</span>
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* ── LINK DE DESTINO COM AUTO-FETCH ── */}
+          <div className="p-4 bg-orange-500/10 rounded-2xl border border-orange-500/20 space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] font-black uppercase text-orange-400">
+                Link de Destino do Site (URL Oficial ou WhatsApp)
+              </label>
+              <button
+                type="button"
+                onClick={handleFetchSiteMetadata}
+                disabled={fetchingSite || !formData.link}
+                className="text-[9px] font-black uppercase tracking-wider text-orange-400 hover:text-white transition-colors flex items-center gap-1 cursor-pointer disabled:opacity-50"
+              >
+                <Sparkles size={12} /> Auto-Puxar Preview
+              </button>
+            </div>
+            <div className="relative flex gap-2">
+              <div className="relative flex-1">
+                <Globe size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-400" />
+                <input 
+                  type="text"
+                  value={formData.link || ''}
+                  onChange={(e) => setFormData({...formData, link: e.target.value})}
+                  className="w-full bg-slate-900 border border-white/10 rounded-xl p-3.5 pl-10 text-xs font-bold text-white placeholder-slate-500"
+                  placeholder="https://site.com ou https://wa.me/244..."
+                />
+              </div>
+              <button
+                type="button"
+                onClick={handleFetchSiteMetadata}
+                disabled={fetchingSite || !formData.link}
+                className="px-4 bg-orange-500 hover:bg-orange-600 active:scale-95 text-white rounded-xl font-black text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-md cursor-pointer disabled:opacity-50"
+                title="Puxar título e imagem automaticamente"
+              >
+                {fetchingSite ? <Loader2 size={14} className="animate-spin" /> : <Wand2 size={14} />}
+                <span className="hidden sm:inline">Puxar</span>
+              </button>
             </div>
           </div>
 
@@ -345,7 +430,7 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
                   value={formData.image_url || ''}
                   onChange={(e) => setFormData({...formData, image_url: e.target.value})}
                   className="w-full bg-slate-900 border border-white/10 rounded-xl p-3.5 pl-10 text-xs font-bold text-white placeholder-slate-500"
-                  placeholder="https://... (ou carregue o ficheiro acima)"
+                  placeholder="https://... (ou carregue o ficheiro / puxe do site)"
                 />
               </div>
             </div>
@@ -382,23 +467,6 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
                 </div>
               </div>
             )}
-
-            {/* Link de Destino ao Clicar no Anúncio */}
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase text-slate-400 ml-1">
-                Link de Destino ao Clicar (URL do Site ou WhatsApp)
-              </label>
-              <div className="relative">
-                <Globe size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input 
-                  type="text"
-                  value={formData.link || ''}
-                  onChange={(e) => setFormData({...formData, link: e.target.value})}
-                  className="w-full bg-slate-50 dark:bg-white/5 border border-white/10 rounded-2xl p-4 pl-10 text-xs font-bold text-white"
-                  placeholder="https://... ou https://wa.me/244..."
-                />
-              </div>
-            </div>
           </div>
 
           {/* Footer Actions */}
@@ -412,7 +480,7 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
              </button>
              <button 
                type="submit"
-               disabled={loading || uploading}
+               disabled={loading || uploading || fetchingSite}
                className="flex-1 bg-orange-500 hover:bg-orange-600 active:scale-95 text-white font-black uppercase text-xs tracking-widest py-4 rounded-2xl transition-all flex items-center justify-center gap-2 shadow-xl shadow-orange-500/25 cursor-pointer"
              >
                {loading ? (
