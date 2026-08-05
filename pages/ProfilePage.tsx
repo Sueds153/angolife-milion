@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Briefcase, Camera, Award, MessageCircle, CheckCircle2, Bell, RefreshCw, DollarSign, ChevronRight, Edit3, Save, Star, History, Download, ShieldCheck, Heart, Link as LinkIcon } from 'lucide-react';
+import { User, Briefcase, Camera, Award, MessageCircle, CheckCircle2, Bell, RefreshCw, DollarSign, ChevronRight, Edit3, Save, Star, History, Download, ShieldCheck, Heart, Link as LinkIcon, Trash2, Loader2 } from 'lucide-react';
 import { UserProfile, Job } from '../types';
 import { NotificationService } from '../services/integrations/notificationService';
 import { AuthService } from '../services/core/auth.service';
@@ -37,6 +37,7 @@ export const ProfilePage: React.FC = () => {
   const [editName, setEditName] = useState(user?.fullName || '');
   const [editPhone, setEditPhone] = useState(user?.phone || '');
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
   
@@ -67,7 +68,7 @@ export const ProfilePage: React.FC = () => {
     fetchSavedJobs();
   }, [user.savedJobs]);
 
-  const firstName = user.fullName || user.email.split('@')[0];
+  const firstName = user?.fullName || user?.email?.split('@')[0] || '';
   const formattedName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
 
   useEffect(() => {
@@ -185,6 +186,30 @@ export const ProfilePage: React.FC = () => {
   };
 
   if (!user) return null;
+
+  const handleDeleteAccount = async () => {
+    if (!user.id) return;
+    const confirmed = window.confirm(
+      'Tens a certeza de que queres apagar a tua conta? Esta ação é permanente e apaga o teu perfil, histórico e dados. Não pode ser anulada.'
+    );
+    if (!confirmed) return;
+    setDeleting(true);
+    try {
+      const { error } = await AuthService.deleteAccount(user.id);
+      if (error) {
+        alert('Não foi possível apagar a conta. Tenta novamente mais tarde.');
+        return;
+      }
+      await AuthService.signOut();
+      setUser(null);
+      setIsAuthenticated(false);
+      navigate('/');
+    } catch {
+      alert('Ocorreu um erro ao apagar a conta. Verifica a tua ligação e tenta novamente.');
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-slide-up pb-20 px-4 sm:px-0">
@@ -676,6 +701,36 @@ export const ProfilePage: React.FC = () => {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* ZONA DE SEGURANÇA */}
+      <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-10 shadow-sm border border-red-500/20">
+        <div className="flex items-center gap-4 mb-6 pb-6 border-b border-red-500/10">
+          <div className="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500 border border-red-500/20">
+            <ShieldCheck size={24} />
+          </div>
+          <div>
+            <h2 className="text-xl font-black text-slate-950 dark:text-white uppercase tracking-tight leading-none mb-1">Zona de Segurança</h2>
+            <p className="text-[10px] font-medium text-slate-500 uppercase tracking-widest">Palavra-passe e Conta</p>
+          </div>
+        </div>
+
+        <button
+          onClick={handleDeleteAccount}
+          disabled={deleting}
+          className="w-full flex items-center justify-between p-5 bg-red-500/5 hover:bg-red-500/10 rounded-2xl border border-red-500/20 transition-all group"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500">
+              {deleting ? <Loader2 size={18} className="animate-spin" /> : <Trash2 size={18} />}
+            </div>
+            <div className="text-left">
+              <p className="text-[10px] font-black text-red-500 uppercase tracking-widest">Apagar Conta</p>
+              <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-1">Elimina permanentemente o teu perfil, histórico e dados</p>
+            </div>
+          </div>
+          <ChevronRight size={16} className="text-red-300 group-hover:text-red-500 transition-colors" />
+        </button>
       </div>
     </div>
   );

@@ -133,8 +133,14 @@ export const NewsPage: React.FC<NewsPageProps> = () => {
     loadNews();
   }, []);
 
-  const openArticle = (article: NewsArticle) => {
-    setSelectedArticle(article);
+  const loadFullArticle = async (article: NewsArticle): Promise<NewsArticle> => {
+    if (article.body) return article;
+    const full = await NewsService.getNewsById(article.id);
+    return full ?? article;
+  };
+
+  const openArticle = async (article: NewsArticle) => {
+    setSelectedArticle(await loadFullArticle(article));
   };
 
   const handleArticleClick = (article: NewsArticle) => {
@@ -158,23 +164,23 @@ export const NewsPage: React.FC<NewsPageProps> = () => {
     }
   };
 
-  const handleRewardedComplete = () => {
+  const handleRewardedComplete = async () => {
     setShowRewardedAd(false);
     setContentUnlocked(true);
     // Reset counter after ad cycle
     setNewsReadCount(0);
     sessionStorage.setItem('news_read_count', '0');
     if (pendingArticle) {
-      setSelectedArticle(pendingArticle);
+      setSelectedArticle(await loadFullArticle(pendingArticle));
       setPendingArticle(null);
     }
   };
 
-  const handleRewardedCancel = () => {
+  const handleRewardedCancel = async () => {
     setShowRewardedAd(false);
     // If user cancels, open the article but content stays locked (they can still unlock via the in-article button)
     if (pendingArticle) {
-      setSelectedArticle(pendingArticle);
+      setSelectedArticle(await loadFullArticle(pendingArticle));
       setPendingArticle(null);
     }
   };

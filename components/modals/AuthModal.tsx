@@ -7,7 +7,7 @@ import { useScrollLock } from '../../hooks/useScrollLock';
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onLogin: (email: string) => void;
+  onLogin?: (email: string) => void;
   initialMode?: 'login' | 'register';
   onOpenLegal: (type: 'privacy' | 'terms' | 'data') => void;
 }
@@ -69,7 +69,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, 
           }
         } else {
           // Success
-          onLogin(email);
+          onLogin?.(email);
         }
       } else {
         const { error } = await AuthService.signIn(email, password);
@@ -77,7 +77,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, 
           setErrorMsg('Credenciais inválidas. Verifique o seu e-mail e palavra-passe.');
         } else {
           // Success
-          onLogin(email);
+          onLogin?.(email);
         }
       }
     } catch {

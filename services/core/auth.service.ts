@@ -96,4 +96,16 @@ export const AuthService = {
   onAuthStateChange: (callback: (event: AuthChangeEvent, session: Session | null) => void) => {
     return supabase.auth.onAuthStateChange(callback);
   },
+
+  updatePassword: async (newPassword: string) => {
+    const { data, error } = await supabase.auth.updateUser({ password: newPassword });
+    return { data, error };
+  },
+
+  deleteAccount: async (userId: string) => {
+    const { data, error } = await supabase.functions.invoke("delete-account", {
+      body: { userId },
+    });
+    return { data, error };
+  },
 };

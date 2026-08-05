@@ -20,35 +20,67 @@ interface NewsRow {
   is_priority?: boolean;
 }
 
+const NEWS_LIST_FIELDS =
+  "id,titulo,resumo,fonte,url_origem,categoria,published_at,status,imagem_url,is_priority";
+
+const NEWS_LIST_LIMIT = 30;
+
+const mapNews = (n: NewsRow): NewsArticle => ({
+  id: n.id,
+  title: n.titulo,
+  summary: n.resumo,
+  source: n.fonte,
+  url: n.url_origem,
+  category: n.categoria,
+  publishedAt: n.published_at,
+  imageUrl: n.imagem_url,
+  body: n.corpo,
+  is_priority: n.is_priority,
+  isSecret: n.is_priority, // Legacy: priority = secret/exclusive
+  status: ServiceUtils.mapStatus(n.status),
+});
+
 export const NewsService = {
-  getNews: async (isAdmin: boolean = false): Promise<NewsArticle[]> => {
-    let query = supabase.from("news_articles").select("*");
+  getNews: async (
+    isAdmin: boolean = false,
+    options: { limit?: number } = {},
+  ): Promise<NewsArticle[]> => {
+    let query = supabase
+      .from("news_articles")
+      .select(isAdmin ? "*" : NEWS_LIST_FIELDS)
+      .order("published_at", { ascending: false });
+
     if (!isAdmin) {
       query = query.or(
         "status.eq.publicado,status.eq.published,status.eq.aprovado,status.eq.approved",
       );
+      const limit = options.limit ?? NEWS_LIST_LIMIT;
+      if (limit > 0) query = query.limit(limit);
     }
 
-    const { data, error } = await query.order("published_at", { ascending: false });
+    const { data, error } = await query;
     if (error) {
       console.error("Error fetching news:", error);
       return [];
     }
 
-    return data.map((n: NewsRow): NewsArticle => ({
-      id: n.id,
-      title: n.titulo,
-      summary: n.resumo,
-      source: n.fonte,
-      url: n.url_origem,
-      category: n.categoria,
-      publishedAt: n.published_at,
-      status: ServiceUtils.mapStatus(n.status),
-      imageUrl: n.imagem_url,
-      body: n.corpo,
-      is_priority: n.is_priority,
-      isSecret: n.is_priority, // Legacy: priority = secret/exclusive
-    }));
+    return (data as unknown as NewsRow[]).map(mapNews);
+  },
+
+  getNewsById: async (id: string): Promise<NewsArticle | null> => {
+    const { data, error } = await supabase
+      .from("news_articles")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Error fetching news by id:", error);
+      return null;
+    }
+    if (!data) return null;
+
+    return mapNews(data as NewsRow);
   },
 
   getPendingNews: async (): Promise<NewsArticle[]> => {
@@ -65,20 +97,7 @@ export const NewsService = {
       return [];
     }
 
-    return data.map((n: NewsRow): NewsArticle => ({
-      id: n.id,
-      title: n.titulo,
-      summary: n.resumo,
-      source: n.fonte,
-      url: n.url_origem,
-      category: n.categoria,
-      publishedAt: n.published_at,
-      imageUrl: n.imagem_url,
-      body: n.corpo,
-      is_priority: n.is_priority,
-      isSecret: n.is_priority,
-      status: ServiceUtils.mapStatus(n.status),
-    }));
+    return data.map(mapNews);
   },
 
   approveNews: async (id: string, isApproved: boolean): Promise<{ success: boolean; error?: string }> => {

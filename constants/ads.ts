@@ -42,9 +42,9 @@ export const PARTNER_ADS = {
     {
       id: "partner-2",
       companyName: "Exemplo Empresa B",
-      mediaType: "video" as "image" | "video",
-      imageUrl: "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?w=1600&q=80", // Poster if video
-      videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4", // Link de exemplo
+      mediaType: "image" as "image" | "video",
+      imageUrl: "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?w=1600&q=80",
+      videoUrl: "",
       link: "https://wa.me/244921967122",
       isActive: true
     }

@@ -9,6 +9,7 @@ import { APP_CONFIG } from '../constants/app';
 import { PARTNER_ADS } from '../constants/ads';
 import { AdBanner } from '../components/ads/AdBanner';
 import { AdsService, Ad } from '../services/api/ads.service';
+import { VideoUtils } from '../services/utils/videoUtils';
 import { useAppStore } from '../store/useAppStore';
 import { Helmet } from 'react-helmet-async';
 import { ErrorBoundary } from '../components/ui/ErrorBoundary';
@@ -41,7 +42,7 @@ const TICKER_MESSAGES = [
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
-  const { systemSettings, setSystemSettings } = useAppStore();
+  const { systemSettings, setSystemSettings, setActiveAds } = useAppStore();
   const [rates, setRates] = useState<ExchangeRate[]>([]);
   const [featuredJobs, setFeaturedJobs] = useState<Job[]>([]);
   const [featuredDeals, setFeaturedDeals] = useState<ProductDeal[]>([]);
@@ -58,14 +59,16 @@ export const HomePage: React.FC = () => {
   const [heroImageIndex, setHeroImageIndex] = useState(0);
   const [adImageIndex, setAdImageIndex] = useState(0);
 
-  // Derivar banners dos ads carregados ou usar fallback estático
-  const heroBanners: HomeBanner[] = useMemo(() => ads.length > 0 
-    ? ads.filter(a => a.type === 'hero' && a.is_active && (a.location === 'home' || a.location === 'all') && a.format === 'banner') 
-    : PARTNER_ADS.heroBanners, [ads]);
+  // Derivar banners dos ads carregados ou usar fallback estático se não houver anúncios da categoria
+  const heroBanners: HomeBanner[] = useMemo(() => {
+    const filtered = ads.filter(a => a.type === 'hero' && a.is_active && (a.location === 'home' || a.location === 'all') && a.format === 'banner');
+    return filtered.length > 0 ? filtered : PARTNER_ADS.heroBanners;
+  }, [ads]);
     
-  const adBanners: HomeBanner[] = useMemo(() => ads.length > 0 
-    ? ads.filter(a => a.type === 'partner' && a.is_active && (a.location === 'home' || a.location === 'all') && a.format === 'banner') 
-    : PARTNER_ADS.partnerBanners.filter(b => b.isActive), [ads]);
+  const adBanners: HomeBanner[] = useMemo(() => {
+    const filtered = ads.filter(a => a.type === 'partner' && a.is_active && (a.location === 'home' || a.location === 'all') && a.format === 'banner');
+    return filtered.length > 0 ? filtered : PARTNER_ADS.partnerBanners.filter(b => b.isActive);
+  }, [ads]);
 
   useEffect(() => {
     // Carrega anúncios e configura rotação de banners
@@ -90,7 +93,7 @@ export const HomePage: React.FC = () => {
 
     const cleanup = setupBannerRotation();
     return cleanup;
-  }, [heroBanners, adBanners]); // Remove heroImageIndex, adImageIndex from deps
+  }, [heroBanners, adBanners]);
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -114,8 +117,10 @@ export const HomePage: React.FC = () => {
         setFeaturedDeals(dealsData.slice(0, 2));
         setFeaturedJobs(jobsData.slice(0, 3));
         
-        if (adsData.length > 0) {
+        if (adsData && adsData.length > 0) {
           setAds(adsData);
+          setActiveAds(adsData);
+
           // Verificar se há Interstitial para Home
           const interstitial = adsData.find(a => a.is_active && a.format === 'interstitial' && (a.location === 'home' || a.location === 'all'));
           if (interstitial) {
@@ -140,7 +145,7 @@ export const HomePage: React.FC = () => {
     };
 
     loadDashboardData();
-  }, [setSystemSettings]);
+  }, [setSystemSettings, setActiveAds]);
 
   const handleWhatsAppContact = () => {
     const phone = systemSettings?.contact_info.whatsapp || APP_CONFIG.WHATSAPP_NUMBER; 
@@ -165,6 +170,7 @@ export const HomePage: React.FC = () => {
         <meta name="description" content="Lidere a economia nacional com a Angolife Su-Golden. Câmbio em tempo real, vagas de elite e as melhores ofertas do mercado angolano." />
         <meta name="keywords" content="vagas angola, cambio angola, economia angola, empregos angola, mercado angolano, su-golden" />
       </Helmet>
+
       {/* Interstitial Ad Overlay */}
       {showInterstitial && interstitialAd && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in">
@@ -179,15 +185,26 @@ export const HomePage: React.FC = () => {
             </button>
             <div className="aspect-[4/5] relative">
               {interstitialAd.media_type === 'video' ? (
-                <video 
-                  src={interstitialAd.video_url} 
-                  poster={interstitialAd.image_url}
-                  autoPlay 
-                  loop 
-                  muted={isMuted}
-                  playsInline
-                  className="w-full h-full object-cover"
-                />
+                (() => {
+                  const embedInfo = VideoUtils.getEmbedUrl(interstitialAd.video_url);
+                  return embedInfo.isEmbed && embedInfo.embedUrl ? (
+                    <iframe
+                      src={embedInfo.embedUrl}
+                      className="w-full h-full border-0 pointer-events-none"
+                      title="Interstitial Video"
+                    />
+                  ) : (
+                    <video 
+                      src={interstitialAd.video_url} 
+                      poster={interstitialAd.image_url}
+                      autoPlay 
+                      loop 
+                      muted={isMuted}
+                      playsInline
+                      className="w-full h-full object-cover"
+                    />
+                  );
+                })()
               ) : (
                 <img src={interstitialAd.image_url} className="w-full h-full object-cover" alt="interstitial" />
               )}
@@ -234,13 +251,24 @@ export const HomePage: React.FC = () => {
                   
                   <div className="rounded-2xl overflow-hidden border border-white/5 aspect-video">
                     {rewardedAd.media_type === 'video' ? (
-                      <video 
-                        src={rewardedAd.video_url} 
-                        poster={rewardedAd.image_url}
-                        autoPlay 
-                        muted={isMuted}
-                        className="w-full h-full object-cover"
-                      />
+                      (() => {
+                        const embedInfo = VideoUtils.getEmbedUrl(rewardedAd.video_url);
+                        return embedInfo.isEmbed && embedInfo.embedUrl ? (
+                          <iframe
+                            src={embedInfo.embedUrl}
+                            className="w-full h-full border-0 pointer-events-none"
+                            title="Rewarded Video"
+                          />
+                        ) : (
+                          <video 
+                            src={rewardedAd.video_url} 
+                            poster={rewardedAd.image_url}
+                            autoPlay 
+                            muted={isMuted}
+                            className="w-full h-full object-cover"
+                          />
+                        );
+                      })()
                     ) : (
                       <img src={rewardedAd.image_url} className="w-full h-full object-cover" alt="rewarded" />
                     )}
@@ -269,34 +297,56 @@ export const HomePage: React.FC = () => {
           )}
         </>
       )}
+
       {/* Hero Section Dynamic - Mobile Optimized Height */}
       <div className="relative rounded-[1.5rem] md:rounded-[3rem] overflow-hidden bg-slate-950 shadow-2xl min-h-[380px] md:min-h-[600px] flex items-center group gold-border-subtle">
         <div className="absolute inset-0 z-0">
-          {heroBanners.map((banner, idx) => (
-            (banner.mediaType === 'video' || banner.media_type === 'video') ? (
-              <video 
-                key={idx}
-                src={banner.videoUrl || banner.video_url} 
-                poster={banner.imageUrl || banner.image_url}
-                autoPlay 
-                muted={isMuted}
-                loop 
-                playsInline
-                className={`absolute inset-0 w-full h-full object-cover transition-all duration-[3000ms] ease-in-out ${heroImageIndex === idx ? 'opacity-40 scale-110' : 'opacity-0 scale-100'}`}
-              />
-            ) : (
+          {heroBanners.map((banner, idx) => {
+            const isVideo = (banner.mediaType === 'video' || banner.media_type === 'video');
+            const videoUrl = banner.videoUrl || banner.video_url;
+            const imageUrl = banner.imageUrl || banner.image_url;
+            const embedInfo = isVideo ? VideoUtils.getEmbedUrl(videoUrl) : { isEmbed: false, embedUrl: null };
+
+            if (isVideo && embedInfo.isEmbed && embedInfo.embedUrl) {
+              return (
+                <iframe
+                  key={idx}
+                  src={embedInfo.embedUrl}
+                  className={`absolute inset-0 w-full h-full border-0 pointer-events-none transition-all duration-[3000ms] ${heroImageIndex === idx ? 'opacity-50 scale-110' : 'opacity-0 scale-100'}`}
+                  title="Hero Banner Video"
+                />
+              );
+            }
+
+            if (isVideo && videoUrl) {
+              return (
+                <video 
+                  key={idx}
+                  src={videoUrl} 
+                  poster={imageUrl}
+                  autoPlay 
+                  muted
+                  loop 
+                  playsInline
+                  ref={(el) => { if (el) el.muted = isMuted; }}
+                  className={`absolute inset-0 w-full h-full object-cover transition-all duration-[3000ms] ease-in-out ${heroImageIndex === idx ? 'opacity-40 scale-110' : 'opacity-0 scale-100'}`}
+                />
+              );
+            }
+
+            return (
               <img 
                 key={idx}
-                src={banner.imageUrl || banner.image_url} 
-                alt={banner.title} 
+                src={imageUrl} 
+                alt={banner.title || 'Hero Banner'} 
                 className={`absolute inset-0 w-full h-full object-cover transition-all duration-[3000ms] ease-in-out ${heroImageIndex === idx ? 'opacity-40 scale-110 translate-x-0' : 'opacity-0 scale-100 translate-x-4'}`}
               />
-            )
-          ))}
+            );
+          })}
           <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-slate-950 via-slate-950/70 to-transparent"></div>
 
           {/* Volume Toggle Hero */}
-          {heroBanners[heroImageIndex]?.mediaType === 'video' && (
+          {(heroBanners[heroImageIndex]?.mediaType === 'video' || heroBanners[heroImageIndex]?.media_type === 'video') && (
             <button 
               onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted); }}
               className="absolute bottom-6 right-6 z-30 p-3 bg-black/40 hover:bg-black/60 backdrop-blur-md rounded-full text-white border border-white/20 transition-all active:scale-95"
@@ -324,7 +374,7 @@ export const HomePage: React.FC = () => {
           <div className="flex flex-col sm:flex-row gap-3">
             <button 
               onClick={() => navigate('/cambio')}
-              className="w-full sm:w-auto bg-brand-gold hover:bg-amber-600 text-white font-black py-4 px-8 rounded-xl md:rounded-2xl transition-all flex items-center justify-center shadow-xl active:scale-95 text-[10px] md:text-sm uppercase tracking-widest border border-brand-gold/50"
+              className="w-full sm:w-auto bg-brand-gold hover:bg-amber-600 text-white font-black py-4 px-8 rounded-xl md:rounded-2xl transition-all flex items-center justify-center shadow-xl active:scale-95 text-[10px] md:text-sm uppercase tracking-widest border border-brand-gold/50 cursor-pointer"
             >
               Consultar Câmbio <ArrowRight size={16} className="ml-2" />
             </button>
@@ -332,7 +382,7 @@ export const HomePage: React.FC = () => {
         </div>
       </div>
 
-      {/* ── LIVE TICKER — Prova Social + Urgência ── */}
+      {/* Live Ticker */}
       <div className="overflow-hidden rounded-2xl bg-slate-900 dark:bg-black border border-orange-500/20 shadow-lg relative">
         <div className="flex items-center gap-3">
           <div className="flex-shrink-0 bg-orange-500 px-4 py-3 flex items-center gap-2">
@@ -363,7 +413,7 @@ export const HomePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Stats Dashboard - Intelligent Adaptive Grid */}
+      {/* Stats Dashboard */}
       {loading ? (
         <div className="grid-adaptive">
           {[1, 2, 3].map(i => (
@@ -410,11 +460,11 @@ export const HomePage: React.FC = () => {
           </div>
           <span className="text-[8px] md:text-[11px] text-slate-400 font-black uppercase tracking-widest block mb-1">Promoções</span>
           <span className="text-2xl md:text-5xl font-black text-brand-gold">{featuredDeals.length} <span className="text-xs md:text-sm font-bold text-slate-400">Destaques</span></span>
-</div>
+        </div>
         </div>
       )}
 
-      {/* ── POR QUE A ANGOLIFE? — Autoridade + Reciprocidade ── */}
+      {/* Por Que a Angolife */}
       <div className="relative overflow-hidden rounded-[2rem] bg-white dark:bg-slate-900 border border-orange-500/10 shadow-xl p-6 md:p-12">
         <div className="absolute top-0 right-0 w-64 h-64 bg-brand-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
         <div className="relative z-10">
@@ -440,7 +490,7 @@ export const HomePage: React.FC = () => {
         </div>
       </div>
 
-      {/* ── VITRINE DE FUNCIONALIDADES — FOMO + Descoberta ── */}
+      {/* Funcionalidades */}
       <div>
         <div className="text-center mb-8">
           <p className="text-[9px] font-black text-brand-gold uppercase tracking-[0.25em] mb-2">Tudo num só lugar</p>
@@ -544,7 +594,7 @@ export const HomePage: React.FC = () => {
         </div>
       </div>
 
-      {/* ── DEPOIMENTOS — Prova Social + Identificação ── */}
+      {/* Depoimentos */}
       <div className="relative overflow-hidden rounded-[2rem] bg-slate-50 dark:bg-slate-900/60 border border-orange-500/10 p-6 md:p-12">
         <div className="text-center mb-8">
           <p className="text-[9px] font-black text-brand-gold uppercase tracking-[0.25em] mb-2">Histórias Reais</p>
@@ -593,7 +643,6 @@ export const HomePage: React.FC = () => {
             </div>
           ))}
         </div>
-        {/* CTA Final — Loss Aversion */}
         <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 pt-8 border-t border-orange-500/10">
           <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500 dark:text-slate-400">
             <CheckCircle size={16} className="text-green-400" /> Acesso gratuito imediato
@@ -608,33 +657,61 @@ export const HomePage: React.FC = () => {
       </div>
 
       {/* Ad Section - Mobile Responsive CTA */}
-      <div className="relative rounded-[1.5rem] md:rounded-[4rem] overflow-hidden bg-black shadow-2xl group transition-all gold-border-subtle min-h-[400px] md:min-h-[500px] flex items-center">
+      <div 
+        onClick={() => {
+          if (adBanners[adImageIndex]?.link) {
+            window.open(adBanners[adImageIndex].link, '_blank');
+          }
+        }}
+        className="relative rounded-[1.5rem] md:rounded-[4rem] overflow-hidden bg-black shadow-2xl group transition-all gold-border-subtle min-h-[400px] md:min-h-[500px] flex items-center cursor-pointer"
+      >
         <div className="absolute inset-0 z-0">
-          {adBanners.map((banner, idx) => (
-            (banner.mediaType === 'video' || banner.media_type === 'video') ? (
-              <video 
-                key={idx}
-                src={banner.videoUrl || banner.video_url} 
-                poster={banner.imageUrl || banner.image_url}
-                autoPlay 
-                muted={isMuted}
-                loop 
-                playsInline
-                className={`absolute inset-0 w-full h-full object-cover transition-all duration-[4000ms] ${adImageIndex === idx ? 'opacity-60 scale-105 blur-none' : 'opacity-0 scale-100'}`}
-              />
-            ) : (
+          {adBanners.map((banner, idx) => {
+            const isVideo = (banner.mediaType === 'video' || banner.media_type === 'video');
+            const videoUrl = banner.videoUrl || banner.video_url;
+            const imageUrl = banner.imageUrl || banner.image_url;
+            const embedInfo = isVideo ? VideoUtils.getEmbedUrl(videoUrl) : { isEmbed: false, embedUrl: null };
+
+            if (isVideo && embedInfo.isEmbed && embedInfo.embedUrl) {
+              return (
+                <iframe
+                  key={idx}
+                  src={embedInfo.embedUrl}
+                  className={`absolute inset-0 w-full h-full border-0 pointer-events-none transition-all duration-[4000ms] ${adImageIndex === idx ? 'opacity-60 scale-105' : 'opacity-0 scale-100'}`}
+                  title="Ad Banner Video"
+                />
+              );
+            }
+
+            if (isVideo && videoUrl) {
+              return (
+                <video 
+                  key={idx}
+                  src={videoUrl} 
+                  poster={imageUrl}
+                  autoPlay 
+                  muted
+                  loop 
+                  playsInline
+                  ref={(el) => { if (el) el.muted = isMuted; }}
+                  className={`absolute inset-0 w-full h-full object-cover transition-all duration-[4000ms] ${adImageIndex === idx ? 'opacity-60 scale-105 blur-none' : 'opacity-0 scale-100'}`}
+                />
+              );
+            }
+
+            return (
               <img 
                 key={idx}
-                src={banner.imageUrl || banner.image_url} 
-                alt={banner.companyName || banner.company_name} 
+                src={imageUrl} 
+                alt={banner.companyName || banner.company_name || 'Ad Banner'} 
                 className={`absolute inset-0 w-full h-full object-cover transition-all duration-[4000ms] ${adImageIndex === idx ? 'opacity-60 scale-105 blur-none' : 'opacity-0 scale-100'}`}
               />
-            )
-          ))}
+            );
+          })}
           <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black via-black/85 to-transparent"></div>
           
           {/* Volume Toggle Ads */}
-          {adBanners[adImageIndex]?.mediaType === 'video' && (
+          {(adBanners[adImageIndex]?.mediaType === 'video' || adBanners[adImageIndex]?.media_type === 'video') && (
             <button 
               onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted); }}
               className="absolute bottom-6 right-6 z-30 p-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white border border-white/10 transition-all active:scale-95"
@@ -664,8 +741,8 @@ export const HomePage: React.FC = () => {
 
           <div className="w-full md:w-auto">
             <button 
-              onClick={handleWhatsAppContact}
-              className="w-full md:w-auto bg-brand-gold px-10 py-5 rounded-2xl font-black text-slate-950 uppercase tracking-[0.2em] text-[10px] md:text-sm transition-all active:scale-95 flex items-center justify-center gap-3 shadow-[0_15px_40px_rgba(245,158,11,0.3)]"
+              onClick={(e) => { e.stopPropagation(); handleWhatsAppContact(); }}
+              className="w-full md:w-auto bg-brand-gold px-10 py-5 rounded-2xl font-black text-slate-950 uppercase tracking-[0.2em] text-[10px] md:text-sm transition-all active:scale-95 flex items-center justify-center gap-3 shadow-[0_15px_40px_rgba(245,158,11,0.3)] cursor-pointer"
             >
               <MessageCircle size={20} />
               <span>ANUNCIAR AGORA</span>
@@ -678,7 +755,7 @@ export const HomePage: React.FC = () => {
       <div className="pt-4 md:pt-8">
         <AdBanner format="leaderboard" />
       </div>
-</div>
-      </ErrorBoundary>
-    );
+    </div>
+    </ErrorBoundary>
+  );
 };

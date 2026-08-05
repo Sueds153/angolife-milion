@@ -6,6 +6,7 @@ import { Background } from './components/layout/Background';
 import { AdBanner } from './components/ads/AdBanner';
 import { InterstitialAd, RewardedAd } from './components/ads/AdOverlays';
 import { AuthModal } from './components/modals/AuthModal';
+import { RecoveryPasswordModal } from './components/modals/RecoveryPasswordModal';
 import { NotificationToast } from './components/ui/NotificationToast';
 import { NotificationService } from './services/integrations/notificationService';
 import { AuthService } from './services/core/auth.service';
@@ -38,6 +39,7 @@ const App: React.FC = () => {
     user, setUser, setIsAuthenticated, setIsAuthLoading,
     isDarkMode,
     isAuthModalOpen, authMode, setAuthModal,
+    setPasswordRecovery,
     notifications, addNotification, removeNotification
   } = useAppStore();
 
@@ -93,7 +95,11 @@ const App: React.FC = () => {
             accountType: profile.account_type,
             savedJobs: profile.saved_jobs || [],
             applicationHistory: profile.application_history || [],
-            referralCode: profile.referral_code
+            referralCode: profile.referral_code,
+            phone: profile.phone || undefined,
+            location: profile.location || undefined,
+            cvHistory: profile.cv_history || [],
+            hasReferralDiscount: profile.has_referral_discount || false
           });
           setIsAuthenticated(true);
         } else {
@@ -119,12 +125,13 @@ const App: React.FC = () => {
     const { data: { subscription } } = AuthService.onAuthStateChange((_event, session) => {
       fetchProfile(session?.user ?? null);
       if (_event === 'SIGNED_IN') setAuthModal(false);
+      if (_event === 'PASSWORD_RECOVERY') setPasswordRecovery(true);
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [setAuthModal, setIsAuthLoading, setIsAuthenticated, setUser]);
+  }, [setAuthModal, setIsAuthLoading, setIsAuthenticated, setUser, setPasswordRecovery]);
 
   const [showInterstitial, setShowInterstitial] = useState(false);
   const [interstitialDuration, setInterstitialDuration] = useState(5);
@@ -139,7 +146,7 @@ const App: React.FC = () => {
       try {
         const [jobs, news] = await Promise.all([
           JobsService.getJobs(false),
-          NewsService.getNews(false)
+          NewsService.getNews(false, { limit: 1 })
         ]);
 
         const isJob = Math.random() > 0.5;
@@ -337,6 +344,8 @@ const App: React.FC = () => {
         initialMode={authMode}
         onOpenLegal={openLegalModal}
       />
+
+      <RecoveryPasswordModal />
 
       {showInterstitial && (
         <InterstitialAd

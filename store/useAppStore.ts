@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { UserProfile, AppNotification } from "../types";
-import { SystemSettings } from "../services/api/ads.service";
+import { SystemSettings, Ad } from "../services/api/ads.service";
 
 interface AppState {
   // Auth State
@@ -12,9 +12,11 @@ interface AppState {
   isDarkMode: boolean;
   isAuthModalOpen: boolean;
   authMode: "login" | "register";
+  passwordRecovery: boolean;
 
-  // Settings
+  // Settings & Ads
   systemSettings: SystemSettings | null;
+  activeAds: Ad[];
 
   // Notifications
   notifications: AppNotification[];
@@ -26,10 +28,12 @@ interface AppState {
   setDarkMode: (isDark: boolean) => void;
   toggleTheme: () => void;
   setAuthModal: (open: boolean, mode?: "login" | "register") => void;
+  setPasswordRecovery: (open: boolean) => void;
   addNotification: (notification: AppNotification) => void;
   removeNotification: (id: string) => void;
   clearNotifications: () => void;
   setSystemSettings: (settings: SystemSettings) => void;
+  setActiveAds: (ads: Ad[]) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -42,8 +46,10 @@ export const useAppStore = create<AppState>((set) => ({
       !localStorage.getItem("theme")),
   isAuthModalOpen: false,
   authMode: "login",
+  passwordRecovery: false,
   notifications: [],
   systemSettings: null,
+  activeAds: [],
 
   setUser: (user) => set({ user }),
   setIsAuthenticated: (isAuthenticated) => set({ isAuthenticated }),
@@ -64,6 +70,8 @@ export const useAppStore = create<AppState>((set) => ({
   setAuthModal: (isOpen, mode = "login") =>
     set({ isAuthModalOpen: isOpen, authMode: mode }),
 
+  setPasswordRecovery: (open) => set({ passwordRecovery: open }),
+
   addNotification: (notification) =>
     set((state) => ({
       notifications: [notification, ...state.notifications].slice(0, 5),
@@ -76,4 +84,5 @@ export const useAppStore = create<AppState>((set) => ({
 
   clearNotifications: () => set({ notifications: [] }),
   setSystemSettings: (systemSettings) => set({ systemSettings }),
+  setActiveAds: (activeAds) => set({ activeAds }),
 }));
