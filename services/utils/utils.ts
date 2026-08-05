@@ -29,23 +29,51 @@ export const ServiceUtils = {
   formatDescription: (text: string): string[] => {
     if (!text) return [];
 
-    let formatted = text
+    // --- 1. Strip JavaScript / tracking code ---
+    // Remove <script>...</script> blocks (just in case HTML wasn't cleaned)
+    let cleaned = text.replace(/<script[\s\S]*?<\/script>/gi, '');
+
+    // Split into lines and filter out lines that look like JS code
+    const jsPatterns = [
+      /^\s*(var|let|const|function|window\.|document\.|if\s*\(|else\s*\{|try\s*\{|catch\s*\(|return\s|for\s*\(|while\s*\(|\.ready\(|\$\.ajax|jQuery|\}\.call\(|stats_|request_|randomizer)/, // common JS keywords
+      /[;{}()=].*[;{}()=].*[;{}()=]/, // lines with 3+ JS punctuation chars – likely code
+      /https?:\/\/[\w./%-]{40,}/, // very long raw URLs (tracking pixels)
+      /\.getHTTP|XMLHttpRequest|ActiveXObject|send\(null\)|readystate/i, // XHR patterns
+    ];
+
+    const lines = cleaned.split('\n');
+    // Find the first line that looks like JS to use as a cutoff
+    let cutoff = lines.length;
+    for (let i = 0; i < lines.length; i++) {
+      if (jsPatterns.some(p => p.test(lines[i]))) {
+        cutoff = i;
+        break;
+      }
+    }
+    cleaned = lines.slice(0, cutoff).join('\n').trim();
+
+    // Also cut everything after common JS sentinel tokens (inline tracking code)
+    cleaned = cleaned.replace(/\s*var\s+stats_\w+\s*=.*$/s, '').trim();
+    cleaned = cleaned.replace(/\s*function\s*\(\s*\).*$/s, '').trim();
+
+    // --- 2. Format readable paragraphs ---
+    let formatted = cleaned
       // Quebrar antes de "1.", "2." (evitando quebrar coisas como v1.0)
       .replace(/(?:\s|^)(\d+\.)\s/g, '\n\n$1 ')
       // Quebrar antes de "1.1", "1.2"
       .replace(/(?:\s|^)(\d+\.\d+)\s/g, '\n\n$1 ')
       // Quebrar antes de bullets "•" ou "⁃"
       .replace(/\s*([•⁃])\s*/g, '\n• ')
-      // Quebrar após ponto final + espaço + Maiúscula (mas apenas se antes houver uma letra/parêntese)
+      // Quebrar após ponto final + espaço + Maiúscula
       .replace(/([a-zA-Zçãéíóúâêôáà)]+)\.\s+(?=[A-Z])/g, '$1.\n')
       // Quebrar após fecho de parênteses + espaço + Maiúscula
       .replace(/\)\s+(?=[A-Z])/g, ')\n')
       // Quebrar após dois-pontos + espaço + Maiúscula
       .replace(/([a-zA-Zçãéíóúâêôáà]):\s+(?=[A-Z])/g, '$1:\n')
-      // Casos em que falta o ponto antes de um número de secção (ex: "experiência 1.3 Formação")
+      // Casos em que falta o ponto antes de um número de secção
       .replace(/([a-zA-Zçãéíóúâêôáà])\s+(\d+\.\d+)\s/g, '$1\n\n$2 ')
       .replace(/([a-zA-Zçãéíóúâêôáà])\s+(\d+\.)\s/g, '$1\n\n$2 ')
-      // Quebrar blocos excessivamente colados em Letras Maiúsculas (ex: "NOME COMPLETO TELEFONE") se houver indicativos
+      // Quebrar blocos excessivamente colados em Letras Maiúsculas
       .replace(/\s(EMAIL|TELEFONE|CIDADE|LINKEDIN|PORTFÓLIO)\b/gi, '\n$1')
       // Palavras-chave de secções
       .replace(/(Requisitos|Benefícios|Responsabilidades|Perfil|Profile|Requirements|Benefits|Responsibilities|Contacto|Email|Candidaturas?|Localização):\s*/gi, '\n\n$1:\n')
