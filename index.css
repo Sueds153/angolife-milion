@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
-  --dark-mode: selector;
   --color-brand-gold: #f59e0b;
   --color-brand-dark: #0f172a;
   --color-brand-light: #f8fafc;
