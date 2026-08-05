@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
 import { Star, CheckCircle, Send, MessageSquare } from 'lucide-react';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 interface FeedbackOrder {
   id: string;
@@ -22,6 +23,8 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ order, isOpen, onC
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+
+  useScrollLock(isOpen && !!order);
 
   if (!isOpen || !order) return null;
 

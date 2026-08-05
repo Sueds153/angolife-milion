@@ -10,6 +10,7 @@ import { CVTemplateSelector, CVTemplateType } from '../components/cv/CVTemplateS
 import { TEMPLATE_OPTIONS } from '../components/cv/templateOptions';
 
 import { useAppStore } from '../store/useAppStore';
+import { useScrollLock } from '../hooks/useScrollLock';
 
 const initialCV: CVData = {
   fullName: '',
@@ -43,6 +44,9 @@ export const CVBuilderPage: React.FC = () => {
   const [paymentStep, setPaymentStep] = useState<'plans' | 'checkout' | 'pending'>('plans');
   const [showPaywall, setShowPaywall] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<CVTemplateType>('classic');
+
+  useScrollLock(showPaywall);
+
   const [educationFirst, setEducationFirst] = useState(false);
   const [aiUsageCount, setAiUsageCount] = useState(() =>
     Number(localStorage.getItem('ai_optimizations_month') || 0)
@@ -562,7 +566,7 @@ export const CVBuilderPage: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen pb-20 relative">
+    <div className="min-h-dvh pb-20 relative">
       <div className="flex flex-col md:flex-row gap-8 print:hidden">
         {/* LEFT SIDE: BUILDER FORM */}
         <div className="w-full md:w-1/2 space-y-6 transition-all duration-500 order-1">

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Lock, Mail, User, ArrowRight, Eye, EyeOff, Loader2, Tag } from 'lucide-react';
 import { AuthService } from '../../services/core/auth.service';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -12,8 +13,7 @@ interface AuthModalProps {
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, onOpenLegal, initialMode = 'login' }) => {
-  const [isRegister, setIsRegister] = useState(initialMode === 'register');
-  const [fullName, setFullName] = useState('');
+  const [isRegister, setIsRegister] = useState(initialMode === 'register');  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -21,6 +21,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, 
   const [isLoading, setIsLoading] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [invitedBy, setInvitedBy] = useState('');
+
+  useScrollLock(isOpen);
 
   useEffect(() => {
     setIsRegister(initialMode === 'register');
@@ -108,8 +110,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, 
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in p-4">
-      <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col relative border border-orange-500/30">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in p-4 overflow-y-auto">
+      <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col relative border border-orange-500/30 my-auto">
         <button
           onClick={onClose}
           title="Fechar"

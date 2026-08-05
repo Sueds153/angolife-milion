@@ -25,7 +25,7 @@ export class ErrorBoundary extends Component<Props, State> {
   public render(): ReactNode {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center p-8 text-center font-sans">
+        <div className="min-h-dvh bg-slate-900 text-white flex flex-col items-center justify-center p-8 text-center font-sans">
           <div className="bg-red-500/20 p-6 rounded-3xl border border-red-500/30 max-w-lg">
             <h1 className="text-2xl font-black mb-4 text-red-500 uppercase tracking-tighter">Erro Crítico Detetado</h1>
             <p className="text-slate-300 mb-6 font-medium">

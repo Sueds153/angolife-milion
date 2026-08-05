@@ -3,6 +3,7 @@ import { X, ShieldCheck, Plus, Award, Mail, Share2 } from 'lucide-react';
 import { Job } from '../../types';
 import { JobLogo } from './JobLogo';
 import { ServiceUtils } from '../../services/utils/utils';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 interface JobDetailsModalProps {
   job: Job | null;
@@ -17,6 +18,7 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
   onApply,
   onShare
 }) => {
+  useScrollLock(!!job);
   if (!job) return null;
 
   const formattedDescription = ServiceUtils.formatDescription(job.description);

@@ -94,6 +94,14 @@ body {
   padding: 0;
 }
 
+/* Reserve scrollbar space on desktop so layout doesn't jump when the
+   scrollbar appears/disappears (e.g. modal scroll-lock, route changes) */
+@media (min-width: 768px) {
+  html {
+    scrollbar-gutter: stable;
+  }
+}
+
 /* Custom Utilities to avoid inline styles flagged by Edge Tools */
 .job-logo-60 {
   width: 60px;
@@ -153,8 +161,8 @@ a.btn {
 
 /* Fix for overlapping elements on mobile browsers with address bars */
 .min-h-screen-safe {
+  min-height: 100dvh;
   min-height: -webkit-fill-available;
-  min-height: 100vh;
 }
 
 /* Fluid Typography Classes - Refined for 320px safety */

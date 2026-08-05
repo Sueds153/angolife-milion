@@ -119,7 +119,7 @@ export const DealDetailPage: React.FC<DealDetailPageProps> = ({ deal: initialDea
     // ── Render ─────────────────────────────────────────────────────────────────
 
     return (
-        <div className="relative flex flex-col min-h-screen pb-[130px] animate-fade-in -mx-4 -mt-6">
+        <div className="relative flex flex-col min-h-dvh pb-[130px] animate-fade-in -mx-4 -mt-6">
 
             {/* ═══ HERO IMAGE ═══════════════════════════════════════════════════════ */}
             <div className="relative w-full h-64 md:h-80 overflow-hidden bg-slate-200 dark:bg-slate-800 flex-shrink-0">

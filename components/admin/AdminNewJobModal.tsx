@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { X, Plus, Send } from 'lucide-react';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 export interface NewJobFormState {
   title: string;
@@ -39,6 +40,7 @@ export const AdminNewJobModal: React.FC<AdminNewJobModalProps> = ({
   addRequirement,
   removeRequirement
 }) => {
+  useScrollLock(isOpen);
   if (!isOpen) return null;
 
   return (

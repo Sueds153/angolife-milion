@@ -2,6 +2,7 @@
 import React from 'react';
 import { Tag, X, FileUp, RefreshCw, Save } from 'lucide-react';
 import { ProductDeal } from '../../types';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 export interface NewDealFormState {
   title: string;
@@ -38,6 +39,7 @@ export const AdminNewDealModal: React.FC<AdminNewDealModalProps> = ({
   dealImagePreview,
   loading
 }) => {
+  useScrollLock(isOpen);
   if (!isOpen) return null;
 
   return (

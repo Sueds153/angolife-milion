@@ -1,6 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { X, Clock, Award } from 'lucide-react';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 interface InterstitialAdProps {
   onClose: () => void;
@@ -11,6 +12,8 @@ export const InterstitialAd: React.FC<InterstitialAdProps> = ({ onClose, duratio
   const [canClose, setCanClose] = useState(false);
   const [timeLeft, setTimeLeft] = useState(duration);
   const [prevDuration, setPrevDuration] = useState(duration);
+
+  useScrollLock(true);
 
   if (prevDuration !== duration) {
     setPrevDuration(duration);
@@ -33,7 +36,7 @@ export const InterstitialAd: React.FC<InterstitialAdProps> = ({ onClose, duratio
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-black/95 backdrop-blur-md animate-fade-in p-4">
+    <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-black/95 backdrop-blur-md animate-fade-in p-4 overflow-y-auto">
       <div className="absolute top-6 right-6 z-[210]">
         {canClose ? (
           <button 
@@ -84,6 +87,8 @@ export const RewardedAd: React.FC<RewardedAdProps> = ({ onReward, onClose }) => 
   const [timeLeft, setTimeLeft] = useState(DURATION);
   const [completed, setCompleted] = useState(false);
 
+  useScrollLock(true);
+
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
@@ -99,7 +104,7 @@ export const RewardedAd: React.FC<RewardedAdProps> = ({ onReward, onClose }) => 
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-black animate-fade-in">
+    <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-black animate-fade-in overflow-y-auto">
       <div className="absolute top-0 left-0 w-full p-8 flex justify-between items-center bg-gradient-to-b from-black via-black/80 to-transparent">
         <div className="flex items-center gap-4 text-white">
           <div className={`p-2.5 rounded-lg ${completed ? 'bg-brand-gold text-black' : 'bg-white/10'}`}>

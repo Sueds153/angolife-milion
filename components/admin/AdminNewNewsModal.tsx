@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { X } from 'lucide-react';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 export interface NewNewsFormState {
   title: string;
@@ -26,6 +27,7 @@ export const AdminNewNewsModal: React.FC<AdminNewNewsModalProps> = ({
   newNews,
   setNewNews
 }) => {
+  useScrollLock(isOpen);
   if (!isOpen) return null;
 
   return (

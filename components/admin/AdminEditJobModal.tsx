@@ -1,6 +1,7 @@
 import React from 'react';
 import { Edit3, X, Save } from 'lucide-react';
 import { Job } from '../../types';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 interface AdminEditJobModalProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ export const AdminEditJobModal: React.FC<AdminEditJobModalProps> = ({
   setEditingJob,
   loading
 }) => {
+  useScrollLock(isOpen && !!editingJob);
   if (!isOpen || !editingJob) return null;
 
   return (

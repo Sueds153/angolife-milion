@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { X, ChevronRight, Briefcase, DollarSign, Sparkles } from 'lucide-react';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 export const OnboardingModal: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState(1);
+
+  useScrollLock(isOpen);
 
   useEffect(() => {
     const hasSeenOnboarding = localStorage.getItem('angolife_onboarding_seen');
@@ -48,8 +51,8 @@ export const OnboardingModal: React.FC = () => {
   const current = steps[step - 1];
 
   return (
-    <div className="fixed inset-0 z-[300] flex items-center justify-center p-6 bg-slate-950/60 backdrop-blur-md animate-fade-in">
-      <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden border border-orange-500/20 animate-slide-up">
+    <div className="fixed inset-0 z-[300] flex items-center justify-center p-6 bg-slate-950/60 backdrop-blur-md animate-fade-in overflow-y-auto">
+      <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden border border-orange-500/20 animate-slide-up my-auto">
         {/* Header Image/Icon Area */}
         <div className={`h-48 bg-gradient-to-br ${current.color} flex items-center justify-center relative`}>
           <div className="p-6 bg-white dark:bg-slate-900 rounded-3xl shadow-xl flex items-center justify-center animate-bounce-slow">

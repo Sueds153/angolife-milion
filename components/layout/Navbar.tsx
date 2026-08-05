@@ -3,6 +3,7 @@ import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { Menu, X, Briefcase, DollarSign, Tag, Newspaper, UserCog, Sun, Moon, Home, LogOut, User, LogIn, UserPlus, FileText, ShieldCheck, Lock } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { AuthService } from '../../services/core/auth.service';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 interface NavbarProps {
   onOpenLegal?: (type: 'privacy' | 'terms' | 'data') => void;
@@ -14,6 +15,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenLegal }) => {
   const { 
     user, isAuthenticated, isDarkMode, toggleTheme, setAuthModal 
   } = useAppStore();
+
+  useScrollLock(isOpen);
 
 
   const handleLogout = async () => {
@@ -150,7 +153,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenLegal }) => {
       {isOpen && (
         <div className="lg:hidden fixed inset-0 top-[calc(64px+var(--sat))] bg-slate-950/80 backdrop-blur-sm z-[130] animate-fade-in" onClick={() => setIsOpen(false)}>
           <div
-            className="bg-white dark:bg-slate-900 w-full shadow-2xl border-t border-orange-500/20 animate-slide-up max-h-[calc(100vh-64px-var(--sat))] overflow-y-auto"
+            className="bg-white dark:bg-slate-900 w-full shadow-2xl border-t border-orange-500/20 animate-slide-up max-h-[calc(100dvh-64px-var(--sat))] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="px-6 py-6 space-y-2">

@@ -2,6 +2,7 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import { NewsArticle } from '../../types';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 interface AdminEditNewsModalProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ export const AdminEditNewsModal: React.FC<AdminEditNewsModalProps> = ({
   editingNews,
   setEditingNews
 }) => {
+  useScrollLock(isOpen && !!editingNews);
   if (!isOpen || !editingNews) return null;
 
   return (

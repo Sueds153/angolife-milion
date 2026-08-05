@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { X, Zap, Play, Loader2, MessageCircle } from 'lucide-react';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 interface RewardedAdModalProps {
   isOpen: boolean;
@@ -35,6 +36,8 @@ export const RewardedAdModal: React.FC<RewardedAdModalProps> = ({
   const [interstitialState, setInterstitialState] = useState<'idle' | 'loading' | 'ready' | 'showing'>('idle');
   const [interstitialTimer, setInterstitialTimer] = useState(5);
   const [rewardTimer, setRewardTimer] = useState(15);
+
+  useScrollLock(isOpen);
 
   // Reset interstitial state when modal opens
   if (prevOpen !== isOpen) {

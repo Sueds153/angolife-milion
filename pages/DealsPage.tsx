@@ -4,6 +4,7 @@ import { Plus, ShoppingBag, X, Camera, FileUp } from 'lucide-react';
 import { DealsService } from '../services/api/deals.service';
 import { ProductDeal } from '../types';
 import { useAppStore } from '../store/useAppStore';
+import { useScrollLock } from '../hooks/useScrollLock';
 
 interface DealsPageProps {
   onSelectDeal: (deal: ProductDeal) => void;
@@ -16,6 +17,8 @@ export const DealsPage: React.FC<DealsPageProps> = ({ onSelectDeal, onShowInters
   const [deals, setDeals] = useState<ProductDeal[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useScrollLock(isModalOpen);
 
   const [formData, setFormData] = useState({
     title: '', store: '', storeNumber: '', originalPrice: 0, discountPrice: 0, location: '', description: '', category: 'Alimentação'

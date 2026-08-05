@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, Image as ImageIcon, Video, Globe, Clock, Layout, MapPin } from 'lucide-react';
 import { Ad, AdsService } from '../../services/api/ads.service';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 interface AdminAdModalProps {
   isOpen: boolean;
@@ -25,6 +26,8 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
     is_active: true,
     display_order: 0
   });
+
+  useScrollLock(isOpen);
 
   useEffect(() => {
     if (editingAd) {
@@ -64,8 +67,8 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/10 flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in overflow-y-auto">
+      <div className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/10 flex flex-col max-h-[90dvh] my-auto">
         {/* Header */}
         <div className="p-6 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50/50 dark:bg-white/[0.02]">
           <div className="flex items-center gap-3">

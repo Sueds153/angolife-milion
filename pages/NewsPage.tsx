@@ -9,6 +9,7 @@ import { ServiceUtils } from '../services/utils/utils';
 
 import { useAppStore } from '../store/useAppStore';
 import { Helmet } from 'react-helmet-async';
+import { useScrollLock } from '../hooks/useScrollLock';
 
 interface NewsPageProps {
   onRequestReward?: (callback: () => void) => void;
@@ -105,6 +106,8 @@ export const NewsPage: React.FC<NewsPageProps> = () => {
   const [pendingArticle, setPendingArticle] = useState<NewsArticle | null>(null);
   // Whether the full article body is unlocked after rewarded video
   const [contentUnlocked, setContentUnlocked] = useState(false);
+
+  useScrollLock(!!selectedArticle || showRewardedAd);
 
   useEffect(() => {
     const loadNews = async () => {

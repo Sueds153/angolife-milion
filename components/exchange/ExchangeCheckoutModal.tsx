@@ -5,6 +5,7 @@ import { APP_CONFIG } from '../../constants/app';
 import { ExchangeStepIdentity } from './ExchangeStepIdentity';
 import { ExchangeStepTerms } from './ExchangeStepTerms';
 import { ExchangeStepPayment } from './ExchangeStepPayment';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 interface ExchangeCheckoutModalProps {
   isOpen: boolean;
@@ -63,6 +64,7 @@ export const ExchangeCheckoutModal: React.FC<ExchangeCheckoutModalProps> = ({
   handleCopy,
   formatTime
 }) => {
+  useScrollLock(isOpen);
   if (!isOpen) return null;
 
   const currentRateValue = tradeAction === 'buy' ? (rates.find(r => r.currency === tradeCurrency)?.informalSell || 0) : (rates.find(r => r.currency === tradeCurrency)?.informalBuy || 0);
@@ -88,8 +90,8 @@ export const ExchangeCheckoutModal: React.FC<ExchangeCheckoutModalProps> = ({
   const isOnline = hour >= APP_CONFIG.OPERATIONAL_HOURS.START && hour < APP_CONFIG.OPERATIONAL_HOURS.END;
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-xl animate-fade-in">
-      <div className="bg-white dark:bg-[#0f172a] w-full max-w-lg rounded-[2.5rem] border border-orange-500/30 shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-xl animate-fade-in overflow-y-auto">
+      <div className="bg-white dark:bg-[#0f172a] w-full max-w-lg rounded-[2.5rem] border border-orange-500/30 shadow-2xl flex flex-col max-h-[90dvh] overflow-hidden my-auto">
         <div className={`w-full py-3 px-4 text-center text-[10px] font-black uppercase tracking-[0.2em] border-b ${isOnline ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-orange-500/10 text-orange-500 border-orange-500/20'}`}>
           {isOnline ? '⚡ Operadores Online' : '🌙 Processamento em espera (Horário de descanso)'}
         </div>

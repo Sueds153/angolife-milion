@@ -2,6 +2,7 @@
 import React from 'react';
 import { Edit3, X, RefreshCw, Save } from 'lucide-react';
 import { ProductDeal } from '../../types';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 interface AdminEditDealModalProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ export const AdminEditDealModal: React.FC<AdminEditDealModalProps> = ({
   setEditingDeal,
   loading
 }) => {
+  useScrollLock(isOpen && !!editingDeal);
   if (!isOpen || !editingDeal) return null;
 
   return (

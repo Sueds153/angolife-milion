@@ -15,6 +15,7 @@ import type { User } from '@supabase/supabase-js';
 import { UserProfile, AppNotification, ProductDeal } from './types';
 import { LegalModals } from './components/modals/LegalModals';
 import { BottomNav } from './components/layout/BottomNav';
+import { ScrollToTop } from './components/layout/ScrollToTop';
 import { useAppStore } from './store/useAppStore';
 import { OnboardingModal } from './components/modals/OnboardingModal';
 
@@ -214,10 +215,10 @@ const App: React.FC = () => {
   const showStickyAd = !(user?.isPremium || user?.isAdmin);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-900 flex justify-center text-slate-900 dark:text-white transition-colors duration-300 print:bg-white print:text-black">
+    <div className="min-h-dvh bg-white dark:bg-slate-900 flex justify-center text-slate-900 dark:text-white transition-colors duration-300 print:bg-white print:text-black">
       <div className="print:hidden"><Background /></div>
 
-      <div className="w-full lg:max-w-7xl xl:max-w-screen-2xl mx-auto print:max-w-none bg-white dark:bg-slate-900 min-h-screen shadow-2xl md:shadow-none print:shadow-none flex flex-col relative text-slate-900 dark:text-white transition-all duration-500">
+      <div className="w-full lg:max-w-7xl xl:max-w-screen-2xl mx-auto print:max-w-none bg-white dark:bg-slate-900 min-h-dvh shadow-2xl md:shadow-none print:shadow-none flex flex-col relative text-slate-900 dark:text-white transition-all duration-500">
 
         {notifications.map(n => (
           <NotificationToast
@@ -228,6 +229,7 @@ const App: React.FC = () => {
           />
         ))}
 
+        <ScrollToTop />
         <OnboardingModal />
 
         <Navbar />
