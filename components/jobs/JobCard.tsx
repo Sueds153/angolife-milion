@@ -23,16 +23,17 @@ export const JobCard: React.FC<JobCardProps> = ({
   onShareWhatsApp,
   formatRelativeDate
 }) => {
+  const parsed = JobUtils.parseJobData(job);
   return (
     <div 
       onClick={() => onOpenDetails(job)} 
-      className="bg-white dark:bg-slate-900 p-6 rounded-[2.5rem] shadow-sm border border-orange-500/10 hover:border-orange-500/50 transition-all cursor-pointer group flex flex-col h-full hover:shadow-xl hover:-translate-y-1 relative group overflow-hidden"
+      className="bg-white dark:bg-slate-900 p-6 rounded-[2.5rem] shadow-sm border border-orange-500/10 hover:border-orange-500/50 transition-all cursor-pointer group flex flex-col h-full hover:shadow-xl hover:-translate-y-1 relative overflow-hidden"
     >
       <div className="flex flex-col min-[320px]:flex-row items-start gap-4 mb-4 stack-narrow">
-        <JobLogo src={job.imageUrl} company={job.company} category={job.category} size={60} />
+        <JobLogo src={job.imageUrl} company={parsed.cleanCompany} category={job.category} size={60} />
         <div className="flex-1 min-w-0 pt-1 w-full md:w-auto">
           <div className="flex flex-wrap items-center gap-1.5 mb-1">
-            <h3 className="font-black text-slate-900 dark:text-white leading-tight group-hover:text-orange-500 transition-colors line-clamp-2 uppercase text-sm">{job.title}</h3>
+            <h3 className="font-black text-slate-900 dark:text-white leading-tight group-hover:text-orange-500 transition-colors line-clamp-2 uppercase text-sm">{parsed.cleanTitle}</h3>
             {job.isVerified && (
               <div className="flex items-center gap-1.5 px-2 py-0.5 bg-amber-500/10 rounded-lg border border-amber-500/20 shrink-0">
                 <ShieldCheck size={14} className="text-amber-500" fill="currentColor" fillOpacity={0.2} />
