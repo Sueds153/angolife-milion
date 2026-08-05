@@ -114,7 +114,7 @@ export const DealsService = {
   },
 
   submitDeal: async (
-    deal: Omit<ProductDeal, "id" | "status" | "createdAt" | "views" | "likes" | "verified" | "is_admin">,
+    deal: Omit<ProductDeal, "id" | "status" | "createdAt" | "views" | "likes">,
   ): Promise<void> => {
     const { error } = await supabase.from("product_deals").insert([
       {
@@ -130,7 +130,9 @@ export const DealsService = {
         image_url: deal.imageUrl,
         category: deal.category,
         submitted_by: deal.submittedBy,
-        status: "pending",
+        verified: deal.verified ?? false,
+        is_admin: deal.is_admin ?? false,
+        status: deal.is_admin ? "approved" : "pending",
       },
     ]);
 

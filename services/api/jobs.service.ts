@@ -127,6 +127,30 @@ export const JobsService = {
     return !error;
   },
 
+  updateJob: async (id: string, job: Job): Promise<boolean> => {
+    const { error } = await supabase
+      .from("jobs")
+      .update({
+        title: job.title,
+        company: job.company,
+        location: job.location,
+        type: job.type,
+        salary: job.salary,
+        description: job.description,
+        requirements: job.requirements,
+        application_email: job.applicationEmail,
+        source_url: job.sourceUrl,
+        imagem_url: job.imageUrl,
+        categoria: job.category,
+        fonte: job.source,
+        is_verified: job.isVerified,
+      })
+      .eq("id", id);
+
+    if (error) console.error("Error updating job:", error);
+    return !error;
+  },
+
   createJob: async (
     job: Omit<Job, "id" | "postedAt" | "status">,
   ): Promise<boolean> => {

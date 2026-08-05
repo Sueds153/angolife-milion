@@ -3,7 +3,7 @@
  * @license Proprietary. Unauthorized copying, modification, or reverse engineering is strictly prohibited.
  */
 
-import { Job, NewsArticle, ProductDeal } from "../../types";
+import { Job, NewsArticle, ProductDeal, CVExperience } from "../../types";
 import { supabase } from "../core/supabaseClient";
 
 // Service used to call the secure Supabase Edge Function

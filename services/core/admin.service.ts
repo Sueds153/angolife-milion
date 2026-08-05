@@ -19,7 +19,7 @@ export const AdminService = {
         requirements: j.requirements,
         source_url: j.sourceUrl,
         application_email: j.applicationEmail,
-        image_url: j.imageUrl || null,
+        imagem_url: j.imageUrl || null,
         categoria: j.category || "Geral",
         fonte: "IA Bot (Gemini)",
         is_verified: false,

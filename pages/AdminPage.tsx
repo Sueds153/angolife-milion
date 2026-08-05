@@ -185,10 +185,18 @@ export const AdminPage: React.FC = () => {
     }
   };
 
-  const handleApprove = async (id: string) => {
+  const handleApprove = async (id: string, jobToApprove?: Job) => {
     if (!confirm('Deseja publicar esta vaga na AngoLife?')) return;
     setLoading(true);
     console.log('✅ Tentando aprovar vaga:', id);
+    if (jobToApprove) {
+      const updated = await JobsService.updateJob(id, jobToApprove);
+      if (!updated) {
+        alert('Erro ao guardar alterações da vaga. Verifique a consola para mais detalhes.');
+        setLoading(false);
+        return;
+      }
+    }
     const success = await JobsService.approveJob(id, true);
     if (success) {
       setPendingJobs(prev => prev.filter(job => job.id !== id));
@@ -553,7 +561,7 @@ export const AdminPage: React.FC = () => {
 
     try {
       const { error } = await supabase
-        .from('cv_subscriptions')
+        .from('subscriptions_pending')
         .update({ status: 'rejeitado' })
         .eq('id', id);
 

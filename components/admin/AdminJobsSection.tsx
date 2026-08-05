@@ -1,8 +1,7 @@
 
 import React, { useState } from 'react';
-import { Briefcase, Check, RefreshCw, Plus, Building, MapPin, Clock, Mail, ShieldCheck, X, HardHat, Store } from 'lucide-react';
+import { Briefcase, Check, RefreshCw, Plus, Building, MapPin, Clock, Mail, ShieldCheck, X, HardHat, Store, Edit3 } from 'lucide-react';
 import { Job } from '../../types';
-import { AdminEditJobModal } from './AdminEditJobModal';
 
 interface AdminJobsSectionProps {
   pendingJobs: Job[];
@@ -72,6 +71,8 @@ export const AdminJobsSection: React.FC<AdminJobsSectionProps> = ({
   handleApproveAll,
   handleSyncJobs,
   setShowNewJobModal,
+  setShowEditJobModal,
+  setEditingJob,
   handleToggleVerification,
   handleReject
 }) => {
@@ -232,15 +233,6 @@ export const AdminJobsSection: React.FC<AdminJobsSectionProps> = ({
           <p className="font-bold text-slate-400 uppercase tracking-widest text-xs">Tudo limpo! Sem vagas pendentes.</p>
 </div>
       )}
-
-      <AdminEditJobModal
-        isOpen={showEditJobModal}
-        onClose={() => setShowEditJobModal(false)}
-        handleApproveJob={handleApprove}
-        editingJob={editingJob}
-        setEditingJob={setEditingJob}
-        loading={loading}
-      />
     </div>
   );
 };
