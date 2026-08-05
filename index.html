@@ -133,6 +133,7 @@
         margin: 0;
         padding: 0;
         overflow-x: hidden;
+        overflow-x: clip;
       }
       .app-loading {
         display: flex;
@@ -155,7 +156,7 @@
     <!-- Plausible Analytics -->
     <script defer data-domain="angolife.app" src="https://plausible.io/js/script.js"></script>
   </head>
-  <body class="noise-bg overflow-x-hidden">
+  <body class="noise-bg">
     <div id="root">
       <div class="app-loading">
         <div class="app-loading-inner">

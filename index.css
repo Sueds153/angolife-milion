@@ -135,10 +135,16 @@ body {
 /* --- PWA & Mobile Optimization --- */
 
 /* Mobile-first responsiveness: Ensure fluids layouts and no side-scroll */
+html {
+  overflow-x: hidden;
+}
 html,
 body {
-  overflow-x: hidden;
   width: 100%;
+}
+body {
+  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* Touch targets optimization (iOS/Android compliance) */
