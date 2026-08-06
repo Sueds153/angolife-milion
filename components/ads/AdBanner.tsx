@@ -87,7 +87,7 @@ export const AdBanner: React.FC<AdBannerProps> = ({ format, customLocation = 'al
       (a.format === 'banner' || a.format === 'all')
     );
     if (matching.length === 0) return null;
-    return matching[Math.floor(Math.random() * matching.length)];
+    return matching[0];
   }, [activeAds, customLocation]);
 
   const isGoogleEnabled = adsConfig.enabled && !partnerAd;

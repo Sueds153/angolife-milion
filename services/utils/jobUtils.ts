@@ -108,10 +108,10 @@ export const JobUtils = {
    * Smart parser for scraped jobs that have concatenated metadata in the title or email fields.
    */
   parseJobData(job: Job): ParsedJobInfo {
-    let rawTitle = (job.title || '').trim();
-    let company = (job.company || '').trim();
-    let location = this.normalizeLocation(job.location);
-    let type = this.displayType(job);
+    const rawTitle = (job.title || '').trim();
+    const company = (job.company || '').trim();
+    const location = this.normalizeLocation(job.location);
+    const type = this.displayType(job);
     let experience: string | undefined = undefined;
     let extraDescription: string | undefined = undefined;
 
@@ -170,7 +170,7 @@ export const JobUtils = {
     }
 
     // --- 2. Clean Application Email / Method ---
-    let rawEmail = (job.applicationEmail || '').trim();
+    const rawEmail = (job.applicationEmail || '').trim();
     let applyMethod: 'email' | 'url' = 'email';
     let applyTarget = rawEmail;
     let applyDisplayLabel = rawEmail;

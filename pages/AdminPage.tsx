@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAppStore } from '../store/useAppStore';
 import { useNavigate } from 'react-router-dom';
 import { JobsService } from '../services/api/jobs.service';
@@ -134,7 +134,7 @@ export const AdminPage: React.FC = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [loadAdsData]);
 
   useEffect(() => {
     if (activeTab === 'jobs') {
@@ -150,7 +150,7 @@ export const AdminPage: React.FC = () => {
     } else if (activeTab === 'ads') {
       loadAdsData();
     }
-  }, [activeTab]);
+  }, [activeTab, loadAdsData]);
 
   const [rates, setRates] = useState<ExchangeRate[]>([]);
   const loadExchangeRates = async () => {
@@ -575,7 +575,7 @@ export const AdminPage: React.FC = () => {
     }
   };
 
-  const loadAdsData = async () => {
+  const loadAdsData = useCallback(async () => {
     try {
       setLoading(true);
       const [adsData, settingsData] = await Promise.all([
@@ -591,7 +591,7 @@ export const AdminPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [setGlobalActiveAds]);
 
   const handleUpdateSetting = async (key: string, value: unknown) => {
     try {

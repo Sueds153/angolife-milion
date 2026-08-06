@@ -31,7 +31,7 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
     if (job && scrollRef.current) {
       scrollRef.current.scrollTop = 0;
     }
-  }, [job?.id]);
+  }, [job]);
 
   // Close on Escape key
   useEffect(() => {
