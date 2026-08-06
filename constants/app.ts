@@ -9,6 +9,6 @@ export const APP_CONFIG = {
     ENTITY: "10116",
     REFERENCE: "929 423 278",
     BINANCE_PAY_ID: "821967221",
-    WISE_PAYPAL_EMAIL: "info@angolife.site"
+    WISE_PAYPAL_EMAIL: "info@resolveao.app"
   }
 };

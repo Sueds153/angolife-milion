@@ -1,5 +1,5 @@
 -- ==========================================
--- AngoLife: ALIGN SCHEMA TO CODE (idempotent)
+-- Resolve.AO: ALIGN SCHEMA TO CODE (idempotent)
 -- Alinha o schema de produção com o que o código espera.
 -- Seguro de re-correr: tudo usa IF NOT EXISTS / ON CONFLICT / DO NOTHING.
 -- Execute no SQL Editor do projeto: efhelvzdlwewsjkdknkl

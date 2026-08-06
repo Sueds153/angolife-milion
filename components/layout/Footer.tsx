@@ -10,8 +10,8 @@ interface FooterProps {
 export const Footer: React.FC<FooterProps> = ({ onOpenLegal }) => {
   const handleShareApp = async () => {
     const shareData = {
-      title: 'Angolife Su-Golden',
-      text: 'Descubra o Angolife: A plataforma de elite para Câmbio, Empregos e Negócios em Angola.',
+      title: 'Resolve.AO Su-Golden',
+      text: 'Descubra o Resolve.AO: A plataforma de elite para Câmbio, Empregos e Negócios em Angola.',
       url: window.location.origin,
     };
 
@@ -41,7 +41,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegal }) => {
               SU-GOLDEN
             </span>
             <span className="text-3xl font-black tracking-tighter text-slate-900 dark:text-white uppercase leading-none">
-              ANGO<span className="text-slate-400 dark:text-slate-600">LIFE</span>
+              RESOLVE<span className="text-slate-400 dark:text-slate-600">.AO</span>
             </span>
           </div>
           <p className="text-slate-500 dark:text-slate-400 text-xs font-medium leading-relaxed max-w-[280px]">
@@ -121,7 +121,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegal }) => {
               <Share2 size={18} />
             </div>
             <div className="text-left">
-              <span className="block text-white text-xs font-black uppercase tracking-wide">Partilhar Angolife</span>
+              <span className="block text-white text-xs font-black uppercase tracking-wide">Partilhar Resolve.AO</span>
               <span className="block text-slate-500 text-[10px] font-bold">Convide amigos e ganhe estatuto</span>
             </div>
           </div>
@@ -132,7 +132,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegal }) => {
         <div className="pt-6 border-t border-orange-500/10 flex flex-col md:flex-row justify-center md:justify-start items-center gap-4">
           <div className="space-y-1 text-center md:text-left">
             <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest">
-              © 2024 ANGOLIFE BY SU-GOLDEN.
+              © 2024 RESOLVE.AO BY SU-GOLDEN.
             </p>
           </div>
         </div>

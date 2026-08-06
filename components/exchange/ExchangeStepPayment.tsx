@@ -54,7 +54,7 @@ export const ExchangeStepPayment: React.FC<ExchangeStepPaymentProps> = ({
 
       <div className="bg-slate-50 dark:bg-slate-900/30 rounded-3xl border border-orange-500/20 p-6 space-y-4">
         <div className="mb-4">
-          <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{tradeAction === 'buy' ? 'DADOS PARA PAGAMENTO' : 'ENTREGAR ATIVOS (ANGOLIFE)'}</span>
+          <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{tradeAction === 'buy' ? 'DADOS PARA PAGAMENTO' : 'ENTREGAR ATIVOS (Resolve.AO)'}</span>
         </div>
 
         <div className="space-y-3">
@@ -178,7 +178,7 @@ export const ExchangeStepPayment: React.FC<ExchangeStepPaymentProps> = ({
           <button
             type="button"
             onClick={() => {
-              const msg = `Olá AngoLife! Estou no meio de uma operação de ${tradeAction === 'buy' ? 'Compra' : 'Venda'} e tive um problema. Podem ajudar?`;
+              const msg = `Olá Resolve.AO! Estou no meio de uma operação de ${tradeAction === 'buy' ? 'Compra' : 'Venda'} e tive um problema. Podem ajudar?`;
               window.open(`https://wa.me/${APP_CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
             }}
             className="flex items-center gap-2 px-4 py-2 bg-slate-800/40 backdrop-blur-sm border border-white/5 rounded-full hover:bg-slate-800/60 transition-all group"

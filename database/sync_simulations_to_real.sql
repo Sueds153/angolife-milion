@@ -1,5 +1,5 @@
 -- ==========================================
--- AngoLife: Real Data Persistence Update
+-- Resolve.AO: Real Data Persistence Update
 -- Adds storage for saved jobs and application history
 -- ==========================================
 -- 1. Update Profiles table with JSONB columns for history

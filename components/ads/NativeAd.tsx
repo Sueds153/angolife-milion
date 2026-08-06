@@ -7,7 +7,7 @@ interface NativeAdProps {
 
 /**
  * Native Ad Component
- * Styled to match AngoLife's premium aesthetic
+ * Styled to match Resolve.AO's premium aesthetic
  * Appears as a "Sponsored Tip" card
  */
 export const NativeAd: React.FC<NativeAdProps> = ({ className = '' }) => {

@@ -29,7 +29,7 @@ export class ErrorBoundary extends Component<Props, State> {
           <div className="bg-red-500/20 p-6 rounded-3xl border border-red-500/30 max-w-lg">
             <h1 className="text-2xl font-black mb-4 text-red-500 uppercase tracking-tighter">Erro Crítico Detetado</h1>
             <p className="text-slate-300 mb-6 font-medium">
-              Ocorreu um erro inesperado no Angolife. Por favor, tente recarregar a página.
+              Ocorreu um erro inesperado no Resolve.AO. Por favor, tente recarregar a página.
             </p>
             <div className="bg-black/50 p-4 rounded-xl text-left text-xs font-mono text-red-300 overflow-auto max-h-40 mb-6">
               {this.state.error?.toString()}

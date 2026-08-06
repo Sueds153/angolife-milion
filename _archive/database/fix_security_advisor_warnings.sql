@@ -1,5 +1,5 @@
 -- ==========================================
--- AngoLife SECURITY ADVISOR FIXES
+-- Resolve.AO SECURITY ADVISOR FIXES
 -- Solve: Search Path Mutability, Disabled RLS on pending tables
 -- ==========================================
 -- 1. Fix: Function Search Path Mutable

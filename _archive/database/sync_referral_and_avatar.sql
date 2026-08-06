@@ -1,5 +1,5 @@
 -- ==========================================
--- AngoLife Synchronization: Referral System & Profile Photos
+-- Resolve.AO Synchronization: Referral System & Profile Photos
 -- Execute this in the Supabase SQL Editor
 -- ==========================================
 -- 1. Update Profiles table with missing columns

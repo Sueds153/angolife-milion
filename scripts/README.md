@@ -1,5 +1,5 @@
 
-# Angolife Automation Scripts 🤖
+# Resolve.AO Automation Scripts 🤖
 
 Este diretório contém os scripts para automação de conteúdo (Vagas de Emprego e Notícias).
 

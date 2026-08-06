@@ -59,8 +59,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenLegal }) => {
             </div>
             <div className="flex items-center text-lg md:text-2xl font-bold tracking-tighter">
               <h1 className="flex items-center">
-                <span className="text-slate-900 dark:text-white">ANGO</span>
-                <span className="text-orange-500 ml-0.5">LIFE</span>
+                <span className="text-slate-900 dark:text-white">RESOLVE</span>
+                <span className="text-orange-500 ml-0.5">.AO</span>
               </h1>
             </div>
           </Link>

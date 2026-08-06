@@ -1,5 +1,5 @@
 -- =================================================================
--- 🔐 AngoLife — Security Patch v2
+-- 🔐 Resolve.AO — Security Patch v2
 -- Execute este script no Supabase SQL Editor em sequência.
 -- Preserva todas as funcionalidades do painel admin.
 -- =================================================================

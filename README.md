@@ -1,4 +1,4 @@
-# AngoLife — Super App de Angola
+# Resolve.AO — Super App de Angola
 
 O portal definitivo para **empregos**, **câmbio informal (Kwanza/Dólar/Euro)**, **notícias** e **promoções** em tempo real em Angola.
 

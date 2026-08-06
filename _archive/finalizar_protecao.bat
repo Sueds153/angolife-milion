@@ -1,6 +1,6 @@
 @echo off
 echo ==========================================
-echo    AngoLife - Finalizador de Seguranca
+echo    Resolve.AO - Finalizador de Seguranca
 echo ==========================================
 echo.
 echo Este script vai terminar a configuracao do seu servidor Supabase.

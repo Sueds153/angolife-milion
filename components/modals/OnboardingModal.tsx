@@ -9,14 +9,14 @@ export const OnboardingModal: React.FC = () => {
   useScrollLock(isOpen);
 
   useEffect(() => {
-    const hasSeenOnboarding = localStorage.getItem('angolife_onboarding_seen');
+    const hasSeenOnboarding = localStorage.getItem('RESOLVEAO_onboarding_seen');
     if (!hasSeenOnboarding) {
       setTimeout(() => setIsOpen(true), 2000); // Show after 2 seconds
     }
   }, []);
 
   const handleClose = () => {
-    localStorage.setItem('angolife_onboarding_seen', 'true');
+    localStorage.setItem('RESOLVEAO_onboarding_seen', 'true');
     setIsOpen(false);
   };
 
@@ -29,7 +29,7 @@ export const OnboardingModal: React.FC = () => {
 
   const steps = [
     {
-      title: "Bem-vindo ao AngoLife",
+      title: "Bem-vindo ao Resolve.AO",
       description: "O teu super aplicativo para tudo o que precisas em Angola. Empregos, Câmbio e Notícias num só lugar.",
       icon: <Sparkles className="text-orange-500" size={40} />,
       color: "from-orange-500/20 to-amber-500/20"

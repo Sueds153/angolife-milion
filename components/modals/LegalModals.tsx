@@ -21,15 +21,15 @@ export const LegalModals: React.FC<LegalModalsProps> = ({ isOpen, onClose, type 
       sections: [
         {
           title: '1. Termos de Uso e Condições Gerais',
-          text: 'Ao instalar, aceder ou utilizar o aplicativo AngoLife, o utilizador declara ter capacidade jurídica plena e aceita, de forma irrevogável e sem reservas, todos os termos aqui descritos. A discordância com qualquer cláusula implica a cessação imediata do direito de uso. Este documento constitui o acordo integral entre o proprietário da plataforma e o utilizador final.'
+          text: 'Ao instalar, aceder ou utilizar o aplicativo Resolve.AO, o utilizador declara ter capacidade jurídica plena e aceita, de forma irrevogável e sem reservas, todos os termos aqui descritos. A discordância com qualquer cláusula implica a cessação imediata do direito de uso. Este documento constitui o acordo integral entre o proprietário da plataforma e o utilizador final.'
         },
         {
           title: '2. Natureza da Operação e Isenção (Scraping)',
-          text: 'O AngoLife opera como um motor de indexação algorítmica de dados públicos. Agregação de Terceiros: O utilizador reconhece que as vagas de emprego e notícias são obtidas via web scraping de fontes externas. O AngoLife não possui controle editorial, não verifica a idoneidade das empresas anunciantes e não garante a existência real das vagas. Inexistência de Garantia: A plataforma é fornecida "tal como está". Não garantimos que o serviço será ininterrupto ou livre de erros.'
+          text: 'O Resolve.AO opera como um motor de indexação algorítmica de dados públicos. Agregação de Terceiros: O utilizador reconhece que as vagas de emprego e notícias são obtidas via web scraping de fontes externas. O Resolve.AO não possui controle editorial, não verifica a idoneidade das empresas anunciantes e não garante a existência real das vagas. Inexistência de Garantia: A plataforma é fornecida "tal como está". Não garantimos que o serviço será ininterrupto ou livre de erros.'
         },
         {
           title: '3. Módulo de Câmbio e Informações Financeiras',
-          text: 'Caráter Informativo: Os dados de compra e venda de moedas são meramente referenciais. O AngoLife não é uma instituição financeira, não realiza custódia de valores nem intermedia transações de câmbio. Isenção Financeira: Não nos responsabilizamos por decisões financeiras ou perdas resultantes da flutuação cambial. O utilizador renuncia a qualquer direito de indemnização por erros de cotação.'
+          text: 'Caráter Informativo: Os dados de compra e venda de moedas são meramente referenciais. O Resolve.AO não é uma instituição financeira, não realiza custódia de valores nem intermedia transações de câmbio. Isenção Financeira: Não nos responsabilizamos por decisões financeiras ou perdas resultantes da flutuação cambial. O utilizador renuncia a qualquer direito de indemnização por erros de cotação.'
         },
         {
           title: '4. Conteúdos Premium e Propriedade Intelectual',
@@ -37,11 +37,11 @@ export const LegalModals: React.FC<LegalModalsProps> = ({ isOpen, onClose, type 
         },
         {
           title: '5. Limitação de Responsabilidade',
-          text: 'Em nenhuma circunstância o proprietário do AngoLife será responsável por danos incidentais, especiais ou consequentes. O utilizador concorda em indemnizar e isentar o desenvolvedor de qualquer reclamação judicial movida por terceiros devido ao uso indevido da plataforma.'
+          text: 'Em nenhuma circunstância o proprietário do Resolve.AO será responsável por danos incidentais, especiais ou consequentes. O utilizador concorda em indemnizar e isentar o desenvolvedor de qualquer reclamação judicial movida por terceiros devido ao uso indevido da plataforma.'
         },
         {
           title: '6. Proibição de Engenharia Reversa e Plágio',
-          text: 'Fica expressamente proibida qualquer tentativa de engenharia reversa, descompilação ou acesso não autorizado ao código-fonte da plataforma. A reprodução, cópia ou plágio da interface, lógica operacional ou algoritmos de raspagem (scrapers) do AngoLife é ilegal e sujeita a severas sanções criminais e cíveis nos termos da legislação de propriedade intelectual angolana e internacional.'
+          text: 'Fica expressamente proibida qualquer tentativa de engenharia reversa, descompilação ou acesso não autorizado ao código-fonte da plataforma. A reprodução, cópia ou plágio da interface, lógica operacional ou algoritmos de raspagem (scrapers) do Resolve.AO é ilegal e sujeita a severas sanções criminais e cíveis nos termos da legislação de propriedade intelectual angolana e internacional.'
         }
       ]
     },
@@ -60,11 +60,11 @@ export const LegalModals: React.FC<LegalModalsProps> = ({ isOpen, onClose, type 
         },
         {
           title: '3. Segurança e Transferência Internacional',
-          text: 'O utilizador aceita que os dados podem ser armazenados em servidores fora de Angola. Embora utilizemos protocolos rigorosos, o AngoLife não pode garantir invulnerabilidade absoluta contra ataques cibernéticos sofisticados.'
+          text: 'O utilizador aceita que os dados podem ser armazenados em servidores fora de Angola. Embora utilizemos protocolos rigorosos, o Resolve.AO não pode garantir invulnerabilidade absoluta contra ataques cibernéticos sofisticados.'
         },
         {
           title: '4. Direitos do Titular (Esquecimento)',
-          text: 'O utilizador pode solicitar a retificação ou eliminação dos seus dados. O AngoLife reserva-se o direito de manter cópias de arquivo para cumprimento de obrigações legais de forma anonimizada.'
+          text: 'O utilizador pode solicitar a retificação ou eliminação dos seus dados. O Resolve.AO reserva-se o direito de manter cópias de arquivo para cumprimento de obrigações legais de forma anonimizada.'
         },
         {
           title: '5. Cookies e Rastreamento',

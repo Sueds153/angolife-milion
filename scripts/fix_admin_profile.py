@@ -3,7 +3,7 @@ import os
 import requests
 from dotenv import load_dotenv
 
-load_dotenv(dotenv_path='c:/Users/Administrator/Desktop/angolife atualizado/angolife/.env.local')
+load_dotenv(dotenv_path='c:/Users/Administrator/Desktop/resolveao atualizado/resolveao/.env.local')
 
 URL = os.getenv("VITE_SUPABASE_URL")
 SERVICE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")

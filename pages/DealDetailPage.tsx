@@ -88,7 +88,7 @@ export const DealDetailPage: React.FC<DealDetailPageProps> = ({ deal: initialDea
 
     const handleShare = async () => {
         const shareData = {
-            title: deal.title ?? 'Oferta AngoLife',
+            title: deal.title ?? 'Oferta Resolve.AO',
             text: `${deal.title} por apenas ${deal.discountPrice?.toLocaleString()} Kz em ${deal.store}!`,
             url: window.location.href,
         };
@@ -184,7 +184,7 @@ export const DealDetailPage: React.FC<DealDetailPageProps> = ({ deal: initialDea
                     <div className="inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-500/10 border border-amber-400/40 dark:border-amber-500/30 rounded-xl px-4 py-2">
                         <BadgeCheck size={16} className="text-amber-500 dark:text-amber-400 flex-shrink-0" />
                         <span className="text-amber-600 dark:text-amber-400 font-black text-[11px] uppercase tracking-widest">
-                            Oferta Verificada pela AngoLife
+                            Oferta Verificada pela Resolve.AO
                         </span>
                     </div>
                 )}

@@ -263,7 +263,7 @@ export const ExchangeStepIdentity: React.FC<ExchangeStepIdentityProps> = ({
           </div>
           <div className="flex flex-col">
             <span className="text-[10px] font-black text-green-500 uppercase tracking-widest whitespace-nowrap">
-              Economia AngoLife
+              Economia Resolve.AO
             </span>
             <span className="text-xs font-bold text-white leading-tight">
               Estás a poupar aproximadamente{" "}

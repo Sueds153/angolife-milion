@@ -1,4 +1,4 @@
-# 📖 Manual de Manutenção - Angolife
+# 📖 Manual de Manutenção - Resolve.AO
 
 Este guia fornece instruções passo a passo para realizar alterações comuns no projeto, como mudar textos, cores, configurações e realizar manutenção básica.
 
@@ -29,7 +29,7 @@ As cores principais são geridas via CSS e classes utilitárias.
 
 ### Cores Globais (Ouro, Escuro, Claro)
 
-Abra o ficheiro [index.css](file:///c:/Users/Administrator/Documents/angolife%20atualizado%20pro/angolife%20atualizado/angolife%20atualizado/angolife/index.css).
+Abra o ficheiro [index.css](file:///c:/Users/Administrator/Documents/resolveao%20atualizado%20pro/resolveao%20atualizado/resolveao%20atualizado/Resolve.AO/index.css).
 
 - Procure o bloco `@theme`.
 - Altere os valores hexadecimais:
@@ -52,7 +52,7 @@ O projeto usa Tailwind CSS. Se vir classes como `text-orange-500` ou `bg-orange-
 
 Centralizei as informações de negócio num ficheiro de constantes para facilitar a manutenção rápida.
 
-Abra o ficheiro [app.ts](file:///c:/Users/Administrator/Documents/angolife%20atualizado%20pro/angolife%20atualizado/angolife%20atualizado/angolife/constants/app.ts).
+Abra o ficheiro [app.ts](file:///c:/Users/Administrator/Documents/resolveao%20atualizado%20pro/resolveao%20atualizado/resolveao%20atualizado/Resolve.AO/constants/app.ts).
 
 Pode alterar:
 
@@ -102,9 +102,9 @@ Para manter o seu sistema seguro e livre de avisos no Dashboard do Supabase, sig
 
 ### Resolver o aviso "Function Search Path Mutable"
 
-Já atualizei o ficheiro [security_patch_v2.sql](file:///c:/Users/Administrator/Documents/angolife%20atualizado%20pro/angolife%20atualizado/angolife%20atualizado/angolife/database/security_patch_v2.sql).
+Já atualizei o ficheiro [security_patch_v2.sql](file:///c:/Users/Administrator/Documents/resolveao%20atualizado%20pro/resolveao%20atualizado/resolveao%20atualizado/Resolve.AO/database/security_patch_v2.sql).
 
-- **Ação (concluída em 2026-08-06)**: Executei o `security_patch_v2.sql` no projeto Supabase `efhelvzdlwewsjkdknkl` (AngoLife). A função `check_notification_limit` foi recriada com `SET search_path = public`, criando a tabela `notification_rate_limit` com RLS ativo. O aviso "Function Search Path Mutable" foi resolvido e a função foi testada (respeita o limite de 2/dia).
+- **Ação (concluída em 2026-08-06)**: Executei o `security_patch_v2.sql` no projeto Supabase `efhelvzdlwewsjkdknkl` (Resolve.AO). A função `check_notification_limit` foi recriada com `SET search_path = public`, criando a tabela `notification_rate_limit` com RLS ativo. O aviso "Function Search Path Mutable" foi resolvido e a função foi testada (respeita o limite de 2/dia).
 
 ### Resolver o aviso "Leaked Password Protection"
 

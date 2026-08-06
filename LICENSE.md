@@ -1,10 +1,10 @@
-# PROPRIETARY LICENSE - ANGOLIFE BY SU-GOLDEN
+# PROPRIETARY LICENSE - Resolve.AO BY SU-GOLDEN
 
-Copyright (c) 2024-2026 AngoLife by Su-Golden. All Rights Reserved.
+Copyright (c) 2024-2026 Resolve.AO by Su-Golden. All Rights Reserved.
 
 ## 1. OWNERSHIP AND INTELLECTUAL PROPERTY
 
-The AngoLife application, including but not limited to its source code, design, logos, algorithms, scrapper mechanisms, and databases, is the exclusive proprietary property of Su-Golden ("the Owner"). It is protected by international copyright laws and treaty provisions.
+The Resolve.AO application, including but not limited to its source code, design, logos, algorithms, scrapper mechanisms, and databases, is the exclusive proprietary property of Su-Golden ("the Owner"). It is protected by international copyright laws and treaty provisions.
 
 ## 2. PROHIBITED ACTIONS
 

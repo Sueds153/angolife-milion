@@ -144,7 +144,7 @@ export const ExchangePage: React.FC = () => {
         isExpired,
         timestamp: Date.now()
       };
-      localStorage.setItem('ANGOLIFE_EXCHANGE_SESSION', JSON.stringify(session));
+      localStorage.setItem('RESOLVEAO_EXCHANGE_SESSION', JSON.stringify(session));
     }
   }, [formData, currentStep, timeLeft, isExpired, isCheckoutOpen]);
 
@@ -173,7 +173,7 @@ export const ExchangePage: React.FC = () => {
       }
 
       // 2. Check Local Persistence
-      const savedSession = localStorage.getItem('ANGOLIFE_EXCHANGE_SESSION');
+      const savedSession = localStorage.getItem('RESOLVEAO_EXCHANGE_SESSION');
       if (savedSession) {
         const session = JSON.parse(savedSession);
         const hoursPassed = (Date.now() - session.timestamp) / (1000 * 60 * 60);
@@ -191,7 +191,7 @@ export const ExchangePage: React.FC = () => {
             setIsCheckoutOpen(true);
           }
         } else {
-          localStorage.removeItem('ANGOLIFE_EXCHANGE_SESSION');
+          localStorage.removeItem('RESOLVEAO_EXCHANGE_SESSION');
         }
       }
     };
@@ -275,9 +275,9 @@ export const ExchangePage: React.FC = () => {
     const finalOrderId = orderId || `MANUAL-${Date.now().toString().slice(-6)}`;
 
     if (tradeAction === 'buy') {
-      message = `${priorityTag}📥 *NOVO PEDIDO - ANGOLIFE*\n\n*ID:* ${finalOrderId}\n\n👤 *Perfil*:\nNome: ${formData.fullName}\nIdade: ${formData.age}\nGénero: ${formData.gender}\n\n🔄 *Operação*:\nTipo: COMPRA\nMontante: ${parseFloat(tradeAmount).toFixed(2)} ${tradeCurrency}\nTotal: ${totalKzFormatted}\n\n📍 *Destino*:\nCarteira: ${formData.wallet}\nID/Coord: ${formData.coordinates}\n\n💳 *Pagamento*:\nMétodo: ${formData.paymentMethod}${isExpired ? '\n\n⚠️ *TEMPO EXPIRADO*' : ''}\n\nLink do Comprovativo:\n${proofUrl || 'Não anexado'}`;
+      message = `${priorityTag}📥 *NOVO PEDIDO - Resolve.AO*\n\n*ID:* ${finalOrderId}\n\n👤 *Perfil*:\nNome: ${formData.fullName}\nIdade: ${formData.age}\nGénero: ${formData.gender}\n\n🔄 *Operação*:\nTipo: COMPRA\nMontante: ${parseFloat(tradeAmount).toFixed(2)} ${tradeCurrency}\nTotal: ${totalKzFormatted}\n\n📍 *Destino*:\nCarteira: ${formData.wallet}\nID/Coord: ${formData.coordinates}\n\n💳 *Pagamento*:\nMétodo: ${formData.paymentMethod}${isExpired ? '\n\n⚠️ *TEMPO EXPIRADO*' : ''}\n\nLink do Comprovativo:\n${proofUrl || 'Não anexado'}`;
     } else {
-      message = `${priorityTag}📥 *ORDEM DE VENDA - ANGOLIFE*\n\n*ID:* ${finalOrderId}\n\n👤 *CLIENTE:* ${formData.fullName}, ${formData.age}, ${formData.gender}.\n\n💰 *VALOR A ENTREGAR:* ${parseFloat(tradeAmount).toFixed(2)} ${tradeCurrency}.\n\n🏦 *RECEBER EM KWANZAS:* ${totalKzFormatted} no banco ${formData.bank}.\n\n📍 *DADOS BANCÁRIOS:* IBAN: ${formData.iban} | Titular: ${formData.accountHolder}.\n\n🕒 *STATUS DO TIMER:* ${isExpired ? '⚠️ Expirado' : 'Dentro do Prazo'}.\n\nLink do Comprovativo:\n${proofUrl || 'Não anexado'}`;
+      message = `${priorityTag}📥 *ORDEM DE VENDA - Resolve.AO*\n\n*ID:* ${finalOrderId}\n\n👤 *CLIENTE:* ${formData.fullName}, ${formData.age}, ${formData.gender}.\n\n💰 *VALOR A ENTREGAR:* ${parseFloat(tradeAmount).toFixed(2)} ${tradeCurrency}.\n\n🏦 *RECEBER EM KWANZAS:* ${totalKzFormatted} no banco ${formData.bank}.\n\n📍 *DADOS BANCÁRIOS:* IBAN: ${formData.iban} | Titular: ${formData.accountHolder}.\n\n🕒 *STATUS DO TIMER:* ${isExpired ? '⚠️ Expirado' : 'Dentro do Prazo'}.\n\nLink do Comprovativo:\n${proofUrl || 'Não anexado'}`;
     }
 
     return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
@@ -310,7 +310,7 @@ export const ExchangePage: React.FC = () => {
   };
 
   const finalizeCleanup = () => {
-    localStorage.removeItem('ANGOLIFE_EXCHANGE_SESSION');
+    localStorage.removeItem('RESOLVEAO_EXCHANGE_SESSION');
     AdService.resetRewardState();
     setHasPriorityReward(false);
     setWhatsappLink(null);
@@ -391,7 +391,7 @@ export const ExchangePage: React.FC = () => {
   return (
     <div className="space-y-8 animate-fade-in pb-20">
       <Helmet>
-        <title>Câmbio em Dia Angola | Angolife Su-Golden</title>
+        <title>Câmbio em Dia Angola | Resolve.AO Su-Golden</title>
         <meta name="description" content="Acompanhe o câmbio formal e informal em Angola em tempo real. Converta Kwanza para Dólar ou Euro com as melhores taxas do mercado." />
         <meta name="keywords" content="cambio angola, kwanza dolar, kwanza euro, mercado informal angola, cambio rua luanda" />
       </Helmet>
@@ -399,7 +399,7 @@ export const ExchangePage: React.FC = () => {
       {activeOrderId && <OrderCard orderId={activeOrderId} whatsappLink={whatsappLink} timeLeft={timeLeft} onComplete={() => { supabase.from('orders').select('*').eq('id', activeOrderId).single().then(({ data }) => { setActiveOrder(data); setIsFeedbackModalOpen(true); }); }} />}
 
       {/* Session Recovery Banner */}
-      {!activeOrderId && showRecoveryBanner && localStorage.getItem('ANGOLIFE_EXCHANGE_SESSION') && (
+      {!activeOrderId && showRecoveryBanner && localStorage.getItem('RESOLVEAO_EXCHANGE_SESSION') && (
         <div className="bg-orange-500/10 border border-orange-500/20 p-4 rounded-2xl flex items-center justify-between gap-4 mb-8 animate-fade-in">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-orange-500/20 rounded-full text-orange-500">
@@ -410,7 +410,7 @@ export const ExchangePage: React.FC = () => {
           <div className="flex items-center gap-3">
             <button
               onClick={() => {
-                const session = JSON.parse(localStorage.getItem('ANGOLIFE_EXCHANGE_SESSION')!);
+                const session = JSON.parse(localStorage.getItem('RESOLVEAO_EXCHANGE_SESSION')!);
                 setFormData(session.formData);
                 setCurrentStep(session.currentStep);
                 setTimeLeft(session.timeLeft);
@@ -423,7 +423,7 @@ export const ExchangePage: React.FC = () => {
             </button>
             <button
               onClick={() => {
-                localStorage.removeItem('ANGOLIFE_EXCHANGE_SESSION');
+                localStorage.removeItem('RESOLVEAO_EXCHANGE_SESSION');
                 setShowRecoveryBanner(false);
               }}
               className="p-2 hover:bg-white/10 rounded-xl transition-all text-slate-400 hover:text-white"
@@ -436,7 +436,7 @@ export const ExchangePage: React.FC = () => {
         </div>
       )}
 
-      <FeedbackModal isOpen={isFeedbackModalOpen} order={activeOrder} onClose={() => { setIsFeedbackModalOpen(false); setActiveOrderId(null); localStorage.removeItem('ANGOLIFE_EXCHANGE_SESSION'); }} />
+      <FeedbackModal isOpen={isFeedbackModalOpen} order={activeOrder} onClose={() => { setIsFeedbackModalOpen(false); setActiveOrderId(null); localStorage.removeItem('RESOLVEAO_EXCHANGE_SESSION'); }} />
 
       {/* Main Header */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">

@@ -150,11 +150,11 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ order, isOpen, onC
                   {/* Gold Overlay Glow */}
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-brand-gold/10 blur-[100px] pointer-events-none"></div>
                   
-                  {/* AngoLife Logo / Header */}
+                  {/* Resolve.AO Logo / Header */}
                   <div className="flex flex-col items-center gap-2 relative">
                      <div className="flex items-center gap-2">
                         <Star size={18} className="text-brand-gold fill-brand-gold" />
-                        <span className="text-xl font-black text-white tracking-widest uppercase">ANGOLIFE</span>
+                        <span className="text-xl font-black text-white tracking-widest uppercase">Resolve.AO</span>
                         <Star size={18} className="text-brand-gold fill-brand-gold" />
                      </div>
                      <div className="h-[1px] w-12 bg-brand-gold/30"></div>
@@ -196,7 +196,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ order, isOpen, onC
                   {/* Footer / Social Branding */}
                   <div className="pt-4 space-y-6">
                      <div className="flex flex-col items-center gap-3">
-                        <p className="text-[9px] font-medium text-slate-500 tracking-widest uppercase">AngoLife.app • O seu parceiro cambial</p>
+                        <p className="text-[9px] font-medium text-slate-500 tracking-widest uppercase">Resolve.AO • O seu parceiro cambial</p>
                         
                         <div className="flex gap-3 w-full">
                            <button 
@@ -209,9 +209,9 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ order, isOpen, onC
                              onClick={() => {
                                 if (navigator.share) {
                                   navigator.share({
-                                    title: 'Minha Troca na AngoLife',
-                                    text: `Acabei de trocar ${order.amount} ${order.currency} na AngoLife! Seguro e rápido.`,
-                                    url: 'https://angolife.app'
+                                    title: 'Minha Troca na Resolve.AO',
+                                    text: `Acabei de trocar ${order.amount} ${order.currency} na Resolve.AO! Seguro e rápido.`,
+                                    url: 'https://resolveao.app'
                                   });
                                 }
                              }}

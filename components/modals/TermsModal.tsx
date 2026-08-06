@@ -30,7 +30,7 @@ export const TermsModal: React.FC<TermsModalProps> = ({ isOpen, onClose, onAccep
                 <div className="w-1.5 h-1.5 bg-[orange-500] rounded-full"></div>
                 1. NATUREZA DA MEDIAÇÃO TECNOLÓGICA
               </h5>
-              <p className="text-justify opacity-80 pl-4 border-l border-[orange-500]/20">A AngoLife opera estritamente como uma plataforma de tecnologia e agregação de dados para facilitar a intenção de troca de ativos digitais. O USUÁRIO declara estar ciente de que a AngoLife não é uma instituição bancária ou casa de câmbio física, atuando apenas como interface para a liquidação de trocas privadas entre carteiras digitais e moeda nacional.</p>
+              <p className="text-justify opacity-80 pl-4 border-l border-[orange-500]/20">A Resolve.AO opera estritamente como uma plataforma de tecnologia e agregação de dados para facilitar a intenção de troca de ativos digitais. O USUÁRIO declara estar ciente de que a Resolve.AO não é uma instituição bancária ou casa de câmbio física, atuando apenas como interface para a liquidação de trocas privadas entre carteiras digitais e moeda nacional.</p>
             </section>
 
             <section className="space-y-3">
@@ -38,7 +38,7 @@ export const TermsModal: React.FC<TermsModalProps> = ({ isOpen, onClose, onAccep
                 <div className="w-1.5 h-1.5 bg-[orange-500] rounded-full"></div>
                 2. RESPONSABILIDADE CIVIL SOBRE DADOS DE DESTINO
               </h5>
-              <p className="text-justify opacity-80 pl-4 border-l border-[orange-500]/20">Ao preencher os campos de "Coordenadas" ou "ID da Carteira", o USUÁRIO assume responsabilidade total e exclusiva pela exatidão dos dados fornecidos. Devido à natureza irreversível das transações em redes Blockchain e sistemas de pagamento internacional (Wise, PayPal, Binance, etc.), a AngoLife EXIME-SE de qualquer dever de ressarcimento ou recuperação de valores em caso de erro de digitação por parte do usuário.</p>
+              <p className="text-justify opacity-80 pl-4 border-l border-[orange-500]/20">Ao preencher os campos de "Coordenadas" ou "ID da Carteira", o USUÁRIO assume responsabilidade total e exclusiva pela exatidão dos dados fornecidos. Devido à natureza irreversível das transações em redes Blockchain e sistemas de pagamento internacional (Wise, PayPal, Binance, etc.), a Resolve.AO EXIME-SE de qualquer dever de ressarcimento ou recuperação de valores em caso de erro de digitação por parte do usuário.</p>
             </section>
 
             <section className="space-y-3">
@@ -49,7 +49,7 @@ export const TermsModal: React.FC<TermsModalProps> = ({ isOpen, onClose, onAccep
               <div className="text-justify opacity-80 pl-4 border-l border-[orange-500]/20 space-y-2">
                 <p>A taxa de câmbio apresentada é garantida exclusivamente por uma janela de 15 (quinze) minutos a partir do início da operação.</p>
                 <p>3.1. Após a expiração do cronómetro, a cotação é considerada obsoleta.</p>
-                <p>3.2. Caso o pagamento seja efetuado após os 15 minutos, a AngoLife reserva-se o direito de reajustar o montante final de ativos a enviar com base na taxa de mercado no exato momento da validação do comprovativo.</p>
+                <p>3.2. Caso o pagamento seja efetuado após os 15 minutos, a Resolve.AO reserva-se o direito de reajustar o montante final de ativos a enviar com base na taxa de mercado no exato momento da validação do comprovativo.</p>
               </div>
             </section>
 

@@ -8,7 +8,7 @@ if sys.platform == "win32":
     import io
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
-load_dotenv(dotenv_path='c:/Users/Administrator/Desktop/angolife atualizado/angolife/.env.local')
+load_dotenv(dotenv_path='c:/Users/Administrator/Desktop/resolveao atualizado/resolveao/.env.local')
 
 URL = os.getenv("VITE_SUPABASE_URL")
 SERVICE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")

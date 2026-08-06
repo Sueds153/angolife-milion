@@ -33,7 +33,7 @@ function expired(): boolean {
   return Date.now() - startTime > DEADLINE_MS;
 }
 
-const ANGOLIFE_PLACEHOLDER = "https://angolife.app/placeholder-news.jpg";
+const RESOLVEAO_PLACEHOLDER = "https://resolveao.app/placeholder-news.jpg";
 
 // ─────────────────────────────────────────────
 // INTELIGÊNCIA: categorização e prioridade
@@ -197,7 +197,7 @@ function extractImage($: cheerio.CheerioAPI, baseUrl: string): string {
     if (src) return normalizeUrl(src, baseUrl);
   }
 
-  return ANGOLIFE_PLACEHOLDER;
+  return RESOLVEAO_PLACEHOLDER;
 }
 
 // ─────────────────────────────────────────────
@@ -318,7 +318,7 @@ async function processArticle(
       titulo: finalTitle.slice(0, 500),
       resumo: (summary || "").slice(0, 1000),
       corpo: (bodyHtml || "").slice(0, 50000),
-      imagem_url: imageUrl || ANGOLIFE_PLACEHOLDER,
+      imagem_url: imageUrl || RESOLVEAO_PLACEHOLDER,
       categoria: categoria || "Geral",
       fonte: siteName,
       url_origem: articleUrl,

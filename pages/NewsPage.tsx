@@ -193,7 +193,7 @@ export const NewsPage: React.FC<NewsPageProps> = () => {
   return (
     <div className="space-y-6 animate-fade-in pb-20">
       <Helmet>
-        <title>Notícias Secretas de Angola | Angolife Su-Golden</title>
+        <title>Notícias Secretas de Angola | Resolve.AO Su-Golden</title>
         <meta name="description" content="Acesse informações exclusivas e notícias de última hora sobre a economia e política de Angola. O que ninguém lhe conta, você encontra aqui." />
         <meta name="keywords" content="noticias angola, segredos angola, economia angola hoje, politica angola" />
       </Helmet>
@@ -311,7 +311,7 @@ export const NewsPage: React.FC<NewsPageProps> = () => {
            {/* Modal Header */}
            <div className="sticky top-0 z-10 bg-slate-900/90 backdrop-blur-md border-b gold-border-b-subtle px-6 py-4 flex justify-between items-center shadow-2xl">
               <span className="text-[10px] font-black text-brand-gold uppercase tracking-[0.3em] flex items-center gap-2">
-                 <Zap size={12} className="fill-brand-gold" /> Angolife Exclusive
+                 <Zap size={12} className="fill-brand-gold" /> Resolve.AO Exclusive
               </span>
               <button 
                 onClick={handleCloseModal}
@@ -366,13 +366,13 @@ export const NewsPage: React.FC<NewsPageProps> = () => {
                        ) : (
                          <>
                            <p>
-                              Informações exclusivas obtidas pelo Angolife indicam movimentos estratégicos nos bastidores que podem alterar completamente o cenário atual. Fontes próximas confirmam que a situação descrita é apenas a ponta do iceberg.
+                              Informações exclusivas obtidas pelo Resolve.AO indicam movimentos estratégicos nos bastidores que podem alterar completamente o cenário atual. Fontes próximas confirmam que a situação descrita é apenas a ponta do iceberg.
                            </p>
                            <p>
                               "A maioria das pessoas não está a ver o que está por vir", afirmou um analista de mercado que preferiu não ser identificado. Os dados preliminares sugerem um impacto direto nas próximas 48 horas.
                            </p>
                            <p>
-                              Especialistas recomendam cautela e atenção redobrada. Se os rumores se confirmarem, estaremos diante de um dos maiores eventos do ano no setor. Continue a acompanhar o Angolife para atualizações em tempo real sobre este desenvolvimento.
+                              Especialistas recomendam cautela e atenção redobrada. Se os rumores se confirmarem, estaremos diante de um dos maiores eventos do ano no setor. Continue a acompanhar o Resolve.AO para atualizações em tempo real sobre este desenvolvimento.
                            </p>
                          </>
                        )}
@@ -387,7 +387,7 @@ export const NewsPage: React.FC<NewsPageProps> = () => {
                           ) : (
                             <>
                               <p>
-                                 Informações exclusivas obtidas pelo Angolife indicam movimentos estratégicos nos bastidores que podem alterar completamente o cenário atual. Fontes próximas confirmam que a situação descrita é apenas a ponta do iceberg.
+                                 Informações exclusivas obtidas pelo Resolve.AO indicam movimentos estratégicos nos bastidores que podem alterar completamente o cenário atual. Fontes próximas confirmam que a situação descrita é apenas a ponta do iceberg.
                               </p>
                               <p>
                                  "A maioria das pessoas não está a ver o que está por vir", afirmou um analista de mercado que preferiu não ser identificado.

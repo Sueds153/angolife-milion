@@ -175,9 +175,9 @@ export const ProfilePage: React.FC = () => {
   ];
 
   const handleShareReferral = async () => {
-    const shareText = `Vem para o Angolife! Regista-te com o meu código: ${user.referralCode}`;
+    const shareText = `Vem para o Resolve.AO! Regista-te com o meu código: ${user.referralCode}`;
     if (navigator.share) {
-      await navigator.share({ title: 'Angolife', text: shareText, url: window.location.origin });
+      await navigator.share({ title: 'Resolve.AO', text: shareText, url: window.location.origin });
     } else {
       navigator.clipboard.writeText(user.referralCode);
       setCopiedCode(true);
@@ -607,7 +607,7 @@ export const ProfilePage: React.FC = () => {
               Desafio <span className="text-brand-gold">Embaixador</span>
             </h2>
             <p className="text-sm font-bold text-slate-400 max-w-xl leading-relaxed">
-              "Deixa os mambos falarem, tu só tens de crescer!" Convida **5 amigos** para o Angolife. 
+              "Deixa os mambos falarem, tu só tens de crescer!" Convida **5 amigos** para o Resolve.AO. 
               Ao bateres a meta, ganhas o **Plano Prata (999,99kz)** de borla e um **Desconto de 5%** no Câmbio de USD/EUR. 
               Aproveita agora, mambo é sério!
             </p>

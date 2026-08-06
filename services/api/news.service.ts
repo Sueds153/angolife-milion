@@ -1,5 +1,5 @@
 /**
- * @copyright (c) 2024-2026 AngoLife by Su-Golden. All rights reserved.
+ * @copyright (c) 2024-2026 Resolve.AO by Su-Golden. All rights reserved.
  */
 
 import { supabase } from "../core/supabaseClient";
@@ -163,7 +163,7 @@ export const NewsService = {
         titulo: news.title,
         resumo: news.summary,
         corpo: news.body,
-        fonte: news.source || "AngoLife",
+        fonte: news.source || "Resolve.AO",
         url_origem: news.url || "",
         categoria: news.category,
         imagem_url: news.imageUrl,

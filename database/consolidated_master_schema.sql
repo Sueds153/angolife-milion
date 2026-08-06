@@ -1,5 +1,5 @@
 -- ==========================================
--- AngoLife MASTER Database Schema v2 (CONSOLIDATED)
+-- Resolve.AO MASTER Database Schema v2 (CONSOLIDATED)
 -- Created during Rigorous Audit: 2026-02-24
 -- This schema matches the reality of the code (Scrapers + SupabaseService)
 -- ==========================================

@@ -1,5 +1,5 @@
 /**
- * @copyright (c) 2024-2026 AngoLife by Su-Golden. All rights reserved.
+ * @copyright (c) 2024-2026 Resolve.AO by Su-Golden. All rights reserved.
  */
 
 import { supabase } from "./supabaseClient";

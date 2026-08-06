@@ -2,7 +2,7 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://angolife.app/sitemap.xml
+Sitemap: https://resolveao.app/sitemap.xml
 
 # Bloquear pastas técnicas
 Disallow: /admin

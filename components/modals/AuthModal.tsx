@@ -130,7 +130,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, 
           <p className="text-slate-500 dark:text-slate-400 text-sm">
             {isRegister
               ? 'Registe-se para aceder a ferramentas exclusivas.'
-              : 'Faça login para continuar a usar o Angolife.'}
+              : 'Faça login para continuar a usar o Resolve.AO.'}
           </p>
         </div>
 
@@ -193,7 +193,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, 
                   setErrorMsg('');
                 }}
                 className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-800 border border-orange-500/20 rounded-lg focus:ring-2 focus:ring-orange-500/20 outline-none text-slate-900 dark:text-white placeholder:text-slate-400 transition-all font-medium"
-                placeholder="exemplo@angolife.ao"
+                placeholder="exemplo@resolveao.app"
               />
             </div>
           </div>

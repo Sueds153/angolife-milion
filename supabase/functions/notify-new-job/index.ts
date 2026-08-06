@@ -4,7 +4,7 @@ import webpush from "https://esm.sh/web-push@3.4.5";
 
 const VAPID_PUBLIC_KEY = Deno.env.get("VAPID_PUBLIC_KEY");
 const VAPID_PRIVATE_KEY = Deno.env.get("VAPID_PRIVATE_KEY");
-const VAPID_EMAIL = Deno.env.get("VAPID_EMAIL") || "mailto:admin@angolife.app";
+const VAPID_EMAIL = Deno.env.get("VAPID_EMAIL") || "mailto:admin@resolveao.app";
 
 webpush.setVapidDetails(
   VAPID_EMAIL,

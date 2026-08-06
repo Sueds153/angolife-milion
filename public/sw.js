@@ -1,4 +1,4 @@
-const CACHE_NAME = 'angolife-v2';
+const CACHE_NAME = 'resolveao-v2';
 const PRECACHE_ASSETS = [
   '/',
   '/manifest.json',
@@ -86,13 +86,13 @@ self.addEventListener('fetch', (event) => {
 
 // Real Web Push Implementation
 self.addEventListener('push', (event) => {
-  let data = { title: 'AngoLife', body: 'Nova atualização disponível!' };
+  let data = { title: 'Resolve.AO', body: 'Nova atualização disponível!' };
 
   if (event.data) {
     try {
       data = event.data.json();
     } catch (e) {
-      data = { title: 'AngoLife', body: event.data.text() };
+      data = { title: 'Resolve.AO', body: event.data.text() };
     }
   }
 

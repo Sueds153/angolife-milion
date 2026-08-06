@@ -34,7 +34,7 @@ export const UrlPreviewService = {
               const domain = new URL(url).hostname.replace(/^www\./, '').split('.')[0];
               companyName = domain.charAt(0).toUpperCase() + domain.slice(1);
             } catch {
-              companyName = 'Parceiro Angolife';
+              companyName = 'Parceiro Resolve.AO';
             }
           }
 

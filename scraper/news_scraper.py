@@ -57,7 +57,7 @@ logging.basicConfig(
 )
 log = logging.getLogger("AngoNewsScraper")
 
-ANGOLIFE_PLACEHOLDER = "https://angolife.app/placeholder-news.jpg"
+RESOLVEAO_PLACEHOLDER = "https://resolveao.app/placeholder-news.jpg"
 
 # ─────────────────────────────────────────────────────────────────────────
 # INTELIGÊNCIA: Palavras-chave para categorização e prioridade
@@ -295,7 +295,7 @@ class AngoNewsScraper:
         """
         Nível 1: og:image (meta tag — mais confiável)
         Nível 2: Primeira <img> dentro do conteúdo principal
-        Nível 3: Placeholder AngoLife
+        Nível 3: Placeholder Resolve.AO
         """
         # Nível 1: og:image
         og = soup.find("meta", property="og:image")
@@ -316,8 +316,8 @@ class AngoNewsScraper:
                 if src:
                     return self.normalize_url(src, base_url)
 
-        # Nível 3: Placeholder AngoLife (Tratamento de Nulos)
-        return ANGOLIFE_PLACEHOLDER
+        # Nível 3: Placeholder Resolve.AO (Tratamento de Nulos)
+        return RESOLVEAO_PLACEHOLDER
 
     # ── Classificação Inteligente ─────────────────────────────────────────
     def classify(self, title: str, fixed_category: str) -> tuple:
@@ -469,7 +469,7 @@ class AngoNewsScraper:
                         "titulo": final_title[:500],
                         "resumo": (summary or "")[:1000],
                         "corpo": (body_html or "")[:50000],
-                        "imagem_url": image_url or ANGOLIFE_PLACEHOLDER,
+                        "imagem_url": image_url or RESOLVEAO_PLACEHOLDER,
                         "categoria": categoria or "Geral",
                         "fonte": site_name,
                         "url_origem": article_url,

@@ -1,4 +1,4 @@
--- AngoLife — Limpeza one-off da tabela jobs
+-- Resolve.AO — Limpeza one-off da tabela jobs
 -- Projeto: efhelvzdlwewsjkdknkl (produção)
 -- Correr no Supabase Dashboard → SQL Editor.
 -- Reversível: corre os comandos dentro da transação; se algo correr mal, faz ROLLBACK.

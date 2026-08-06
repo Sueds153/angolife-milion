@@ -164,7 +164,7 @@ export const AdminNewJobModal: React.FC<AdminNewJobModalProps> = ({
               <input
                 id="job-source"
                 type="text"
-                placeholder="AngoLife"
+                placeholder="Resolve.AO"
                 className="w-full px-5 py-4 bg-slate-50 dark:bg-white/5 border border-orange-500/10 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500/20 text-slate-900 dark:text-white"
                 value={newJob.source}
                 onChange={e => setNewJob({ ...newJob, source: e.target.value })}

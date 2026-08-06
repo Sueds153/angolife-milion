@@ -1,4 +1,4 @@
--- 🚨 AngoLife Security Hardening Script 🚨
+-- 🚨 Resolve.AO Security Hardening Script 🚨
 -- Este script ativa e reforça as políticas de RLS em todas as tabelas.
 -- 1. Tabela de PERFIS (Profiles)
 alter table public.profiles enable row level security;

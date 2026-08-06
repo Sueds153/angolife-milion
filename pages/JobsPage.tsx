@@ -113,8 +113,8 @@ export const JobsPage: React.FC<JobsPageProps> = ({
     e.stopPropagation();
 
     const executeShare = () => {
-      const appLink = "https://angolife.app";
-      const text = `🚀 *Vaga Imperdível:* ${job.title}\n🏢 *Empresa:* ${job.company}\n📍 *Local:* ${job.location}\n\nOlha esta vaga que encontrei na AngoLife! Sê o primeiro a candidatar-te.\n\nBaixa aqui o app e vê mais: ${appLink}`;
+      const appLink = "https://resolveao.app";
+      const text = `🚀 *Vaga Imperdível:* ${job.title}\n🏢 *Empresa:* ${job.company}\n📍 *Local:* ${job.location}\n\nOlha esta vaga que encontrei na Resolve.AO! Sê o primeiro a candidatar-te.\n\nBaixa aqui o app e vê mais: ${appLink}`;
       const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
       window.open(url, '_blank');
     };
@@ -217,7 +217,7 @@ export const JobsPage: React.FC<JobsPageProps> = ({
   return (
     <div className="space-y-6 md:space-y-8 animate-slide-up relative">
       <Helmet>
-        <title>Vagas de Emprego em Angola | Angolife Su-Golden</title>
+        <title>Vagas de Emprego em Angola | Resolve.AO Su-Golden</title>
         <meta name="description" content="Encontre as melhores oportunidades de emprego em Angola. Vagas atualizadas diariamente em Luanda, Benguela e todas as províncias." />
         <meta name="keywords" content="emprego angola, buscar trabalho angola, vagas de emprego luanda, recrutamento angola" />
       </Helmet>

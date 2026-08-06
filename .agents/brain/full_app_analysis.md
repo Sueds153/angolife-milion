@@ -1,6 +1,6 @@
-# AngoLife: Auditoria & Análise Completa
+# Resolve.AO: Auditoria & Análise Completa
 
-Este documento apresenta uma análise profunda da estrutura técnica e funcional do seu ecossistema **AngoLife**, identificando o que já está excelente e onde podemos aplicar melhorias estratégicas para escalar o projeto.
+Este documento apresenta uma análise profunda da estrutura técnica e funcional do seu ecossistema **Resolve.AO**, identificando o que já está excelente e onde podemos aplicar melhorias estratégicas para escalar o projeto.
 
 ---
 
@@ -17,7 +17,7 @@ Este documento apresenta uma análise profunda da estrutura técnica e funcional
 
 ### 1. Roteamento Profissional (Clean URLs)
 *   **Estado Atual**: O app usa `useState` para trocar de páginas. Isso significa que se o utilizador clicar no botão "Voltar" do navegador, ele sai do app em vez de voltar à página anterior.
-*   **Melhoria**: Migrar para `react-router-dom`. Isso permitirá URLs como `angolife.com/vagas/vaga-id`, facilitando a partilha de links específicos e melhorando o SEO.
+*   **Melhoria**: Migrar para `react-router-dom`. Isso permitirá URLs como `resolveao.app/vagas/vaga-id`, facilitando a partilha de links específicos e melhorando o SEO.
 
 ### 2. Refatoração do `SupabaseService`
 *   **Estado Atual**: `SupabaseService.ts` tem mais de 1100 linhas, sendo difícil de manter.
@@ -51,7 +51,7 @@ Este documento apresenta uma análise profunda da estrutura técnica e funcional
 *   **Melhoria**: Implementar `Web Push Notifications` para avisar o utilizador sobre novas vagas mesmo com o navegador fechado (usando Service Workers).
 
 ### 💬 Chat/Mensageria Direta
-*   Permitir que recrutadores entrem em contacto com utilizadores através de uma "caixa de entrada" interna no AngoLife.
+*   Permitir que recrutadores entrem em contacto com utilizadores através de uma "caixa de entrada" interna no Resolve.AO.
 
 ---
 

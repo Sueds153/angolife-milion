@@ -1,5 +1,5 @@
 -- ==========================================
--- AngoLife: FIX RLS RECURSION (live database 42P17)
+-- Resolve.AO: FIX RLS RECURSION (live database 42P17)
 -- Verified against live DB via Management API snapshot.
 -- The helper functions public.is_admin() and public.check_is_admin()
 -- already exist and are SECURITY DEFINER (no recursion).

@@ -36,7 +36,7 @@ export const AdminNewNewsModal: React.FC<AdminNewNewsModalProps> = ({
         <div className="p-8 border-b border-orange-500/10 flex justify-between items-center bg-slate-50 dark:bg-slate-800/20">
           <div>
             <h3 className="text-2xl font-black uppercase tracking-tight">Notícia Urgente</h3>
-            <p className="text-[10px] text-orange-500 font-bold uppercase tracking-widest mt-1">Publicação Instantânea AngoLife</p>
+            <p className="text-[10px] text-orange-500 font-bold uppercase tracking-widest mt-1">Publicação Instantânea Resolve.AO</p>
           </div>
           <button onClick={onClose} className="p-3 rounded-full hover:bg-red-500 hover:text-white transition-all" title="Fechar Modal">
             <X size={20} />

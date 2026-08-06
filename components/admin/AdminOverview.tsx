@@ -60,7 +60,7 @@ export const AdminOverview: React.FC = () => {
     <div className="space-y-6 animate-fade-in">
       <div className="bg-slate-50 dark:bg-white/5 p-6 md:p-12 rounded-[2rem] md:rounded-[3rem] text-center border border-orange-500/10">
         <h3 className="text-xl font-black uppercase mb-4">Bem-vindo ao Painel de Controlo</h3>
-        <p className="text-slate-500 text-sm max-w-sm mx-auto">Utilize as abas acima para gerir os diferentes departamentos da AngoLife.</p>
+        <p className="text-slate-500 text-sm max-w-sm mx-auto">Utilize as abas acima para gerir os diferentes departamentos da Resolve.AO.</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

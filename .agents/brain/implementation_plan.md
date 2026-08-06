@@ -6,19 +6,19 @@ Address layout issues where information is cut off or overflows on mobile device
 
 ### [Component Name] components/ConversionSimulator.tsx
 
-#### [MODIFY] [ConversionSimulator.tsx](file:///c:/Users/Administrator/Documents/angolife%20atualizado/angolife%20atualizado/angolife/components/ConversionSimulator.tsx)
+#### [MODIFY] [ConversionSimulator.tsx](file:///c:/Users/Administrator/Documents/resolveao%20atualizado/resolveao%20atualizado/Resolve.AO/components/ConversionSimulator.tsx)
 - Reduce the font size of the conversion result on mobile from `text-3xl` to `text-2xl`.
 - Add `break-words` and `overflow-hidden` to ensure long numbers don't break the layout.
 
 ### [Component Name] components/admin/AdminJobsSection.tsx
 
-#### [MODIFY] [AdminJobsSection.tsx](file:///c:/Users/Administrator/Documents/angolife%20atualizado/angolife%20atualizado/angolife/components/admin/AdminJobsSection.tsx)
+#### [MODIFY] [AdminJobsSection.tsx](file:///c:/Users/Administrator/Documents/resolveao%20atualizado/resolveao%20atualizado/Resolve.AO/components/admin/AdminJobsSection.tsx)
 - Update the job title header to allow wrapping of the "Pendente" badge on very small screens.
 - Change `flex-nowrap` behavior in the job header to `flex-wrap` for mobile.
 
 ### [Component Name] components/admin/AdminDiagnostic.tsx
 
-#### [MODIFY] [AdminDiagnostic.tsx](file:///c:/Users/Administrator/Documents/angolife%20atualizado/angolife%20atualizado/angolife/components/admin/AdminDiagnostic.tsx)
+#### [MODIFY] [AdminDiagnostic.tsx](file:///c:/Users/Administrator/Documents/resolveao%20atualizado/resolveao%20atualizado/Resolve.AO/components/admin/AdminDiagnostic.tsx)
 - Reposition the diagnostic overlay to `top-24` and `right-4` to avoid overlapping main content cards and stay out of the way of navigation.
 
 ## React Router Migration (UX Priority)
@@ -43,7 +43,7 @@ Address layout issues where information is cut off or overflows on mobile device
 
 ## Real Web Push Implementation (Retention)
 
-### [NEW] [sw.js](file:///c:/Users/Administrator/Documents/angolife%20atualizado/angolife%20atualizado/angolife/public/sw.js)
+### [NEW] [sw.js](file:///c:/Users/Administrator/Documents/resolveao%20atualizado/resolveao%20atualizado/Resolve.AO/public/sw.js)
 - Implement a Service Worker to handle incoming push events and show native notifications.
 
 ### [Component Name] services/notificationService.ts

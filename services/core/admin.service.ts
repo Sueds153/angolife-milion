@@ -1,5 +1,5 @@
 /**
- * @copyright (c) 2024-2026 AngoLife by Su-Golden. All rights reserved.
+ * @copyright (c) 2024-2026 Resolve.AO by Su-Golden. All rights reserved.
  */
 
 import { supabase } from "./supabaseClient";
@@ -41,7 +41,7 @@ export const AdminService = {
       const newsToInsert = aiNews.map((n) => ({
         titulo: n.title,
         resumo: n.summary,
-        corpo: `Informações exclusivas obtidas pelo Angolife indicam movimentos estratégicos nos bastidores que podem alterar completamente o cenário atual. Fontes próximas confirmam que a situação descrita é apenas a ponta do iceberg. "A maioria das pessoas não está a ver o que está por vir", afirmou um analista de mercado que preferiu não ser identificado. Os dados preliminares sugerem um impacto direto nas próximas 48 horas. Especialistas recomendam cautela e atenção redobrada. Se os rumores se confirmarem, estaremos diante de um dos maiores eventos do ano no setor. Continue a acompanhar o Angolife para atualizações em tempo real sobre este desenvolvimento.`,
+        corpo: `Informações exclusivas obtidas pelo Resolve.AO indicam movimentos estratégicos nos bastidores que podem alterar completamente o cenário atual. Fontes próximas confirmam que a situação descrita é apenas a ponta do iceberg. "A maioria das pessoas não está a ver o que está por vir", afirmou um analista de mercado que preferiu não ser identificado. Os dados preliminares sugerem um impacto direto nas próximas 48 horas. Especialistas recomendam cautela e atenção redobrada. Se os rumores se confirmarem, estaremos diante de um dos maiores eventos do ano no setor. Continue a acompanhar o Resolve.AO para atualizações em tempo real sobre este desenvolvimento.`,
         fonte: n.source,
         url_origem: n.url,
         categoria: n.category,

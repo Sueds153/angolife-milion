@@ -15,10 +15,18 @@ interface AdBannerProps {
 // instances mount at the same time on the same page.
 let isFetchingAds = false;
 
+/** Builds a thum.io screenshot URL as a reliable image fallback */
+const buildScreenshotUrl = (url?: string) =>
+  url ? `https://image.thum.io/get/width/1200/crop/628/${encodeURIComponent(url)}` : null;
+
 export const AdBanner: React.FC<AdBannerProps> = ({ format, customLocation = 'all' }) => {
   const { systemSettings, activeAds, setActiveAds } = useAppStore();
   const [partnerAd, setPartnerAd] = useState<Ad | null>(null);
   const hasFetched = useRef(false);
+
+  // Image source state — allows automatic fallback on load error
+  const [imgSrc, setImgSrc] = useState<string | null>(null);
+  const [imgFallbackUsed, setImgFallbackUsed] = useState(false);
 
   // Site Preview Modal State
   const [showPreviewModal, setShowPreviewModal] = useState(false);
@@ -44,17 +52,12 @@ export const AdBanner: React.FC<AdBannerProps> = ({ format, customLocation = 'al
   // Pick an active partner ad matching location & format
   useEffect(() => {
     if (activeAds.length > 0) {
-      // All display banner formats (leaderboard, rectangle, skyscraper, sticky-footer)
-      // map to 'banner' type ads in the database.
-      // 'interstitial' and 'rewarded' are handled separately via AdOverlays.
       const dbFormat = 'banner';
-
       const matching = activeAds.filter(a =>
         a.is_active &&
         (a.location === customLocation || a.location === 'all') &&
         a.format === dbFormat
       );
-
       if (matching.length > 0) {
         const randomAd = matching[Math.floor(Math.random() * matching.length)];
         setPartnerAd(randomAd);
@@ -62,10 +65,18 @@ export const AdBanner: React.FC<AdBannerProps> = ({ format, customLocation = 'al
     }
   }, [activeAds, format, customLocation]);
 
+  // Whenever the active ad changes, reset the image source
+  useEffect(() => {
+    if (partnerAd) {
+      setImgFallbackUsed(false);
+      // Prefer stored image; fall back to screenshot of the destination link
+      setImgSrc(partnerAd.image_url || buildScreenshotUrl(partnerAd.link));
+    }
+  }, [partnerAd]);
+
   const adsConfig = systemSettings?.google_ads || PARTNER_ADS.googleAds;
   const isGoogleEnabled = adsConfig.enabled && !partnerAd;
 
-  // Map display format to the correct Google Ads slot key
   const getAdSlot = () => {
     const slots = adsConfig.slots;
     if (format === 'leaderboard' || format === 'sticky-footer') return slots.homeFooter;
@@ -76,9 +87,9 @@ export const AdBanner: React.FC<AdBannerProps> = ({ format, customLocation = 'al
 
   const getStyles = () => {
     switch (format) {
-      case 'leaderboard': return 'h-24 w-full max-w-[728px] mx-auto my-2 rounded-2xl'; 
-      case 'rectangle': return 'h-[250px] w-full max-w-[300px] mx-auto my-4 rounded-3xl'; 
-      case 'skyscraper': return 'h-[600px] w-[160px] my-4 rounded-2xl hidden md:flex'; 
+      case 'leaderboard': return 'h-24 w-full max-w-[728px] mx-auto my-2 rounded-2xl';
+      case 'rectangle': return 'h-[250px] w-full max-w-[300px] mx-auto my-4 rounded-3xl';
+      case 'skyscraper': return 'h-[600px] w-[160px] my-4 rounded-2xl hidden md:flex';
       case 'sticky-footer': return 'w-full h-[50px] md:h-[60px]';
       default: return 'h-24 w-full';
     }
@@ -91,6 +102,12 @@ export const AdBanner: React.FC<AdBannerProps> = ({ format, customLocation = 'al
     const isVideo = partnerAd.media_type === 'video';
     const embedInfo = isVideo ? VideoUtils.getEmbedUrl(partnerAd.video_url) : { isEmbed: false, embedUrl: null };
 
+    // For unsupported video platforms (Facebook, TikTok, etc.),
+    // the embed URL is not available — we show the poster image instead.
+    const canEmbedVideo = isVideo && embedInfo.isEmbed && embedInfo.embedUrl;
+    const canPlayDirectVideo = isVideo && !embedInfo.isEmbed && partnerAd.video_url
+      && (partnerAd.video_url.endsWith('.mp4') || partnerAd.video_url.includes('supabase'));
+
     const handleAdClick = () => {
       if (partnerAd.link) {
         setPreviewModalUrl(partnerAd.link);
@@ -98,36 +115,54 @@ export const AdBanner: React.FC<AdBannerProps> = ({ format, customLocation = 'al
       }
     };
 
+    const handleImgError = () => {
+      if (!imgFallbackUsed && partnerAd.link) {
+        // First failure: try a live screenshot of the destination site
+        setImgFallbackUsed(true);
+        setImgSrc(buildScreenshotUrl(partnerAd.link));
+      } else {
+        // Second failure: clear src so the gradient background shows
+        setImgSrc(null);
+      }
+    };
+
     return (
       <>
-        <div 
+        <div
           onClick={handleAdClick}
-          className={`relative overflow-hidden cursor-pointer group flex items-center justify-center ${getStyles()} bg-slate-950 border border-orange-500/20 shadow-xl transition-all hover:border-orange-500/50`}
+          className={`relative overflow-hidden cursor-pointer group flex items-center justify-center ${getStyles()} bg-gradient-to-br from-slate-900 to-slate-800 border border-orange-500/20 shadow-xl transition-all hover:border-orange-500/50`}
         >
           {/* Media Background */}
-          {isVideo && embedInfo.isEmbed && embedInfo.embedUrl ? (
+          {canEmbedVideo ? (
             <iframe
-              src={embedInfo.embedUrl}
+              src={embedInfo.embedUrl!}
               className="absolute inset-0 w-full h-full border-0 pointer-events-none opacity-80 group-hover:scale-105 transition-transform duration-700"
               title={partnerAd.title || 'Anúncio'}
+              allow="autoplay; encrypted-media"
             />
-          ) : isVideo && partnerAd.video_url ? (
+          ) : canPlayDirectVideo ? (
             <video
               src={partnerAd.video_url}
-              poster={partnerAd.image_url}
+              poster={imgSrc || undefined}
               autoPlay
               muted
               loop
               playsInline
               className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
             />
-          ) : partnerAd.image_url ? (
+          ) : imgSrc ? (
             <img
-              src={partnerAd.image_url}
+              src={imgSrc}
               alt={partnerAd.company_name || partnerAd.title || 'Publicidade'}
+              onError={handleImgError}
               className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
+              referrerPolicy="no-referrer"
+              crossOrigin="anonymous"
             />
-          ) : null}
+          ) : (
+            // Gradient fallback when all image sources fail
+            <div className="absolute inset-0 bg-gradient-to-br from-orange-500/20 via-slate-900 to-slate-800" />
+          )}
 
           {/* Overlay Banner Bar */}
           <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent p-4 flex items-center justify-between z-10">
@@ -170,6 +205,7 @@ export const AdBanner: React.FC<AdBannerProps> = ({ format, customLocation = 'al
     );
   }
 
+
   // --- 2. Google AdSense Fallback ---
   if (isGoogleEnabled && adSlot) {
     return (
@@ -183,7 +219,7 @@ export const AdBanner: React.FC<AdBannerProps> = ({ format, customLocation = 'al
     );
   }
 
-  // --- 3. Default AngoLife Ad Fallback ---
+  // --- 3. Default Resolve.AO Ad Fallback ---
   return (
     <div className={`bg-slate-900 border border-orange-500/20 flex flex-col items-center justify-center relative overflow-hidden transition-all ${getStyles()} ${!isSticky ? 'shadow-lg' : ''} backdrop-blur-sm`}>
       <div className="absolute top-0 right-0 bg-white/10 border-b border-l border-white/10 px-2 py-0.5 z-10 rounded-bl-lg">
@@ -206,9 +242,9 @@ export const AdBanner: React.FC<AdBannerProps> = ({ format, customLocation = 'al
             </div>
             <div className="flex flex-col">
               <span className={`font-black text-white uppercase tracking-tight ${isSticky ? 'text-[10px]' : 'text-xs'}`}>
-                {format === 'leaderboard' ? 'Publica a tua Vaga no Angolife' : 
+                {format === 'leaderboard' ? 'Publica a tua Vaga no Resolve.AO' : 
                  format === 'rectangle' ? 'Câmbio em Tempo Real' : 
-                 'Publicidade AngoLife'}
+                 'Publicidade Resolve.AO'}
               </span>
               <p className={`text-slate-400 font-bold ${isSticky ? 'text-[8px]' : 'text-[10px] mt-0.5'}`}>
                 {format === 'leaderboard' ? 'Alcança milhares de candidatos qualificados em Angola' : 

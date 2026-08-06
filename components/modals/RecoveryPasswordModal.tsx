@@ -66,7 +66,7 @@ export const RecoveryPasswordModal: React.FC = () => {
             Definir Nova Palavra-Passe
           </h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm">
-            Escolhe uma nova palavra-passe para a tua conta Angolife.
+            Escolhe uma nova palavra-passe para a tua conta Resolve.AO.
           </p>
         </div>
 

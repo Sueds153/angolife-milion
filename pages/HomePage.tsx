@@ -158,7 +158,7 @@ export const HomePage: React.FC = () => {
 
   const handleWhatsAppContact = () => {
     const phone = systemSettings?.contact_info.whatsapp || APP_CONFIG.WHATSAPP_NUMBER; 
-    const message = "Olá! Gostaria de saber mais sobre as opções de publicidade premium no Angolife para o meu negócio.";
+    const message = "Olá! Gostaria de saber mais sobre as opções de publicidade premium no Resolve.AO para o meu negócio.";
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
@@ -175,8 +175,8 @@ export const HomePage: React.FC = () => {
     <ErrorBoundary>
       <div className="space-y-6 md:space-y-12 animate-fade-in">
       <Helmet>
-        <title>Angolife Su-Golden | Inteligência de Mercado e Elite em Angola</title>
-        <meta name="description" content="Lidere a economia nacional com a Angolife Su-Golden. Câmbio em tempo real, vagas de elite e as melhores ofertas do mercado angolano." />
+        <title>Resolve.AO Su-Golden | Inteligência de Mercado e Elite em Angola</title>
+        <meta name="description" content="Lidere a economia nacional com a Resolve.AO Su-Golden. Câmbio em tempo real, vagas de elite e as melhores ofertas do mercado angolano." />
         <meta name="keywords" content="vagas angola, cambio angola, economia angola, empregos angola, mercado angolano, su-golden" />
       </Helmet>
 
@@ -396,7 +396,7 @@ export const HomePage: React.FC = () => {
           </div>
           
           <h1 className="text-fluid-h1 font-black text-white mb-4 md:mb-8 tracking-tighter leading-[1.1] md:leading-[0.85] uppercase">
-            Angolife <br/>
+            Resolve.AO <br/>
             <span className="text-brand-gold">Su-Golden</span>
           </h1>
           
@@ -497,13 +497,13 @@ export const HomePage: React.FC = () => {
         </div>
       )}
 
-      {/* Por Que a Angolife */}
+      {/* Por Que a Resolve.AO */}
       <div className="relative overflow-hidden rounded-[2rem] bg-white dark:bg-slate-900 border border-orange-500/10 shadow-xl p-6 md:p-12">
         <div className="absolute top-0 right-0 w-64 h-64 bg-brand-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
         <div className="relative z-10">
           <p className="text-[9px] font-black text-brand-gold uppercase tracking-[0.25em] mb-3">A Tua Plataforma de Confiança</p>
           <h2 className="text-fluid-h2 font-black text-slate-900 dark:text-white uppercase tracking-tight mb-8">
-            Por que <span className="text-brand-gold">milhares</span> escolhem a Angolife?
+            Por que <span className="text-brand-gold">milhares</span> escolhem a Resolve.AO?
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
             {[
@@ -767,7 +767,7 @@ export const HomePage: React.FC = () => {
             
             <div className="block border-l-2 md:border-l-4 border-brand-gold pl-4 md:pl-6 py-2 mb-6 md:mb-0">
               <p className="text-fluid-p text-slate-200 font-bold">
-                Alcance o topo do mercado angolano. Anuncie na rede exclusiva de empresários e investidores da Angolife.
+                Alcance o topo do mercado angolano. Anuncie na rede exclusiva de empresários e investidores da Resolve.AO.
               </p>
             </div>
           </div>

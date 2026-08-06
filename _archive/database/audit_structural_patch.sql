@@ -1,5 +1,5 @@
 -- ==========================================
--- AngoLife MASTER STRUCTURAL REPAIR
+-- Resolve.AO MASTER STRUCTURAL REPAIR
 -- Solve: Missing Tables, RLS Recursion, Admin Permissions
 -- ==========================================
 -- 1. ENSURE MISSING TABLES EXIST

@@ -1,4 +1,4 @@
-# Task List - AngoLife Modernization
+# Task List - Resolve.AO Modernization
 
 Track the progress of fixing layout issues, refactoring services, and migrating to standard routing.
 

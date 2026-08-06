@@ -63,7 +63,7 @@ export const AdminPage: React.FC = () => {
     requirements: [] as string[],
     newRequirement: '',
     category: 'Geral',
-    source: 'AngoLife',
+    source: 'Resolve.AO',
     sourceUrl: '',
     imageUrl: '',
     isVerified: false
@@ -187,7 +187,7 @@ export const AdminPage: React.FC = () => {
   };
 
   const handleApprove = async (id: string, jobToApprove?: Job) => {
-    if (!confirm('Deseja publicar esta vaga na AngoLife?')) return;
+    if (!confirm('Deseja publicar esta vaga na Resolve.AO?')) return;
     setLoading(true);
     console.log('✅ Tentando aprovar vaga:', id);
     if (jobToApprove) {
@@ -496,7 +496,7 @@ export const AdminPage: React.FC = () => {
     });
 
     if (success) {
-      alert('Vaga publicada com sucesso na AngoLife!');
+      alert('Vaga publicada com sucesso na Resolve.AO!');
       setShowNewJobModal(false);
       setNewJob({
         title: '',
@@ -509,7 +509,7 @@ export const AdminPage: React.FC = () => {
         requirements: [],
         newRequirement: '',
         category: 'Geral',
-        source: 'AngoLife',
+        source: 'Resolve.AO',
         sourceUrl: '',
         isVerified: false
       });
@@ -609,7 +609,7 @@ export const AdminPage: React.FC = () => {
           <Lock className="text-amber-500" size={32} />
         </div>
         <h2 className="text-xl font-black mb-4 text-slate-900 dark:text-white uppercase tracking-tight">Acesso Restrito</h2>
-        <p className="text-slate-500 text-center max-w-xs mb-6">Esta área é reservada para administradores da AngoLife.</p>
+        <p className="text-slate-500 text-center max-w-xs mb-6">Esta área é reservada para administradores da Resolve.AO.</p>
         <button
           onClick={() => navigate('/')}
           className="bg-slate-900 dark:bg-amber-500 text-white px-6 py-3 rounded-xl font-bold uppercase text-xs tracking-widest transition-all active:scale-95"
@@ -626,7 +626,7 @@ export const AdminPage: React.FC = () => {
       <div className="flex flex-col md:flex-row justify-between items-start gap-2">
         <div className="pt-safe w-full md:w-auto">
           <h2 className="text-fluid-h2 font-black text-orange-500 uppercase tracking-tight leading-tight">Painel Admin</h2>
-          <p className="text-slate-500 dark:text-slate-400 font-medium text-[10px] md:text-sm uppercase tracking-widest mt-1">Gerindo a AngoLife com precisão.</p>
+          <p className="text-slate-500 dark:text-slate-400 font-medium text-[10px] md:text-sm uppercase tracking-widest mt-1">Gerindo a Resolve.AO com precisão.</p>
           
           <AdminDiagnostic user={user} />
         </div>

@@ -179,7 +179,7 @@ export const RewardedAdModal: React.FC<RewardedAdModalProps> = ({
     return (
       <div className="fixed inset-0 bg-black z-[300] flex flex-col items-center justify-center p-6 animate-fade-in">
         <div className="absolute top-0 left-0 w-full p-6 flex justify-between items-center text-white/50 text-[10px] font-mono">
-          <span>Angolife AdSystem</span>
+          <span>Resolve.AO AdSystem</span>
           <span>Test ID: {ADMOB_INTERSTITIAL_ID.slice(0, 20)}...</span>
         </div>
 
@@ -242,7 +242,7 @@ export const RewardedAdModal: React.FC<RewardedAdModalProps> = ({
     return (
       <div className="fixed inset-0 bg-black z-[500] flex flex-col items-center justify-center p-6 animate-fade-in">
         <div className="absolute top-0 left-0 w-full p-6 flex justify-between items-center text-white/50 text-[10px] font-mono">
-          <span>Angolife Network | REWARDED VIDEO</span>
+          <span>Resolve.AO Network | REWARDED VIDEO</span>
           <div className="flex items-center gap-2">
             <Zap size={10} className="text-orange-500" />
             <span>AD ID: {adId}</span>
@@ -295,7 +295,7 @@ export const RewardedAdModal: React.FC<RewardedAdModalProps> = ({
 
           <div className="flex items-center gap-3 justify-center text-slate-600">
              <div className="h-px w-8 bg-slate-800"></div>
-             <span className="text-[9px] font-black uppercase tracking-widest">Publicidade Angolife</span>
+             <span className="text-[9px] font-black uppercase tracking-widest">Publicidade Resolve.AO</span>
              <div className="h-px w-8 bg-slate-800"></div>
           </div>
         </div>

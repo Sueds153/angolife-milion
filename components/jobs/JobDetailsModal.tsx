@@ -321,11 +321,11 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
                 </button>
               </div>
 
-              {/* Dica Angolife Card */}
+              {/* Dica Resolve.AO Card */}
               <div className="p-5 bg-amber-500/10 rounded-[2rem] border border-amber-500/20 space-y-2">
                 <div className="flex items-center gap-2 text-amber-400">
                   <LightbulbIcon size={16} />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Dica Angolife</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest">Dica Resolve.AO</span>
                 </div>
                 <p className="text-xs text-amber-200/90 font-medium leading-relaxed italic">
                   "Destaque as suas principais competências e envie sempre o seu CV em formato PDF para garantir que seja bem visualizado pelos recrutadores."

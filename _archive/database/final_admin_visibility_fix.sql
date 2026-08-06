@@ -1,5 +1,5 @@
 -- ==========================================
--- AngoLife FINAL ADMIN VISIBILITY FIX
+-- Resolve.AO FINAL ADMIN VISIBILITY FIX
 -- 1. Eliminate RLS Recursion
 -- 2. Ensure Admin Status for Sued Josué
 -- 3. Standardize RLS for All Modules

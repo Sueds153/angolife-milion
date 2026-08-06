@@ -101,7 +101,7 @@ export const AdminEditJobModal: React.FC<AdminEditJobModalProps> = ({
             </div>
             <div className="space-y-1">
               <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Fonte</label>
-              <input className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-800 transition-all text-slate-900 dark:text-white" placeholder="AngoLife" value={editingJob.source || 'AngoLife'} onChange={e => setEditingJob({ ...editingJob, source: e.target.value })} title="Fonte da Vaga" />
+              <input className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-slate-800 transition-all text-slate-900 dark:text-white" placeholder="Resolve.AO" value={editingJob.source || 'Resolve.AO'} onChange={e => setEditingJob({ ...editingJob, source: e.target.value })} title="Fonte da Vaga" />
             </div>
             <div className="flex items-center gap-3">
               <input type="checkbox" id="job-verified" className="w-5 h-5 accent-orange-500" checked={editingJob.isVerified || false} onChange={e => setEditingJob({ ...editingJob, isVerified: e.target.checked })} />

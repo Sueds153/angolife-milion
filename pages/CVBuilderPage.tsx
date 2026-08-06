@@ -164,7 +164,7 @@ export const CVBuilderPage: React.FC = () => {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `CV_${cv.fullName.replace(/\s+/g, '_') || 'AngoLife'}.pdf`;
+      link.download = `CV_${cv.fullName.replace(/\s+/g, '_') || 'Resolve.AO'}.pdf`;
       link.click();
       URL.revokeObjectURL(url);
     } else {
@@ -559,7 +559,7 @@ export const CVBuilderPage: React.FC = () => {
       {/* Watermark for non-premium */}
       {!isPremiumValid && (
         <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-[0.03] rotate-45 select-none overflow-hidden">
-          <span className="text-8xl font-black uppercase tracking-[2em]">ANGOLIFE</span>
+          <span className="text-8xl font-black uppercase tracking-[2em]">Resolve.AO</span>
         </div>
       )}
     </div>
@@ -644,7 +644,7 @@ export const CVBuilderPage: React.FC = () => {
           <div className="bg-slate-950 text-white p-8 rounded-[2rem] gold-border-subtle relative overflow-hidden">
             <div className="relative z-10">
               <h4 className="flex items-center gap-2 text-brand-gold font-black uppercase tracking-widest text-sm mb-4">
-                <Sparkles size={14} /> Dica de Ouro Angolife
+                <Sparkles size={14} /> Dica de Ouro Resolve.AO
               </h4>
               <p className="text-sm font-medium leading-relaxed text-slate-300">
                 {step === 1 && "Use um email profissional (nome.sobrenome@email.com). Evite emails informais. No resumo, foque no valor que pode trazer à empresa."}
