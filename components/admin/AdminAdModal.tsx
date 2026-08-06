@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, Image as ImageIcon, Video, Globe, Clock, Layout, MapPin, Upload, Loader2, Sparkles, Wand2 } from 'lucide-react';
+import { X, Save, Image as ImageIcon, Video, Globe, Clock, Layout, MapPin, Upload, Loader2, Sparkles, Wand2, Info } from 'lucide-react';
 import { Ad, AdsService } from '../../services/api/ads.service';
 import { StorageService } from '../../services/api/storage.service';
 import { VideoUtils } from '../../services/utils/videoUtils';
@@ -163,6 +163,14 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
   if (!isOpen) return null;
 
   const embedInfo = VideoUtils.getEmbedUrl(formData.video_url);
+  const canRenderVideo = (() => {
+    const v = formData.video_url;
+    if (!v) return true;
+    if (embedInfo.isEmbed && embedInfo.embedUrl) return true;
+    if (/\.(mp4|webm|ogg|mov|m4v|avi)(\?|#|$)/i.test(v)) return true;
+    if (v.includes('supabase')) return true;
+    return false;
+  })();
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in overflow-y-auto">
@@ -477,9 +485,20 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
                     value={formData.video_url || ''}
                     onChange={(e) => setFormData({...formData, video_url: e.target.value})}
                     className="w-full bg-slate-900 border border-white/10 rounded-xl p-3.5 pl-10 text-xs font-bold text-white placeholder-slate-500"
-                    placeholder="https://... (.mp4 ou link do YouTube)"
+                    placeholder="https://www.youtube.com/watch?v=... ou https://.../video.mp4"
                   />
                 </div>
+
+                {formData.video_url && !canRenderVideo && (
+                  <p className="flex items-start gap-2 text-[10px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-xl p-2.5">
+                    <Info size={13} className="mt-0.5 shrink-0" />
+                    Este link pode não reproduzir no slot e só mostrará a imagem de capa. Para garantir reprodução, usa YouTube, Vimeo ou um ficheiro .mp4 direto.
+                  </p>
+                )}
+
+                <p className="text-[10px] font-bold text-slate-400 leading-relaxed">
+                  Melhor resultado: cola um link do <span className="text-orange-400">YouTube</span>, <span className="text-orange-400">Vimeo</span> ou um ficheiro <span className="text-orange-400">.mp4</span> direto. Links de TikTok, Instagram e Facebook podem ser bloqueados pelos próprios sites no browser.
+                </p>
               </div>
             )}
           </div>
