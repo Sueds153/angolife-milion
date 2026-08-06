@@ -27,9 +27,8 @@ import { AdminEditDealModal } from '../components/admin/AdminEditDealModal';
 import { AdsService, Ad, SystemSettings } from '../services/api/ads.service';
 import { AdminAdsSection } from '../components/admin/AdminAdsSection';
 
-
 export const AdminPage: React.FC = () => {
-  const { user } = useAppStore();
+  const { user, setActiveAds: setGlobalActiveAds } = useAppStore();
   const navigate = useNavigate();
 
 
@@ -148,6 +147,8 @@ export const AdminPage: React.FC = () => {
       loadExchangeRates();
     } else if (activeTab === 'cv') {
       loadCvSubscriptions();
+    } else if (activeTab === 'ads') {
+      loadAdsData();
     }
   }, [activeTab]);
 
@@ -578,11 +579,13 @@ export const AdminPage: React.FC = () => {
     try {
       setLoading(true);
       const [adsData, settingsData] = await Promise.all([
-        AdsService.getAds(),
+        AdsService.getAds(false), // Admin sees all ads, including inactive
         AdsService.getSettings()
       ]);
       setAds(adsData);
       setSystemSettings(settingsData);
+      // Sync global store so AdBanner on public pages reflects changes immediately
+      setGlobalActiveAds(adsData.filter(a => a.is_active));
     } catch (error) {
       console.error("Load ads error", error);
     } finally {

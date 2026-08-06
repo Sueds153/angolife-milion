@@ -32,29 +32,47 @@ export interface SystemSettings {
 }
 
 export const AdsService = {
-  async getAds(): Promise<Ad[]> {
-    const { data, error } = await supabase
+  async getAds(onlyActive = true): Promise<Ad[]> {
+    let query = supabase
       .from('ads')
       .select('*')
       .order('display_order', { ascending: true });
-    
+
+    if (onlyActive) {
+      query = query.eq('is_active', true);
+    }
+
+    const { data, error } = await query;
     if (error) throw error;
     return data || [];
   },
 
   async getSettings(): Promise<SystemSettings> {
-    const { data, error } = await supabase
-      .from('system_settings')
-      .select('*');
-    
-    if (error) throw error;
-    
-    const settings: Record<string, unknown> = {};
-    data.forEach(item => {
-      settings[item.key] = item.value;
-    });
-    
-    return settings as unknown as SystemSettings;
+    const defaultSettings: SystemSettings = {
+      google_ads: {
+        enabled: false,
+        client: '',
+        slots: { homeHero: '', homeFooter: '', jobsList: '' },
+      },
+      contact_info: { whatsapp: '' },
+    };
+
+    try {
+      const { data, error } = await supabase
+        .from('system_settings')
+        .select('*');
+
+      if (error || !data || data.length === 0) return defaultSettings;
+
+      const settings: Record<string, unknown> = {};
+      data.forEach(item => {
+        settings[item.key] = item.value;
+      });
+
+      return { ...defaultSettings, ...(settings as Partial<SystemSettings>) } as SystemSettings;
+    } catch {
+      return defaultSettings;
+    }
   },
 
   async updateAd(id: string, updates: Partial<Ad>) {

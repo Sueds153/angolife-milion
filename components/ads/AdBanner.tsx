@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Info, Sparkles, ExternalLink } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { PARTNER_ADS } from '../../constants/ads';
@@ -11,32 +11,48 @@ interface AdBannerProps {
   customLocation?: 'home' | 'jobs' | 'exchange' | 'all';
 }
 
+// Global flag to prevent multiple concurrent fetches when many AdBanner
+// instances mount at the same time on the same page.
+let isFetchingAds = false;
+
 export const AdBanner: React.FC<AdBannerProps> = ({ format, customLocation = 'all' }) => {
   const { systemSettings, activeAds, setActiveAds } = useAppStore();
   const [partnerAd, setPartnerAd] = useState<Ad | null>(null);
-  
+  const hasFetched = useRef(false);
+
   // Site Preview Modal State
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [previewModalUrl, setPreviewModalUrl] = useState<string>('');
 
-  // Load ads into store if not loaded yet
+  // Always load fresh ads on mount — ensures admin changes are visible
+  // without a hard page reload. The module-level flag prevents concurrent
+  // duplicate fetches when multiple AdBanner instances mount simultaneously.
   useEffect(() => {
-    if (activeAds.length === 0) {
-      AdsService.getAds()
-        .then(data => {
-          if (data && data.length > 0) setActiveAds(data);
-        })
-        .catch(() => {});
-    }
-  }, [activeAds.length, setActiveAds]);
+    if (hasFetched.current || isFetchingAds) return;
+    hasFetched.current = true;
+    isFetchingAds = true;
+    AdsService.getAds(true)
+      .then(data => {
+        setActiveAds(data);
+      })
+      .catch(() => {})
+      .finally(() => {
+        isFetchingAds = false;
+      });
+  }, [setActiveAds]);
 
   // Pick an active partner ad matching location & format
   useEffect(() => {
     if (activeAds.length > 0) {
-      const matching = activeAds.filter(a => 
-        a.is_active && 
-        (a.location === customLocation || a.location === 'all') && 
-        (a.format === 'banner' || a.format === (format === 'sticky-footer' ? 'banner' : format))
+      // All display banner formats (leaderboard, rectangle, skyscraper, sticky-footer)
+      // map to 'banner' type ads in the database.
+      // 'interstitial' and 'rewarded' are handled separately via AdOverlays.
+      const dbFormat = 'banner';
+
+      const matching = activeAds.filter(a =>
+        a.is_active &&
+        (a.location === customLocation || a.location === 'all') &&
+        a.format === dbFormat
       );
 
       if (matching.length > 0) {
@@ -48,7 +64,15 @@ export const AdBanner: React.FC<AdBannerProps> = ({ format, customLocation = 'al
 
   const adsConfig = systemSettings?.google_ads || PARTNER_ADS.googleAds;
   const isGoogleEnabled = adsConfig.enabled && !partnerAd;
-  const adSlot = adsConfig.slots[format as keyof typeof adsConfig.slots];
+
+  // Map display format to the correct Google Ads slot key
+  const getAdSlot = () => {
+    const slots = adsConfig.slots;
+    if (format === 'leaderboard' || format === 'sticky-footer') return slots.homeFooter;
+    if (format === 'rectangle' || format === 'skyscraper') return slots.jobsList;
+    return slots.homeHero;
+  };
+  const adSlot = getAdSlot();
 
   const getStyles = () => {
     switch (format) {

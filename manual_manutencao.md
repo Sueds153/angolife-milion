@@ -102,9 +102,9 @@ Para manter o seu sistema seguro e livre de avisos no Dashboard do Supabase, sig
 
 ### Resolver o aviso "Function Search Path Mutable"
 
-Eu já atualizei o ficheiro [security_patch_v2.sql](file:///c:/Users/Administrator/Documents/angolife%20atualizado%20pro/angolife%20atualizado/angolife%20atualizado/angolife/database/security_patch_v2.sql).
+Já atualizei o ficheiro [security_patch_v2.sql](file:///c:/Users/Administrator/Documents/angolife%20atualizado%20pro/angolife%20atualizado/angolife%20atualizado/angolife/database/security_patch_v2.sql).
 
-- **Ação**: Copie o conteúdo da função `check_notification_limit` desse ficheiro e execute-o novamente no "SQL Editor" do seu painel Supabase. Isso restringirá o caminho de busca e protegerá a função.
+- **Ação (concluída em 2026-08-06)**: Executei o `security_patch_v2.sql` no projeto Supabase `efhelvzdlwewsjkdknkl` (AngoLife). A função `check_notification_limit` foi recriada com `SET search_path = public`, criando a tabela `notification_rate_limit` com RLS ativo. O aviso "Function Search Path Mutable" foi resolvido e a função foi testada (respeita o limite de 2/dia).
 
 ### Resolver o aviso "Leaked Password Protection"
 
