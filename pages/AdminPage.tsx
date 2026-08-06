@@ -116,6 +116,24 @@ export const AdminPage: React.FC = () => {
 
 
 
+  const loadAdsData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const [adsData, settingsData] = await Promise.all([
+        AdsService.getAds(false), // Admin sees all ads, including inactive
+        AdsService.getSettings()
+      ]);
+      setAds(adsData);
+      setSystemSettings(settingsData);
+      // Sync global store so AdBanner on public pages reflects changes immediately
+      setGlobalActiveAds(adsData.filter(a => a.is_active));
+    } catch (error) {
+      console.error("Load ads error", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [setGlobalActiveAds]);
+
   useEffect(() => {
     // Carregar dados iniciais ao montar o componente
     loadPendingJobs();
@@ -574,24 +592,6 @@ export const AdminPage: React.FC = () => {
       alert("Erro ao rejeitar comprovativo.");
     }
   };
-
-  const loadAdsData = useCallback(async () => {
-    try {
-      setLoading(true);
-      const [adsData, settingsData] = await Promise.all([
-        AdsService.getAds(false), // Admin sees all ads, including inactive
-        AdsService.getSettings()
-      ]);
-      setAds(adsData);
-      setSystemSettings(settingsData);
-      // Sync global store so AdBanner on public pages reflects changes immediately
-      setGlobalActiveAds(adsData.filter(a => a.is_active));
-    } catch (error) {
-      console.error("Load ads error", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [setGlobalActiveAds]);
 
   const handleUpdateSetting = async (key: string, value: unknown) => {
     try {
