@@ -357,7 +357,8 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
                   onChange={(e) => setFormData({...formData, format: e.target.value as Ad['format']})}
                   className="w-full bg-slate-50 dark:bg-white/5 border border-white/10 rounded-2xl p-4 pl-10 text-xs font-bold appearance-none focus:ring-2 focus:ring-orange-500/50 text-white"
                 >
-                  <option value="banner" className="bg-slate-900">Banner (Carrossel)</option>
+                  <option value="all" className="bg-slate-900">Todos os Formatos (Banner, Popup e Vídeo)</option>
+                  <option value="banner" className="bg-slate-900">Banner (Carrossel / Secção)</option>
                   <option value="interstitial" className="bg-slate-900">Interstitial (Ecrã Inteiro Popup)</option>
                   <option value="rewarded" className="bg-slate-900">Rewarded (Bonificado com Vídeo)</option>
                 </select>

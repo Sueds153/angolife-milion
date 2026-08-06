@@ -216,7 +216,7 @@ export const AdminAdsSection: React.FC<AdminAdsSectionProps> = ({
                       {ad.media_type === 'video' ? <Video size={8}/> : <ImageIcon size={8}/>} {ad.media_type}
                     </span>
                     <span className="text-[7px] font-black uppercase bg-amber-500/10 text-amber-600 px-2 py-0.5 rounded-full flex items-center gap-1">
-                      <Layout size={8}/> {ad.format}
+                      <Layout size={8}/> {ad.format === 'all' ? 'Todos os Formatos' : ad.format}
                     </span>
                     <span className="text-[7px] font-black uppercase bg-emerald-500/10 text-emerald-600 px-2 py-0.5 rounded-full flex items-center gap-1">
                       <MapPin size={8}/> {ad.location}

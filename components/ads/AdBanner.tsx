@@ -56,7 +56,7 @@ export const AdBanner: React.FC<AdBannerProps> = ({ format, customLocation = 'al
       const matching = activeAds.filter(a =>
         a.is_active &&
         (a.location === customLocation || a.location === 'all') &&
-        a.format === dbFormat
+        (a.format === dbFormat || a.format === 'all')
       );
       if (matching.length > 0) {
         const randomAd = matching[Math.floor(Math.random() * matching.length)];

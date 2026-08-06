@@ -1,0 +1,11 @@
+# Keep CLI uploads in sync with git deploys: exclude files that are
+# gitignored but would otherwise be uploaded by `vercel deploy`.
+# Tailwind's scanner on Vercel (no .git dir) does NOT respect .gitignore
+# and breaks the build on junk content (old _archive/dist, *.log, supabase/.temp).
+node_modules
+dist
+.vercel
+.env*
+*.log
+_archive
+supabase/.temp
