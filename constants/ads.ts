@@ -28,31 +28,34 @@ export const PARTNER_ADS = {
     }
   ],
   
-  // Banners de Parceiros (Seção de Anúncios)
+  // Banners de Parceiros (Seção de Anúncios) — fallback usado apenas quando a
+  // base de dados não tem banners de parceiros ativos.
   partnerBanners: [
     {
       id: "partner-1",
-      companyName: "Exemplo Empresa A",
+      companyName: "Resolve.AO",
       mediaType: "image" as "image" | "video",
-      imageUrl: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=1600&q=80",
+      imageUrl: "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=1600&q=80",
       videoUrl: "",
-      link: "https://wa.me/244921967122",
+      link: "https://wa.me/244929423278",
+      title: "Promove a tua empresa",
       isActive: true
     },
     {
       id: "partner-2",
-      companyName: "Exemplo Empresa B",
+      companyName: "Resolve.AO",
       mediaType: "image" as "image" | "video",
-      imageUrl: "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?w=1600&q=80",
+      imageUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1600&q=80",
       videoUrl: "",
-      link: "https://wa.me/244921967122",
+      link: "/cambio",
+      title: "Câmbio em tempo real",
       isActive: true
     }
   ],
 
   // Configurações do Google AdSense
   googleAds: {
-    enabled: true,
+    enabled: false,
     client: "ca-pub-XXXXXXXXXXXXXXXX", // Substituir pelo ID real do Google Ads
     slots: {
       homeHero: "XXXXXXXXXX",

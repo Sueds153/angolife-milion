@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Briefcase, ShoppingBag, DollarSign, ChevronRight, MessageCircle, Activity, Volume2, VolumeX, X, Newspaper, FileText, Tag, Users, Shield, Zap, Star, TrendingUp, Quote, CheckCircle } from 'lucide-react';
 import { ExchangeService } from '../services/api/exchange.service';
@@ -9,6 +9,7 @@ import { APP_CONFIG } from '../constants/app';
 import { PARTNER_ADS } from '../constants/ads';
 import { AdBanner } from '../components/ads/AdBanner';
 import { AdsService, Ad } from '../services/api/ads.service';
+import { AdService } from '../services/api/adService';
 import { VideoUtils } from '../services/utils/videoUtils';
 import { useAppStore } from '../store/useAppStore';
 import { Helmet } from 'react-helmet-async';
@@ -65,6 +66,7 @@ export const HomePage: React.FC = () => {
 
   const [heroImageIndex, setHeroImageIndex] = useState(0);
   const [adImageIndex, setAdImageIndex] = useState(0);
+  const interstitialTimerRef = useRef<number | null>(null);
 
   const heroBanners: HomeBanner[] = useMemo(() => {
     const filtered = ads.filter(a => a.type === 'hero' && a.is_active && (a.location === 'home' || a.location === 'all') && a.format === 'banner');
@@ -125,9 +127,10 @@ export const HomePage: React.FC = () => {
           setActiveAds(adsData);
 
           const interstitial = adsData.find(a => a.is_active && a.format === 'interstitial' && (a.location === 'home' || a.location === 'all'));
-          if (interstitial) {
+          if (interstitial && AdService.canShowInterstitial()) {
             setInterstitialAd(interstitial);
-            setTimeout(() => setShowInterstitial(true), 3000);
+            AdService.recordInterstitialShown();
+            interstitialTimerRef.current = window.setTimeout(() => setShowInterstitial(true), 3000);
           }
           
           const rewarded = adsData.find(a => a.is_active && a.format === 'rewarded' && (a.location === 'home' || a.location === 'all'));
@@ -146,6 +149,15 @@ export const HomePage: React.FC = () => {
 
     loadDashboardData();
   }, [setSystemSettings, setActiveAds]);
+
+  // Cleanup pending interstitial timer on unmount
+  useEffect(() => {
+    return () => {
+      if (interstitialTimerRef.current !== null) {
+        window.clearTimeout(interstitialTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleBannerClick = (banner: HomeBanner) => {
     if (banner.link) {

@@ -106,6 +106,11 @@ export const JobsService = {
     }));
   },
 
+  deleteJob: async (id: string): Promise<boolean> => {
+    const { error } = await supabase.from("jobs").delete().eq("id", id);
+    return !error;
+  },
+
   approveJob: async (id: string, isApproved: boolean): Promise<boolean> => {
     if (isApproved) {
       const { error } = await supabase

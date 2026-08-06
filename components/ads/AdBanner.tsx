@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { Info, Sparkles, ExternalLink } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { PARTNER_ADS } from '../../constants/ads';
@@ -14,19 +14,38 @@ interface AdBannerProps {
 // Global flag to prevent multiple concurrent fetches when many AdBanner
 // instances mount at the same time on the same page.
 let isFetchingAds = false;
+// Global flag so the Google AdSense script is injected only once per session
+let adsenseScriptLoaded = false;
+
+declare global {
+  interface Window {
+    adsbygoogle?: unknown[];
+  }
+}
 
 /** Builds a thum.io screenshot URL — raw URL in path, no encodeURIComponent */
 const buildScreenshotUrl = (url?: string) =>
   url ? `https://image.thum.io/get/width/1200/crop/628/${url}` : null;
 
+/** Injects the Google AdSense script once (no-op if already loaded) */
+const loadAdsenseScript = (client: string) => {
+  if (adsenseScriptLoaded || !client) return;
+  adsenseScriptLoaded = true;
+  const script = document.createElement('script');
+  script.async = true;
+  script.crossOrigin = 'anonymous';
+  script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}`;
+  document.head.appendChild(script);
+};
+
 export const AdBanner: React.FC<AdBannerProps> = ({ format, customLocation = 'all' }) => {
   const { systemSettings, activeAds, setActiveAds } = useAppStore();
-  const [partnerAd, setPartnerAd] = useState<Ad | null>(null);
   const hasFetched = useRef(false);
 
-  // Image source state — allows automatic fallback on load error
-  const [imgSrc, setImgSrc] = useState<string | null>(null);
-  const [imgFallbackUsed, setImgFallbackUsed] = useState(false);
+  // Image fallback state — allows automatic fallback on load error.
+  // Reset per-ad by tracking which ad the fallback stage refers to.
+  const [imgFallbackStage, setImgFallbackStage] = useState(0);
+  const [imgFallbackAdId, setImgFallbackAdId] = useState<string | null>(null);
 
   // Site Preview Modal State
   const [showPreviewModal, setShowPreviewModal] = useState(false);
@@ -49,33 +68,7 @@ export const AdBanner: React.FC<AdBannerProps> = ({ format, customLocation = 'al
       });
   }, [setActiveAds]);
 
-  // Pick an active partner ad matching location & format
-  useEffect(() => {
-    if (activeAds.length > 0) {
-      const dbFormat = 'banner';
-      const matching = activeAds.filter(a =>
-        a.is_active &&
-        (a.location === customLocation || a.location === 'all') &&
-        (a.format === dbFormat || a.format === 'all')
-      );
-      if (matching.length > 0) {
-        const randomAd = matching[Math.floor(Math.random() * matching.length)];
-        setPartnerAd(randomAd);
-      }
-    }
-  }, [activeAds, format, customLocation]);
-
-  // Whenever the active ad changes, reset the image source
-  useEffect(() => {
-    if (partnerAd) {
-      setImgFallbackUsed(false);
-      // Prefer stored image; fall back to screenshot of the destination link
-      setImgSrc(partnerAd.image_url || buildScreenshotUrl(partnerAd.link));
-    }
-  }, [partnerAd]);
-
   const adsConfig = systemSettings?.google_ads || PARTNER_ADS.googleAds;
-  const isGoogleEnabled = adsConfig.enabled && !partnerAd;
 
   const getAdSlot = () => {
     const slots = adsConfig.slots;
@@ -84,6 +77,51 @@ export const AdBanner: React.FC<AdBannerProps> = ({ format, customLocation = 'al
     return slots.homeHero;
   };
   const adSlot = getAdSlot();
+
+  // Pick an active partner ad matching location & format
+  const partnerAd = useMemo<Ad | null>(() => {
+    if (activeAds.length === 0) return null;
+    const matching = activeAds.filter(a =>
+      a.is_active &&
+      (a.location === customLocation || a.location === 'all') &&
+      (a.format === 'banner' || a.format === 'all')
+    );
+    if (matching.length === 0) return null;
+    return matching[Math.floor(Math.random() * matching.length)];
+  }, [activeAds, customLocation]);
+
+  const isGoogleEnabled = adsConfig.enabled && !partnerAd;
+
+  // Image source: prefer stored image, fall back to a live screenshot of the destination
+  const imgSrc = useMemo<string | null>(() => {
+    if (!partnerAd) return null;
+    const stage = imgFallbackAdId === partnerAd.id ? imgFallbackStage : 0;
+    if (stage === 0) return partnerAd.image_url || buildScreenshotUrl(partnerAd.link);
+    if (stage === 1) return partnerAd.link ? buildScreenshotUrl(partnerAd.link) : null;
+    return null;
+  }, [partnerAd, imgFallbackStage, imgFallbackAdId]);
+
+  const handleImgError = () => {
+    if (!partnerAd) return;
+    if (imgFallbackAdId !== partnerAd.id) {
+      setImgFallbackAdId(partnerAd.id);
+      setImgFallbackStage(1);
+    } else {
+      setImgFallbackStage((s) => Math.min(s + 1, 2));
+    }
+  };
+
+  // Load Google AdSense script once and register this slot when enabled
+  useEffect(() => {
+    if (isGoogleEnabled && adSlot) {
+      loadAdsenseScript(adsConfig.client);
+      try {
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      } catch {
+        // AdSense runtime not ready yet — the script requests ads on load
+      }
+    }
+  }, [isGoogleEnabled, adSlot, adsConfig.client]);
 
   const getStyles = () => {
     switch (format) {
@@ -112,17 +150,6 @@ export const AdBanner: React.FC<AdBannerProps> = ({ format, customLocation = 'al
       if (partnerAd.link) {
         setPreviewModalUrl(partnerAd.link);
         setShowPreviewModal(true);
-      }
-    };
-
-    const handleImgError = () => {
-      if (!imgFallbackUsed && partnerAd.link) {
-        // First failure: try a live screenshot of the destination site
-        setImgFallbackUsed(true);
-        setImgSrc(buildScreenshotUrl(partnerAd.link));
-      } else {
-        // Second failure: clear src so the gradient background shows
-        setImgSrc(null);
       }
     };
 
