@@ -157,6 +157,21 @@ export const NewsService = {
     return !error;
   },
 
+  deleteOldNews: async (days: number = 60): Promise<{ count: number; success: boolean }> => {
+    const cutoffDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+    const { data, error } = await supabase
+      .from("news_articles")
+      .delete()
+      .lt("published_at", cutoffDate)
+      .select("id");
+
+    if (error) {
+      console.error("Error deleting old news:", error);
+      return { count: 0, success: false };
+    }
+    return { count: data?.length || 0, success: true };
+  },
+
   createNews: async (news: Partial<NewsArticle>): Promise<boolean> => {
     const { error } = await supabase.from("news_articles").insert([
       {

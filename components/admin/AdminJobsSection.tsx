@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Briefcase, Check, RefreshCw, Plus, Building, MapPin, Clock, Mail, ShieldCheck, X, HardHat, Store, Edit3 } from 'lucide-react';
+import { Briefcase, Check, RefreshCw, Plus, Building, MapPin, Clock, Mail, ShieldCheck, X, HardHat, Store, Edit3, Trash2 } from 'lucide-react';
 import { Job } from '../../types';
 
 interface AdminJobsSectionProps {
@@ -14,6 +14,7 @@ interface AdminJobsSectionProps {
   setEditingJob: (job: Job) => void;
   handleToggleVerification: (id: string, currentStatus: boolean) => void;
   handleReject: (id: string) => void;
+  handleCleanOld: () => void;
 }
 
 // Helper Component for Job Logo inside Admin
@@ -74,7 +75,8 @@ export const AdminJobsSection: React.FC<AdminJobsSectionProps> = ({
   setShowEditJobModal,
   setEditingJob,
   handleToggleVerification,
-  handleReject
+  handleReject,
+  handleCleanOld
 }) => {
   return (
     <div className="space-y-6">
@@ -95,6 +97,14 @@ export const AdminJobsSection: React.FC<AdminJobsSectionProps> = ({
             className="flex-1 md:flex-none justify-center bg-emerald-500 text-white px-5 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-600 active:scale-95 transition-all disabled:opacity-50 shadow-lg shadow-emerald-500/20"
           >
             <Check size={16} /> Tudo
+          </button>
+          <button
+            onClick={handleCleanOld}
+            disabled={loading}
+            title="Eliminar vagas com mais de 30 dias"
+            className="flex-1 md:flex-none justify-center bg-red-500/10 text-red-500 border border-red-500/30 px-5 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 hover:bg-red-500 hover:text-white active:scale-95 transition-all disabled:opacity-50"
+          >
+            <Trash2 size={16} /> Limpar Antigos
           </button>
           <button
             onClick={handleSyncJobs}

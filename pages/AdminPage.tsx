@@ -327,6 +327,19 @@ export const AdminPage: React.FC = () => {
     setLoading(false);
   };
 
+  const handleCleanOldJobs = async () => {
+    if (!confirm('Deseja eliminar TODAS as vagas com mais de 30 dias?')) return;
+    setLoading(true);
+    const result = await JobsService.deleteOldJobs(30);
+    if (result.success) {
+      alert(`${result.count} vaga(s) antiga(s) eliminada(s) com sucesso.`);
+      loadPendingJobs();
+    } else {
+      alert('Erro ao eliminar vagas antigas.');
+    }
+    setLoading(false);
+  };
+
   const handleToggleVerification = async (id: string, currentStatus: boolean) => {
     const success = await JobsService.toggleJobVerification(id, !currentStatus);
     if (success) {
@@ -433,6 +446,19 @@ export const AdminPage: React.FC = () => {
       alert('Notícia eliminada com sucesso.');
     } else {
       alert('Erro ao eliminar notícia.');
+    }
+    setLoading(false);
+  };
+
+  const handleCleanOldNews = async () => {
+    if (!confirm('Deseja eliminar TODAS as notícias com mais de 60 dias?')) return;
+    setLoading(true);
+    const result = await NewsService.deleteOldNews(60);
+    if (result.success) {
+      alert(`${result.count} notícia(s) antiga(s) eliminada(s) com sucesso.`);
+      loadPendingNews();
+    } else {
+      alert('Erro ao eliminar notícias antigas.');
     }
     setLoading(false);
   };
@@ -699,6 +725,7 @@ export const AdminPage: React.FC = () => {
           handleToggleVerification={handleToggleVerification}
           handleApprove={handleApprove}
           handleReject={handleReject}
+          handleCleanOld={handleCleanOldJobs}
         />
       )}
 
@@ -759,6 +786,7 @@ export const AdminPage: React.FC = () => {
           handleApproveNews={handleApproveNews}
           handleEditNews={handleEditNews}
           handleDeleteNews={handleDeleteNews}
+          handleCleanOld={handleCleanOldNews}
         />
       )}
 

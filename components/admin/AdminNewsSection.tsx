@@ -12,6 +12,7 @@ interface AdminNewsSectionProps {
   handleApproveNews: (id: string) => void;
   handleEditNews: (news: NewsArticle) => void;
   handleDeleteNews: (id: string) => void;
+  handleCleanOld: () => void;
 }
 
 export const AdminNewsSection: React.FC<AdminNewsSectionProps> = ({
@@ -22,7 +23,8 @@ export const AdminNewsSection: React.FC<AdminNewsSectionProps> = ({
   setShowNewNewsModal,
   handleApproveNews,
   handleEditNews,
-  handleDeleteNews
+  handleDeleteNews,
+  handleCleanOld
 }) => {
   return (
     <div className="space-y-6">
@@ -44,6 +46,14 @@ export const AdminNewsSection: React.FC<AdminNewsSectionProps> = ({
             className="bg-emerald-500 text-white px-4 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-emerald-600 active:scale-95 transition-all disabled:opacity-50 shadow-lg shadow-emerald-500/20"
           >
             <Check size={16} /> Publicar Tudo
+          </button>
+          <button
+            onClick={handleCleanOld}
+            disabled={loading}
+            title="Eliminar notícias com mais de 60 dias"
+            className="bg-red-500/10 text-red-500 border border-red-500/30 px-4 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-red-500 hover:text-white active:scale-95 transition-all disabled:opacity-50"
+          >
+            <Trash2 size={16} /> Limpar Antigos
           </button>
           <button
             onClick={handleSyncNews}
