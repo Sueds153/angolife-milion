@@ -798,7 +798,7 @@ export const HomePage: React.FC = () => {
       
       {/* Banner de Publicidade Final */}
       <div className="pt-4 md:pt-8">
-        <AdBanner format="leaderboard" />
+        <AdBanner format="leaderboard" customLocation="home" />
       </div>
     </div>
     </ErrorBoundary>

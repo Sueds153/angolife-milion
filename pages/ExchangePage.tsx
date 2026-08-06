@@ -17,6 +17,7 @@ import { LiveFeed } from '../components/ui/LiveFeed';
 import { OrderCard } from '../components/exchange/OrderCard';
 import { FeedbackModal } from '../components/modals/FeedbackModal';
 import { NativeAd } from '../components/ads/NativeAd';
+import { AdBanner } from '../components/ads/AdBanner';
 import { RewardedAdModal } from '../components/ads/RewardedAdModal';
 import { AdService } from '../services/api/adService';
 import { APP_CONFIG } from '../constants/app';
@@ -396,6 +397,7 @@ export const ExchangePage: React.FC = () => {
         <meta name="keywords" content="cambio angola, kwanza dolar, kwanza euro, mercado informal angola, cambio rua luanda" />
       </Helmet>
       <LiveFeed />
+      <AdBanner format="leaderboard" customLocation="exchange" />
       {activeOrderId && <OrderCard orderId={activeOrderId} whatsappLink={whatsappLink} timeLeft={timeLeft} onComplete={() => { supabase.from('orders').select('*').eq('id', activeOrderId).single().then(({ data }) => { setActiveOrder(data); setIsFeedbackModalOpen(true); }); }} />}
 
       {/* Session Recovery Banner */}

@@ -355,7 +355,7 @@ export const JobsPage: React.FC<JobsPageProps> = ({
                 />
                 {(index + 1) % 6 === 0 && (
                   <div className="col-span-full py-4">
-                    <AdBanner format="leaderboard" />
+                    <AdBanner format="leaderboard" customLocation="jobs" />
                   </div>
                 )}
               </React.Fragment>
@@ -406,7 +406,7 @@ export const JobsPage: React.FC<JobsPageProps> = ({
       )}
 
       <div className="pt-12 pb-24 md:pb-12">
-        <AdBanner format="leaderboard" />
+        <AdBanner format="leaderboard" customLocation="jobs" />
       </div>
 
       <JobDetailsModal 
