@@ -111,6 +111,21 @@ export const JobsService = {
     return !error;
   },
 
+  deleteOldJobs: async (days: number = 30): Promise<{ count: number; success: boolean }> => {
+    const cutoffDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+    const { data, error } = await supabase
+      .from("jobs")
+      .delete()
+      .lt("posted_at", cutoffDate)
+      .select("id");
+
+    if (error) {
+      console.error("Error deleting old jobs:", error);
+      return { count: 0, success: false };
+    }
+    return { count: data?.length || 0, success: true };
+  },
+
   approveJob: async (id: string, isApproved: boolean): Promise<boolean> => {
     if (isApproved) {
       const { error } = await supabase
