@@ -440,7 +440,7 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
               <div className="p-4 bg-orange-500/10 rounded-2xl border border-orange-500/20 space-y-3 animate-slide-up">
                 <div className="flex items-center justify-between">
                   <label className="text-[10px] font-black uppercase text-orange-400">
-                    Ficheiro ou Link do Vídeo (.mp4 ou YouTube)
+                    Ficheiro ou Link do Vídeo (MP4, YouTube, TikTok, Facebook, Instagram ou LinkedIn)
                   </label>
 
                   {/* Botão de Upload de Vídeo */}
