@@ -2,7 +2,7 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://resolve.ao.vercel.app/sitemap.xml
+Sitemap: https://resolveao.vercel.app/sitemap.xml
 
 # Bloquear pastas técnicas
 Disallow: /admin

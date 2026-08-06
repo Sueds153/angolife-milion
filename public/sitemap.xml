@@ -1,32 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://resolve.ao.vercel.app/</loc>
+    <loc>https://resolveao.vercel.app/</loc>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://resolve.ao.vercel.app/cambio</loc>
+    <loc>https://resolveao.vercel.app/cambio</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://resolve.ao.vercel.app/vagas</loc>
+    <loc>https://resolveao.vercel.app/vagas</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://resolve.ao.vercel.app/noticias</loc>
+    <loc>https://resolveao.vercel.app/noticias</loc>
     <changefreq>hourly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://resolve.ao.vercel.app/ofertas</loc>
+    <loc>https://resolveao.vercel.app/ofertas</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://resolve.ao.vercel.app/cv-criador</loc>
+    <loc>https://resolveao.vercel.app/cv-criador</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>

@@ -57,7 +57,7 @@ logging.basicConfig(
 )
 log = logging.getLogger("AngoNewsScraper")
 
-RESOLVEAO_PLACEHOLDER = "https://resolve.ao.vercel.app/og-image.jpg"
+RESOLVEAO_PLACEHOLDER = "https://resolveao.vercel.app/og-image.jpg"
 
 # ─────────────────────────────────────────────────────────────────────────
 # INTELIGÊNCIA: Palavras-chave para categorização e prioridade

@@ -33,7 +33,7 @@ function expired(): boolean {
   return Date.now() - startTime > DEADLINE_MS;
 }
 
-const RESOLVEAO_PLACEHOLDER = "https://resolve.ao.vercel.app/og-image.jpg";
+const RESOLVEAO_PLACEHOLDER = "https://resolveao.vercel.app/og-image.jpg";
 
 // ─────────────────────────────────────────────
 // INTELIGÊNCIA: categorização e prioridade

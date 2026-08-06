@@ -113,7 +113,7 @@ export const JobsPage: React.FC<JobsPageProps> = ({
     e.stopPropagation();
 
     const executeShare = () => {
-      const appLink = "https://resolve.ao.vercel.app";
+      const appLink = "https://resolveao.vercel.app";
       const text = `🚀 *Vaga Imperdível:* ${job.title}\n🏢 *Empresa:* ${job.company}\n📍 *Local:* ${job.location}\n\nOlha esta vaga que encontrei na Resolve.AO! Sê o primeiro a candidatar-te.\n\nBaixa aqui o app e vê mais: ${appLink}`;
       const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
       window.open(url, '_blank');
