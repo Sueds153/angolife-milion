@@ -13,55 +13,64 @@ export interface UrlMetadata {
 
 export const UrlPreviewService = {
   fetchMetadata: async (targetUrl: string): Promise<UrlMetadata | null> => {
+    let url = targetUrl.trim();
+    if (!url) return null;
+
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url;
+    }
+
+    // ── Step 1: Build baseline result from domain parsing + thum.io screenshot ──
+    // This always works and is the guaranteed fallback.
+    let companyName = 'Parceiro';
     try {
-      let url = targetUrl.trim();
-      if (!url) return null;
+      const domain = new URL(url).hostname.replace(/^www\./, '').split('.')[0];
+      companyName = domain.charAt(0).toUpperCase() + domain.slice(1);
+    } catch {
+      // Invalid URL — keep default company name
+    }
 
-      if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        url = 'https://' + url;
-      }
+    // thum.io expects the raw URL in the path (no encodeURIComponent)
+    const screenshotUrl = `https://image.thum.io/get/width/1200/crop/628/${url}`;
 
-      // Microlink API for metadata extraction
-      const response = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(url)}`);
+    const baseResult: UrlMetadata = {
+      title: `Publicidade ${companyName}`,
+      companyName,
+      imageUrl: screenshotUrl,
+    };
+
+    // ── Step 2: Try Microlink for richer metadata (title, OG image, publisher) ──
+    // Wrapped in its own try-catch so any network/CORS failure falls back gracefully.
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 6000);
+
+      const response = await fetch(
+        `https://api.microlink.io/?url=${encodeURIComponent(url)}`,
+        { signal: controller.signal }
+      );
+      clearTimeout(timeout);
+
       if (response.ok) {
         const json = await response.json();
         if (json.status === 'success' && json.data) {
           const d = json.data;
-          
-          let companyName = d.publisher;
-          if (!companyName) {
-            try {
-              const domain = new URL(url).hostname.replace(/^www\./, '').split('.')[0];
-              companyName = domain.charAt(0).toUpperCase() + domain.slice(1);
-            } catch {
-              companyName = 'Parceiro Resolve.AO';
-            }
-          }
-
-          const fallbackScreenshot = `https://image.thum.io/get/width/1200/crop/600/${url}`;
+          const publisher = d.publisher || companyName;
 
           return {
-            title: d.title || `Anúncio ${companyName}`,
-            companyName: companyName,
-            imageUrl: d.image?.url || fallbackScreenshot,
+            title: d.title || baseResult.title,
+            companyName: publisher,
+            imageUrl: d.image?.url || screenshotUrl,
             description: d.description || '',
             logoUrl: d.logo?.url || d.icon?.url || '',
           };
         }
       }
-
-      // Fallback domain parser & screenshot service
-      const domain = new URL(url).hostname.replace(/^www\./, '').split('.')[0];
-      const companyName = domain.charAt(0).toUpperCase() + domain.slice(1);
-
-      return {
-        title: `Publicidade ${companyName}`,
-        companyName: companyName,
-        imageUrl: `https://image.thum.io/get/width/1200/crop/600/${url}`,
-      };
-    } catch (err) {
-      console.error('[UrlPreviewService] Error:', err);
-      return null;
+    } catch {
+      // Microlink failed (CORS, timeout, network) — fall through to baseResult
     }
+
+    // Always return at least the domain-based fallback
+    return baseResult;
   }
 };

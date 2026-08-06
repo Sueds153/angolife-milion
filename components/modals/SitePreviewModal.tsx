@@ -21,8 +21,8 @@ export const SitePreviewModal: React.FC<SitePreviewModalProps> = ({
   if (!isOpen || !url) return null;
 
   const targetUrl = url.startsWith('http') ? url : `https://${url}`;
-  // thum.io generates a high-quality screenshot of any public URL
-  const screenshotUrl = `https://image.thum.io/get/width/1200/crop/628/${encodeURIComponent(targetUrl)}`;
+  // thum.io generates a high-quality screenshot — raw URL in path, no encodeURIComponent
+  const screenshotUrl = `https://image.thum.io/get/width/1200/crop/628/${targetUrl}`;
 
   const handleOpenSite = () => {
     window.open(targetUrl, '_blank', 'noopener,noreferrer');

@@ -15,9 +15,9 @@ interface AdBannerProps {
 // instances mount at the same time on the same page.
 let isFetchingAds = false;
 
-/** Builds a thum.io screenshot URL as a reliable image fallback */
+/** Builds a thum.io screenshot URL — raw URL in path, no encodeURIComponent */
 const buildScreenshotUrl = (url?: string) =>
-  url ? `https://image.thum.io/get/width/1200/crop/628/${encodeURIComponent(url)}` : null;
+  url ? `https://image.thum.io/get/width/1200/crop/628/${url}` : null;
 
 export const AdBanner: React.FC<AdBannerProps> = ({ format, customLocation = 'all' }) => {
   const { systemSettings, activeAds, setActiveAds } = useAppStore();
@@ -156,8 +156,6 @@ export const AdBanner: React.FC<AdBannerProps> = ({ format, customLocation = 'al
               alt={partnerAd.company_name || partnerAd.title || 'Publicidade'}
               onError={handleImgError}
               className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
-              referrerPolicy="no-referrer"
-              crossOrigin="anonymous"
             />
           ) : (
             // Gradient fallback when all image sources fail
