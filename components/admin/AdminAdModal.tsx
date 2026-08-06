@@ -66,18 +66,20 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
     setFetchingSite(true);
     try {
       const meta = await UrlPreviewService.fetchMetadata(formData.link);
-      if (meta) {
+      if (meta && (meta.imageUrl || meta.title)) {
         setFormData(prev => ({
           ...prev,
-          title: prev.title || meta.title,
-          company_name: prev.company_name || meta.companyName,
+          title: meta.title || prev.title,
+          company_name: meta.companyName || prev.company_name,
           image_url: meta.imageUrl || prev.image_url,
+          media_type: 'image', // Always switch to image media_type so pulled image shows immediately!
         }));
       } else {
         alert("Não foi possível puxar dados automáticos deste site. Pode carregar a mídia manualmente.");
       }
     } catch (err) {
       console.error("Fetch site metadata error:", err);
+      alert("Não foi possível puxar dados do site.");
     } finally {
       setFetchingSite(false);
     }
@@ -106,13 +108,25 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
           }));
         }
       } else {
-        alert('Não foi possível carregar o ficheiro.');
+        if (target === 'video' || file.type.startsWith('video/')) {
+          alert(
+            "⚠️ O upload do ficheiro de vídeo MP4 requer um bucket de armazenamento no Supabase.\n\n" +
+            "Para carregar vídeos em ficheiro MP4:\n" +
+            "1. Aceda ao Supabase Dashboard → Storage → Create New Bucket\n" +
+            "2. Crie o bucket com o nome 'ads' e marque como PUBLIC\n\n" +
+            "Dica: Também pode colar diretamente o link do vídeo do YouTube, TikTok, Facebook ou Instagram no campo abaixo."
+          );
+        } else {
+          alert('Não foi possível carregar a imagem.');
+        }
       }
     } catch (err) {
       console.error('File upload error:', err);
       alert('Erro ao carregar o ficheiro.');
     } finally {
       setUploading(false);
+      // Reset input value so re-selecting same file triggers onChange
+      e.target.value = '';
     }
   };
 

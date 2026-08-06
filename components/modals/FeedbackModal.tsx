@@ -211,7 +211,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ order, isOpen, onC
                                   navigator.share({
                                     title: 'Minha Troca na Resolve.AO',
                                     text: `Acabei de trocar ${order.amount} ${order.currency} na Resolve.AO! Seguro e rápido.`,
-                                    url: 'https://resolveao.app'
+                                    url: 'https://resolve.ao.vercel.app'
                                   });
                                 }
                              }}
