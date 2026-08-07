@@ -25,7 +25,7 @@ serve(async (req: Request) => {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" })
 
     let resultData = {}
 
@@ -132,8 +132,10 @@ ${skillsList || '(não informado)'}`;
     )
 
   } catch (error: any) {
+    // Nunca expor a API key no erro (as mensagens da Google incluem "?key=...")
+    const safeMessage = String(error?.message || error).replace(/[?&]key=[^&\s"']+/g, '');
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: safeMessage }),
       { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }

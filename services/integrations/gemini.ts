@@ -183,7 +183,7 @@ Recomendação: O momento é de cautela. Observe as flutuações nas primeiras h
 // Helper to call Supabase Edge Functions
 async function callEdgeProxy(action: string, payload: Record<string, unknown> = {}) {
   const { data, error } = await supabase.functions.invoke('gemini-proxy', {
-    body: { action, ...payload }
+    body: { action, payload }
   });
   if (error) throw error;
   return data;

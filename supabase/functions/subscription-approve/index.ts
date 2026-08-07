@@ -70,7 +70,16 @@ serve(async (req: Request) => {
       );
     }
 
-    // Marcar subscrição como premium
+    // Ler o plano escolhido para aplicar as regras corretas
+    const { data: sub } = await supabaseAdmin
+      .from("subscriptions_pending")
+      .select("plano_escolhido")
+      .eq("id", id)
+      .single();
+
+    const plan = sub?.plano_escolhido || "monthly";
+
+    // Marcar subscrição como aprovada
     const { error: subError } = await supabaseAdmin
       .from("subscriptions_pending")
       .update({ status: "premium" })
@@ -84,10 +93,39 @@ serve(async (req: Request) => {
       );
     }
 
-    // Ativar Premium no perfil
+    // Aplicar benefícios conforme o plano:
+    // - pack3 (Bronze): +2 downloads pontuais, sem premium
+    // - monthly (Prata): premium por 30 dias
+    // - yearly (Ouro): premium vitalício (sem expiração)
+    let profileUpdates: Record<string, unknown>;
+    if (plan === "pack3") {
+      const { data: prof } = await supabaseAdmin
+        .from("profiles")
+        .select("cv_credits")
+        .eq("id", userId)
+        .single();
+      profileUpdates = {
+        cv_credits: (prof?.cv_credits || 0) + 2,
+        account_type: "bronze",
+      };
+    } else if (plan === "yearly") {
+      profileUpdates = {
+        is_premium: true,
+        account_type: "premium",
+        premium_expiry: null,
+      };
+    } else {
+      profileUpdates = {
+        is_premium: true,
+        account_type: "silver",
+        premium_expiry: Date.now() + 30 * 24 * 60 * 60 * 1000,
+      };
+    }
+
+    // Ativar benefícios no perfil
     const { error: profileError } = await supabaseAdmin
       .from("profiles")
-      .update({ is_premium: true, account_type: "premium" })
+      .update(profileUpdates)
       .eq("id", userId);
 
     if (profileError) {

@@ -98,6 +98,7 @@ const App: React.FC = () => {
             avatarUrl: profile.avatar_url,
             cvCredits: profile.cv_credits,
             isPremium: profile.is_premium,
+            premiumExpiry: profile.premium_expiry ? Number(profile.premium_expiry) : undefined,
             isAdmin: profile.is_admin || isAdminEmail(sessionUser.email),
             referralCount: profile.referral_count,
             accountType: profile.account_type,

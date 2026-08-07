@@ -80,7 +80,8 @@ export const CVBuilderPage: React.FC = () => {
 
   // Check Access
   const hasCredits = (user?.cvCredits || 0) > 0;
-  const isPremiumValid = user?.isAdmin || (user?.isPremium && (user.premiumExpiry || 0) > Date.now());
+  // Premium sem premium_expiry = vitalício; com expiry, só válido se no futuro
+  const isPremiumValid = user?.isAdmin || (user?.isPremium && (!user.premiumExpiry || user.premiumExpiry > Date.now()));
   const canDownload = isAuthenticated && (isPremiumValid || hasCredits);
 
   // AI Enhance Gate Logic
@@ -705,7 +706,7 @@ export const CVBuilderPage: React.FC = () => {
         </div>
 
         {/* SUBSCRIPTION OVERLAY */}
-        {showPaywall && !canDownload && (
+        {showPaywall && (
           <div className="fixed inset-0 z-50 overflow-y-auto">
             <div className="min-h-full flex items-center justify-center p-4">
               <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md"></div>
