@@ -38,22 +38,23 @@ serve(async (req: Request) => {
     }
 
     // Validar e limpar o código de referral
+    // Formato real gerado pelo trigger: 'ANGO-' + 6 hex maiúsculos.
     const cleanCode = String(referralCode).trim().toUpperCase();
-    if (!/^ANGO-[A-Z0-9-]{4,}$/.test(cleanCode)) {
+    if (!/^ANGO-[A-Z0-9]{4,}$/.test(cleanCode)) {
       return new Response(
         JSON.stringify({ error: "Código de referral inválido." }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const sharerIdPrefix = cleanCode.replace("ANGO-", "").toLowerCase();
-
-    // Buscar o utilizador referenciador
+    // Buscar o utilizador referenciador pelo referral_code (coluna gerada pelo
+    // trigger tr_generate_referral_code). Antes procurava por prefixo do `id`,
+    // o que nunca correspondia a códigos aleatórios -> referrals não eram creditados.
     const { data: sharer, error: sharerError } = await supabaseAdmin
       .from("profiles")
       .select("id, referral_count, cv_credits, email")
-      .ilike("id", `${sharerIdPrefix}%`)
-      .single();
+      .eq("referral_code", cleanCode)
+      .maybeSingle();
 
     if (sharerError || !sharer) {
       return new Response(

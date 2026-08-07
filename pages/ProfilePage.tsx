@@ -5,6 +5,7 @@ import { UserProfile, Job } from '../types';
 import { NotificationService } from '../services/integrations/notificationService';
 import { AuthService } from '../services/core/auth.service';
 import { JobsService } from '../services/api/jobs.service';
+import { JobDetailsModal } from '../components/jobs/JobDetailsModal';
 import { OrderService, OrderRow } from '../services/api/order.service';
 import { StorageService } from '../services/api/storage.service';
 import { useAppStore } from '../store/useAppStore';
@@ -42,19 +43,24 @@ export const ProfilePage: React.FC = () => {
   const progressRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
+    let cancelled = false;
     const fetchOrders = async () => {
-      if (user.email) {
-        setLoading(true);
-        const data = await OrderService.getUserOrders(user.email);
-        setOrders(data);
+      if (!user.email) {
         setLoading(false);
+        return;
       }
+      setLoading(true);
+      const data = await OrderService.getUserOrders(user.email);
+      if (!cancelled) setOrders(data);
+      if (!cancelled) setLoading(false);
     };
     fetchOrders();
+    return () => { cancelled = true; };
   }, [user.email]);
   
   const [savedJobsData, setSavedJobsData] = useState<Job[]>([]);
   const [loadingJobs, setLoadingJobs] = useState(false);
+  const [selectedSavedJob, setSelectedSavedJob] = useState<Job | null>(null);
 
   useEffect(() => {
     const fetchSavedJobs = async () => {
@@ -67,6 +73,23 @@ export const ProfilePage: React.FC = () => {
     };
     fetchSavedJobs();
   }, [user.savedJobs]);
+
+  const handleSavedJobApply = async (job: Job) => {
+    await JobsService.incrementApplicationCount(job.id);
+    if (user && onUpdateUser) {
+      const newHistory = await JobsService.submitJobApplication(user.id || '', user.applicationHistory || [], job);
+      onUpdateUser({ applicationHistory: newHistory });
+    }
+    window.open(`mailto:${job.applicationEmail}?subject=Candidatura: ${job.title}`, '_blank');
+    setSavedJobsData(prev => prev.map(j => j.id === job.id ? { ...j, applicationCount: (j.applicationCount || 0) + 1 } : j));
+  };
+
+  const handleSavedJobShare = (e: React.MouseEvent, job: Job) => {
+    e.stopPropagation();
+    const appLink = "https://resolveao.vercel.app";
+    const text = `🚀 *Vaga Imperdível:* ${job.title}\n🏢 *Empresa:* ${job.company}\n📍 *Local:* ${job.location}\n\nOlha esta vaga que encontrei na Resolve.AO! Sê o primeiro a candidatar-te.\n\nBaixa aqui o app e vê mais: ${appLink}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  };
 
   const firstName = user?.fullName || user?.email?.split('@')[0] || '';
   const formattedName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
@@ -91,6 +114,8 @@ export const ProfilePage: React.FC = () => {
       const uploadedUrl = await StorageService.uploadAvatar(selectedFile);
       if (uploadedUrl) {
         avatarUrl = uploadedUrl;
+      } else {
+        alert('Não foi possível enviar a foto de perfil. Os restantes dados serão guardados na mesma.');
       }
     }
 
@@ -111,11 +136,10 @@ export const ProfilePage: React.FC = () => {
 
   const calculateProgress = () => {
     let points = 0;
-    const total = 4;
+    const total = 3;
     if (user.fullName) points++;
     if (user.phone) points++;
-    if (profileImage || user.email) points++; // Simplificado
-    if (user.referralCount > 0) points++;
+    if (profileImage || user.avatarUrl) points++;
     return Math.round((points / total) * 100);
   };
 
@@ -126,6 +150,13 @@ export const ProfilePage: React.FC = () => {
       progressRef.current.style.setProperty('--progress-width', `${profileProgress}%`);
     }
   }, [profileProgress]);
+
+  useEffect(() => {
+    // Sincronizar a foto de perfil com o store, sem apagar o preview local em edição
+    if (!isEditing && !selectedFile) {
+      setProfileImage(user?.avatarUrl || null);
+    }
+  }, [user?.avatarUrl, isEditing, selectedFile]);
 
   const handleEnableNotifications = async () => {
     try {
@@ -175,14 +206,21 @@ export const ProfilePage: React.FC = () => {
   ];
 
   const handleShareReferral = async () => {
+    const shareUrl = `${window.location.origin}?ref=${user.referralCode}`;
     const shareText = `Vem para o Resolve.AO! Regista-te com o meu código: ${user.referralCode}`;
     if (navigator.share) {
-      await navigator.share({ title: 'Resolve.AO', text: shareText, url: window.location.origin });
+      await navigator.share({ title: 'Resolve.AO', text: shareText, url: shareUrl });
     } else {
-      navigator.clipboard.writeText(user.referralCode);
-      setCopiedCode(true);
-      setTimeout(() => setCopiedCode(false), 2000);
+      navigator.clipboard.writeText(shareUrl);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2000);
     }
+  };
+
+  const normalizeOrderType = (order: OrderRow): 'buy' | 'sell' => {
+    const t = (order.order_type ?? order.type ?? '').toLowerCase();
+    if (t === 'compra' || t === 'buy') return 'buy';
+    return 'sell';
   };
 
   if (!user) return null;
@@ -319,7 +357,7 @@ export const ProfilePage: React.FC = () => {
                  />
              </div>
              {profileProgress < 100 && (
-               <p className="text-[9px] font-bold text-slate-500 italic uppercase">💡 Dica: Preenche o teu nome e telefone para chegares aos 100% e teres um CV mais profissional.</p>
+               <p className="text-[9px] font-bold text-slate-500 italic uppercase">💡 Dica: Preenche o teu nome, telefone e foto para chegares aos 100% e teres um CV mais profissional.</p>
              )}
           </div>
         </div>
@@ -384,7 +422,7 @@ export const ProfilePage: React.FC = () => {
                   Desbloqueia o **Gerador de CV Profissional**, remove anúncios e ganha selo de verificação em Angola.
                 </p>
                 <div className="space-y-3">
-                  <button className="w-full bg-slate-950 text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-2xl hover:scale-[1.02] transition-all border border-white/10">
+                  <button onClick={() => navigate('/cv-criador')} className="w-full bg-slate-950 text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-2xl hover:scale-[1.02] transition-all border border-white/10">
                     Torna-te Premium
                   </button>
                   <p className="text-center text-[9px] font-black text-white/50 uppercase tracking-widest">A partir de 500 Kz/mês</p>
@@ -458,7 +496,7 @@ export const ProfilePage: React.FC = () => {
                   {savedJobsData.map((job) => (
                     <div 
                       key={job.id} 
-                      onClick={() => navigate('/vagas')}
+                      onClick={() => setSelectedSavedJob(job)}
                       className="p-4 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5 flex items-center justify-between group hover:border-orange-500/30 transition-all cursor-pointer"
                     >
                        <div className="flex items-center gap-4">
@@ -563,12 +601,12 @@ export const ProfilePage: React.FC = () => {
             {orders.map((order) => (
               <div key={order.id} className="flex items-center justify-between p-6 bg-slate-50 dark:bg-black/20 rounded-3xl border border-slate-100 dark:border-white/5 hover:border-orange-500/40 transition-all group shadow-sm">
                 <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border shadow-inner ${order.type === 'buy' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-orange-500/10 text-orange-500 border-orange-500/20'}`}>
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border shadow-inner ${normalizeOrderType(order) === 'buy' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-orange-500/10 text-orange-500 border-orange-500/20'}`}>
                     {order.currency === 'USDT' ? <span className="font-black text-lg">₮</span> : (order.currency === 'EUR' ? <span className="font-black text-lg">€</span> : <DollarSign size={20} />)}
                   </div>
                   <div>
                     <h4 className="text-[11px] font-black text-slate-950 dark:text-white uppercase tracking-tight mb-1">
-                      {order.type === 'buy' ? 'Compra' : 'Venda'} {order.amount} {order.currency}
+                      {normalizeOrderType(order) === 'buy' ? 'Compra' : 'Venda'} {order.amount} {order.currency}
                     </h4>
                     <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">
                        {new Date(order.created_at).toLocaleDateString()}
@@ -620,7 +658,8 @@ export const ProfilePage: React.FC = () => {
                 </div>
                 <div className="w-56 h-2 bg-white/5 rounded-full overflow-hidden border border-white/10">
                   <div 
-                    className={`h-full bg-gradient-to-r from-brand-gold to-amber-400 rounded-full transition-all duration-1000 shadow-[0_0_15px_rgba(212,175,55,0.4)] ref-progress-${Math.min(5, user.referralCount || 0)}`}
+                    className={`h-full bg-gradient-to-r from-brand-gold to-amber-400 rounded-full transition-all duration-1000 shadow-[0_0_15px_rgba(212,175,55,0.4)]`}
+                    style={{ width: `${Math.min(100, ((user.referralCount || 0) / 5) * 100)}%` }}
                   />
                 </div>
               </div>
@@ -732,6 +771,13 @@ export const ProfilePage: React.FC = () => {
           <ChevronRight size={16} className="text-red-300 group-hover:text-red-500 transition-colors" />
         </button>
       </div>
+
+      <JobDetailsModal
+        job={selectedSavedJob}
+        onClose={() => setSelectedSavedJob(null)}
+        onApply={handleSavedJobApply}
+        onShare={handleSavedJobShare}
+      />
     </div>
   );
 };

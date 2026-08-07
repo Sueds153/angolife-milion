@@ -243,7 +243,11 @@ export const JobsService = {
     const { data, error } = await supabase
       .from("jobs")
       .select("*")
-      .in("id", ids);
+      .in("id", ids)
+      .or(
+        "status.eq.publicado,status.eq.published,status.eq.aprovado,status.eq.approved",
+      )
+      .order("posted_at", { ascending: false });
 
     if (error || !data) return [];
     return data.map((j: JobRow): Job => ({

@@ -32,6 +32,14 @@ const CVBuilderPage = lazy(() => import('./pages/CVBuilderPage').then(m => ({ de
 const DealDetailPage = lazy(() => import('./pages/DealDetailPage').then(m => ({ default: m.DealDetailPage })));
 type Page = 'home' | 'jobs' | 'exchange' | 'deals' | 'news' | 'admin' | 'profile' | 'cv-builder';
 
+// Emails com privilégio de admin. Configurável via VITE_ADMIN_EMAILS (separado por
+// vírgulas); por defeito mantém o antigo owner para não bloquear acesso.
+const ADMIN_EMAILS = (import.meta.env.VITE_ADMIN_EMAILS || 'suedjosue@gmail.com')
+  .split(',')
+  .map((e: string) => e.trim().toLowerCase())
+  .filter(Boolean);
+const isAdminEmail = (email?: string | null) => !!email && ADMIN_EMAILS.includes(email.toLowerCase());
+
 const App: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -90,7 +98,7 @@ const App: React.FC = () => {
             avatarUrl: profile.avatar_url,
             cvCredits: profile.cv_credits,
             isPremium: profile.is_premium,
-            isAdmin: profile.is_admin || sessionUser.email === 'suedjosue@gmail.com',
+            isAdmin: profile.is_admin || isAdminEmail(sessionUser.email),
             referralCount: profile.referral_count,
             accountType: profile.account_type,
             savedJobs: profile.saved_jobs || [],
@@ -107,7 +115,7 @@ const App: React.FC = () => {
             id: sessionUser.id,
             email: sessionUser.email,
             fullName: sessionUser.email.split('@')[0],
-            isAdmin: sessionUser.email === 'suedjosue@gmail.com',
+            isAdmin: isAdminEmail(sessionUser.email),
             isPremium: false,
             cvCredits: 0,
             referralCount: 0,

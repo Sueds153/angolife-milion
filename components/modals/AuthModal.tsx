@@ -31,7 +31,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, 
     setFullName('');
     setIsLoading(false);
     setTermsAccepted(false);
-    setInvitedBy('');
+
+    // Preencher automaticamente o código de convite a partir do link partilhado
+    // (ex.: https://resolveao.app/?ref=ANGO-XXXXXX)
+    const ref = new URLSearchParams(window.location.search).get('ref');
+    setInvitedBy((ref || '').toUpperCase());
   }, [initialMode, isOpen]);
 
   if (!isOpen) return null;
