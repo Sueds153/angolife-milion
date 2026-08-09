@@ -3,6 +3,7 @@
  */
 
 import { supabase } from "./supabaseClient";
+import { PLACEHOLDER_IMAGE } from "../../constants/placeholders";
 
 export const AdminService = {
   triggerJobScraper: async (): Promise<number> => {
@@ -47,7 +48,7 @@ export const AdminService = {
         categoria: n.category,
         published_at: new Date().toISOString(),
         status: "pendente",
-        imagem_url: n.imageUrl || "https://images.unsplash.com/photo-1495020689067-958852a7765e?q=80&w=1000&auto=format&fit=crop",
+        imagem_url: n.imageUrl || PLACEHOLDER_IMAGE,
         is_priority: n.category === "URGENTE" || n.category === "ALERTA",
       }));
 

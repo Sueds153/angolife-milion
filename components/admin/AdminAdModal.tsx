@@ -5,6 +5,7 @@ import { StorageService } from '../../services/api/storage.service';
 import { VideoUtils } from '../../services/utils/videoUtils';
 import { UrlPreviewService } from '../../services/api/urlPreview.service';
 import { useScrollLock } from '../../hooks/useScrollLock';
+import { PLACEHOLDER_IMAGE } from '../../constants/placeholders';
 
 interface AdminAdModalProps {
   isOpen: boolean;
@@ -98,7 +99,7 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
             ...prev,
             media_type: 'video',
             video_url: publicUrl,
-            image_url: prev.image_url || 'https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=1600&q=80',
+            image_url: prev.image_url || PLACEHOLDER_IMAGE,
           }));
         } else {
           setFormData(prev => ({
@@ -138,11 +139,11 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
       const payload = { ...formData };
       
       if (payload.media_type === 'video' && !payload.image_url) {
-        payload.image_url = 'https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=1600&q=80';
+        payload.image_url = PLACEHOLDER_IMAGE;
       }
 
       if (!payload.image_url) {
-        payload.image_url = 'https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=1600&q=80';
+        payload.image_url = PLACEHOLDER_IMAGE;
       }
 
       if (editingAd?.id) {

@@ -67,7 +67,8 @@ export const AuthService = {
     // geridos exclusivamente por serviços server-side (subscription, referral Edge Function).
     const ALLOWED_USER_FIELDS = [
       'full_name', 'avatar_url', 'saved_jobs',
-      'application_history', 'cv_history', 'phone', 'bio', 'location'
+      'application_history', 'cv_history', 'phone', 'bio', 'location',
+      'tipo_utilizador', 'destinos_frequentes', 'contacto_emergencia'
     ];
 
     const dbUpdates: Record<string, unknown> = {};
@@ -78,6 +79,9 @@ export const AuthService = {
     if (updates.savedJobs)          dbUpdates.saved_jobs = updates.savedJobs;
     if (updates.applicationHistory) dbUpdates.application_history = updates.applicationHistory;
     if (updates.cvHistory)          dbUpdates.cv_history = updates.cvHistory;
+    if (updates.tipoUtilizador)     dbUpdates.tipo_utilizador = updates.tipoUtilizador;
+    if (updates.destinosFrequentes) dbUpdates.destinos_frequentes = updates.destinosFrequentes;
+    if (updates.contactoEmergencia) dbUpdates.contacto_emergencia = updates.contactoEmergencia;
 
     // Incluir apenas campos snake_case que estão na whitelist
     for (const [key, value] of Object.entries(updates)) {

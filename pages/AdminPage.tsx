@@ -8,6 +8,7 @@ import { ExchangeService } from '../services/api/exchange.service';
 import { AdminService } from '../services/core/admin.service';
 import { SubscriptionService, CVSubscriptionRow } from '../services/api/subscription.service';
 import { NotificationService } from '../services/integrations/notificationService';
+import { PLACEHOLDER_IMAGE } from '../constants/placeholders';
 import { supabase } from '../services/core/supabaseClient';
 import { Job, NewsArticle, ProductDeal, ExchangeRate } from '../types';
 import { Lock } from 'lucide-react';
@@ -282,7 +283,7 @@ export const AdminPage: React.FC = () => {
     if (!newDeal.title || !newDeal.store || newDeal.discountPrice <= 0) return;
 
     setLoading(true);
-    let uploadedUrl = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80';
+    let uploadedUrl = PLACEHOLDER_IMAGE;
     if (dealImageFile) {
       uploadedUrl = await DealsService.uploadDiscountImage(dealImageFile) || uploadedUrl;
     }

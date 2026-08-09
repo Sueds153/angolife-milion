@@ -35,12 +35,31 @@ export interface ApplicationEntry {
 }
 
 export const JobsService = {
-  getJobs: async (isAdmin: boolean = false): Promise<Job[]> => {
+  getJobs: async (
+    isAdmin: boolean = false,
+    options: {
+      limit?: number;
+      search?: string;
+      from?: number;
+      to?: number;
+    } = {},
+  ): Promise<Job[]> => {
     let query = supabase.from("jobs").select("*");
     if (!isAdmin) {
       query = query.or(
         "status.eq.publicado,status.eq.published,status.eq.aprovado,status.eq.approved",
       );
+      if (options.search && options.search.trim()) {
+        const term = options.search.trim();
+        query = query.or(
+          `title.ilike.%${term}%,company.ilike.%${term}%,location.ilike.%${term}%`,
+        );
+      }
+      if (typeof options.from === "number" && typeof options.to === "number") {
+        query = query.range(options.from, options.to);
+      } else if (options.limit && options.limit > 0) {
+        query = query.limit(options.limit);
+      }
     }
 
     const { data, error } = await query.order("posted_at", { ascending: false });
@@ -299,7 +318,7 @@ export const JobsService = {
     const newCount = (job.report_count || 0) + 1;
     const updateData: Record<string, unknown> = { report_count: newCount };
     if (newCount >= 3) {
-      updateData.status = "pending";
+      updateData.status = "pendente"; // valor canónico (fase 9)
     }
 
     await supabase.from("jobs").update(updateData).eq("id", id);

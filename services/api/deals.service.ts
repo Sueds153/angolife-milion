@@ -30,13 +30,15 @@ interface DealRow {
 }
 
 export const DealsService = {
-  getDeals: async (isAdmin: boolean = false): Promise<ProductDeal[]> => {
+  getDeals: async (isAdmin: boolean = false, options: { limit?: number } = {}): Promise<ProductDeal[]> => {
     let query = supabase.from("product_deals").select("*");
 
     if (!isAdmin) {
       query = query.or(
         "status.eq.approved,status.eq.aprovado,status.eq.publicado,status.eq.published",
       );
+      const limit = options.limit;
+      if (limit && limit > 0) query = query.limit(limit);
     }
 
     const { data, error } = await query;

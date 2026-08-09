@@ -98,6 +98,104 @@ export interface UserProfile {
   cvHistory?: { id: string, date: string, url: string, name: string }[];
   hasReferralDiscount?: boolean;
   avatarUrl?: string;
+  // VaiJá
+  tipoUtilizador?: TipoUtilizador;
+  destinosFrequentes?: string[];
+  avaliacaoMedia?: number | null;
+  passageiroNoShowCount?: number;
+  contactoEmergencia?: string;
+}
+
+// ── VaiJá ────────────────────────────────────────────
+export type TipoUtilizador = "passageiro" | "motorista" | "ambos";
+export type TipoVeiculo = "candongueiro" | "taxi";
+export type ModoTrajeto = "trajeto" | "corredor";
+export type StatusTrajeto = "ativo" | "lotado" | "finalizado" | "expirado";
+export type StatusConfirmacao = "confirmado" | "embarcado" | "cancelado" | "nao_apareceu";
+export type StatusPedidoDemanda = "aberto" | "atendido" | "cancelado";
+
+export interface DriverData {
+  id?: string;
+  userId: string;
+  matricula?: string;
+  tipoVeiculo?: TipoVeiculo;
+  fotoDocumentoUrl?: string;
+  verificado?: boolean;
+  trajetosFantasmaCount?: number;
+  statusConta?: "ativo" | "suspenso";
+  criadoEm?: string;
+  atualizadoEm?: string;
+}
+
+export interface MotoristaPublico {
+  userId: string;
+  matricula?: string;
+  tipoVeiculo?: TipoVeiculo;
+  verificado?: boolean;
+  trajetosFantasmaCount?: number;
+  statusConta?: "ativo" | "suspenso";
+  fullName?: string;
+  phone?: string;
+  avatarUrl?: string;
+  avaliacaoMedia?: number | null;
+}
+
+export interface Corredor {
+  id: string;
+  nome: string;
+  partida: string;
+  destino: string;
+  partidaLat?: number | null;
+  partidaLng?: number | null;
+  destinoLat?: number | null;
+  destinoLng?: number | null;
+  precoReferencia?: number | null;
+  distanciaKm?: number | null;
+  ativo?: boolean;
+}
+
+export interface TrajetoAtivo {
+  id: string;
+  motoristaId: string;
+  modo: ModoTrajeto;
+  corredorId?: string | null;
+  pontoPartida: string;
+  partidaLat?: number | null;
+  partidaLng?: number | null;
+  pontoDestino: string;
+  destinoLat?: number | null;
+  destinoLng?: number | null;
+  lugaresTotais: number;
+  lugaresDisponiveis: number;
+  preco: number;
+  modoLotacaoRapida?: boolean;
+  status: StatusTrajeto;
+  incidenteReportado?: boolean;
+  criadoEm: string;
+  atualizadoEm: string;
+  expiraEm: string;
+}
+
+export interface Confirmacao {
+  id: string;
+  trajetoId: string;
+  passageiroId: string;
+  precoAcordado?: number | null;
+  status: StatusConfirmacao;
+  criadoEm: string;
+}
+
+export interface PedidoDemanda {
+  id: string;
+  passageiroId: string;
+  pontoPartida: string;
+  partidaLat?: number | null;
+  partidaLng?: number | null;
+  pontoDestino: string;
+  destinoLat?: number | null;
+  destinoLng?: number | null;
+  status: StatusPedidoDemanda;
+  criadoEm: string;
 }
 
 export interface AppNotification {

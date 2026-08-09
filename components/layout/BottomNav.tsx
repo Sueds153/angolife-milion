@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, Briefcase, DollarSign, Newspaper, FileText } from 'lucide-react';
+import { Home, Briefcase, Car, DollarSign, Newspaper } from 'lucide-react';
 
 interface BottomNavProps {
   showStickyAd: boolean;
@@ -10,7 +10,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ showStickyAd }) => {
   const navItems = [
     { id: 'home', label: 'Início', icon: Home, path: '/' },
     { id: 'jobs', label: 'Vagas', icon: Briefcase, path: '/vagas' },
-    { id: 'cv-builder', label: 'CV', icon: FileText, path: '/cv-criador' },
+    { id: 'vaija', label: 'VaiJá', icon: Car, path: '/vaija' },
     { id: 'exchange', label: 'Câmbio', icon: DollarSign, path: '/cambio' },
     { id: 'news', label: 'Notícias', icon: Newspaper, path: '/noticias' },
   ];

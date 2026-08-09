@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
-import { Menu, X, Briefcase, DollarSign, Tag, Newspaper, UserCog, Sun, Moon, Home, LogOut, User, LogIn, UserPlus, FileText, ShieldCheck, Lock } from 'lucide-react';
+import { Menu, X, Briefcase, DollarSign, Tag, Newspaper, UserCog, Sun, Moon, Home, LogOut, User, LogIn, UserPlus, FileText, ShieldCheck, Lock, Car } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { AuthService } from '../../services/core/auth.service';
 import { useScrollLock } from '../../hooks/useScrollLock';
@@ -35,6 +35,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenLegal }) => {
     { id: 'exchange', label: 'Câmbio', icon: DollarSign, path: '/cambio' },
     { id: 'deals', label: 'Descontos', icon: Tag, path: '/ofertas' },
     { id: 'news', label: 'Notícias', icon: Newspaper, path: '/noticias' },
+    { id: 'vaija', label: 'VaiJá', icon: Car, path: '/vaija' },
   ];
 
   if (isAdmin) {

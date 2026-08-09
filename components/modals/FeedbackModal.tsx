@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { supabase } from '../../services/core/supabaseClient';
+import { OrderService } from '../../services/api/order.service';
 import { Star, CheckCircle, Send, MessageSquare } from 'lucide-react';
 import { useScrollLock } from '../../hooks/useScrollLock';
 
@@ -35,22 +35,10 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ order, isOpen, onC
   const handleSubmitFeedback = async () => {
     if (rating === 0) return;
     setSubmitting(true);
-    
-    try {
-      const { error: reviewError } = await supabase
-        .from('reviews')
-        .insert({
-          order_id: order.id,
-          rating,
-          comment
-        });
 
-      if (!reviewError) {
-        await supabase
-          .from('orders')
-          .update({ status: 'completed' })
-          .eq('id', order.id);
-        
+    try {
+      const success = await OrderService.submitReview(order.id, rating, comment);
+      if (success) {
         setSubmitted(true);
         setTimeout(() => setStep('success'), 1500);
       }

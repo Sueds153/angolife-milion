@@ -27,7 +27,7 @@ const DETAIL_DELAY_MS = 400;
 const DEADLINE_MS = 115_000;
 
 const startTime = Date.now();
-const stats = { processed: 0, saved: 0, skipped: 0, errors: 0 };
+const stats = { processed: 0, saved: 0, skipped: 0, errors: 0, junk: 0, detailNull: 0, redup: 0, badUrl: 0, throws: 0, throwSample: "" };
 
 function expired(): boolean {
   return Date.now() - startTime > DEADLINE_MS;
@@ -75,26 +75,6 @@ const SITES_CONFIG: Record<string, SiteConfig> = {
     link_selector: "a",
     fixed_category: "Economia",
   },
-  "Jornal de Angola": {
-    base_url: "https://www.jornaldeangola.ao",
-    list_url: "https://www.jornaldeangola.ao/ao/noticias/",
-    article_selector: "article, .td-module-container, .td-block-span12, .entry-title",
-    title_selector: "h1, h2, h3, .entry-title, a",
-    link_selector: "a",
-    fixed_category: "Angola",
-    extra_headers: {
-      "Referer": "https://www.google.com/",
-      "Accept-Language": "pt-PT,pt;q=0.9,en;q=0.8",
-    },
-  },
-  "TPA": {
-    base_url: "https://tpaonline.ao",
-    list_url: "https://tpaonline.ao/category/noticias/",
-    article_selector: "article, .post, .entry, a[href*='/detalhe/']",
-    title_selector: "h2, h3, .title",
-    link_selector: "a",
-    fixed_category: "Oficial",
-  },
   "TV Girassol": {
     base_url: "https://www.giranoticias.com",
     list_url: "https://www.giranoticias.com/",
@@ -102,21 +82,6 @@ const SITES_CONFIG: Record<string, SiteConfig> = {
     title_selector: "h2, h3, .jeg_post_title",
     link_selector: "a",
     fixed_category: "Oficial",
-  },
-  "ANGOP": {
-    base_url: "https://www.angop.ao",
-    list_url: "https://www.angop.ao/angola/pt_pt/noticias/",
-    article_selector: "article, .news-item, .item, a[href*='/noticias/'], .jeg_post",
-    title_selector: "h1, h2, h3, .title",
-    link_selector: "a",
-    fixed_category: "Angola",
-    extra_headers: {
-      "Accept-Encoding": "gzip, deflate",
-      "Referer": "https://www.google.com/",
-      "Sec-Fetch-Mode": "navigate",
-      "Accept-Language": "pt-PT,pt;q=0.9",
-      "Sec-Fetch-Site": "cross-site",
-    },
   },
   "Novo Jornal": {
     base_url: "https://www.novojornal.co.ao",
@@ -127,20 +92,12 @@ const SITES_CONFIG: Record<string, SiteConfig> = {
     fixed_category: "Investigação",
   },
   "NovaGazeta": {
-    base_url: "https://novagazeta.co.ao",
-    list_url: "https://novagazeta.co.ao/category/noticias/",
+    base_url: "https://www.novagazeta.co.ao",
+    list_url: "https://www.novagazeta.co.ao/",
     article_selector: "article, .post, .news-item",
     title_selector: "h1, h2, h3, .entry-title, .post-title",
     link_selector: "a",
     fixed_category: "Utilidade",
-  },
-  "Xé Angola": {
-    base_url: "https://xaa.ao",
-    list_url: "https://xaa.ao/category/noticias/",
-    article_selector: ".post, article, .jeg_post",
-    title_selector: "h3, h2, .entry-title, .jeg_post_title",
-    link_selector: "a",
-    fixed_category: "Sociedade",
   },
   "Angonotícias": {
     base_url: "https://www.angonoticias.com",
@@ -149,18 +106,6 @@ const SITES_CONFIG: Record<string, SiteConfig> = {
     title_selector: ".",
     link_selector: ".",
     fixed_category: "Angola",
-  },
-  "PlatinaLine": {
-    base_url: "https://platinaline.com",
-    list_url: "https://platinaline.com/category/noticias/",
-    article_selector: "article, .l-post, .post-meta",
-    title_selector: "h1, h2, h3, h4, .post-title, a",
-    link_selector: "a",
-    fixed_category: "Geral",
-    extra_headers: {
-      "Referer": "https://www.google.com/",
-      "Upgrade-Insecure-Requests": "1",
-    },
   },
 };
 
@@ -198,6 +143,68 @@ function extractImage($: cheerio.CheerioAPI, baseUrl: string): string {
   }
 
   return RESOLVEAO_PLACEHOLDER;
+}
+
+// ─────────────────────────────────────────────
+// CACHE DE IMAGENS (Fase D2): evita hotlinks externos
+// ─────────────────────────────────────────────
+async function sha256Hex(input: string): Promise<string> {
+  const data = new TextEncoder().encode(input);
+  const digest = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+function extFromContentType(contentType: string | null): string {
+  if (!contentType) return ".jpg";
+  const t = contentType.toLowerCase();
+  if (t.includes("png")) return ".png";
+  if (t.includes("webp")) return ".webp";
+  if (t.includes("gif")) return ".gif";
+  if (t.includes("svg")) return ".svg";
+  if (t.includes("avif")) return ".avif";
+  return ".jpg";
+}
+
+async function cacheImage(imageUrl: string): Promise<string> {
+  if (!imageUrl || imageUrl === RESOLVEAO_PLACEHOLDER) return RESOLVEAO_PLACEHOLDER;
+  if (!/^https?:\/\//i.test(imageUrl)) return RESOLVEAO_PLACEHOLDER;
+
+  try {
+    const res = await fetch(imageUrl, {
+      headers: { "User-Agent": "ResolveAO-NewsScraper/1.0" },
+      redirect: "follow",
+    });
+    if (!res.ok) {
+      console.warn(`  ⚠️ Imagem não disponível (${res.status}): ${imageUrl.slice(0, 60)}`);
+      return RESOLVEAO_PLACEHOLDER;
+    }
+    const contentType = res.headers.get("content-type");
+    const buffer = await res.arrayBuffer();
+    if (buffer.byteLength === 0) return RESOLVEAO_PLACEHOLDER;
+
+    const hash = await sha256Hex(imageUrl);
+    const path = `news/${hash}${extFromContentType(contentType)}`;
+
+    const { error: upErr } = await supabase.storage
+      .from("news-images")
+      .upload(path, buffer, { contentType: contentType ?? "image/jpeg", upsert: false });
+
+    if (upErr) {
+      // Já existe (mesmo hash) -> reutilizamos o objecto
+      if (/duplicate/i.test(upErr.message)) {
+        return supabase.storage.from("news-images").getPublicUrl(path).data.publicUrl;
+      }
+      console.warn(`  ⚠️ Upload imagem falhou: ${upErr.message}`);
+      return RESOLVEAO_PLACEHOLDER;
+    }
+
+    return supabase.storage.from("news-images").getPublicUrl(path).data.publicUrl;
+  } catch (err) {
+    console.warn(`  ⚠️ Erro a cachear imagem: ${String(err).slice(0, 120)}`);
+    return RESOLVEAO_PLACEHOLDER;
+  }
 }
 
 // ─────────────────────────────────────────────
@@ -241,11 +248,34 @@ async function scrapeSite(siteName: string, cfg: SiteConfig): Promise<void> {
     }
     console.log(`  📋 ${articles.length} artigos encontrados`);
 
-    const limited = articles.slice(0, MAX_PER_SITE);
-    await mapWithConcurrency(limited, DETAIL_CONCURRENCY, async (el) => {
+    // Salta artigos já existentes (dedup) e só processa novos, até MAX_PER_SITE.
+    const fresh: cheerio.Cheerio<cheerio.AnyNode>[] = [];
+    for (const el of articles) {
+      if (expired()) break;
+      const art = $(el);
+      let rawUrl = "";
+      if (cfg.link_selector === ".") {
+        rawUrl = art.attr("href") ?? "";
+      } else {
+        const linkEl = art.find(cfg.link_selector).first();
+        rawUrl = linkEl.attr("href") ?? "";
+      }
+      if (!rawUrl && art.is("a")) rawUrl = art.attr("href") ?? "";
+      const articleUrl = normalizeUrl(rawUrl, cfg.base_url);
+      if (!articleUrl || articleUrl === cfg.base_url || articleUrl === cfg.list_url) continue;
+      if (await isDuplicate(articleUrl)) {
+        stats.skipped++;
+        continue;
+      }
+      fresh.push(art);
+      if (fresh.length >= MAX_PER_SITE) break;
+    }
+    console.log(`  ➕ ${fresh.length} artigos novos a processar`);
+
+    await mapWithConcurrency(fresh, DETAIL_CONCURRENCY, async (el) => {
       if (expired()) return;
       stats.processed++;
-      await processArticle($(el), siteName, cfg);
+      await processArticle(el, siteName, cfg);
     });
   } catch (err) {
     console.error(`❌ SITE FALHADO: ${siteName} | ${String(err)}`);
@@ -269,11 +299,15 @@ async function processArticle(
     if (!rawUrl && art.is("a")) rawUrl = art.attr("href") ?? "";
 
     const articleUrl = normalizeUrl(rawUrl, cfg.base_url);
-    if (!articleUrl || articleUrl === cfg.base_url || articleUrl === cfg.list_url) return;
+    if (!articleUrl || articleUrl === cfg.base_url || articleUrl === cfg.list_url) {
+      stats.badUrl++;
+      return;
+    }
 
     if (await isDuplicate(articleUrl)) {
       console.log(`  ⏭️ Já existe: ${articleUrl.slice(0, 70)}`);
       stats.skipped++;
+      stats.redup++;
       return;
     }
 
@@ -285,28 +319,37 @@ async function processArticle(
       title = cleanText(titleEl.text());
     }
     if (isJunkTitle(title)) title = cleanText(art.text());
-    if (isJunkTitle(title)) return;
+    if (isJunkTitle(title)) {
+      stats.junk++;
+      return;
+    }
 
     console.log(`  ✨ Capturando: ${title.slice(0, 65)}...`);
 
     await sleep(DETAIL_DELAY_MS);
     const detail = await fetchSoup(articleUrl, cfg.extra_headers ?? {}, 20000);
-    if (!detail) return;
+    if (!detail) {
+      stats.detailNull++;
+      return;
+    }
 
     const detailTitleEl = detail("h1, .entry-title, .article-title").first();
     const detailTitle = cleanText(detailTitleEl.text());
     const finalTitle = !isJunkTitle(detailTitle) ? detailTitle : title;
 
     const imageUrl = extractImage(detail, cfg.base_url);
+    const cachedImageUrl = await cacheImage(imageUrl);
 
     let bodyArea = detail("article, .entry-content, .post-content, .content-body, .article-content, .td-post-content, main").first();
     let bodyHtml = "";
     let bodyText = "";
     if (bodyArea.length > 0) {
-      const clone = bodyArea.clone();
-      clone("script, style, iframe, ins, nav, footer, aside, form, noscript").remove();
-      bodyHtml = clone.html() ?? "";
-      bodyText = clone.text();
+      const raw = bodyArea.html() ?? "";
+      const $body = cheerio.load(raw);
+      $body("script, style, iframe, ins, nav, footer, aside, form, noscript").remove();
+      const root = $body.root();
+      bodyHtml = root.html() ?? "";
+      bodyText = root.text();
     } else {
       bodyText = detail.text();
     }
@@ -318,7 +361,7 @@ async function processArticle(
       titulo: finalTitle.slice(0, 500),
       resumo: (summary || "").slice(0, 1000),
       corpo: (bodyHtml || "").slice(0, 50000),
-      imagem_url: imageUrl || RESOLVEAO_PLACEHOLDER,
+      imagem_url: cachedImageUrl,
       categoria: categoria || "Geral",
       fonte: siteName,
       url_origem: articleUrl,
@@ -336,6 +379,8 @@ async function processArticle(
     stats.saved++;
   } catch (err) {
     console.warn(`  ⚠️ Erro num artigo de ${siteName}: ${String(err)}`);
+    stats.throws++;
+    if (!stats.throwSample) stats.throwSample = String(err).slice(0, 300);
   }
 }
 
@@ -362,7 +407,7 @@ Deno.serve(async () => {
     stats,
   };
   console.log(
-    `🏁 CONCLUÍDO em ${elapsed}s | Guardados: ${stats.saved} | Duplicados: ${stats.skipped} | Erros: ${stats.errors}`,
+    `🏁 CONCLUÍDO em ${elapsed}s | Guardados: ${stats.saved} | Duplicados: ${stats.skipped} | Erros: ${stats.errors} | Junk: ${stats.junk} | DetailNull: ${stats.detailNull} | Redup: ${stats.redup} | BadUrl: ${stats.badUrl} | Throws: ${stats.throws}`,
   );
   return new Response(JSON.stringify(body), {
     headers: { "Content-Type": "application/json" },

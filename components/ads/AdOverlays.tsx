@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { X, Clock, Award } from 'lucide-react';
 import { useScrollLock } from '../../hooks/useScrollLock';
+import { PLACEHOLDER_IMAGE } from '../../constants/placeholders';
 
 interface InterstitialAdProps {
   onClose: () => void;
@@ -59,7 +60,7 @@ export const InterstitialAd: React.FC<InterstitialAdProps> = ({ onClose, duratio
             
             {/* Imagem de Sucesso Negra no anúncio - Atualizada para ser exclusiva */}
             <div className="w-28 h-28 md:w-40 md:h-40 rounded-full overflow-hidden mb-8 border-4 border-brand-gold shadow-2xl transform hover:scale-105 transition-transform duration-500">
-               <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=500&q=80" className="w-full h-full object-cover" alt="Elite Business" />
+               <img src={PLACEHOLDER_IMAGE} className="w-full h-full object-cover" alt="Elite Business" />
             </div>
             
             <h3 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white mb-4 uppercase tracking-tighter leading-none">Resolve.AO <br/><span className="text-brand-gold">Premium Plus</span></h3>
@@ -125,7 +126,7 @@ export const RewardedAd: React.FC<RewardedAdProps> = ({ onReward, onClose }) => 
         <div className="text-center p-8 max-w-md">
            <div className="relative inline-block mb-12">
               <div className={`w-32 h-32 md:w-48 md:h-48 rounded-full border-2 overflow-hidden shadow-2xl transition-all duration-1000 ${completed ? 'border-brand-gold scale-110' : 'border-white/10 opacity-30 grayscale'}`}>
-                 <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&q=80" className="w-full h-full object-cover" alt="Reward" />
+                 <img src={PLACEHOLDER_IMAGE} className="w-full h-full object-cover" alt="Reward" />
               </div>
               {completed && <Award size={40} className="absolute -top-4 -right-4 text-white bg-brand-gold rounded-full p-2 shadow-2xl border-4 border-black" />}
            </div>

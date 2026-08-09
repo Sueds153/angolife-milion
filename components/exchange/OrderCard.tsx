@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../services/core/supabaseClient';
+import { OrderService, OrderRow } from '../../services/api/order.service';
 import { Clock, Eye, Send, ArrowRight, ExternalLink } from 'lucide-react';
 
 interface OrderCardProps {
@@ -9,15 +9,8 @@ interface OrderCardProps {
   timeLeft?: number;
 }
 
-interface OrderStatusRow {
-  status: string;
-  amount: number;
-  currency: string;
-  wallet: string;
-}
-
 export const OrderCard: React.FC<OrderCardProps> = ({ orderId, onComplete, whatsappLink, timeLeft: parentTimeLeft }) => {
-  const [order, setOrder] = useState<OrderStatusRow | null>(null);
+  const [order, setOrder] = useState<OrderRow | null>(null);
   const [loading, setLoading] = useState(true);
   
   // Use parent timeLeft if provided, otherwise use local state
@@ -42,12 +35,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({ orderId, onComplete, whats
 
   useEffect(() => {
     const fetchOrder = async () => {
-      const { data } = await supabase
-        .from('orders')
-        .select('*')
-        .eq('id', orderId)
-        .single();
-
+      const data = await OrderService.getOrderById(orderId);
       if (data) {
         setOrder(data);
       }
@@ -57,23 +45,15 @@ export const OrderCard: React.FC<OrderCardProps> = ({ orderId, onComplete, whats
     fetchOrder();
 
     // Subscribe to realtime changes
-    const subscription = supabase
-      .channel(`order-${orderId}`)
-      .on('postgres_changes', { 
-        event: 'UPDATE', 
-        schema: 'public', 
-        table: 'orders',
-        filter: `id=eq.${orderId}`
-      }, (payload) => {
-        setOrder(payload.new);
-        if (payload.new.status === 'sent') {
-          // Trigger celebration modal will be handled by parent or deep link
-        }
-      })
-      .subscribe();
+    const subscription = OrderService.subscribeOrder(orderId, (updated) => {
+      setOrder(updated);
+      if (updated.status === 'sent') {
+        // Trigger celebration modal will be handled by parent or deep link
+      }
+    });
 
     return () => {
-      supabase.removeChannel(subscription);
+      subscription.unsubscribe();
     };
   }, [orderId]);
 

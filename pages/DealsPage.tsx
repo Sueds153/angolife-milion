@@ -5,6 +5,7 @@ import { DealsService } from '../services/api/deals.service';
 import { ProductDeal } from '../types';
 import { useAppStore } from '../store/useAppStore';
 import { useScrollLock } from '../hooks/useScrollLock';
+import { PLACEHOLDER_IMAGE } from '../constants/placeholders';
 
 interface DealsPageProps {
   onSelectDeal: (deal: ProductDeal) => void;
@@ -107,7 +108,7 @@ export const DealsPage: React.FC<DealsPageProps> = ({ onSelectDeal, onShowInters
           return;
         }
       } else {
-        uploadedUrl = `https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80`;
+        uploadedUrl = PLACEHOLDER_IMAGE;
       }
 
       const isUserAdmin = user?.isAdmin || false;
@@ -190,7 +191,7 @@ export const DealsPage: React.FC<DealsPageProps> = ({ onSelectDeal, onShowInters
             {deals.map((deal) => (
               <div key={deal.id} onClick={() => onSelectDeal(deal)} className="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-md border border-slate-100 dark:border-white/5 group hover:shadow-xl transition-all cursor-pointer active:scale-[0.98] flex flex-col h-full">
                 <div className="h-48 overflow-hidden relative">
-                  <img src={deal.imageUrl} alt={deal.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                  <img src={deal.imageUrl || deal.imagePlaceholder || PLACEHOLDER_IMAGE} alt={deal.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                   <div className="absolute top-3 right-3 bg-red-500 text-white text-[10px] font-black px-2 py-1 rounded-lg shadow-lg">
                     -{Math.round(((deal.originalPrice - deal.discountPrice) / deal.originalPrice) * 100)}%
                   </div>

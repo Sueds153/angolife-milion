@@ -30,7 +30,9 @@ const AdminPage = lazy(() => import('./pages/AdminPage').then(m => ({ default: m
 const ProfilePage = lazy(() => import('./pages/ProfilePage').then(m => ({ default: m.ProfilePage })));
 const CVBuilderPage = lazy(() => import('./pages/CVBuilderPage').then(m => ({ default: m.CVBuilderPage })));
 const DealDetailPage = lazy(() => import('./pages/DealDetailPage').then(m => ({ default: m.DealDetailPage })));
-type Page = 'home' | 'jobs' | 'exchange' | 'deals' | 'news' | 'admin' | 'profile' | 'cv-builder';
+const VaiJaPage = lazy(() => import('./pages/VaiJaPage').then(m => ({ default: m.VaiJaPage })));
+const VaiJaTrajetoPage = lazy(() => import('./pages/VaiJaTrajetoPage').then(m => ({ default: m.VaiJaTrajetoPage })));
+type Page = 'home' | 'jobs' | 'exchange' | 'deals' | 'news' | 'admin' | 'profile' | 'cv-builder' | 'vaija';
 
 // Emails com privilégio de admin. Configurável via VITE_ADMIN_EMAILS (separado por
 // vírgulas); por defeito mantém o antigo owner para não bloquear acesso.
@@ -60,6 +62,7 @@ const App: React.FC = () => {
     if (path.startsWith('/admin')) return 'admin';
     if (path.startsWith('/perfil')) return 'profile';
     if (path.startsWith('/cv-criador')) return 'cv-builder';
+    if (path.startsWith('/vaija')) return 'vaija';
     return 'home';
   };
 
@@ -108,7 +111,12 @@ const App: React.FC = () => {
             phone: profile.phone || undefined,
             location: profile.location || undefined,
             cvHistory: profile.cv_history || [],
-            hasReferralDiscount: profile.has_referral_discount || false
+            hasReferralDiscount: profile.has_referral_discount || false,
+            tipoUtilizador: profile.tipo_utilizador || 'passageiro',
+            destinosFrequentes: profile.destinos_frequentes || [],
+            avaliacaoMedia: profile.avaliacao_media ?? null,
+            passageiroNoShowCount: profile.passageiro_no_show_count || 0,
+            contactoEmergencia: profile.contacto_emergencia || undefined
           });
           setIsAuthenticated(true);
         } else {
@@ -149,50 +157,87 @@ const App: React.FC = () => {
   const [lastInterstitialTime, setLastInterstitialTime] = useState(0);
   const [subscribedCategories, setSubscribedCategories] = useState<string[]>([]);
 
-  // Real-time Update Checker (simplified to use Store)
+  // Real-time Update Checker (real: só notifica quando há conteúdo novo)
   useEffect(() => {
+    const readSeenIds = (key: string): string[] => {
+      try {
+        return JSON.parse(localStorage.getItem(key) || '[]') as string[];
+      } catch {
+        return [];
+      }
+    };
+
+    const writeSeenId = (key: string, id: string) => {
+      const seen = readSeenIds(key);
+      if (!seen.includes(id)) {
+        seen.unshift(id);
+        localStorage.setItem(key, JSON.stringify(seen.slice(0, 20)));
+      }
+    };
+
     const checkForUpdates = async () => {
       try {
         const [jobs, news] = await Promise.all([
-          JobsService.getJobs(false),
+          JobsService.getJobs(false, { limit: 1 }),
           NewsService.getNews(false, { limit: 1 })
         ]);
 
-        const isJob = Math.random() > 0.5;
-        let mockNotification: AppNotification | null = null;
+        const latestJob = jobs.length > 0 ? jobs[0] : null;
+        const latestNews = news.length > 0 ? news[0] : null;
 
-        if (isJob && jobs.length > 0) {
-          const latestJob = jobs[0];
-          mockNotification = {
-            id: latestJob.id,
+        let notification: AppNotification | null = null;
+
+        if (latestJob && !readSeenIds('seen_jobs_ids').includes(latestJob.id)) {
+          notification = {
+            id: `job-${latestJob.id}-${Date.now()}`,
             title: `Nova Vaga: ${latestJob.title}`,
             message: `Oportunidade em ${latestJob.company} (${latestJob.location}). Candidata-te já!`,
             type: 'job',
             timestamp: Date.now()
           };
-        } else if (news.length > 0) {
-          const latestNews = news[0];
-          mockNotification = {
-            id: latestNews.id,
+          writeSeenId('seen_jobs_ids', latestJob.id);
+        } else if (latestNews && !readSeenIds('seen_news_ids').includes(latestNews.id)) {
+          notification = {
+            id: `news-${latestNews.id}-${Date.now()}`,
             title: latestNews.title,
             message: latestNews.summary,
             type: 'market',
             timestamp: Date.now()
           };
+          writeSeenId('seen_news_ids', latestNews.id);
         }
 
-        if (mockNotification) {
-          addNotification(mockNotification);
-          NotificationService.sendNativeNotification(mockNotification.title, mockNotification.message);
+        if (notification) {
+          addNotification(notification);
+          NotificationService.sendNativeNotification(notification.title, notification.message, user?.id);
         }
       } catch (err) {
         console.error("Update checker error:", err);
       }
     };
 
+    // Primeira verificação marca o estado atual como visto (sem notificar conteúdo antigo)
+    const bootstrap = async () => {
+      try {
+        const [jobs, news] = await Promise.all([
+          JobsService.getJobs(false, { limit: 1 }),
+          NewsService.getNews(false, { limit: 1 })
+        ]);
+        if (jobs[0] && readSeenIds('seen_jobs_ids').length === 0) {
+          writeSeenId('seen_jobs_ids', jobs[0].id);
+        }
+        if (news[0] && readSeenIds('seen_news_ids').length === 0) {
+          writeSeenId('seen_news_ids', news[0].id);
+        }
+      } catch (err) {
+        console.error("Update checker bootstrap error:", err);
+      }
+    };
+
+    bootstrap();
     const interval = setInterval(checkForUpdates, 180000);
     return () => clearInterval(interval);
-  }, [subscribedCategories, addNotification]);
+  }, [subscribedCategories, addNotification, user?.id]);
 
   const [showRewarded, setShowRewarded] = useState(false);
   const [pendingAdPage, setPendingAdPage] = useState<Page>('home');
@@ -324,6 +369,8 @@ const App: React.FC = () => {
                 />
               } />
               <Route path="/cv-criador" element={<CVBuilderPage />} />
+              <Route path="/vaija" element={<VaiJaPage />} />
+              <Route path="/vaija/trajeto/:id" element={<VaiJaTrajetoPage />} />
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/perfil" element={user ? <ProfilePage /> : <Navigate to="/" replace />} />
               <Route path="*" element={<Navigate to="/" replace />} />

@@ -11,7 +11,6 @@ import { ExchangeService } from '../services/api/exchange.service';
 import { OrderService, OrderRow } from '../services/api/order.service';
 import { StorageService } from '../services/api/storage.service';
 import { ServiceUtils } from '../services/utils/utils';
-import { supabase } from '../services/core/supabaseClient';
 import { ExchangeRate } from '../types';
 import { LiveFeed } from '../components/ui/LiveFeed';
 import { OrderCard } from '../components/exchange/OrderCard';
@@ -165,7 +164,7 @@ export const ExchangePage: React.FC = () => {
       const actionParam = params.get('action');
 
       if (orderIdParam && actionParam === 'confirm') {
-        const { data } = await supabase.from('orders').select('*').eq('id', orderIdParam).single();
+        const data = await OrderService.getOrderById(orderIdParam);
         if (data) {
           setActiveOrder(data);
           setIsFeedbackModalOpen(true);
@@ -365,7 +364,7 @@ export const ExchangePage: React.FC = () => {
     };
 
     try {
-      const orderId = await OrderService.createOrder(orderData);
+      const { orderId } = await OrderService.createOrder(orderData);
       
       if (!orderId) {
         // Erro silencioso do Supabase (ex: schema mismatch, RLS)
@@ -398,7 +397,7 @@ export const ExchangePage: React.FC = () => {
       </Helmet>
       <LiveFeed />
       <AdBanner format="leaderboard" customLocation="exchange" />
-      {activeOrderId && <OrderCard orderId={activeOrderId} whatsappLink={whatsappLink} timeLeft={timeLeft} onComplete={() => { supabase.from('orders').select('*').eq('id', activeOrderId).single().then(({ data }) => { setActiveOrder(data); setIsFeedbackModalOpen(true); }); }} />}
+      {activeOrderId && <OrderCard orderId={activeOrderId} whatsappLink={whatsappLink} timeLeft={timeLeft} onComplete={async () => { const data = await OrderService.getOrderById(activeOrderId); if (data) { setActiveOrder(data); setIsFeedbackModalOpen(true); } }} />}
 
       {/* Session Recovery Banner */}
       {!activeOrderId && showRecoveryBanner && localStorage.getItem('RESOLVEAO_EXCHANGE_SESSION') && (

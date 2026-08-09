@@ -107,7 +107,7 @@ export const HomePage: React.FC = () => {
         const [ratesData, dealsData, jobsData, adsData, settingsData] = await Promise.all([
           ExchangeService.getRates(),
           DealsService.getDeals(false),
-          JobsService.getJobs(false),
+          JobsService.getJobs(false, { limit: 4 }),
           AdsService.getAds().catch((err) => {
             console.error('[HomePage] AdsService.getAds failed:', err);
             return [];

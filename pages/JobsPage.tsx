@@ -54,13 +54,25 @@ export const JobsPage: React.FC<JobsPageProps> = ({
     setCurrentPage(1);
   }, [filter, selectedProvince]);
 
+  // Pesquisa server-side com debounce (evita 1 request por tecla)
+  useEffect(() => {
+    const term = filter.trim();
+    if (term.length < 2) {
+      loadJobs();
+      return;
+    }
+    const timer = setTimeout(() => loadJobs(term), 400);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter]);
+
   useEffect(() => {
     loadJobs();
   }, []);
 
-  const loadJobs = async () => {
+  const loadJobs = async (searchTerm?: string) => {
     setLoading(true);
-    const data = await JobsService.getJobs(false);
+    const data = await JobsService.getJobs(false, searchTerm ? { search: searchTerm } : {});
     setJobs(data);
     setLoading(false);
 

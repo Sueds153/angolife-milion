@@ -2,15 +2,18 @@ import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 import { pdf } from '@react-pdf/renderer';
 import { CVDocument } from '../components/cv/CVDocument';
 import { Download, ChevronRight, ChevronLeft, Sparkles, Plus, Trash2, User, Briefcase, GraduationCap, Award, FileText, Lock, Check, Zap, Crown, CreditCard, Calendar, Clock, X } from 'lucide-react';
-import { GeminiService } from '../services/integrations/gemini';
+import { GeminiService, GeminiError } from '../services/integrations/gemini';
 import { SubscriptionService } from '../services/api/subscription.service';
 import { StorageService } from '../services/api/storage.service';
+import { supabase } from '../services/core/supabaseClient';
 import { CVData, CVExperience, CVEducation } from '../types';
 import { CVTemplateSelector, CVTemplateType } from '../components/cv/CVTemplateSelector';
 import { TEMPLATE_OPTIONS } from '../components/cv/templateOptions';
 
 import { useAppStore } from '../store/useAppStore';
 import { useScrollLock } from '../hooks/useScrollLock';
+
+const FREE_AI_MONTHLY_LIMIT = 2;
 
 const initialCV: CVData = {
   fullName: '',
@@ -29,11 +32,22 @@ export const CVBuilderPage: React.FC = () => {
   
   const onRequireAuth = useCallback(() => setAuthModal(true, 'login'), [setAuthModal]);
   
-  const onDecrementCredit = useCallback(() => {
+  const onDecrementCredit = useCallback(async (): Promise<boolean> => {
     const currentUser = useAppStore.getState().user;
-    if (currentUser) {
-      setUser({ ...currentUser, cvCredits: Math.max(0, currentUser.cvCredits - 1) });
+    if (!currentUser) return false;
+    // Admin / premium válido nunca gasta crédito
+    if (currentUser.isAdmin ||
+        (currentUser.isPremium && (!currentUser.premiumExpiry || Number(currentUser.premiumExpiry) > Date.now()))) {
+      return true;
     }
+    const { data, error } = await supabase.rpc('consume_cv_credit');
+    if (error) {
+      console.error('[Credit] consume_cv_credit error:', error);
+      return false;
+    }
+    if (data == null) return false;
+    setUser({ ...currentUser, cvCredits: Number(data) });
+    return true;
   }, [setUser]);
   const [step, setStep] = useState(1);
   const [cv, setCv] = useState<CVData>(initialCV);
@@ -48,9 +62,8 @@ export const CVBuilderPage: React.FC = () => {
   useScrollLock(showPaywall);
 
   const [educationFirst, setEducationFirst] = useState(false);
-  const [aiUsageCount, setAiUsageCount] = useState(() =>
-    Number(localStorage.getItem('ai_optimizations_month') || 0)
-  );
+  const [aiUsageCount, setAiUsageCount] = useState(0);
+  const [isDownloading, setIsDownloading] = useState(false);
   const strengthRef = useRef<HTMLDivElement>(null);
 
   // --- CV STRENGTH METER (useMemo for reactive updates) ---
@@ -88,8 +101,20 @@ export const CVBuilderPage: React.FC = () => {
   const canUseAI = useCallback(() => {
     if (user?.isAdmin) return true;
     if (isPremiumValid) return true; // Bronze, Prata, Ouro
-    return aiUsageCount < 2; // Free = 2/mês
+    return aiUsageCount < FREE_AI_MONTHLY_LIMIT; // Free = 2/mês
   }, [user?.isAdmin, isPremiumValid, aiUsageCount]);
+
+  // Carrega o uso real de IA do servidor (server-side é a fonte de verdade)
+  useEffect(() => {
+    if (!isAuthenticated || !user?.id) return;
+    if (user?.isAdmin || isPremiumValid) return; // premium/admin: ilimitado, sem contagem
+    const month = new Date().toISOString().slice(0, 7);
+    supabase
+      .rpc('get_ai_usage', { p_user_id: user.id, p_month: month })
+      .then(({ data, error }) => {
+        if (!error && typeof data === 'number') setAiUsageCount(data);
+      });
+  }, [isAuthenticated, user?.id, user?.isAdmin, isPremiumValid]);
 
   // Helper for Input Changes
   const updateField = useCallback(<K extends keyof CVData>(field: K, value: CVData[K]) => {
@@ -102,17 +127,30 @@ export const CVBuilderPage: React.FC = () => {
     if (!text) return;
 
     setIsImproving(true);
-    const optimized = await GeminiService.improveCVContent(text, type);
+    try {
+      const optimized = await GeminiService.improveCVContent(text, type);
 
-    if (type === 'summary') {
-      updateField('summary', optimized);
-    } else if (type === 'description' && expId) {
-      setCv(prev => ({
-        ...prev,
-        experiences: prev.experiences.map(e => e.id === expId ? { ...e, description: optimized } : e)
-      }));
+      if (type === 'summary') {
+        updateField('summary', optimized);
+      } else if (type === 'description' && expId) {
+        setCv(prev => ({
+          ...prev,
+          experiences: prev.experiences.map(e => e.id === expId ? { ...e, description: optimized } : e)
+        }));
+      }
+    } catch (error) {
+      console.error('[ImproveText] Error:', error);
+      const code = (error as GeminiError)?.code;
+      if (code === 'limit' || code === 'no_credits') {
+        setShowPaywall(true);
+      } else if (code === 'unauth') {
+        onRequireAuth();
+      } else {
+        alert('Erro ao otimizar com IA. Tente novamente.');
+      }
+    } finally {
+      setIsImproving(false);
     }
-    setIsImproving(false);
   }, [isAuthenticated, onRequireAuth, updateField]);
 
   const addExperience = () => {
@@ -154,13 +192,26 @@ export const CVBuilderPage: React.FC = () => {
 
   const handlePrint = async () => {
     if (!isAuthenticated) { onRequireAuth(); return; }
+    if (isDownloading) return; // evita duplo clique
 
-    if (canDownload) {
-      if (!isPremiumValid && hasCredits && onDecrementCredit) {
-        onDecrementCredit();
-        alert(`1 Crédito usado. Restam ${user!.cvCredits - 1} créditos.`);
+    if (!canDownload) {
+      setShowPaywall(true);
+      return;
+    }
+
+    setIsDownloading(true);
+    try {
+      if (!isPremiumValid && hasCredits) {
+        const ok = await onDecrementCredit();
+        if (!ok) {
+          alert('Não foi possível debitar o crédito. Verifique o seu saldo.');
+          setShowPaywall(true);
+          return;
+        }
+        const currentUser = useAppStore.getState().user;
+        alert(`1 Crédito usado. Restam ${currentUser?.cvCredits ?? 0} créditos.`);
       }
-      
+
       const blob = await pdf(<CVDocument data={cv} />).toBlob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -168,8 +219,11 @@ export const CVBuilderPage: React.FC = () => {
       link.download = `CV_${cv.fullName.replace(/\s+/g, '_') || 'Resolve.AO'}.pdf`;
       link.click();
       URL.revokeObjectURL(url);
-    } else {
-      setShowPaywall(true);
+    } catch (error) {
+      console.error('[CV Download] Error:', error);
+      alert('Erro ao gerar o PDF. Tente novamente.');
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -213,21 +267,11 @@ export const CVBuilderPage: React.FC = () => {
     }
   };
 
-  // Increment AI usage counter (Free tier: 2/month) with monthly reset
+  // Increment AI usage counter (Free tier: 2/month) — server-side é a fonte de verdade;
+  // aqui apenas atualizamos o contador local para refletir a UI imediatamente.
   const incrementAIUsage = useCallback(() => {
-    const now = new Date();
-    const currentMonth = `${now.getFullYear()}-${now.getMonth()}`;
-    const storedMonth = localStorage.getItem('ai_usage_month');
-    if (storedMonth !== currentMonth) {
-      localStorage.setItem('ai_usage_month', currentMonth);
-      localStorage.setItem('ai_optimizations_month', '1');
-      setAiUsageCount(1);
-    } else {
-      const next = aiUsageCount + 1;
-      localStorage.setItem('ai_optimizations_month', String(next));
-      setAiUsageCount(next);
-    }
-  }, [aiUsageCount]);
+    setAiUsageCount(c => c + 1);
+  }, []);
 
   // "Otimizar Textos com IA (ATS)" - improve summary + each experience description + categorize skills
   const handleEnhanceAll = useCallback(async () => {
@@ -267,7 +311,14 @@ export const CVBuilderPage: React.FC = () => {
       alert('Textos otimizados com sucesso! Revise na pré-visualização.');
     } catch (error) {
       console.error('[EnhanceAll] Error:', error);
-      alert('Erro ao otimizar com IA. Tente novamente.');
+      const code = (error as GeminiError)?.code;
+      if (code === 'limit' || code === 'no_credits') {
+        setShowPaywall(true);
+      } else if (code === 'unauth') {
+        onRequireAuth();
+      } else {
+        alert('Erro ao otimizar com IA. Tente novamente.');
+      }
     } finally {
       setIsImproving(false);
     }
@@ -383,7 +434,7 @@ export const CVBuilderPage: React.FC = () => {
               <p className="text-xs text-slate-500 font-medium">
                 {isPremiumValid || user?.isAdmin
                   ? 'Acesso Ilimitado (Plano Premium Ativo)'
-                  : `${Math.max(0, 2 - aiUsageCount)} de 2 otimizações gratuitas restantes este mês`}
+                  : `${Math.max(0, FREE_AI_MONTHLY_LIMIT - aiUsageCount)} de ${FREE_AI_MONTHLY_LIMIT} otimizações gratuitas restantes este mês`}
               </p>
               <button
                 onClick={handleEnhanceAll}

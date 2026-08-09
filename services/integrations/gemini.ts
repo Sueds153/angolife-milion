@@ -5,6 +5,7 @@
 
 import { Job, NewsArticle, ProductDeal, CVExperience } from "../../types";
 import { supabase } from "../core/supabaseClient";
+import { PLACEHOLDER_IMAGE } from "../../constants/placeholders";
 
 // Service used to call the secure Supabase Edge Function
 // This prevents exposing API keys in the frontend bundle.
@@ -135,7 +136,7 @@ const FALLBACK_DEALS: ProductDeal[] = [
     location: "Kilamba, Luanda",
     description: "Promoção de fim de semana.",
     imagePlaceholder:
-      "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=500&q=80",
+      PLACEHOLDER_IMAGE,
     status: "approved",
     submittedBy: "system",
     createdAt: new Date().toISOString(),
@@ -149,7 +150,7 @@ const FALLBACK_DEALS: ProductDeal[] = [
     location: "Talatona, Luanda",
     description: "Leve 3 pague 2.",
     imagePlaceholder:
-      "https://images.unsplash.com/photo-1474631245212-32dc3c8310c6?w=500&q=80",
+      PLACEHOLDER_IMAGE,
     status: "approved",
     submittedBy: "system",
     createdAt: new Date().toISOString(),
@@ -163,7 +164,7 @@ const FALLBACK_DEALS: ProductDeal[] = [
     location: "Shopping Avennida",
     description: "Desconto exclusivo online.",
     imagePlaceholder:
-      "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=500&q=80",
+      PLACEHOLDER_IMAGE,
     status: "approved",
     submittedBy: "system",
     createdAt: new Date().toISOString(),
@@ -180,12 +181,25 @@ O mercado cambial apresenta uma ligeira estabilidade nesta semana.
 Recomendação: O momento é de cautela. Observe as flutuações nas primeiras horas da manhã antes de realizar grandes transações.
 `;
 
+export interface GeminiError extends Error {
+  code?: 'unauth' | 'no_credits' | 'limit' | 'server' | string;
+}
+
 // Helper to call Supabase Edge Functions
 async function callEdgeProxy(action: string, payload: Record<string, unknown> = {}) {
   const { data, error } = await supabase.functions.invoke('gemini-proxy', {
     body: { action, payload }
   });
-  if (error) throw error;
+  if (error) {
+    const code = (error as any)?.context?.error?.code;
+    const message =
+      (error as any)?.context?.error?.message ||
+      error.message ||
+      'Erro ao contactar o serviço de IA.';
+    const e = new Error(message) as GeminiError;
+    e.code = code;
+    throw e;
+  }
   return data;
 }
 
@@ -250,13 +264,8 @@ export const GeminiService = {
     originalText: string,
     type: "description" | "summary",
   ): Promise<string> => {
-    try {
-      const { improvedText } = await callEdgeProxy('improveCVContent', { originalText, type });
-      return improvedText;
-    } catch (error) {
-      console.error("CV Improvement Error:", error);
-      return originalText;
-    }
+    const { improvedText } = await callEdgeProxy('improveCVContent', { originalText, type });
+    return improvedText;
   },
 
   improveCVSections: async (data: {
@@ -268,13 +277,8 @@ export const GeminiService = {
     experiences: string[];
     skills: { technical: string[]; soft: string[]; languages: string[]; tools: string[] };
   }> => {
-    try {
-      const { improved } = await callEdgeProxy('improveCVSections', data);
-      return improved;
-    } catch (error) {
-      console.error("CV Sections Improvement Error:", error);
-      throw error;
-    }
+    const { improved } = await callEdgeProxy('improveCVSections', data);
+    return improved;
   },
 };
 

@@ -47,7 +47,9 @@ export interface LatestOrder {
 }
 
 export const OrderService = {
-  createOrder: async (order: NewOrder): Promise<string | null> => {
+  createOrder: async (
+    order: NewOrder,
+  ): Promise<{ orderId: string | null; error?: string }> => {
     const { data, error } = await supabase
       .from("orders")
       .insert([order])
@@ -55,11 +57,38 @@ export const OrderService = {
       .single();
 
     if (error) {
-      // Log the full error for debugging, then throw so callers can react
+      // Padrão consistente com os restantes serviços: nunca lançar throw.
       console.error('[OrderService] createOrder error:', error.code, error.message, error.details);
-      throw new Error(error.message || 'Erro ao registar ordem no Supabase.');
+      return { orderId: null, error: error.message || 'Erro ao registar ordem no Supabase.' };
     }
-    return data.id;
+    return { orderId: data.id };
+  },
+
+  getOrderById: async (id: string): Promise<OrderRow | null> => {
+    const { data, error } = await supabase
+      .from("orders")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+
+    return error || !data ? null : (data as OrderRow);
+  },
+
+  /** Subscreve alterações de uma ordem via realtime; devolve a subscription para unsubscribe(). */
+  subscribeOrder: (
+    id: string,
+    onUpdate: (order: OrderRow) => void,
+  ): { unsubscribe: () => void } => {
+    const subscription = supabase
+      .channel(`order-${id}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "orders", filter: `id=eq.${id}` },
+        (payload) => onUpdate(payload.new as OrderRow),
+      )
+      .subscribe();
+
+    return { unsubscribe: () => supabase.removeChannel(subscription) };
   },
 
   getUserOrders: async (email: string): Promise<OrderRow[]> => {
@@ -70,6 +99,28 @@ export const OrderService = {
       .order("created_at", { ascending: false });
 
     return error ? [] : data;
+  },
+
+  submitReview: async (
+    orderId: string,
+    rating: number,
+    comment: string,
+  ): Promise<boolean> => {
+    const { error: reviewError } = await supabase
+      .from("reviews")
+      .insert({ order_id: orderId, rating, comment });
+
+    if (reviewError) {
+      console.error("Submit review error:", reviewError);
+      return false;
+    }
+
+    const { error: updateError } = await supabase
+      .from("orders")
+      .update({ status: "completed" })
+      .eq("id", orderId);
+
+    return !updateError;
   },
 
   getActiveOrdersCount: async (): Promise<number> => {
@@ -85,8 +136,7 @@ export const OrderService = {
 
   // 🔐 SEGURANÇA: requer sessão de admin (protegido por RLS "Admins view all orders").
   // Dados financeiros nunca são retornados a utilizadores sem permissão.
-  getLatestOrders: async (limit: number = 5): Promise<LatestOrder[]> => {
-    const { data, error } = await supabase
+  getLatestOrders: async (limit: number = 5): Promise<LatestOrder[]> => {    const { data, error } = await supabase
       .from("orders")
       .select("full_name, wallet, amount, currency, order_type, bank")
       .order("created_at", { ascending: false })

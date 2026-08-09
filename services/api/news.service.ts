@@ -43,7 +43,7 @@ const mapNews = (n: NewsRow): NewsArticle => ({
 export const NewsService = {
   getNews: async (
     isAdmin: boolean = false,
-    options: { limit?: number } = {},
+    options: { limit?: number; category?: string } = {},
   ): Promise<NewsArticle[]> => {
     let query = supabase
       .from("news_articles")
@@ -54,6 +54,9 @@ export const NewsService = {
       query = query.or(
         "status.eq.publicado,status.eq.published,status.eq.aprovado,status.eq.approved",
       );
+      if (options.category && options.category !== "Todas") {
+        query = query.eq("categoria", options.category);
+      }
       const limit = options.limit ?? NEWS_LIST_LIMIT;
       if (limit > 0) query = query.limit(limit);
     }
@@ -65,6 +68,22 @@ export const NewsService = {
     }
 
     return (data as unknown as NewsRow[]).map(mapNews);
+  },
+
+  getNewsCategories: async (): Promise<string[]> => {
+    const { data, error } = await supabase
+      .from("news_articles")
+      .select("categoria")
+      .or("status.eq.publicado,status.eq.published,status.eq.aprovado,status.eq.approved");
+
+    if (error || !data) return [];
+
+    const cats = new Set<string>();
+    for (const row of data as unknown as NewsRow[]) {
+      const c = row.categoria?.trim();
+      if (c) cats.add(c);
+    }
+    return Array.from(cats).sort();
   },
 
   getNewsById: async (id: string): Promise<NewsArticle | null> => {

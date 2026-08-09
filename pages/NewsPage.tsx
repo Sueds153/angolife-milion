@@ -6,6 +6,7 @@ import { ExternalLink, Calendar, Eye, Flame, Lock, X, Clock, Zap, Newspaper, Arr
 import { RewardedAd } from '../components/ads/AdOverlays';
 import { AdBanner } from '../components/ads/AdBanner';
 import { ServiceUtils } from '../services/utils/utils';
+import { PLACEHOLDER_IMAGE as FALLBACK_IMAGE } from '../constants/placeholders';
 
 import { useAppStore } from '../store/useAppStore';
 import { Helmet } from 'react-helmet-async';
@@ -14,8 +15,6 @@ import { useScrollLock } from '../hooks/useScrollLock';
 interface NewsPageProps {
   onRequestReward?: (callback: () => void) => void;
 }
-
-const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1495020689067-958852a7765e?q=80&w=1000&auto=format&fit=crop";
 
 // Helper components outside to prevent re-definition on every render
 const getCategoryStyle = (category: string) => {
@@ -79,8 +78,12 @@ export const NewsPage: React.FC<NewsPageProps> = () => {
   const { isAuthenticated, setAuthModal } = useAppStore();
   const onRequireAuth = () => setAuthModal(true, 'login');
   const [news, setNews] = useState<NewsArticle[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState('Todas');
   const [loading, setLoading] = useState(true);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const [visibleCount, setVisibleCount] = useState(9);
+  const NEWS_PAGE_STEP = 9;
 
   useEffect(() => {
     const handleOnline = () => setIsOffline(false);
@@ -110,6 +113,10 @@ export const NewsPage: React.FC<NewsPageProps> = () => {
   useScrollLock(!!selectedArticle || showRewardedAd);
 
   useEffect(() => {
+    NewsService.getNewsCategories().then(setCategories);
+  }, []);
+
+  useEffect(() => {
     const loadNews = async () => {
       if (!navigator.onLine) {
         const cached = localStorage.getItem('news_cache');
@@ -121,7 +128,8 @@ export const NewsPage: React.FC<NewsPageProps> = () => {
       }
 
       setLoading(true);
-      const data = await NewsService.getNews();
+      setVisibleCount(9);
+      const data = await NewsService.getNews(false, { category: selectedCategory });
       setNews(data);
       setLoading(false);
 
@@ -131,7 +139,7 @@ export const NewsPage: React.FC<NewsPageProps> = () => {
       }
     };
     loadNews();
-  }, []);
+  }, [selectedCategory]);
 
   const loadFullArticle = async (article: NewsArticle): Promise<NewsArticle> => {
     if (article.body) return article;
@@ -205,6 +213,24 @@ export const NewsPage: React.FC<NewsPageProps> = () => {
         <p className="text-slate-500 text-[10px] md:text-xs font-bold uppercase tracking-widest leading-relaxed">O que ninguém lhe conta sobre Angola.</p>
       </div>
 
+      {categories.length > 0 && (
+        <div className="scroll-x-touch flex flex-nowrap gap-2 pb-4 -mx-4 px-4">
+          {['Todas', ...categories].map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border ${
+                selectedCategory === cat
+                  ? 'bg-brand-gold text-slate-900 border-brand-gold shadow-lg shadow-brand-gold/20'
+                  : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-orange-500/10 hover:border-brand-gold/30'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      )}
+
       {isOffline && (
         <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-2xl flex items-center justify-between animate-pulse">
            <div className="flex items-center gap-3">
@@ -228,7 +254,7 @@ export const NewsPage: React.FC<NewsPageProps> = () => {
             <div className="col-span-full py-20 text-center text-slate-500 font-bold uppercase tracking-widest">
               Nenhuma notícia publicada ainda.
             </div>
-          ) : news.map((item) => (
+          ) : news.slice(0, visibleCount).map((item) => (
             <div 
                key={item.id} 
                onClick={() => handleArticleClick(item)}
@@ -291,6 +317,18 @@ export const NewsPage: React.FC<NewsPageProps> = () => {
         {news.length > 0 && (
           <div className="mt-4">
             <AdBanner format="leaderboard" />
+          </div>
+        )}
+
+        {/* VER MAIS - Paginação incremental */}
+        {news.length > visibleCount && (
+          <div className="mt-8 flex justify-center">
+            <button
+              onClick={() => setVisibleCount(c => c + NEWS_PAGE_STEP)}
+              className="bg-brand-gold text-slate-900 font-black uppercase tracking-widest text-xs px-8 py-4 rounded-2xl shadow-lg hover:opacity-90 transition-opacity"
+            >
+              Ver mais notícias
+            </button>
           </div>
         )}
         </>

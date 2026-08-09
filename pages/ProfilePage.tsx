@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Briefcase, Camera, Award, MessageCircle, CheckCircle2, Bell, RefreshCw, DollarSign, ChevronRight, Edit3, Save, Star, History, Download, ShieldCheck, Heart, Link as LinkIcon, Trash2, Loader2 } from 'lucide-react';
-import { UserProfile, Job } from '../types';
+import { User, Briefcase, Camera, Award, MessageCircle, CheckCircle2, Bell, RefreshCw, DollarSign, ChevronRight, Edit3, Save, Star, History, Download, ShieldCheck, Heart, Link as LinkIcon, Trash2, Loader2, Car, MapPin, X } from 'lucide-react';
+import { UserProfile, Job, DriverData } from '../types';
 import { NotificationService } from '../services/integrations/notificationService';
 import { AuthService } from '../services/core/auth.service';
 import { JobsService } from '../services/api/jobs.service';
@@ -9,6 +9,8 @@ import { JobDetailsModal } from '../components/jobs/JobDetailsModal';
 import { OrderService, OrderRow } from '../services/api/order.service';
 import { StorageService } from '../services/api/storage.service';
 import { useAppStore } from '../store/useAppStore';
+import { VaiJaService } from '../services/api/vaija.service';
+import { DadosMotoristaForm } from '../components/vaija/DadosMotoristaForm';
 
 export const ProfilePage: React.FC = () => {
   const { user, setUser, setIsAuthenticated } = useAppStore();
@@ -41,6 +43,58 @@ export const ProfilePage: React.FC = () => {
   const [deleting, setDeleting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
+
+  // ── VaiJá ──
+  const [driverData, setDriverData] = useState<DriverData | null | undefined>(undefined);
+  const [destinosInput, setDestinosInput] = useState('');
+  const [destinos, setDestinos] = useState<string[]>(user?.destinosFrequentes || []);
+  const [savingVaiJa, setSavingVaiJa] = useState(false);
+  const [vaiJaMsg, setVaiJaMsg] = useState<{ type: 'ok' | 'erro'; text: string } | null>(null);
+
+  useEffect(() => {
+    if (user?.id) {
+      VaiJaService.getDriverData(user.id).then(setDriverData);
+    }
+  }, [user?.id]);
+
+  const isDriverMode = user?.tipoUtilizador === 'motorista' || user?.tipoUtilizador === 'ambos';
+
+  const handleToggleDriver = async () => {
+    if (!user?.id) return;
+    setSavingVaiJa(true);
+    setVaiJaMsg(null);
+    const next = isDriverMode ? 'passageiro' : 'ambos';
+    const { error } = await AuthService.updateProfile(user.id, { tipoUtilizador: next });
+    setSavingVaiJa(false);
+    if (error) {
+      setVaiJaMsg({ type: 'erro', text: 'Não foi possível atualizar o modo motorista.' });
+      return;
+    }
+    onUpdateUser({ tipoUtilizador: next });
+    setVaiJaMsg({ type: 'ok', text: isDriverMode ? 'Modo motorista desativado.' : 'Modo motorista ativado!' });
+  };
+
+  const addDestino = () => {
+    const d = destinosInput.trim();
+    if (!d) return;
+    if (!destinos.includes(d)) setDestinos((prev) => [...prev, d]);
+    setDestinosInput('');
+  };
+
+  const removeDestino = (d: string) => setDestinos((prev) => prev.filter((x) => x !== d));
+
+  const saveDestinos = async () => {
+    if (!user?.id) return;
+    setSavingVaiJa(true);
+    const { error } = await AuthService.updateProfile(user.id, { destinosFrequentes: destinos });
+    setSavingVaiJa(false);
+    if (error) {
+      setVaiJaMsg({ type: 'erro', text: 'Erro ao guardar os destinos frequentes.' });
+      return;
+    }
+    onUpdateUser({ destinosFrequentes: destinos });
+    setVaiJaMsg({ type: 'ok', text: 'Destinos frequentes guardados.' });
+  };
   
   useEffect(() => {
     let cancelled = false;
@@ -740,6 +794,98 @@ export const ProfilePage: React.FC = () => {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* VAIJÁ */}
+      <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-10 shadow-sm border border-orange-500/10">
+        <div className="flex items-center gap-4 mb-8 pb-6 border-b border-orange-500/10">
+          <div className="w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-500 border border-orange-500/5">
+            <Car size={24} />
+          </div>
+          <div>
+            <h2 className="text-xl font-black text-slate-950 dark:text-white uppercase tracking-tight leading-none mb-1">VaiJá</h2>
+            <p className="text-[10px] font-medium text-slate-500 uppercase tracking-widest">Candongueiros e táxis sem o lotador</p>
+          </div>
+        </div>
+
+        {vaiJaMsg && (
+          <div className={`mb-6 p-4 rounded-2xl text-[10px] font-black uppercase tracking-widest border ${
+            vaiJaMsg.type === 'ok'
+              ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
+              : 'bg-red-500/10 text-red-500 border-red-500/20'
+          }`}>
+            {vaiJaMsg.text}
+          </div>
+        )}
+
+        <div className="flex items-center justify-between gap-4 p-5 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500">
+              <Car size={18} />
+            </div>
+            <div>
+              <p className="text-[10px] font-black uppercase dark:text-white">Quero publicar trajetos como motorista</p>
+              <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Publica boleias na aba VaiJá e vê a procura da tua rota</p>
+            </div>
+          </div>
+          <button
+            onClick={handleToggleDriver}
+            disabled={savingVaiJa}
+            aria-pressed={isDriverMode}
+            title={isDriverMode ? 'Desativar modo motorista' : 'Ativar modo motorista'}
+            className={`relative w-14 h-8 rounded-full transition-colors shrink-0 ${isDriverMode ? 'bg-orange-500' : 'bg-slate-200 dark:bg-white/10'}`}
+          >
+            <span className={`absolute top-1 w-6 h-6 rounded-full bg-white shadow-md transition-all ${isDriverMode ? 'left-7' : 'left-1'}`} />
+          </button>
+        </div>
+
+        {isDriverMode && (
+          <div className="mt-6 p-5 bg-slate-50 dark:bg-white/5 rounded-2xl border border-orange-500/10 animate-fade-in">
+            <DadosMotoristaForm userId={user.id || ''} initial={driverData} onSaved={setDriverData} />
+          </div>
+        )}
+
+        <div className="mt-6 p-5 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5">
+          <p className="text-[10px] font-black uppercase text-slate-900 dark:text-white mb-1">Destinos frequentes</p>
+          <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-4">
+            O VaiJá avisa-te quando há trajetos para os teus sítios do dia a dia
+          </p>
+          <div className="flex gap-2 mb-3">
+            <input
+              value={destinosInput}
+              onChange={(e) => setDestinosInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addDestino(); } }}
+              placeholder="Ex: Mutamba"
+              className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl py-3 px-4 text-sm font-bold focus:ring-2 focus:ring-orange-500 outline-none transition-all dark:text-white"
+            />
+            <button
+              onClick={addDestino}
+              className="px-5 bg-orange-500 text-white rounded-2xl font-black text-lg hover:bg-orange-600 transition-all"
+              title="Adicionar destino"
+            >
+              +
+            </button>
+          </div>
+          {destinos.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {destinos.map((d) => (
+                <span key={d} className="px-3 py-1.5 rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20 text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5">
+                  <MapPin size={10} /> {d}
+                  <button onClick={() => removeDestino(d)} className="hover:text-red-500" title={`Remover ${d}`}>
+                    <X size={11} />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+          <button
+            onClick={saveDestinos}
+            disabled={savingVaiJa}
+            className="px-6 py-3 bg-slate-950 dark:bg-white text-white dark:text-slate-950 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:scale-[1.01] transition-all disabled:opacity-50"
+          >
+            {savingVaiJa ? <RefreshCw size={14} className="animate-spin" /> : <MapPin size={14} />} Guardar Destinos
+          </button>
+        </div>
       </div>
 
       {/* ZONA DE SEGURANÇA */}

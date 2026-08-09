@@ -24,6 +24,9 @@ function expired(): boolean {
   return Date.now() - startTime > DEADLINE_MS;
 }
 
+// URLs já vistas neste run — evita duplicados inseridos por concorrência.
+const seenUrls = new Set<string>();
+
 // ─────────────────────────────────────────────
 // CATEGORIZAÇÃO AUTOMÁTICA
 // ─────────────────────────────────────────────
@@ -168,15 +171,15 @@ const JOBS_CONFIG: Record<string, SiteConfig> = {
     request_delay_range: [3, 6],
   },
   "VerAngola": {
-    base_url: "https://www.verangola.net",
-    list_url: "https://www.verangola.net/va/pt/emprego/",
-    job_card_selector: ".card-type-news, .card",
-    title_selector: "h2.card-title",
-    company_selector: ".card-author, .company",
-    location_selector: ".card-section",
-    link_selector: "a",
+    base_url: "https://empregos.verangola.net",
+    list_url: "https://empregos.verangola.net/",
+    job_card_selector: "li.listing-card.listing-card-oferta, li.listing-card",
+    title_selector: "a.title",
+    company_selector: "span.username b",
+    location_selector: "span.location",
+    link_selector: "a.title",
     detail_enabled: true,
-    detail_description_selector: ".card-deck, .article-content",
+    detail_description_selector: "#description",
     detail_requirements_selector: null,
     request_delay_range: [3, 6],
   },
@@ -242,6 +245,8 @@ function inferType(title: string): string {
 }
 
 const NEWS_PATTERNS = /est[aá] a construir|est[aã]o a construir|convidados? a publicar|mobiliza fam[ií]lias|v[ií]timas? de acidente|inaugur|adjudic|lan[çc]a concurso|lan[çc]a programa/i;
+
+const NEWS_URL_PATTERNS = /\/va\/pt\/\d{6}\/|verangola\.net\/va\/pt\/(politica|economia|saude|sociedade|educacao|desporto|opiniao|telecomunicacoes|energia|turismo|construcao|eventos|defesa|justica|interior|cultura|agricultura|ambiente|actualidade|angola)\//i;
 
 function normalizeLocation(raw: string): string {
   const parts: string[] = [];
@@ -361,11 +366,6 @@ async function processCard(
   cfg: SiteConfig,
 ): Promise<boolean> {
   try {
-    if (await isDuplicateUrl(jobUrl)) {
-      stats.skipped++;
-      return false;
-    }
-
     let title = "";
     const titleEl = card.find(cfg.title_selector).first();
     title = cleanText(titleEl.text());
@@ -376,11 +376,16 @@ async function processCard(
       const compEl = card.find(cfg.company_selector).first();
       company = cleanText(compEl.text());
     }
-    if (!company) company = "Empresa Confidencial";
+    if (!company || /^an[oó]nimo$/i.test(company)) company = "Empresa Confidencial";
 
     if (!title) return false;
 
     if (NEWS_PATTERNS.test(title)) {
+      stats.skipped++;
+      return false;
+    }
+
+    if (NEWS_URL_PATTERNS.test(jobUrl)) {
       stats.skipped++;
       return false;
     }
@@ -487,15 +492,35 @@ async function scrapeSite(siteName: string, cfg: SiteConfig): Promise<void> {
     }
     console.log(`  📋 ${cards.length} cards encontrados`);
 
-    const limited = cards.slice(0, MAX_PER_SITE);
-    await mapWithConcurrency(limited, DETAIL_CONCURRENCY, async (el) => {
-      stats.processed++;
+    // Dedup serial: recolhe vagas novas (URL nunca vista neste run nem na BD)
+    // antes de abrir a concorrência — evita duplicados por race.
+    const fresh: { card: cheerio.Cheerio<cheerio.AnyNode>; jobUrl: string }[] = [];
+    for (const el of cards) {
+      if (expired()) break;
       const card = $(el);
       const linkEl = card.find(cfg.link_selector).first();
       const rawUrl = linkEl.attr("href") ?? (card.is("a") ? card.attr("href") : "");
       const jobUrl = normalizeUrl(rawUrl, cfg.base_url);
-      if (!jobUrl) return;
-      await processCard(card, jobUrl, siteName, cfg);
+      if (!jobUrl) continue;
+      if (seenUrls.has(jobUrl)) continue;
+      if (NEWS_URL_PATTERNS.test(jobUrl)) {
+        stats.skipped++;
+        continue;
+      }
+      if (await isDuplicateUrl(jobUrl)) {
+        stats.skipped++;
+        continue;
+      }
+      seenUrls.add(jobUrl);
+      fresh.push({ card, jobUrl });
+      if (fresh.length >= MAX_PER_SITE) break;
+    }
+    console.log(`  ➕ ${fresh.length} vagas novas a processar`);
+
+    await mapWithConcurrency(fresh, DETAIL_CONCURRENCY, async (item) => {
+      if (expired()) return;
+      stats.processed++;
+      await processCard(item.card, item.jobUrl, siteName, cfg);
     });
   } catch (err) {
     console.error(`❌ SITE FALHADO: ${siteName} | ${String(err)}`);
