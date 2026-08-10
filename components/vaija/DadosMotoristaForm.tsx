@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Car, Upload, Loader2, CheckCircle2 } from "lucide-react";
+import { Car, Upload, Loader2, CheckCircle2, ShieldCheck, Clock } from "lucide-react";
 import { VaiJaService } from "../../services/api/vaija.service";
 import type { DriverData, TipoVeiculo } from "../../types";
 
@@ -35,6 +35,10 @@ export const DadosMotoristaForm: React.FC<DadosMotoristaFormProps> = ({ userId, 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!fotoDocumentoUrl) {
+      setError("O documento (BI ou carta de condução) é obrigatório para publicar trajetos.");
+      return;
+    }
     setSaving(true);
     setError(null);
     const { error: err } = await VaiJaService.saveDriverData({
@@ -100,7 +104,7 @@ export const DadosMotoristaForm: React.FC<DadosMotoristaFormProps> = ({ userId, 
 
       <div>
         <label className="block text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">
-          BI ou carta de condução <span className="normal-case opacity-70">(opcional — verificação futura)</span>
+          BI ou carta de condução <span className="normal-case opacity-70">(obrigatório)</span>
         </label>
         <label className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-white/5 border border-dashed border-slate-300 dark:border-white/15 rounded-2xl cursor-pointer hover:border-orange-500/50 transition-all">
           <Upload size={18} className="text-orange-500" />
@@ -112,6 +116,20 @@ export const DadosMotoristaForm: React.FC<DadosMotoristaFormProps> = ({ userId, 
           </div>
           <input type="file" accept="image/*" className="hidden" onChange={handleFile} />
         </label>
+
+        {fotoDocumentoUrl && (
+          <div className="mt-3">
+            {initial?.verificado ? (
+              <p className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-3 py-2.5">
+                <ShieldCheck size={13} /> Identidade verificada — já podes publicar
+              </p>
+            ) : (
+              <p className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-xl px-3 py-2.5">
+                <Clock size={13} /> Documento submetido — a aguardar verificação
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       {error && (

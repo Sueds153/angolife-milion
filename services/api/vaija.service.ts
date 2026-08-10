@@ -289,4 +289,34 @@ export const VaiJaService = {
       .limit(limit);
     return error ? [] : (data as TrajetoAtivo[]);
   },
+
+  // ── Verificação documental (admin) ─────────────────
+  /** Motoristas que já submeteram documento mas ainda não foram verificados. */
+  getMotoristasPorVerificar: async (): Promise<
+    { userId: string; nome?: string; phone?: string; matricula?: string; tipoVeiculo?: string; fotoDocumentoUrl?: string; criadoEm?: string }[]
+  > => {
+    const { data, error } = await supabase.rpc("vaija_por_verificar");
+    if (error || !data) return [];
+    const r = data as { ok: boolean; erro?: string; data?: unknown[] };
+    return r.ok ? ((r.data as unknown[]) ?? []) as { userId: string; nome?: string; phone?: string; matricula?: string; tipoVeiculo?: string; fotoDocumentoUrl?: string; criadoEm?: string }[] : [];
+  },
+
+  /** Aprova ou rejeita (p_aprovado=false limpa o documento) a verificação. */
+  verificarMotorista: async (userId: string, aprovado: boolean): Promise<{ ok: boolean; error: string | null }> => {
+    const { data, error } = await supabase.rpc("vaija_verificar_motorista", {
+      p_user: userId,
+      p_aprovado: aprovado,
+    });
+    if (error) return { ok: false, error: error.message || "Erro de ligação." };
+    const r = data as { ok?: boolean; erro?: string };
+    return { ok: !!r?.ok, error: r?.ok ? null : (r?.erro ?? "Sem permissão.") };
+  },
+
+  /** URL assinado do documento (validade curta) para o admin rever. */
+  verDocumento: async (path: string): Promise<string | null> => {
+    const { data, error } = await supabase.storage
+      .from("documentos-motorista")
+      .createSignedUrl(path, 300);
+    return error || !data ? null : data.signedUrl;
+  },
 };

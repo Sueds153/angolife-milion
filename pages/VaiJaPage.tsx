@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Compass, Car, Radio, LayoutDashboard, Search, LogIn, Users,
   MapPin, ArrowRight, Loader2, RefreshCw, Clock, CheckCircle2, BellRing, X,
+  ShieldCheck,
 } from "lucide-react";
 import { useAppStore } from "../store/useAppStore";
 import { VaiJaService } from "../services/api/vaija.service";
@@ -346,6 +347,40 @@ const PublicarTab: React.FC<{ userId: string; onPublished: (id: string) => void;
         <p className="text-xs font-bold text-slate-500 mt-2">
           O teu modo motorista está suspenso por trajetos sem passageiros. Contacta a equipa Resolve.AO.
         </p>
+      </div>
+    );
+  }
+
+  const semDocumento = !driverData.fotoDocumentoUrl;
+  const porVerificar = !semDocumento && driverData.verificado !== true;
+
+  if (semDocumento || porVerificar) {
+    return (
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-10 text-center shadow-sm border border-orange-500/10">
+        <div className="w-14 h-14 mx-auto rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 mb-4">
+          <ShieldCheck size={26} />
+        </div>
+        <h2 className="text-xl font-black text-slate-950 dark:text-white uppercase tracking-tight mb-2">
+          {semDocumento ? "Identifica-te para publicar" : "Verificação em curso"}
+        </h2>
+        <p className="text-xs font-bold text-slate-500 mb-6 max-w-sm mx-auto">
+          {semDocumento
+            ? "Para publicar trajetos, submete o teu BI ou carta de condução no perfil. A equipa Resolve.AO valida em menos de 24h."
+            : "Já recebemos o teu documento e está a ser analisado pela equipa. Assim que for aprovado, podes começar a publicar."}
+        </p>
+        {semDocumento && (
+          <button
+            onClick={onGoProfile}
+            className="inline-flex items-center gap-3 bg-orange-500 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-orange-500/20 hover:bg-orange-600 transition-all"
+          >
+            Submeter no Perfil
+          </button>
+        )}
+        {porVerificar && (
+          <div className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-600 font-black text-[9px] uppercase tracking-widest">
+            <Clock size={14} /> Aprovação normalmente em menos de 24h
+          </div>
+        )}
       </div>
     );
   }
