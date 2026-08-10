@@ -32,7 +32,8 @@ const CVBuilderPage = lazy(() => import('./pages/CVBuilderPage').then(m => ({ de
 const DealDetailPage = lazy(() => import('./pages/DealDetailPage').then(m => ({ default: m.DealDetailPage })));
 const VaiJaPage = lazy(() => import('./pages/VaiJaPage').then(m => ({ default: m.VaiJaPage })));
 const VaiJaTrajetoPage = lazy(() => import('./pages/VaiJaTrajetoPage').then(m => ({ default: m.VaiJaTrajetoPage })));
-type Page = 'home' | 'jobs' | 'exchange' | 'deals' | 'news' | 'admin' | 'profile' | 'cv-builder' | 'vaija';
+const MulticaixaPage = lazy(() => import('./pages/MulticaixaPage').then(m => ({ default: m.MulticaixaPage })));
+type Page = 'home' | 'jobs' | 'exchange' | 'deals' | 'news' | 'admin' | 'profile' | 'cv-builder' | 'vaija' | 'multicaixa';
 
 // Emails com privilégio de admin. Configurável via VITE_ADMIN_EMAILS (separado por
 // vírgulas); por defeito mantém o antigo owner para não bloquear acesso.
@@ -63,6 +64,7 @@ const App: React.FC = () => {
     if (path.startsWith('/perfil')) return 'profile';
     if (path.startsWith('/cv-criador')) return 'cv-builder';
     if (path.startsWith('/vaija')) return 'vaija';
+    if (path.startsWith('/multicaixa')) return 'multicaixa';
     return 'home';
   };
 
@@ -116,7 +118,10 @@ const App: React.FC = () => {
             destinosFrequentes: profile.destinos_frequentes || [],
             avaliacaoMedia: profile.avaliacao_media ?? null,
             passageiroNoShowCount: profile.passageiro_no_show_count || 0,
-            contactoEmergencia: profile.contacto_emergencia || undefined
+            contactoEmergencia: profile.contacto_emergencia || undefined,
+            pontosGuardiao: profile.pontos_guardiao || 0,
+            precisaoReportes: profile.precisao_reportes ?? null,
+            badgesMulticaixa: profile.badges_multicaixa || []
           });
           setIsAuthenticated(true);
         } else {
@@ -371,6 +376,7 @@ const App: React.FC = () => {
               <Route path="/cv-criador" element={<CVBuilderPage />} />
               <Route path="/vaija" element={<VaiJaPage />} />
               <Route path="/vaija/trajeto/:id" element={<VaiJaTrajetoPage />} />
+              <Route path="/multicaixa" element={<MulticaixaPage />} />
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/perfil" element={user ? <ProfilePage /> : <Navigate to="/" replace />} />
               <Route path="*" element={<Navigate to="/" replace />} />

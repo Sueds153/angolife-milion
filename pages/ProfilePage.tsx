@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Briefcase, Camera, Award, MessageCircle, CheckCircle2, Bell, RefreshCw, DollarSign, ChevronRight, Edit3, Save, Star, History, Download, ShieldCheck, Heart, Link as LinkIcon, Trash2, Loader2, Car, MapPin, X } from 'lucide-react';
+import { User, Briefcase, Camera, Award, MessageCircle, CheckCircle2, Bell, RefreshCw, DollarSign, ChevronRight, Edit3, Save, Star, History, Download, ShieldCheck, Heart, Link as LinkIcon, Trash2, Loader2, Car, MapPin, X, Banknote } from 'lucide-react';
 import { UserProfile, Job, DriverData } from '../types';
 import { NotificationService } from '../services/integrations/notificationService';
 import { AuthService } from '../services/core/auth.service';
@@ -11,6 +11,7 @@ import { StorageService } from '../services/api/storage.service';
 import { useAppStore } from '../store/useAppStore';
 import { VaiJaService } from '../services/api/vaija.service';
 import { DadosMotoristaForm } from '../components/vaija/DadosMotoristaForm';
+import { nivelClasses, nivelEmoji, nivelLabel, nivelPorPontos } from '../components/multicaixa/helpers';
 
 export const ProfilePage: React.FC = () => {
   const { user, setUser, setIsAuthenticated } = useAppStore();
@@ -794,6 +795,69 @@ export const ProfilePage: React.FC = () => {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* MULTICAIXA — GUARDIÃO */}
+      <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-10 shadow-sm border border-orange-500/10">
+        <div className="flex items-center gap-4 mb-8 pb-6 border-b border-orange-500/10">
+          <div className="w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-500 border border-orange-500/5">
+            <Banknote size={24} />
+          </div>
+          <div className="flex-1">
+            <h2 className="text-xl font-black text-slate-950 dark:text-white uppercase tracking-tight leading-none mb-1">Guardião Multicaixa</h2>
+            <p className="text-[10px] font-medium text-slate-500 uppercase tracking-widest">Reporta o estado das caixas e ganha pontos</p>
+          </div>
+          <button
+            onClick={() => navigate('/multicaixa')}
+            className="flex items-center gap-2 px-4 py-3 bg-orange-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-orange-600 transition-all active:scale-[0.98]"
+          >
+            <Banknote size={14} /> Abrir Multicaixa
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="p-5 bg-slate-50 dark:bg-white/5 rounded-2xl border border-orange-500/10">
+            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Nível</span>
+            <span className="block text-2xl font-black text-slate-950 dark:text-white uppercase tracking-tight mt-1">
+              {nivelEmoji(nivelPorPontos(user.pontosGuardiao || 0))} {nivelLabel(nivelPorPontos(user.pontosGuardiao || 0))}
+            </span>
+            <span className={`mt-2 inline-flex items-center gap-2 px-2.5 py-1 rounded-full border text-[9px] font-black uppercase tracking-widest ${nivelClasses(nivelPorPontos(user.pontosGuardiao || 0))}`}>
+              Guardião
+            </span>
+          </div>
+          <div className="p-5 bg-slate-50 dark:bg-white/5 rounded-2xl border border-orange-500/10">
+            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Pontos de Guardião</span>
+            <span className="block text-2xl font-black text-slate-950 dark:text-white uppercase tracking-tight mt-1">{user.pontosGuardiao || 0}</span>
+            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">+1 por reporte verificado</span>
+          </div>
+          <div className="p-5 bg-slate-50 dark:bg-white/5 rounded-2xl border border-orange-500/10">
+            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Precisão dos Reportes</span>
+            <span className="block text-2xl font-black text-slate-950 dark:text-white uppercase tracking-tight mt-1">
+              {user.precisaoReportes ? `${user.precisaoReportes}%` : '—'}
+            </span>
+            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">últimos 30 dias</span>
+          </div>
+        </div>
+
+        <div className="mt-6">
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Badges conquistadas</p>
+          <div className="flex flex-wrap gap-2">
+            {user.badgesMulticaixa && user.badgesMulticaixa.length > 0 ? (
+              user.badgesMulticaixa.map((badge) => (
+                <span
+                  key={badge}
+                  className="px-3 py-2 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-[9px] font-black uppercase tracking-widest text-orange-600 dark:text-orange-400"
+                >
+                  {badge}
+                </span>
+              ))
+            ) : (
+              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                Ainda sem badges. Reporta o estado de multicaixas para ganhares a tua primeira badge!
+              </span>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* VAIJÁ */}

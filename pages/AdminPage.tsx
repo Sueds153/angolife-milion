@@ -27,13 +27,14 @@ import { AdminNewDealModal } from '../components/admin/AdminNewDealModal';
 import { AdminEditDealModal } from '../components/admin/AdminEditDealModal';
 import { AdsService, Ad, SystemSettings } from '../services/api/ads.service';
 import { AdminAdsSection } from '../components/admin/AdminAdsSection';
+import { AdminMulticaixaSection } from '../components/admin/AdminMulticaixaSection';
 
 export const AdminPage: React.FC = () => {
   const { user, setActiveAds: setGlobalActiveAds } = useAppStore();
   const navigate = useNavigate();
 
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'jobs' | 'news' | 'exchange' | 'deals' | 'cv' | 'ads'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'jobs' | 'news' | 'exchange' | 'deals' | 'cv' | 'ads' | 'multicaixa'>('overview');
   const [pendingJobs, setPendingJobs] = useState<Job[]>([]);
   const [pendingNews, setPendingNews] = useState<NewsArticle[]>([]);
   const [pendingDeals, setPendingDeals] = useState<ProductDeal[]>([]);
@@ -711,6 +712,13 @@ export const AdminPage: React.FC = () => {
           >
             Publicidade
           </button>
+          <button
+            onClick={() => setActiveTab('multicaixa')}
+            className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap shrink-0 ${activeTab === 'multicaixa' ? 'bg-orange-500 text-white shadow-lg' : 'bg-white dark:bg-white/5 text-slate-500 border border-orange-500/10'}`}
+            title="Moderar Multicaixas"
+          >
+            Multicaixa
+          </button>
         </div>
       </div>
 
@@ -861,6 +869,9 @@ export const AdminPage: React.FC = () => {
           handleRejectCvSub={handleRejectCvSub}
         />
       )}
+
+      {/* MULTICAIXA TAB */}
+      {activeTab === 'multicaixa' && <AdminMulticaixaSection />}
 
     </div >
   );

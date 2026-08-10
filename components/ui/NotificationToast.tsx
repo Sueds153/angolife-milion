@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { Bell, X, TrendingUp, Briefcase, Zap } from 'lucide-react';
+import { Bell, X, TrendingUp, Briefcase, Zap, Banknote } from 'lucide-react';
 import { AppNotification } from '../../types';
 
 interface NotificationToastProps {
@@ -29,6 +29,7 @@ export const NotificationToast: React.FC<NotificationToastProps> = ({ notificati
     switch (notification.type) {
       case 'market': return <TrendingUp size={20} className="text-brand-gold" />;
       case 'job': return <Briefcase size={20} className="text-blue-400" />;
+      case 'multicaixa': return <Banknote size={20} className="text-emerald-400" />;
       default: return <Bell size={20} className="text-white" />;
     }
   };
@@ -37,6 +38,7 @@ export const NotificationToast: React.FC<NotificationToastProps> = ({ notificati
     switch (notification.type) {
       case 'market': return 'shadow-[0_0_30px_rgba(245,158,11,0.2)] border-brand-gold/30';
       case 'job': return 'shadow-[0_0_30px_rgba(96,165,250,0.2)] border-blue-500/30';
+      case 'multicaixa': return 'shadow-[0_0_30px_rgba(52,211,153,0.2)] border-emerald-500/30';
       default: return 'shadow-xl border-white/10';
     }
   };

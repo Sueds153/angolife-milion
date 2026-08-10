@@ -104,6 +104,10 @@ export interface UserProfile {
   avaliacaoMedia?: number | null;
   passageiroNoShowCount?: number;
   contactoEmergencia?: string;
+  // Multicaixa / Gamificação
+  pontosGuardiao?: number;
+  precisaoReportes?: number | null;
+  badgesMulticaixa?: string[];
 }
 
 // ── VaiJá ────────────────────────────────────────────
@@ -202,7 +206,7 @@ export interface AppNotification {
   id: string;
   title: string;
   message: string;
-  type: "job" | "market" | "system";
+  type: "job" | "market" | "system" | "multicaixa";
   timestamp: number;
 }
 
@@ -249,5 +253,67 @@ export interface CheckoutFormData {
   accountHolder: string;
   termsAccepted?: boolean;
   rateGuaranteeAccepted?: boolean;
+}
+
+// ── Multicaixa / Gamificação ─────────────────────────
+export type StatusAprovacao = "aprovado" | "pendente_aprovacao" | "rejeitado";
+export type StatusDinheiro = "tem_dinheiro" | "sem_dinheiro" | "avariado";
+export type TipoNotas = "notas_pequenas" | "so_notas_grandes" | "nao_informado";
+export type StatusFila = "sem_fila" | "fila_pequena" | "fila_grande" | "nao_informado";
+export type NivelGuardiao = "novato" | "bronze" | "prata" | "ouro";
+
+/** Tabela multicaixas (ATMs). */
+export interface Multicaixa {
+  id: string;
+  nome: string;
+  banco_operador?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  bairro?: string | null;
+  status_aprovacao: StatusAprovacao;
+  contribuidor_id?: string | null;
+  criado_em: string;
+}
+
+/** Estado atual calculado pelo RPC multicaixa_estados. */
+export interface EstadoMulticaixa extends Multicaixa {
+  distancia_km?: number | null;
+  estado: "tem_dinheiro" | "sem_dinheiro" | "avariado" | "desconhecido";
+  confirmado: boolean;
+  ultimo_report_em?: string | null;
+  min_ultimo_report?: number | null;
+  fiabilidade_30d?: number | null;
+  total_reportes_30d: number;
+}
+
+/** Tabela reportes_multicaixa. */
+export interface ReporteMulticaixa {
+  id: string;
+  multicaixa_id: string;
+  user_id: string;
+  status_dinheiro: StatusDinheiro;
+  tipo_notas: TipoNotas;
+  valor_maximo_levantado?: number | null;
+  status_fila: StatusFila;
+  timestamp: string;
+}
+
+/** Resposta do RPC multicaixa_reportar. */
+export interface ResultadoReporte {
+  ok: boolean;
+  erro?: string;
+  pontos?: number;
+  nivel?: string;
+}
+
+/** Resposta do RPC multicaixa_ranking. */
+export interface RankingGuardiao {
+  user_id: string;
+  full_name: string;
+  avatar_url: string | null;
+  bairro: string | null;
+  reportes_mes: number;
+  pontos_guardiao: number;
+  nivel: string;
 }
 

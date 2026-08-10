@@ -80,6 +80,13 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegal }) => {
               >
                 <ChevronRight size={12} className="text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity" /> Descontos
               </Link>
+              <Link 
+                to="/multicaixa" 
+                onClick={() => window.scrollTo(0, 0)}
+                className="group flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors text-xs font-bold w-fit"
+              >
+                <ChevronRight size={12} className="text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity" /> Multicaixa
+              </Link>
             </div>
           </div>
 
