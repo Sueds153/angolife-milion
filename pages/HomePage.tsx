@@ -15,6 +15,7 @@ import { useAppStore } from '../store/useAppStore';
 import { Helmet } from 'react-helmet-async';
 import { ErrorBoundary } from '../components/ui/ErrorBoundary';
 import { SitePreviewModal } from '../components/modals/SitePreviewModal';
+import { Reveal } from '../components/ui/Reveal';
 
 interface HomeBanner {
   mediaType?: string;
@@ -402,28 +403,36 @@ export const HomePage: React.FC = () => {
         </div>
         
         <div className="relative z-10 p-6 md:p-24 max-w-5xl w-full">
-          <div className="inline-flex items-center gap-2 bg-white/5 border border-white/15 backdrop-blur-xl px-4 py-2 rounded-full text-slate-200 text-[11px] md:text-xs font-semibold tracking-wide mb-6 md:mb-12">
-            <span className="w-1.5 h-1.5 rounded-full bg-brand-gold" />
-            Atualizado a cada minuto
-          </div>
+          <Reveal delay={0}>
+            <div className="inline-flex items-center gap-2 bg-white/5 border border-white/15 backdrop-blur-xl px-4 py-2 rounded-full text-slate-200 text-[11px] md:text-xs font-semibold tracking-wide mb-6 md:mb-12">
+              <span className="w-1.5 h-1.5 rounded-full bg-brand-gold" />
+              Atualizado a cada minuto
+            </div>
+          </Reveal>
           
-          <h1 className="text-fluid-h1 font-black text-white mb-4 md:mb-8 tracking-tight leading-[1.05] md:leading-[0.95]">
-            Resolve.AO <br/>
-            <span className="text-brand-gold">Su-Golden</span>
-          </h1>
+          <Reveal delay={120}>
+            <h1 className="text-fluid-h1 font-black text-white mb-4 md:mb-8 tracking-tight leading-[1.05] md:leading-[0.95]">
+              Resolve.AO <br/>
+              <span className="text-brand-gold">Su-Golden</span>
+            </h1>
+          </Reveal>
           
-          <p className="text-fluid-p text-slate-200 font-medium max-w-md mb-6 md:mb-12">
-            O essencial do mercado angolano num só lugar: câmbio, emprego, notícias e ofertas que fazem a diferença no teu dia a dia.
-          </p>
+          <Reveal delay={240}>
+            <p className="text-fluid-p text-slate-200 font-medium max-w-md mb-6 md:mb-12">
+              O essencial do mercado angolano num só lugar: câmbio, emprego, notícias e ofertas que fazem a diferença no teu dia a dia.
+            </p>
+          </Reveal>
           
-          <div className="flex flex-col sm:flex-row gap-3">
-            <button 
-              onClick={(e) => { e.stopPropagation(); navigate('/cambio'); }}
-              className="w-full sm:w-auto bg-brand-gold hover:bg-amber-600 text-slate-950 font-bold py-4 px-8 rounded-xl md:rounded-2xl transition-all flex items-center justify-center shadow-xl active:scale-95 text-sm md:text-base cursor-pointer"
-            >
-              Consultar câmbio <ArrowRight size={16} className="ml-2" />
-            </button>
-          </div>
+          <Reveal delay={360}>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button 
+                onClick={(e) => { e.stopPropagation(); navigate('/cambio'); }}
+                className="w-full sm:w-auto bg-brand-gold hover:bg-amber-600 text-slate-950 font-bold py-4 px-8 rounded-xl md:rounded-2xl transition-all hover:-translate-y-0.5 hover:shadow-2xl active:scale-95 flex items-center justify-center shadow-xl text-sm md:text-base cursor-pointer"
+              >
+                Consultar câmbio <ArrowRight size={16} className="ml-2" />
+              </button>
+            </div>
+          </Reveal>
         </div>
       </div>
 
@@ -437,7 +446,7 @@ export const HomePage: React.FC = () => {
           <div className="flex-1 overflow-hidden py-3 relative">
             <div
               key={tickerIndex}
-              className="flex items-center gap-3 animate-fade-in"
+              className="flex items-center gap-3 animate-ticker-in"
             >
               <span className="w-1.5 h-1.5 bg-brand-gold rounded-full flex-shrink-0" />
               <span className="text-xs font-medium text-slate-700 dark:text-slate-200 tracking-normal whitespace-nowrap">
@@ -474,75 +483,87 @@ export const HomePage: React.FC = () => {
         </div>
       ) : (
         <div className="grid-adaptive">
-          <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] p-5 md:p-10 shadow-xl cursor-pointer group gold-border-subtle card-glow-hover active:scale-[0.98]" onClick={() => navigate('/cambio')}>
-          <div className="flex justify-between items-center mb-4 md:mb-6">
-            <div className="w-10 h-10 md:w-14 md:h-14 bg-brand-gold/5 rounded-xl text-brand-gold flex items-center justify-center">
-              <DollarSign className="w-5 h-5 md:w-7 md:h-7" />
+          <Reveal delay={0}>
+            <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] p-5 md:p-10 shadow-xl cursor-pointer group gold-border-subtle card-glow-hover active:scale-[0.98]" onClick={() => navigate('/cambio')}>
+            <div className="flex justify-between items-center mb-4 md:mb-6">
+              <div className="w-10 h-10 md:w-14 md:h-14 bg-brand-gold/5 rounded-xl text-brand-gold flex items-center justify-center">
+                <DollarSign className="w-5 h-5 md:w-7 md:h-7" />
+              </div>
+              <ChevronRight size={16} className="text-slate-300 group-hover:translate-x-1 transition-transform" />
             </div>
-            <ChevronRight size={16} className="text-slate-300 group-hover:translate-x-1 transition-transform" />
+            <span className="text-xs md:text-sm text-slate-500 dark:text-slate-400 font-medium block mb-1">Câmbio rua · venda</span>
+            <span className="text-2xl md:text-5xl font-black text-brand-gold">{usdRate?.informalSell.toFixed(0)} <span className="text-xs md:text-sm font-bold text-brand-gold">Kz</span></span>
           </div>
-          <span className="text-xs md:text-sm text-slate-500 dark:text-slate-400 font-medium block mb-1">Câmbio rua · venda</span>
-          <span className="text-2xl md:text-5xl font-black text-brand-gold">{usdRate?.informalSell.toFixed(0)} <span className="text-xs md:text-sm font-bold text-brand-gold">Kz</span></span>
-        </div>
+          </Reveal>
 
-        <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] p-5 md:p-10 shadow-xl cursor-pointer group gold-border-subtle card-glow-hover active:scale-[0.98]" onClick={() => navigate('/vagas')}>
-          <div className="flex justify-between items-center mb-4 md:mb-6">
-            <div className="w-10 h-10 md:w-14 md:h-14 bg-brand-gold/5 rounded-xl text-brand-gold flex items-center justify-center">
-              <Briefcase className="w-5 h-5 md:w-7 md:h-7" />
+          <Reveal delay={120}>
+            <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] p-5 md:p-10 shadow-xl cursor-pointer group gold-border-subtle card-glow-hover active:scale-[0.98]" onClick={() => navigate('/vagas')}>
+            <div className="flex justify-between items-center mb-4 md:mb-6">
+              <div className="w-10 h-10 md:w-14 md:h-14 bg-brand-gold/5 rounded-xl text-brand-gold flex items-center justify-center">
+                <Briefcase className="w-5 h-5 md:w-7 md:h-7" />
+              </div>
+              <ChevronRight size={16} className="text-slate-300 group-hover:translate-x-1 transition-transform" />
             </div>
-            <ChevronRight size={16} className="text-slate-300 group-hover:translate-x-1 transition-transform" />
+            <span className="text-xs md:text-sm text-slate-500 dark:text-slate-400 font-medium block mb-1">Vagas disponíveis</span>
+            <span className="text-2xl md:text-5xl font-black text-brand-gold">{featuredJobs.length}+ <span className="text-xs md:text-sm font-bold text-slate-400">Abertas</span></span>
           </div>
-          <span className="text-xs md:text-sm text-slate-500 dark:text-slate-400 font-medium block mb-1">Vagas disponíveis</span>
-          <span className="text-2xl md:text-5xl font-black text-brand-gold">{featuredJobs.length}+ <span className="text-xs md:text-sm font-bold text-slate-400">Abertas</span></span>
-        </div>
+          </Reveal>
 
-        <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] p-5 md:p-10 shadow-xl cursor-pointer group gold-border-subtle card-glow-hover active:scale-[0.98]" onClick={() => navigate('/ofertas')}>
-          <div className="flex justify-between items-center mb-4 md:mb-6">
-            <div className="w-10 h-10 md:w-14 md:h-14 bg-brand-gold/10 rounded-xl text-brand-gold flex items-center justify-center">
-              <ShoppingBag className="w-5 h-5 md:w-7 md:h-7" />
+          <Reveal delay={240}>
+            <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] p-5 md:p-10 shadow-xl cursor-pointer group gold-border-subtle card-glow-hover active:scale-[0.98]" onClick={() => navigate('/ofertas')}>
+            <div className="flex justify-between items-center mb-4 md:mb-6">
+              <div className="w-10 h-10 md:w-14 md:h-14 bg-brand-gold/10 rounded-xl text-brand-gold flex items-center justify-center">
+                <ShoppingBag className="w-5 h-5 md:w-7 md:h-7" />
+              </div>
+              <ChevronRight size={16} className="text-slate-300 group-hover:translate-x-1 transition-transform" />
             </div>
-            <ChevronRight size={16} className="text-slate-300 group-hover:translate-x-1 transition-transform" />
+            <span className="text-xs md:text-sm text-slate-500 dark:text-slate-400 font-medium block mb-1">Promoções em destaque</span>
+            <span className="text-2xl md:text-5xl font-black text-brand-gold">{featuredDeals.length} <span className="text-xs md:text-sm font-bold text-slate-400">Destaques</span></span>
           </div>
-          <span className="text-xs md:text-sm text-slate-500 dark:text-slate-400 font-medium block mb-1">Promoções em destaque</span>
-          <span className="text-2xl md:text-5xl font-black text-brand-gold">{featuredDeals.length} <span className="text-xs md:text-sm font-bold text-slate-400">Destaques</span></span>
-        </div>
+          </Reveal>
         </div>
       )}
 
       {/* Por Que a Resolve.AO */}
-      <div className="relative overflow-hidden rounded-[2rem] bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-sm p-6 md:p-12">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-brand-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
-        <div className="relative z-10">
-          <p className="text-xs md:text-sm font-semibold text-brand-gold mb-3">A tua plataforma de confiança</p>
-          <h2 className="text-fluid-h2 font-black text-slate-900 dark:text-white tracking-tight mb-8">
-            Porque é que <span className="text-brand-gold">milhares</span> escolhem a Resolve.AO?
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
-            {[
-              { icon: TrendingUp, title: '#1 em Angola', desc: 'A plataforma de referência para o mercado angolano', color: 'text-brand-gold' },
-              { icon: Zap, title: 'Gratuito para sempre', desc: 'Acesso completo a câmbio, vagas e notícias sem pagar nada', color: 'text-green-500' },
-              { icon: Shield, title: '100% seguro', desc: 'Os teus dados protegidos com encriptação de nível bancário', color: 'text-blue-500' },
-            ].map((item) => (
-              <div key={item.title} className="flex flex-col items-start p-5 rounded-[1.5rem] bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:border-brand-gold/30 transition-all group">
-                <div className={`w-12 h-12 rounded-2xl bg-brand-gold/10 flex items-center justify-center mb-4 ${item.color}`}>
-                  <item.icon size={22} />
-                </div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white tracking-tight mb-2">{item.title}</h3>
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400 leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
+      <Reveal>
+        <div className="relative overflow-hidden rounded-[2rem] bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-sm p-6 md:p-12">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-brand-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
+          <div className="relative z-10">
+            <p className="text-xs md:text-sm font-semibold text-brand-gold mb-3">A tua plataforma de confiança</p>
+            <h2 className="text-fluid-h2 font-black text-slate-900 dark:text-white tracking-tight mb-8">
+              Porque é que <span className="text-brand-gold">milhares</span> escolhem a Resolve.AO?
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+              {[
+                { icon: TrendingUp, title: '#1 em Angola', desc: 'A plataforma de referência para o mercado angolano', color: 'text-brand-gold' },
+                { icon: Zap, title: 'Gratuito para sempre', desc: 'Acesso completo a câmbio, vagas e notícias sem pagar nada', color: 'text-green-500' },
+                { icon: Shield, title: '100% seguro', desc: 'Os teus dados protegidos com encriptação de nível bancário', color: 'text-blue-500' },
+              ].map((item, idx) => (
+                <Reveal key={item.title} delay={idx * 120}>
+                  <div className="flex flex-col items-start p-5 rounded-[1.5rem] bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:border-brand-gold/30 transition-all group">
+                    <div className={`w-12 h-12 rounded-2xl bg-brand-gold/10 flex items-center justify-center mb-4 ${item.color}`}>
+                      <item.icon size={22} />
+                    </div>
+                    <h3 className="text-base font-bold text-slate-900 dark:text-white tracking-tight mb-2">{item.title}</h3>
+                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400 leading-relaxed">{item.desc}</p>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      </Reveal>
 
       {/* Funcionalidades */}
       <div>
-        <div className="text-center mb-8">
-          <p className="text-xs md:text-sm font-semibold text-brand-gold mb-2">Tudo num só lugar</p>
-          <h2 className="text-fluid-h2 font-black text-slate-900 dark:text-white tracking-tight">
-            O que podes fazer <span className="text-brand-gold">agora</span>
-          </h2>
-        </div>
+        <Reveal>
+          <div className="text-center mb-8">
+            <p className="text-xs md:text-sm font-semibold text-brand-gold mb-2">Tudo num só lugar</p>
+            <h2 className="text-fluid-h2 font-black text-slate-900 dark:text-white tracking-tight">
+              O que podes fazer <span className="text-brand-gold">agora</span>
+            </h2>
+          </div>
+        </Reveal>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
             {
@@ -593,45 +614,47 @@ export const HomePage: React.FC = () => {
               path: '/perfil',
               highlight: false,
             },
-          ].map((feature) => (
-            <div
-              key={feature.path}
-              onClick={() => navigate(feature.path)}
-              className={`group relative cursor-pointer rounded-[1.5rem] p-6 border transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg active:scale-95 ${
-                feature.highlight
-                  ? 'bg-slate-900 dark:bg-black border-brand-gold/30 shadow-md'
-                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 hover:border-brand-gold/30 shadow-sm'
-              }`}
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                  feature.highlight ? 'bg-brand-gold text-slate-950' : 'bg-brand-gold/10 text-brand-gold'
-                }`}>
-                  <feature.icon size={22} />
+          ].map((feature, idx) => (
+            <Reveal key={feature.path} delay={(idx % 3) * 100}>
+              <div
+                onClick={() => navigate(feature.path)}
+                className={`group relative cursor-pointer rounded-[1.5rem] p-6 border transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg active:scale-95 ${
+                  feature.highlight
+                    ? 'bg-slate-900 dark:bg-black border-brand-gold/30 shadow-md'
+                    : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 hover:border-brand-gold/30 shadow-sm'
+                }`}
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                    feature.highlight ? 'bg-brand-gold text-slate-950' : 'bg-brand-gold/10 text-brand-gold'
+                  }`}>
+                    <feature.icon size={22} />
+                  </div>
+                </div>
+                <h3 className={`text-base font-bold tracking-tight mb-2 ${
+                  feature.highlight ? 'text-white' : 'text-slate-900 dark:text-white'
+                }`}>{feature.label}</h3>
+                <p className={`text-sm font-medium leading-relaxed mb-4 ${
+                  feature.highlight ? 'text-slate-400' : 'text-slate-500 dark:text-slate-400'
+                }`}>{feature.desc}</p>
+                <div className={`flex items-center gap-2 text-sm font-semibold ${
+                  feature.highlight ? 'text-brand-gold' : 'text-brand-gold'
+                } group-hover:gap-3 transition-all`}>
+                  {feature.cta} <ArrowRight size={14} />
                 </div>
               </div>
-              <h3 className={`text-base font-bold tracking-tight mb-2 ${
-                feature.highlight ? 'text-white' : 'text-slate-900 dark:text-white'
-              }`}>{feature.label}</h3>
-              <p className={`text-sm font-medium leading-relaxed mb-4 ${
-                feature.highlight ? 'text-slate-400' : 'text-slate-500 dark:text-slate-400'
-              }`}>{feature.desc}</p>
-              <div className={`flex items-center gap-2 text-sm font-semibold ${
-                feature.highlight ? 'text-brand-gold' : 'text-brand-gold'
-              } group-hover:gap-3 transition-all`}>
-                {feature.cta} <ArrowRight size={14} />
-              </div>
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>
 
       {/* Depoimentos */}
-      <div className="relative overflow-hidden rounded-[2rem] bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-white/10 p-6 md:p-12">
-        <div className="text-center mb-8">
-          <p className="text-xs md:text-sm font-semibold text-brand-gold mb-2">Histórias reais</p>
-          <h2 className="text-fluid-h2 font-black text-slate-900 dark:text-white tracking-tight">
-            O que dizem os nossos <span className="text-brand-gold">utilizadores</span>
+      <Reveal>
+        <div className="relative overflow-hidden rounded-[2rem] bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-white/10 p-6 md:p-12">
+          <div className="text-center mb-8">
+            <p className="text-xs md:text-sm font-semibold text-brand-gold mb-2">Histórias reais</p>
+            <h2 className="text-fluid-h2 font-black text-slate-900 dark:text-white tracking-tight">
+              O que dizem os nossos <span className="text-brand-gold">utilizadores</span>
           </h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -679,8 +702,10 @@ export const HomePage: React.FC = () => {
           </div>
         </div>
       </div>
+      </Reveal>
 
       {/* Ad Section - Mobile Responsive CTA */}
+      <Reveal>
       <div 
         onClick={() => {
           if (adBanners[adImageIndex]?.link) {
@@ -774,6 +799,7 @@ export const HomePage: React.FC = () => {
           </div>
         </div>
       </div>
+      </Reveal>
       
       {/* Banner de Publicidade Final */}
       <div className="pt-4 md:pt-8">
