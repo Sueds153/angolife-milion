@@ -152,13 +152,13 @@ export const RewardedAd: React.FC<RewardedAdProps> = ({ onReward, onClose }) => 
         {completed ? (
           <button 
             onClick={onReward}
-            className="w-full max-w-sm flex items-center justify-center gap-4 bg-brand-gold text-slate-950 px-12 py-6 rounded-2xl text-sm md:text-base font-semibold transition-colors hover:brightness-105 active:scale-[0.98]"
+            className="w-full max-w-sm flex items-center justify-center gap-4 bg-brand-gold text-slate-950 px-12 py-6 rounded-3xl text-xs md:text-sm font-black uppercase tracking-[0.25em] shadow-[0_25px_60px_rgba(245,158,11,0.4)] animate-float"
           >
             <Award size={24} />
-            Reivindicar recompensa
+            REIVINDICAR ACESSO ELITE
           </button>
         ) : (
-          <div className="text-slate-500 text-[10px] font-semibold uppercase tracking-[0.3em] text-center">Anúncio Resolve.AO</div>
+          <div className="text-slate-600 text-[10px] font-black uppercase tracking-[0.5em] text-center">Conexão Segura Resolve.AO Ads</div>
         )}
       </div>
     </div>

@@ -112,7 +112,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenLegal }) => {
                 </button>
                 <button
                   onClick={() => setAuthModal(true, 'register')}
-                  className="text-sm font-semibold px-5 py-2.5 bg-brand-gold text-slate-950 rounded-xl hover:bg-orange-600 transition-colors border border-brand-gold/40"
+                  className="text-sm font-semibold px-5 py-2.5 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-all shadow-lg shadow-amber-900/10 border border-orange-500/50"
                 >
                   Criar conta
                 </button>
@@ -205,7 +205,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenLegal }) => {
                     </button>
                     <button
                       onClick={() => { setAuthModal(true, 'register'); setIsOpen(false); }}
-                      className="flex items-center justify-center gap-3 w-full py-4 text-sm font-semibold tracking-wide bg-brand-gold text-slate-950 rounded-2xl active:scale-95 transition-all"
+                      className="flex items-center justify-center gap-3 w-full py-4 text-sm font-semibold tracking-wide bg-orange-500 text-white rounded-2xl shadow-xl shadow-amber-900/20 active:scale-95 transition-all"
                     >
                       <UserPlus size={18} />
                       Criar conta

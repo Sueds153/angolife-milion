@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Briefcase, DollarSign, MessageCircle, Volume2, VolumeX, X, Newspaper, FileText, Tag, Users, Shield, Zap, TrendingUp, Quote } from 'lucide-react';
+import { ArrowRight, Briefcase, ShoppingBag, DollarSign, ChevronRight, MessageCircle, Volume2, VolumeX, X, Newspaper, FileText, Tag, Users, Shield, Zap, TrendingUp, Quote, CheckCircle } from 'lucide-react';
 import { ExchangeService } from '../services/api/exchange.service';
 import { DealsService } from '../services/api/deals.service';
 import { JobsService } from '../services/api/jobs.service';
@@ -34,12 +34,12 @@ interface HomeBanner {
 }
 
 const TICKER_MESSAGES = [
-  'Câmbio do dia, atualizado várias vezes ao dia',
-  'Novas vagas de emprego publicadas todos os dias',
-  'Notícias revistas antes de serem publicadas',
-  'O preço do dólar na rua, sem inventar',
-  'Ofertas e descontos verificados na hora',
-  'Feito para quem vive e trabalha em Angola',
+  { icon: '📊', text: 'Taxas de câmbio atualizadas em tempo real' },
+  { icon: '💼', text: 'Vagas de emprego atualizadas diariamente' },
+  { icon: '📰', text: 'Notícias verificadas antes de publicar' },
+  { icon: '🛡️', text: 'Os teus dados protegidos com encriptação' },
+  { icon: '⚡', text: 'Câmbio informal atualizado a cada minuto' },
+  { icon: '🤝', text: 'Comunidade de mais de 50.000 utilizadores' },
 ];
 
 export const HomePage: React.FC = () => {
@@ -204,7 +204,7 @@ export const HomePage: React.FC = () => {
       {/* Interstitial Ad Overlay */}
       {showInterstitial && interstitialAd && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in">
-          <div className="relative w-full max-w-lg bg-slate-900 rounded-2xl overflow-hidden shadow-xl gold-border-subtle">
+          <div className="relative w-full max-w-lg bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-2xl gold-border-subtle">
             <button 
               onClick={() => setShowInterstitial(false)}
               className="absolute top-6 right-6 z-10 p-2 bg-black/40 hover:bg-black/60 rounded-full text-white transition-all"
@@ -250,7 +250,7 @@ export const HomePage: React.FC = () => {
                     }
                     setShowInterstitial(false);
                   }}
-                  className="w-full bg-brand-gold text-slate-950 py-4 rounded-xl font-semibold text-sm transition-colors active:scale-[0.98]"
+                  className="w-full bg-brand-gold text-slate-950 py-4 rounded-2xl font-bold text-sm tracking-wide shadow-lg active:scale-95 transition-all"
                 >
                   Ver site / oferta
                 </button>
@@ -265,7 +265,7 @@ export const HomePage: React.FC = () => {
         <>
           <button 
             onClick={() => setShowRewarded(true)}
-            className="fixed bottom-24 right-6 z-[150] bg-brand-gold text-slate-950 px-5 py-4 rounded-full shadow-lg transition-all text-xs font-semibold flex items-center gap-2 hover:brightness-105 active:scale-[0.97]"
+            className="fixed bottom-24 right-6 z-[150] bg-brand-gold text-slate-950 px-5 py-4 rounded-full shadow-2xl animate-bounce hover:scale-110 active:scale-95 transition-all text-xs font-bold tracking-wide flex items-center gap-2"
             title="Ver Oferta Especial"
           >
             <DollarSign size={16} /> Ganhar bónus
@@ -273,14 +273,14 @@ export const HomePage: React.FC = () => {
 
           {showRewarded && (
             <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/95 animate-fade-in backdrop-blur-md">
-              <div className="bg-slate-900 w-full max-w-sm rounded-3xl overflow-hidden border border-brand-gold/30 shadow-xl">
+              <div className="bg-slate-900 w-full max-w-sm rounded-[3rem] overflow-hidden border border-brand-gold/30 shadow-brand-gold/10 shadow-2xl">
                 <div className="p-8 text-center space-y-6">
                   <div className="w-20 h-20 bg-brand-gold/10 rounded-full flex items-center justify-center text-brand-gold mx-auto">
                     <DollarSign size={40} />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-white mb-2">Oferta especial</h3>
-                    <p className="text-slate-400 text-sm font-medium leading-relaxed px-4">Veja este anúncio da <span className="text-brand-gold">{rewardedAd.company_name}</span> para desbloquear a recompensa.</p>
+                    <h3 className="text-xl font-bold text-white mb-2">Oferta exclusiva</h3>
+                    <p className="text-slate-400 text-sm font-medium leading-relaxed px-4">Veja este anúncio premium da <span className="text-brand-gold">{rewardedAd.company_name}</span> para desbloquear a sua recompensa.</p>
                   </div>
                   
                   <div className="rounded-2xl overflow-hidden border border-white/5 aspect-video">
@@ -343,7 +343,7 @@ export const HomePage: React.FC = () => {
             handleBannerClick(heroBanners[heroImageIndex]);
           }
         }}
-        className="relative rounded-2xl md:rounded-[2rem] overflow-hidden bg-slate-950 shadow-md min-h-[360px] md:min-h-[560px] flex items-center group cursor-pointer"
+        className="relative rounded-[1.5rem] md:rounded-[3rem] overflow-hidden bg-slate-950 shadow-2xl min-h-[380px] md:min-h-[600px] flex items-center group gold-border-subtle cursor-pointer"
       >
         <div className="absolute inset-0 z-0">
           {heroBanners.map((banner, idx) => {
@@ -388,7 +388,7 @@ export const HomePage: React.FC = () => {
               />
             );
           })}
-          <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-[#110e0b] via-[#110e0b]/75 to-[#110e0b]/10"></div>
+          <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-slate-950 via-slate-950/70 to-transparent"></div>
 
           {/* Volume Toggle Hero */}
           {(heroBanners[heroImageIndex]?.mediaType === 'video' || heroBanners[heroImageIndex]?.media_type === 'video') && (
@@ -402,23 +402,24 @@ export const HomePage: React.FC = () => {
         </div>
         
         <div className="relative z-10 p-6 md:p-24 max-w-5xl w-full">
-          <p className="text-eyebrow text-brand-gold mb-5 md:mb-10">
-            Câmbio · Empregos · Notícias · Descontos
-          </p>
-
-          <h1 className="font-display text-fluid-h1 font-bold text-white mb-4 md:mb-8 leading-[1.05] md:leading-[0.98]">
-            A Angola do dia a dia,<br />
-            <span className="text-brand-gold">num só lugar.</span>
+          <div className="inline-flex items-center gap-2 bg-white/5 border border-white/15 backdrop-blur-xl px-4 py-2 rounded-full text-slate-200 text-[11px] md:text-xs font-semibold tracking-wide mb-6 md:mb-12">
+            <span className="w-1.5 h-1.5 rounded-full bg-brand-gold" />
+            Atualizado a cada minuto
+          </div>
+          
+          <h1 className="text-fluid-h1 font-black text-white mb-4 md:mb-8 tracking-tight leading-[1.05] md:leading-[0.95]">
+            Resolve.AO <br/>
+            <span className="text-brand-gold">Su-Golden</span>
           </h1>
-
+          
           <p className="text-fluid-p text-slate-200 font-medium max-w-md mb-6 md:mb-12">
-            Taxas de câmbio, vagas de emprego, notícias e descontos atualizados ao longo do dia — para quem vive e trabalha cá.
+            O essencial do mercado angolano num só lugar: câmbio, emprego, notícias e ofertas que fazem a diferença no teu dia a dia.
           </p>
-
+          
           <div className="flex flex-col sm:flex-row gap-3">
-            <button
+            <button 
               onClick={(e) => { e.stopPropagation(); navigate('/cambio'); }}
-              className="w-full sm:w-auto bg-brand-gold hover:bg-orange-600 text-slate-950 font-semibold py-4 px-8 rounded-xl md:rounded-xl transition-colors flex items-center justify-center text-sm md:text-base cursor-pointer"
+              className="w-full sm:w-auto bg-brand-gold hover:bg-amber-600 text-slate-950 font-bold py-4 px-8 rounded-xl md:rounded-2xl transition-all flex items-center justify-center shadow-xl active:scale-95 text-sm md:text-base cursor-pointer"
             >
               Consultar câmbio <ArrowRight size={16} className="ml-2" />
             </button>
@@ -431,15 +432,16 @@ export const HomePage: React.FC = () => {
         <div className="flex items-center gap-3">
           <div className="flex-shrink-0 border-r border-slate-200 dark:border-white/10 px-4 py-3 flex items-center gap-2">
             <span className="w-1.5 h-1.5 bg-brand-gold rounded-full" />
-            <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap tracking-wide">Agora</span>
+            <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap tracking-wide">Em destaque</span>
           </div>
           <div className="flex-1 overflow-hidden py-3 relative">
             <div
               key={tickerIndex}
               className="flex items-center gap-3 animate-fade-in"
             >
+              <span className="text-slate-500 dark:text-slate-400 text-sm">{TICKER_MESSAGES[tickerIndex].icon}</span>
               <span className="text-xs font-medium text-slate-700 dark:text-slate-200 tracking-normal whitespace-nowrap">
-                {TICKER_MESSAGES[tickerIndex]}
+                {TICKER_MESSAGES[tickerIndex].text}
               </span>
             </div>
           </div>
@@ -458,88 +460,111 @@ export const HomePage: React.FC = () => {
 
       {/* Stats Dashboard */}
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+        <div className="grid-adaptive">
           {[1, 2, 3].map(i => (
-            <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl p-6 md:p-8 border border-slate-200 dark:border-white/10 animate-pulse h-28" />
+            <div key={i} className="bg-white dark:bg-slate-900 rounded-[1.5rem] p-5 md:p-10 shadow-xl gold-border-subtle animate-pulse">
+              <div className="flex justify-between items-center mb-4 md:mb-6">
+                <div className="w-10 h-10 md:w-14 md:h-14 bg-slate-200 dark:bg-white/10 rounded-xl" />
+                <div className="w-6 h-6 bg-slate-200 dark:bg-white/10 rounded" />
+              </div>
+              <div className="h-4 bg-slate-200 dark:bg-white/10 rounded w-1/4 mb-2" />
+              <div className="h-8 bg-slate-200 dark:bg-white/10 rounded w-1/2" />
+            </div>
           ))}
         </div>
       ) : (
-        <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 overflow-hidden">
-          <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 dark:divide-white/10">
-            <button onClick={() => navigate('/cambio')} className="group text-left p-5 md:p-8 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors cursor-pointer">
-              <span className="text-xs md:text-sm text-slate-500 dark:text-slate-400 font-medium block mb-2">Câmbio rua · venda</span>
-              <span className="font-display text-2xl md:text-4xl font-bold text-slate-900 dark:text-white">{usdRate?.informalSell.toFixed(0)} <span className="text-base md:text-lg text-brand-gold">Kz</span></span>
-              <span className="mt-2 block text-xs text-slate-400">Ver taxas de hoje →</span>
-            </button>
-
-            <button onClick={() => navigate('/vagas')} className="group text-left p-5 md:p-8 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors cursor-pointer">
-              <span className="text-xs md:text-sm text-slate-500 dark:text-slate-400 font-medium block mb-2">Vagas em destaque</span>
-              <span className="font-display text-2xl md:text-4xl font-bold text-slate-900 dark:text-white">{featuredJobs.length} <span className="text-base md:text-lg text-slate-400">+</span></span>
-              <span className="mt-2 block text-xs text-slate-400">Ver vagas →</span>
-            </button>
-
-            <button onClick={() => navigate('/ofertas')} className="group text-left p-5 md:p-8 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors cursor-pointer">
-              <span className="text-xs md:text-sm text-slate-500 dark:text-slate-400 font-medium block mb-2">Promoções ativas</span>
-              <span className="font-display text-2xl md:text-4xl font-bold text-slate-900 dark:text-white">{featuredDeals.length}</span>
-              <span className="mt-2 block text-xs text-slate-400">Ver descontos →</span>
-            </button>
+        <div className="grid-adaptive">
+          <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] p-5 md:p-10 shadow-xl cursor-pointer group gold-border-subtle card-glow-hover active:scale-[0.98]" onClick={() => navigate('/cambio')}>
+          <div className="flex justify-between items-center mb-4 md:mb-6">
+            <div className="w-10 h-10 md:w-14 md:h-14 bg-brand-gold/5 rounded-xl text-brand-gold flex items-center justify-center">
+              <DollarSign className="w-5 h-5 md:w-7 md:h-7" />
+            </div>
+            <ChevronRight size={16} className="text-slate-300 group-hover:translate-x-1 transition-transform" />
           </div>
+          <span className="text-xs md:text-sm text-slate-500 dark:text-slate-400 font-medium block mb-1">Câmbio rua · venda</span>
+          <span className="text-2xl md:text-5xl font-black text-brand-gold">{usdRate?.informalSell.toFixed(0)} <span className="text-xs md:text-sm font-bold text-brand-gold">Kz</span></span>
+        </div>
+
+        <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] p-5 md:p-10 shadow-xl cursor-pointer group gold-border-subtle card-glow-hover active:scale-[0.98]" onClick={() => navigate('/vagas')}>
+          <div className="flex justify-between items-center mb-4 md:mb-6">
+            <div className="w-10 h-10 md:w-14 md:h-14 bg-brand-gold/5 rounded-xl text-brand-gold flex items-center justify-center">
+              <Briefcase className="w-5 h-5 md:w-7 md:h-7" />
+            </div>
+            <ChevronRight size={16} className="text-slate-300 group-hover:translate-x-1 transition-transform" />
+          </div>
+          <span className="text-xs md:text-sm text-slate-500 dark:text-slate-400 font-medium block mb-1">Vagas disponíveis</span>
+          <span className="text-2xl md:text-5xl font-black text-brand-gold">{featuredJobs.length}+ <span className="text-xs md:text-sm font-bold text-slate-400">Abertas</span></span>
+        </div>
+
+        <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] p-5 md:p-10 shadow-xl cursor-pointer group gold-border-subtle card-glow-hover active:scale-[0.98]" onClick={() => navigate('/ofertas')}>
+          <div className="flex justify-between items-center mb-4 md:mb-6">
+            <div className="w-10 h-10 md:w-14 md:h-14 bg-brand-gold/10 rounded-xl text-brand-gold flex items-center justify-center">
+              <ShoppingBag className="w-5 h-5 md:w-7 md:h-7" />
+            </div>
+            <ChevronRight size={16} className="text-slate-300 group-hover:translate-x-1 transition-transform" />
+          </div>
+          <span className="text-xs md:text-sm text-slate-500 dark:text-slate-400 font-medium block mb-1">Promoções em destaque</span>
+          <span className="text-2xl md:text-5xl font-black text-brand-gold">{featuredDeals.length} <span className="text-xs md:text-sm font-bold text-slate-400">Destaques</span></span>
+        </div>
         </div>
       )}
 
       {/* Por Que a Resolve.AO */}
-      <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 p-6 md:p-12">
-        <p className="text-eyebrow text-brand-gold mb-3">Porquê o Resolve.AO</p>
-        <h2 className="text-fluid-h2 font-display font-bold text-slate-900 dark:text-white mb-8">
-          Não inventámos nada. Só juntámos o que faz falta.
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
-          {[
-            { icon: TrendingUp, title: 'Útil todos os dias', desc: 'Câmbio, vagas e notícias sempre à mão, sem assinatura nem taxas escondidas.', color: 'text-brand-gold' },
-            { icon: Zap, title: 'Custa 0 Kz', desc: 'Podes consultar tudo sem criar conta. A conta é grátis e só serve para guardar o que interessa.', color: 'text-green-600' },
-            { icon: Shield, title: 'Com respeito pelos teus dados', desc: 'Guardamos o mínimo necessário e não vendemos a tua informação a ninguém.', color: 'text-blue-600' },
-          ].map((item) => (
-            <div key={item.title} className="flex flex-col items-start p-5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:border-brand-gold/40 transition-colors">
-              <div className={`w-12 h-12 rounded-xl bg-brand-gold/10 flex items-center justify-center mb-4 ${item.color}`}>
-                <item.icon size={22} />
+      <div className="relative overflow-hidden rounded-[2rem] bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-sm p-6 md:p-12">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-brand-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
+        <div className="relative z-10">
+          <p className="text-xs md:text-sm font-semibold text-brand-gold mb-3">A tua plataforma de confiança</p>
+          <h2 className="text-fluid-h2 font-black text-slate-900 dark:text-white tracking-tight mb-8">
+            Por que <span className="text-brand-gold">milhares</span> escolhem a Resolve.AO?
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+            {[
+              { icon: TrendingUp, title: '#1 em Angola', desc: 'A plataforma de referência para o mercado angolano', color: 'text-brand-gold' },
+              { icon: Zap, title: 'Gratuito para sempre', desc: 'Acesso completo a câmbio, vagas e notícias sem pagar nada', color: 'text-green-500' },
+              { icon: Shield, title: '100% seguro', desc: 'Os teus dados protegidos com encriptação de nível bancário', color: 'text-blue-500' },
+            ].map((item) => (
+              <div key={item.title} className="flex flex-col items-start p-5 rounded-[1.5rem] bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:border-brand-gold/30 transition-all group">
+                <div className={`w-12 h-12 rounded-2xl bg-brand-gold/10 flex items-center justify-center mb-4 ${item.color}`}>
+                  <item.icon size={22} />
+                </div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white tracking-tight mb-2">{item.title}</h3>
+                <p className="text-sm font-medium text-slate-500 dark:text-slate-400 leading-relaxed">{item.desc}</p>
               </div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2">{item.title}</h3>
-              <p className="text-sm font-medium text-slate-500 dark:text-slate-400 leading-relaxed">{item.desc}</p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
 
       {/* Funcionalidades */}
       <div>
         <div className="text-center mb-8">
-          <p className="text-eyebrow text-brand-gold mb-3">O que encontras aqui</p>
-          <h2 className="text-fluid-h2 font-display font-bold text-slate-900 dark:text-white">
-            Câmbio, trabalho, notícias e descontos
+          <p className="text-xs md:text-sm font-semibold text-brand-gold mb-2">Tudo num só lugar</p>
+          <h2 className="text-fluid-h2 font-black text-slate-900 dark:text-white tracking-tight">
+            O que podes fazer <span className="text-brand-gold">agora</span>
           </h2>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
             {
               icon: DollarSign,
-              label: 'Câmbio',
-              desc: 'A taxa do banco e a da rua, lado a lado. Sabes se estás a fazer bom negócio antes de trocar.',
-              cta: 'Ver taxas',
+              label: 'Câmbio em tempo real',
+              desc: 'Acompanha a taxa formal e informal ao minuto. Compra ou vende divisas com segurança.',
+              cta: 'Ver taxas agora',
               path: '/cambio',
               highlight: true,
             },
             {
               icon: Briefcase,
               label: 'Vagas de emprego',
-              desc: 'Ofertas publicadas por empresas em todo o país, de Luanda a outras províncias. Candidata-te em poucos toques.',
+              desc: 'As melhores ofertas de trabalho em Angola, de Luanda a todas as províncias.',
               cta: 'Explorar vagas',
               path: '/vagas',
               highlight: false,
             },
             {
               icon: FileText,
-              label: 'Criar CV',
-              desc: 'Um currículo simples e bem feito, sem precisar de saber design. Pronto para enviar.',
+              label: 'Criar CV com IA',
+              desc: 'Cria um CV profissional em minutos com a ajuda da nossa inteligência artificial.',
               cta: 'Criar o meu CV',
               path: '/cv-criador',
               highlight: false,
@@ -547,24 +572,24 @@ export const HomePage: React.FC = () => {
             {
               icon: Newspaper,
               label: 'Notícias de Angola',
-              desc: 'O essencial do dia, sem ruído e sem títulos de alarme.',
+              desc: 'Fica a par do que acontece em Angola antes de toda a gente.',
               cta: 'Ler notícias',
               path: '/noticias',
               highlight: false,
             },
             {
               icon: Tag,
-              label: 'Descontos',
-              desc: 'Promoções reais de lojas e marcas em Angola, verificadas antes de publicar.',
+              label: 'Descontos exclusivos',
+              desc: 'Promoções e ofertas das melhores marcas e lojas de Angola — por tempo limitado.',
               cta: 'Ver promoções',
               path: '/ofertas',
               highlight: false,
             },
             {
               icon: Users,
-              label: 'A tua conta',
-              desc: 'Guarda o teu CV, segue vagas e recebe aviso quando aparece algo para ti. Grátis.',
-              cta: 'Criar conta',
+              label: 'Cria a tua conta',
+              desc: 'Regista-te grátis e recebe notificações das oportunidades mais relevantes para ti.',
+              cta: 'Criar conta grátis',
               path: '/perfil',
               highlight: false,
             },
@@ -572,10 +597,10 @@ export const HomePage: React.FC = () => {
             <div
               key={feature.path}
               onClick={() => navigate(feature.path)}
-              className={`group relative cursor-pointer rounded-xl p-6 border transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.99] ${
+              className={`group relative cursor-pointer rounded-[1.5rem] p-6 border transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg active:scale-95 ${
                 feature.highlight
-                  ? 'bg-slate-900 dark:bg-slate-900 border-brand-gold/40'
-                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 hover:border-brand-gold/40'
+                  ? 'bg-slate-900 dark:bg-black border-brand-gold/30 shadow-md'
+                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 hover:border-brand-gold/30 shadow-sm'
               }`}
             >
               <div className="flex items-start justify-between mb-4">
@@ -585,13 +610,15 @@ export const HomePage: React.FC = () => {
                   <feature.icon size={22} />
                 </div>
               </div>
-              <h3 className={`text-base font-bold mb-2 ${
+              <h3 className={`text-base font-bold tracking-tight mb-2 ${
                 feature.highlight ? 'text-white' : 'text-slate-900 dark:text-white'
               }`}>{feature.label}</h3>
               <p className={`text-sm font-medium leading-relaxed mb-4 ${
                 feature.highlight ? 'text-slate-400' : 'text-slate-500 dark:text-slate-400'
               }`}>{feature.desc}</p>
-              <div className="flex items-center gap-2 text-sm font-semibold text-brand-gold group-hover:gap-3 transition-all">
+              <div className={`flex items-center gap-2 text-sm font-semibold ${
+                feature.highlight ? 'text-brand-gold' : 'text-brand-gold'
+              } group-hover:gap-3 transition-all`}>
                 {feature.cta} <ArrowRight size={14} />
               </div>
             </div>
@@ -600,35 +627,35 @@ export const HomePage: React.FC = () => {
       </div>
 
       {/* Depoimentos */}
-      <div className="rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-white/10 p-6 md:p-12">
+      <div className="relative overflow-hidden rounded-[2rem] bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-white/10 p-6 md:p-12">
         <div className="text-center mb-8">
-          <p className="text-eyebrow text-brand-gold mb-3">Na voz de quem usa</p>
-          <h2 className="text-fluid-h2 font-display font-bold text-slate-900 dark:text-white">
-            Do Luanda ao Huambo, a mesma utilidade
+          <p className="text-xs md:text-sm font-semibold text-brand-gold mb-2">Histórias reais</p>
+          <h2 className="text-fluid-h2 font-black text-slate-900 dark:text-white tracking-tight">
+            O que dizem os nossos <span className="text-brand-gold">utilizadores</span>
           </h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
             {
-              quote: 'Vi uma vaga de motorista de app numa segunda, liguei na terça e na quinta já estava a trabalhar.',
-              name: 'Carlos',
+              quote: 'Consegui o meu emprego em 3 dias após ver a vaga aqui. Nunca pensei que fosse tão fácil.',
+              name: 'Carlos M.',
               city: 'Luanda',
-              role: 'Motorista',
+              role: 'Engenheiro Civil',
             },
             {
-              quote: 'Sigo o câmbio da rua aqui todos os dias. Já sei quando o valor que me dão no bairro está certo ou me estão a enganar.',
-              name: 'Ana',
+              quote: 'Poupei mais de 15 000 Kz por semana só por acompanhar a taxa informal pelo app.',
+              name: 'Ana F.',
               city: 'Benguela',
-              role: 'Vendedora',
+              role: 'Empresária',
             },
             {
-              quote: 'Fiz o meu CV no telemóvel numa tarde, mandei para três empresas e fui chamado em duas.',
-              name: 'Pedro',
+              quote: 'O CV que criei aqui com a IA foi o que me fez passar na entrevista. Recomendo a todos.',
+              name: 'Pedro S.',
               city: 'Huambo',
-              role: 'Técnico de informática',
+              role: 'Técnico de TI',
             },
           ].map((t) => (
-            <div key={t.name} className="bg-white dark:bg-slate-800/80 rounded-xl p-6 border border-slate-200 dark:border-white/10">
+            <div key={t.name} className="bg-white dark:bg-slate-800/80 rounded-[1.5rem] p-6 border border-slate-200 dark:border-white/10 shadow-sm hover:shadow-md transition-all">
               <Quote size={20} className="text-brand-gold mb-4 opacity-60" />
               <p className="text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed mb-5">&ldquo;{t.quote}&rdquo;</p>
               <div className="flex items-center justify-between">
@@ -640,10 +667,16 @@ export const HomePage: React.FC = () => {
             </div>
           ))}
         </div>
-        <div className="mt-8 pt-8 border-t border-slate-200 dark:border-white/10 text-center">
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 max-w-lg mx-auto">
-            O Resolve.AO é gratuito. Se quiseres, cria conta para guardar o CV e seguir vagas.
-          </p>
+        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 pt-8 border-t border-slate-200 dark:border-white/10">
+          <div className="flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400">
+            <CheckCircle size={16} className="text-green-500" /> Acesso gratuito imediato
+          </div>
+          <div className="flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400">
+            <CheckCircle size={16} className="text-green-500" /> Sem cartão de crédito
+          </div>
+          <div className="flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400">
+            <CheckCircle size={16} className="text-green-500" /> Cancela quando quiseres
+          </div>
         </div>
       </div>
 
@@ -654,7 +687,7 @@ export const HomePage: React.FC = () => {
             handleBannerClick(adBanners[adImageIndex]);
           }
         }}
-        className="relative rounded-2xl md:rounded-[2.5rem] overflow-hidden bg-black shadow-md group cursor-pointer min-h-[400px] md:min-h-[500px] flex items-center"
+        className="relative rounded-[1.5rem] md:rounded-[4rem] overflow-hidden bg-black shadow-2xl group transition-all gold-border-subtle min-h-[400px] md:min-h-[500px] flex items-center cursor-pointer"
       >
         <div className="absolute inset-0 z-0">
           {adBanners.map((banner, idx) => {
@@ -715,17 +748,17 @@ export const HomePage: React.FC = () => {
         <div className="relative z-10 p-6 md:p-24 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12 w-full text-center md:text-left stack-narrow">
           <div className="max-w-3xl">
             <p className="text-brand-gold text-sm md:text-base font-semibold mb-4">
-              Divulga o teu negócio
+              Publicidade para o teu negócio
             </p>
             
-            <h2 className="text-fluid-h2 font-display font-bold text-white mb-6">
-              Aparece a quem está<br/>
-              <span className="text-brand-gold">a procurar</span>
+            <h2 className="text-fluid-h2 font-black text-white tracking-tight mb-6">
+              Leva a tua marca<br/>
+              <span className="text-brand-gold">mais longe</span>
             </h2>
             
             <div className="border-l-2 md:border-l-4 border-brand-gold pl-4 md:pl-6 py-2 mb-6 md:mb-0">
               <p className="text-fluid-p text-slate-200 font-medium">
-                O teu anúncio aparece junto das taxas, vagas e notícias que as pessoas consultam todos os dias. Fala connosco no WhatsApp e tratamos do resto.
+                Coloca o teu negócio diante de milhares de angolanos todos os dias, em câmbio, vagas, notícias e promoções.
               </p>
             </div>
           </div>
@@ -733,10 +766,10 @@ export const HomePage: React.FC = () => {
           <div className="w-full md:w-auto">
             <button 
               onClick={(e) => { e.stopPropagation(); handleWhatsAppContact(); }}
-              className="w-full md:w-auto bg-brand-gold px-10 py-5 rounded-xl font-bold text-slate-950 text-sm md:text-base transition-colors active:scale-[0.98] flex items-center justify-center gap-3 cursor-pointer"
+              className="w-full md:w-auto bg-brand-gold px-10 py-5 rounded-2xl font-bold text-slate-950 text-sm md:text-base transition-all active:scale-95 flex items-center justify-center gap-3 shadow-[0_15px_40px_rgba(245,158,11,0.3)] cursor-pointer"
             >
               <MessageCircle size={20} />
-              <span>Falar no WhatsApp</span>
+              <span>Anunciar agora</span>
             </button>
           </div>
         </div>

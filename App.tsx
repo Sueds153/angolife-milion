@@ -284,7 +284,7 @@ const App: React.FC = () => {
     <div className="min-h-dvh bg-white dark:bg-slate-900 flex justify-center text-slate-900 dark:text-white transition-colors duration-300 print:bg-white print:text-black">
       <div className="print:hidden"><Background /></div>
 
-      <div className="w-full lg:max-w-7xl xl:max-w-screen-2xl mx-auto print:max-w-none bg-white dark:bg-slate-900 min-h-dvh flex flex-col relative text-slate-900 dark:text-white transition-all duration-500">
+      <div className="w-full lg:max-w-7xl xl:max-w-screen-2xl mx-auto print:max-w-none bg-white dark:bg-slate-900 min-h-dvh shadow-2xl md:shadow-none print:shadow-none flex flex-col relative text-slate-900 dark:text-white transition-all duration-500">
 
         {notifications.map(n => (
           <NotificationToast
@@ -304,7 +304,7 @@ const App: React.FC = () => {
           <div className="flex-grow container py-6 animate-fade-in print:p-0">
             <Suspense fallback={
               <div className="flex-grow flex items-center justify-center min-h-[50vh]">
-                <div className="w-12 h-12 border-4 border-brand-gold/20 border-t-brand-gold rounded-full animate-spin"></div>
+                <div className="w-12 h-12 border-4 border-orange-500/20 border-t-orange-500 rounded-full animate-spin"></div>
               </div>
             }>
               <Routes>
