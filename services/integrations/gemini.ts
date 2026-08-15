@@ -92,36 +92,36 @@ const FALLBACK_NEWS: NewsArticle[] = [
   {
     id: "n1",
     title:
-      "ALERTA: BNA anuncia medida drástica que vai impactar o teu bolso amanhã!",
+      "BNA mantém política monetária: o que muda para o câmbio",
     summary:
-      "Ninguém esperava por esta mudança repentina nas taxas de juro. Sabe urgentemente como proteger o teu património antes que seja tarde.",
-    source: "Mercado Secreto",
+      "O Banco Nacional de Angola reafirmou o compromisso com a estabilidade do kwanza. Reunimos os pontos principais e o impacto esperado nas taxas de câmbio.",
+    source: "Resolve.AO Notícias",
     url: "#",
-    category: "Urgente",
-    publishedAt: "Agora mesmo",
+    category: "Economia",
+    publishedAt: "Hoje",
     status: "published",
   },
   {
     id: "n2",
     title:
-      "Vazou: A lista secreta das empresas que vão contratar em massa em Luanda",
+      "Empresas reforçam contratações em Luanda",
     summary:
-      "Documentos internos revelam salários milionários e benefícios nunca vistos. Vê se a tua área está na lista dourada.",
-    source: "Insider Luanda",
+      "Vários sectores, da construção ao comércio, anunciaram novas vagas nas últimas semanas. Resumo das oportunidades disponíveis no Resolve.AO.",
+    source: "Resolve.AO Notícias",
     url: "#",
-    category: "Exclusivo",
-    publishedAt: "Há 15 min",
+    category: "Empregos",
+    publishedAt: "Hoje",
     status: "published",
   },
   {
     id: "n3",
-    title: "Choque no sector petrolífero: A descoberta que muda tudo em Angola",
+    title: "Mercado cambial: como acompanhar as taxas do dia",
     summary:
-      "Investidores estrangeiros estão a correr para o Namibe. O que foi encontrado no subsolo vale mais que diamantes.",
-    source: "Confidencial",
+      "Entenda a diferença entre o câmbio formal e informal e como consultar as taxas atualizadas em tempo real na Resolve.AO.",
+    source: "Resolve.AO Notícias",
     url: "#",
-    category: "Bombástico",
-    publishedAt: "Há 1 hora",
+    category: "Câmbio",
+    publishedAt: "Hoje",
     status: "published",
   },
 ];

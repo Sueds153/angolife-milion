@@ -11,7 +11,7 @@ export const ShareButton: React.FC<ShareButtonProps> = ({ title, text, url = win
   const handleShare = async () => {
     const shareData = {
       title: title,
-      text: `${text}\n\nVeja mais em Resolve.AO Su-Golden:`,
+      text: `${text}\n\nVê mais em Resolve.AO Su-Golden:`,
       url: url,
     };
 

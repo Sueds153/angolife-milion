@@ -201,16 +201,16 @@ export const NewsPage: React.FC<NewsPageProps> = () => {
   return (
     <div className="space-y-6 animate-fade-in pb-20">
       <Helmet>
-        <title>Notícias Secretas de Angola | Resolve.AO Su-Golden</title>
-        <meta name="description" content="Acede a informações exclusivas e notícias de última hora sobre a economia e política de Angola. O que ninguém te conta, encontras aqui." />
-        <meta name="keywords" content="noticias angola, segredos angola, economia angola hoje, politica angola" />
+        <title>Notícias de Angola | Resolve.AO Su-Golden</title>
+        <meta name="description" content="Acede a informações e notícias de última hora sobre a economia e política de Angola." />
+        <meta name="keywords" content="noticias angola, economia angola hoje, politica angola" />
       </Helmet>
       <div className="flex flex-col gap-1 mb-4 w-full stack-narrow">
         <h2 className="text-fluid-h2 font-black text-brand-gold uppercase tracking-tighter flex flex-wrap items-center gap-2 leading-tight">
            <Flame className="fill-brand-gold text-brand-gold shrink-0" />
-           News Secretas
+           News de Angola
         </h2>
-        <p className="text-slate-500 text-[10px] md:text-xs font-bold uppercase tracking-widest leading-relaxed">O que ninguém lhe conta sobre Angola.</p>
+        <p className="text-slate-500 text-[10px] md:text-xs font-bold uppercase tracking-widest leading-relaxed">O que se passa na economia e na política de Angola.</p>
       </div>
 
       {categories.length > 0 && (

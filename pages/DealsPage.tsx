@@ -176,7 +176,7 @@ export const DealsPage: React.FC<DealsPageProps> = ({ onSelectDeal, onShowInters
               </div>
               <h4 className="text-slate-900 dark:text-white font-black uppercase tracking-tight text-xl mb-2">Ofertas Exclusivas</h4>
               <p className="text-slate-600 dark:text-slate-400 text-xs font-bold mb-6 max-w-[250px]">
-                Crie uma conta gratuita para ver os preços secretos das melhores lojas de Luanda.
+                Cria uma conta gratuita para ver as promoções das melhores lojas de Luanda.
               </p>
               <button
                 onClick={onRequireAuth}

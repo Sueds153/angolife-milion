@@ -40,7 +40,7 @@ const TICKER_MESSAGES = [
   { text: 'Notícias verificadas antes de publicar' },
   { text: 'Os teus dados protegidos com encriptação' },
   { text: 'Câmbio informal atualizado a cada minuto' },
-  { text: 'Comunidade de mais de 50.000 utilizadores' },
+  { text: 'Câmbio, vagas e notícias de Angola num só lugar' },
 ];
 
 export const HomePage: React.FC = () => {
@@ -523,9 +523,9 @@ export const HomePage: React.FC = () => {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
               {[
-                { icon: TrendingUp, title: '#1 em Angola', desc: 'A plataforma de referência para o mercado angolano', color: 'text-brand-gold' },
+                { icon: TrendingUp, title: 'Taxas em tempo real', desc: 'Câmbio formal e informal de Luanda, atualizado ao minuto', color: 'text-brand-gold' },
                 { icon: Zap, title: 'Gratuito para sempre', desc: 'Acesso completo a câmbio, vagas e notícias sem pagar nada', color: 'text-green-500' },
-                { icon: Shield, title: '100% seguro', desc: 'Os teus dados protegidos com encriptação de nível bancário', color: 'text-blue-500' },
+                { icon: Shield, title: 'Dados protegidos', desc: 'As tuas informações guardadas com encriptação e em ambiente seguro', color: 'text-blue-500' },
               ].map((item, idx) => (
                 <Reveal key={item.title} delay={idx * 120}>
                   <div className="flex flex-col items-start p-5 rounded-[1.5rem] bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:border-brand-gold/30 transition-all group">
@@ -581,7 +581,7 @@ export const HomePage: React.FC = () => {
             {
               icon: Newspaper,
               label: 'Notícias de Angola',
-              desc: 'Fica a par do que acontece em Angola antes de toda a gente.',
+              desc: 'Fica a par do que acontece em Angola, com notícias do dia e análises.',
               cta: 'Ler notícias',
               path: '/noticias',
               highlight: false,

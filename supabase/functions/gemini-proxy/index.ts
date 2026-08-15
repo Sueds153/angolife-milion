@@ -169,11 +169,12 @@ serve(async (req: Request) => {
       case 'fetchNews': {
         const gate = await gateContent(userId)
         if (gate === 'limit') return json({ error: { code: 'limit', message: 'Limite diário de consultas atingido.' } }, 429)
-        const response = await model.generateContent(`Pesquise as notícias mais quentes de hoje em Angola (Economia, Sociedade, Escândalos Financeiros, Oportunidades Secretas).
-        Crie títulos EXTREMAMENTE chamativos, estilo "clickbait" mas verdadeiros, que despertem curiosidade imediata (Ex: "O segredo que os bancos não contam", "Mudança drástica no Kwanza").
+        const response = await model.generateContent(`Pesquise as principais notícias de hoje em Angola (Economia, Política, Sociedade, Empregos).
+        Escreva títulos claros e factuais, sem sensacionalismo, e resumos informativos e objetivos.
+        IMPORTANTE: Use o registo "tu" (tu/teu/tua), não "você".
 
         Retorne JSON array com 5 notícias.
-        Campos: id, title, summary (um resumo que deixa suspense), source, publishedAt, category (use categorias como: 'BOMBÁSTICO', 'ALERTA', 'SEGREDO', 'URGENTE').
+        Campos: id, title, summary (resumo informativo de 1-2 frases), source, publishedAt, category (use categorias simples como: 'Economia', 'Política', 'Sociedade', 'Empregos', 'Câmbio').
         IMPORTANTE: Mantenha os textos em Português de Angola (pt-AO).`)
         const text = response.response.text().replace(/```json/g, '').replace(/```/g, '').trim()
         resultData = { news: JSON.parse(text) }

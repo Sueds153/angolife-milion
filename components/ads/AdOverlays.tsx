@@ -131,7 +131,7 @@ export const RewardedAd: React.FC<RewardedAdProps> = ({ onReward, onClose }) => 
               {completed && <Award size={40} className="absolute -top-4 -right-4 text-white bg-brand-gold rounded-full p-2 shadow-2xl border-4 border-black" />}
            </div>
            
-           <h2 className="text-2xl md:text-4xl text-white font-black mb-6 uppercase tracking-tight leading-tight">ACEDA À INTELIGÊNCIA <br/><span className="text-brand-gold">SU-GOLDEN AI</span></h2>
+           <h2 className="text-2xl md:text-4xl text-white font-black mb-6 uppercase tracking-tight leading-tight">ACEDE À INTELIGÊNCIA <br/><span className="text-brand-gold">SU-GOLDEN AI</span></h2>
            <p className="text-slate-400 text-sm md:text-base font-medium max-w-xs mx-auto mb-12">Desbloqueia agora a visão estratégica que o teu negócio precisa.</p>
            
            <div className="w-full h-1.5 bg-white/10 rounded-full mx-auto overflow-hidden">
