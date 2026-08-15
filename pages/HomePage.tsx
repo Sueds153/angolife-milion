@@ -51,7 +51,6 @@ export const HomePage: React.FC = () => {
   const [featuredDeals, setFeaturedDeals] = useState<ProductDeal[]>([]);
   const [loading, setLoading] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
-  const [tickerIndex, setTickerIndex] = useState(0);
   
   const [ads, setAds] = useState<Ad[]>([]);
   const [showInterstitial, setShowInterstitial] = useState(false);
@@ -439,30 +438,19 @@ export const HomePage: React.FC = () => {
       {/* Live Ticker */}
       <div className="overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-sm relative">
         <div className="flex items-center gap-3">
-          <div className="flex-shrink-0 border-r border-slate-200 dark:border-white/10 px-4 py-3 flex items-center gap-2">
-            <span className="w-1.5 h-1.5 bg-brand-gold rounded-full" />
+          <div className="flex-shrink-0 border-r border-slate-200 dark:border-white/10 px-4 py-3 flex items-center gap-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm z-10">
+            <span className="w-1.5 h-1.5 bg-brand-gold rounded-full animate-pulse" />
             <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap tracking-wide">Em destaque</span>
           </div>
           <div className="flex-1 overflow-hidden py-3 relative">
-            <div
-              key={tickerIndex}
-              className="flex items-center gap-3 animate-ticker-in"
-            >
-              <span className="w-1.5 h-1.5 bg-brand-gold rounded-full flex-shrink-0" />
-              <span className="text-xs font-medium text-slate-700 dark:text-slate-200 tracking-normal whitespace-nowrap">
-                {TICKER_MESSAGES[tickerIndex].text}
-              </span>
+            <div className="ticker-marquee-track">
+              {[...TICKER_MESSAGES, ...TICKER_MESSAGES].map((m, i) => (
+                <span key={i} className="flex items-center gap-3 mx-6 text-xs font-medium text-slate-700 dark:text-slate-200 tracking-normal whitespace-nowrap">
+                  <span className="w-1.5 h-1.5 bg-brand-gold rounded-full flex-shrink-0" />
+                  {m.text}
+                </span>
+              ))}
             </div>
-          </div>
-          <div className="flex-shrink-0 flex gap-1.5 px-4">
-            {TICKER_MESSAGES.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setTickerIndex(i)}
-                className={`w-1.5 h-1.5 rounded-full transition-all ${i === tickerIndex ? 'bg-brand-gold w-4' : 'bg-slate-300 dark:bg-slate-700 hover:bg-slate-400'}`}
-                aria-label={`Mensagem ${i + 1}`}
-              />
-            ))}
           </div>
         </div>
       </div>
