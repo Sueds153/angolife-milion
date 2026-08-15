@@ -78,7 +78,7 @@ export const LegalModals: React.FC<LegalModalsProps> = ({ isOpen, onClose, type 
     },
     data: {
       title: 'Dados Pessoais',
-      subtitle: 'Gerencie suas informações',
+      subtitle: 'Gerencia as tuas informações',
       icon: <Lock size={32} />,
       sections: [
         {
@@ -86,8 +86,8 @@ export const LegalModals: React.FC<LegalModalsProps> = ({ isOpen, onClose, type 
           text: 'Os seus dados são protegidos por criptografia de ponta a ponta no Supabase. Coletamos apenas o necessário para o funcionamento das ferramentas de Emprego, CV e Alertas personalizados.'
         },
         {
-          title: 'Seus Direitos',
-          text: 'Você tem direito ao acesso, retificação e eliminação dos seus dados a qualquer momento. Para exercer este direito, pode solicitar a remoção da sua conta nas definições de perfil ou contactar o suporte.'
+          title: 'Os Teus Direitos',
+          text: 'Tens direito ao acesso, retificação e eliminação dos teus dados a qualquer momento. Para exercer este direito, podes solicitar a remoção da tua conta nas definições de perfil ou contactar o suporte.'
         },
         {
           title: 'Lei de Proteção de Dados',

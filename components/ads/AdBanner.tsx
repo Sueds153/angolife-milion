@@ -274,7 +274,7 @@ export const AdBanner: React.FC<AdBannerProps> = ({ format, customLocation = 'al
               <p className={`text-slate-400 font-bold ${isSticky ? 'text-[8px]' : 'text-[10px] mt-0.5'}`}>
                 {format === 'leaderboard' ? 'Alcança milhares de candidatos qualificados em Angola' : 
                  format === 'rectangle' ? 'Acompanha a taxa formal e informal ao minuto' : 
-                 'Anuncie a sua marca para milhares de empresários'}
+                 'Anuncia a tua marca para milhares de empresários'}
               </p>
             </div>
          </div>

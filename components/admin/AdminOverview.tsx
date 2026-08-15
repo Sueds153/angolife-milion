@@ -85,7 +85,7 @@ export const AdminOverview: React.FC = () => {
         <div>
           <h4 className="font-black text-amber-500 uppercase text-xs tracking-widest mb-1">Ações Rápidas</h4>
           <p className="text-[11px] text-amber-600/80 font-medium leading-relaxed">
-            Verifique as abas "Vagas", "Notícias" e "Descontos" para aprovar conteúdos pendentes. 
+            Verifica as abas "Vagas", "Notícias" e "Descontos" para aprovar conteúdos pendentes. 
             Sincronize com a IA para capturar novas oportunidades automaticamente.
           </p>
         </div>

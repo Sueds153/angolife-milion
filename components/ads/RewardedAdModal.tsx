@@ -226,7 +226,7 @@ export const RewardedAdModal: React.FC<RewardedAdModalProps> = ({
           <div className="space-y-3">
             <h3 className="text-xl font-black text-white uppercase tracking-tight">PEDIDO PRONTO!</h3>
             <p className="text-slate-400 text-xs font-bold uppercase tracking-widest leading-relaxed">
-              Clique abaixo para ser reencaminhado ao WhatsApp com o seu ticket de atendimento.
+              Clique abaixo para ser reencaminhado ao WhatsApp com o teu ticket de atendimento.
             </p>
           </div>
           <button
@@ -289,7 +289,7 @@ export const RewardedAdModal: React.FC<RewardedAdModalProps> = ({
               A PREPARAR O TEU<br />LUGAR NA FILA...
             </h3>
             <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest px-8">
-              O seu atendimento será priorizado após este breve vídeo explicativo.
+              O teu atendimento será priorizado após este breve vídeo explicativo.
             </p>
           </div>
 
@@ -305,7 +305,7 @@ export const RewardedAdModal: React.FC<RewardedAdModalProps> = ({
     return (
       <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[300] flex flex-col items-center justify-center p-6 animate-fade-in">
         <Loader2 className="text-[#F59E0B] animate-spin mb-4" size={48} />
-        <p className="text-white font-black uppercase tracking-widest text-sm">A preparar o seu link de atendimento...</p>
+        <p className="text-white font-black uppercase tracking-widest text-sm">A preparar o teu link de atendimento...</p>
       </div>
     );
   }
@@ -346,14 +346,14 @@ export const RewardedAdModal: React.FC<RewardedAdModalProps> = ({
           {/* Explanation */}
           <div className="flex flex-col gap-3">
             <p className="text-sm text-slate-300 leading-relaxed">
-              Temos muitos pedidos neste momento. Assista a um anúncio de <span className="text-[#F59E0B] font-bold">15 segundos</span> para dar prioridade ao seu pedido no WhatsApp.
+              Temos muitos pedidos neste momento. Assiste a um anúncio de <span className="text-[#F59E0B] font-bold">15 segundos</span> para dar prioridade ao teu pedido no WhatsApp.
             </p>
 
             <div className="bg-slate-800/50 rounded-2xl p-4 border border-slate-700/50">
               <div className="flex items-center gap-3">
                 <Zap size={16} className="text-[#F59E0B]" />
                 <span className="text-xs text-slate-400">
-                  A sua mensagem será marcada como <span className="text-[#F59E0B] font-bold">⚡ PRIORITÁRIA</span>
+                  A tua mensagem será marcada como <span className="text-[#F59E0B] font-bold">⚡ PRIORITÁRIA</span>
                 </span>
               </div>
             </div>

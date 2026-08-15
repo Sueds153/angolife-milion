@@ -281,7 +281,7 @@ export const HomePage: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-white mb-2">Oferta exclusiva</h3>
-                    <p className="text-slate-400 text-sm font-medium leading-relaxed px-4">Veja este anúncio premium da <span className="text-brand-gold">{rewardedAd.company_name}</span> para desbloquear a sua recompensa.</p>
+                    <p className="text-slate-400 text-sm font-medium leading-relaxed px-4">Veja este anúncio premium da <span className="text-brand-gold">{rewardedAd.company_name}</span> para desbloquear a tua recompensa.</p>
                   </div>
                   
                   <div className="rounded-2xl overflow-hidden border border-white/5 aspect-video">
@@ -698,7 +698,7 @@ export const HomePage: React.FC = () => {
             <CheckCircle size={16} className="text-green-500" /> Sem cartão de crédito
           </div>
           <div className="flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400">
-            <CheckCircle size={16} className="text-green-500" /> Cancela quando quiseres
+            <CheckCircle size={16} className="text-green-500" /> Taxas do dia em tempo real
           </div>
         </div>
       </div>

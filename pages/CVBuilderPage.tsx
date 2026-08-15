@@ -1,6 +1,4 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { pdf } from '@react-pdf/renderer';
-import { CVDocument } from '../components/cv/CVDocument';
 import { Download, ChevronRight, ChevronLeft, Sparkles, Plus, Trash2, User, Briefcase, GraduationCap, Award, FileText, Lock, Check, Zap, Crown, CreditCard, Calendar, Clock, X } from 'lucide-react';
 import { GeminiService, GeminiError } from '../services/integrations/gemini';
 import { SubscriptionService } from '../services/api/subscription.service';
@@ -146,7 +144,7 @@ export const CVBuilderPage: React.FC = () => {
       } else if (code === 'unauth') {
         onRequireAuth();
       } else {
-        alert('Erro ao otimizar com IA. Tente novamente.');
+        alert('Erro ao otimizar com IA. Tenta novamente.');
       }
     } finally {
       setIsImproving(false);
@@ -204,7 +202,7 @@ export const CVBuilderPage: React.FC = () => {
       if (!isPremiumValid && hasCredits) {
         const ok = await onDecrementCredit();
         if (!ok) {
-          alert('Não foi possível debitar o crédito. Verifique o seu saldo.');
+          alert('Não foi possível debitar o crédito. Verifica o teu saldo.');
           setShowPaywall(true);
           return;
         }
@@ -212,6 +210,10 @@ export const CVBuilderPage: React.FC = () => {
         alert(`1 Crédito usado. Restam ${currentUser?.cvCredits ?? 0} créditos.`);
       }
 
+      const [{ pdf }, { CVDocument }] = await Promise.all([
+        import('@react-pdf/renderer'),
+        import('../components/cv/CVDocument')
+      ]);
       const blob = await pdf(<CVDocument data={cv} />).toBlob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -221,7 +223,7 @@ export const CVBuilderPage: React.FC = () => {
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error('[CV Download] Error:', error);
-      alert('Erro ao gerar o PDF. Tente novamente.');
+      alert('Erro ao gerar o PDF. Tenta novamente.');
     } finally {
       setIsDownloading(false);
     }
@@ -261,7 +263,7 @@ export const CVBuilderPage: React.FC = () => {
       }
     } catch (error) {
       console.error('[Payment] Error:', error);
-      alert(`Erro ao processar pagamento: ${(error as Error)?.message || 'Tente novamente.'}`);
+      alert(`Erro ao processar pagamento: ${(error as Error)?.message || 'Tenta novamente.'}`);
     } finally {
       setIsUploadingReceipt(false);
     }
@@ -317,7 +319,7 @@ export const CVBuilderPage: React.FC = () => {
       } else if (code === 'unauth') {
         onRequireAuth();
       } else {
-        alert('Erro ao otimizar com IA. Tente novamente.');
+        alert('Erro ao otimizar com IA. Tenta novamente.');
       }
     } finally {
       setIsImproving(false);
@@ -393,7 +395,7 @@ export const CVBuilderPage: React.FC = () => {
             className="w-full bg-slate-50 dark:bg-white/5 border gold-border-subtle p-3 rounded-xl outline-none h-32 resize-none"
             value={cv.summary}
             onChange={e => updateField('summary', e.target.value)}
-            placeholder="Escreva um breve resumo sobre a sua carreira..."
+            placeholder="Escreve um breve resumo sobre a tua carreira..."
           />
           <p className="text-[10px] text-slate-400 mt-1">💡 Dica: 3-4 frases, mencione anos de experiência, área de especialização e o valor que traz. Ex: 'Gestor com 5 anos em logística, especializado em redução de custos operacionais.'</p>
         </div>
@@ -419,7 +421,7 @@ export const CVBuilderPage: React.FC = () => {
           className="w-full bg-slate-50 dark:bg-white/5 border gold-border-subtle p-3 rounded-xl outline-none h-64 resize-none"
           value={cv.summary}
           onChange={e => updateField('summary', e.target.value)}
-          placeholder="Escreva um breve resumo sobre a sua carreira..."
+          placeholder="Escreve um breve resumo sobre a tua carreira..."
         />
         <p className="text-[10px] text-slate-400">💡 Dica: Mencione anos de experiência, sector e o principal valor que entrega ao empregador.</p>
 
@@ -532,7 +534,7 @@ export const CVBuilderPage: React.FC = () => {
             </div>
             <textarea
               className="w-full bg-slate-50 dark:bg-white/5 border gold-border-subtle p-3 rounded-xl outline-none h-24 resize-none"
-              placeholder="Descreva suas responsabilidades e conquistas..."
+              placeholder="Descreve as tuas responsabilidades e conquistas..."
               value={exp.description}
               onChange={e => updateExperience(exp.id, 'description', e.target.value)}
             />
@@ -703,7 +705,7 @@ export const CVBuilderPage: React.FC = () => {
                 {step === 2 && "Em vez de listar tarefas, liste resultados. Use a IA para transformar 'Vendi produtos' em 'Gerenciei vendas resultando em 20% de aumento de receita'."}
                 {step === 3 && "Coloque a educação mais recente primeiro. Se tem experiência, não precisa detalhar o ensino médio."}
                 {step === 4 && "Foque em competências técnicas (Hard Skills) relevantes para a vaga. Soft skills são melhores demonstradas na entrevista."}
-                {step === 5 && "Revise o resumo cuidadosamente. Esta é a primeira coisa que o recrutador lê, e por vezes a única. Seja direto, objetivo e destaque o seu maior diferencial."}
+                {step === 5 && "Revê o resumo cuidadosamente. Esta é a primeira coisa que o recrutador lê, e por vezes a única. Sê direto, objetivo e destaca o teu maior diferencial."}
               </p>
             </div>
           </div>
@@ -776,10 +778,10 @@ export const CVBuilderPage: React.FC = () => {
                     <X size={24} />
                   </button>
                   <h2 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter mb-4">
-                    Desbloqueie o seu <span className="text-brand-gold">Potencial</span>
+                    Desbloqueia o teu <span className="text-brand-gold">Potencial</span>
                   </h2>
                   <p className="text-slate-400 text-lg font-medium max-w-xl mx-auto">
-                    Escolha o plano ideal para a sua carreira. Acesso imediato ao nosso criador de CV com inteligência artificial.
+                    Escolhe o plano ideal para a tua carreira. Acesso imediato ao nosso criador de CV com inteligência artificial.
                   </p>
                 </div>
 
@@ -845,7 +847,7 @@ export const CVBuilderPage: React.FC = () => {
                       <span className="text-brand-gold font-bold text-sm">Kz</span>
                     </div>
                     <p className="text-slate-400 text-xs font-bold leading-relaxed mb-6">
-                      "Acesso Vitalício + Modelos VIP". O melhor investimento para sua carreira.
+                      "Acesso Vitalício + Modelos VIP". O melhor investimento para a tua carreira.
                     </p>
                     <ul className="space-y-3 mb-8">
                       <li className="flex items-center gap-2 text-xs font-bold text-slate-300"><Check size={14} className="text-emerald-500" /> Acesso Vitalício</li>
@@ -933,7 +935,7 @@ export const CVBuilderPage: React.FC = () => {
                       </div>
                       <h4 className="text-white font-black uppercase tracking-widest text-lg mb-2">Aguardando Aprovação</h4>
                       <p className="text-slate-400 text-sm font-medium mb-6">
-                        Recebemos o seu comprovativo. O nosso administrador irá validar o pagamento em breve.
+                        Recebemos o teu comprovativo. O nosso administrador irá validar o pagamento em breve.
                       </p>
                       <button
                         onClick={() => setPaymentStep('plans')}

@@ -135,7 +135,7 @@ export const DealsPage: React.FC<DealsPageProps> = ({ onSelectDeal, onShowInters
       setFormData({ title: '', store: '', storeNumber: '', originalPrice: 0, discountPrice: 0, location: '', description: '', category: 'Alimentação' });
       setImageFile(null);
       setImagePreview(null);
-      alert(isUserAdmin ? "Oferta verificada e publicada com sucesso!" : "Boa! A sua promoção foi enviada para análise e aprovação!");
+      alert(isUserAdmin ? "Oferta verificada e publicada com sucesso!" : "Boa! A tua promoção foi enviada para análise e aprovação!");
     };
 
     if (onShowInterstitial && !user?.isPremium && !user?.isAdmin) {
@@ -342,7 +342,7 @@ export const DealsPage: React.FC<DealsPageProps> = ({ onSelectDeal, onShowInters
               <div
                 onClick={() => fileInputRef.current?.click()}
                 className="w-full h-40 border-2 border-dashed gold-border-subtle rounded-2xl flex flex-col items-center justify-center bg-white/5 relative overflow-hidden cursor-pointer hover:bg-white/10 transition-colors"
-                title="Sua imagem será rapidamente comprimida para economizar dados móveis"
+                title="A tua imagem será rapidamente comprimida para economizar dados móveis"
               >
                 {imagePreview ? (
                   <img src={imagePreview} alt="Preview Oferta" className="w-full h-full object-cover" />

@@ -13,7 +13,7 @@ interface NativeAdProps {
 export const NativeAd: React.FC<NativeAdProps> = ({ className = '' }) => {
   // PLACEHOLDER: Replace with actual ad content from provider
   const adData = {
-    title: 'Proteja o Seu Futuro Financeiro',
+    title: 'Protege o Teu Futuro Financeiro',
     description: 'Descubra como investir em AOA e USD com segurança. Consultoria gratuita disponível.',
     sponsor: 'Banco Atlântico',
     ctaText: 'Saiba Mais',

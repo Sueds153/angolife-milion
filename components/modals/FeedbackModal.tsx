@@ -184,7 +184,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ order, isOpen, onC
                   {/* Footer / Social Branding */}
                   <div className="pt-4 space-y-6">
                      <div className="flex flex-col items-center gap-3">
-                        <p className="text-[9px] font-medium text-slate-500 tracking-widest uppercase">Resolve.AO • O seu parceiro cambial</p>
+                        <p className="text-[9px] font-medium text-slate-500 tracking-widest uppercase">Resolve.AO • O teu parceiro cambial</p>
                         
                         <div className="flex gap-3 w-full">
                            <button 

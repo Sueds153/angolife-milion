@@ -203,8 +203,8 @@ serve(async (req: Request) => {
 
       case 'improveCVContent': {
         const gate = await gatePaidAi(userId)
-        if (gate === 'no_credits') return json({ error: { code: 'no_credits', message: 'Sem acesso à IA. Faça upgrade do seu plano.' } }, 403)
-        if (gate === 'limit') return json({ error: { code: 'limit', message: 'Limite mensal gratuito atingido. Faça upgrade para acesso ilimitado.' } }, 429)
+        if (gate === 'no_credits') return json({ error: { code: 'no_credits', message: 'Sem acesso à IA. Faz upgrade do teu plano.' } }, 403)
+        if (gate === 'limit') return json({ error: { code: 'limit', message: 'Limite mensal gratuito atingido. Faz upgrade para acesso ilimitado.' } }, 429)
 
         const prompt = payload.type === 'summary'
           ? `Reescreva este resumo profissional para um Currículo (CV). Torne-o impactante, executivo e persuasivo, focado no mercado de trabalho angolano/internacional. Use Português de Angola (pt-AO). Texto original: "${payload.originalText}"`
@@ -216,8 +216,8 @@ serve(async (req: Request) => {
 
       case 'improveCVSections': {
         const gate = await gatePaidAi(userId)
-        if (gate === 'no_credits') return json({ error: { code: 'no_credits', message: 'Sem acesso à IA. Faça upgrade do seu plano.' } }, 403)
-        if (gate === 'limit') return json({ error: { code: 'limit', message: 'Limite mensal gratuito atingido. Faça upgrade para acesso ilimitado.' } }, 429)
+        if (gate === 'no_credits') return json({ error: { code: 'no_credits', message: 'Sem acesso à IA. Faz upgrade do teu plano.' } }, 403)
+        if (gate === 'limit') return json({ error: { code: 'limit', message: 'Limite mensal gratuito atingido. Faz upgrade para acesso ilimitado.' } }, 429)
 
         // Expects: payload = { summary: string, experiences: CVExperience[], skills: string[] }
         const { summary, experiences, skills } = payload as { summary: string; experiences: { description?: string }[]; skills: string[] };
@@ -226,7 +226,7 @@ serve(async (req: Request) => {
         const expDescriptions = (experiences || []).map(e => e.description || '').join('\n---\n');
         const skillsList = (skills || []).join(', ');
 
-        const prompt = `Você é um especialista em otimização de CV para ATS (Sistema de Rastreamento de Candidatos) e mercado de trabalho angolano/internacional.
+        const prompt = `És um especialista em otimização de CV para ATS (Sistema de Rastreamento de Candidatos) e mercado de trabalho angolano/internacional.
 Otimize os textos abaixo para serem ATS-friendly, executivos, diretos e em Português de Angola (pt-AO).
 REGRAS CRÍTICAS:
 - NÃO invente empresas, cargos, datas, números ou resultados que não existam no texto original.

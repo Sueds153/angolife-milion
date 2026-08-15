@@ -54,7 +54,7 @@ export const TechnicalTemplate: React.FC<TemplateSharedProps> = ({ cv, education
     // Centered Executive Header
     const renderExecutiveHeader = () => (
         <div className="executive-header">
-            <h1 className="executive-name">{cv.fullName || 'Seu Nome'}</h1>
+            <h1 className="executive-name">{cv.fullName || 'Nome Completo'}</h1>
             {cv.title && <div className="executive-title">{cv.title}</div>}
             {(cv.email || cv.phone || cv.location) && (
                 <div className="executive-contacts">

@@ -41,7 +41,7 @@ export const RecoveryPasswordModal: React.FC = () => {
         alert('Palavra-passe atualizada com sucesso. Já podes entrar com a nova palavra-passe.');
       }
     } catch {
-      setErrorMsg('Ocorreu um erro inesperado. Verifique a sua ligação.');
+      setErrorMsg('Não conseguimos ligar ao servidor. Verifica a tua ligação e tenta novamente.');
     } finally {
       setIsLoading(false);
     }

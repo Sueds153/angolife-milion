@@ -69,7 +69,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, 
           if (error.message.toLowerCase().includes('rate limit')) {
             setErrorMsg('Limite de tentativas excedido. Por favor, aguarde uns minutos ou desative a Confirmação de Email no Supabase.');
           } else {
-            setErrorMsg(error.message || 'Erro ao criar conta. Tente novamente.');
+            setErrorMsg(error.message || 'Erro ao criar conta. Tenta novamente.');
           }
         } else {
           // Success
@@ -78,14 +78,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, 
       } else {
         const { error } = await AuthService.signIn(email, password);
         if (error) {
-          setErrorMsg('Credenciais inválidas. Verifique o seu e-mail e palavra-passe.');
+          setErrorMsg('Credenciais inválidas. Verifica o teu e-mail e palavra-passe.');
         } else {
           // Success
           onLogin?.(email);
         }
       }
     } catch {
-      setErrorMsg('Ocorreu um erro inesperado. Verifique a sua ligação.');
+      setErrorMsg('Não conseguimos ligar ao servidor. Verifica a tua ligação e tenta novamente.');
     } finally {
       setIsLoading(false);
     }
@@ -93,7 +93,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, 
 
   const handleForgotPassword = async () => {
     if (!email) {
-      setErrorMsg('Por favor, introduza o seu e-mail no campo acima primeiro.');
+      setErrorMsg('Introduz o teu e-mail no campo acima primeiro.');
       return;
     }
 
@@ -102,9 +102,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, 
     try {
       const { error } = await AuthService.resetPassword(email);
       if (error) {
-        setErrorMsg('Erro ao recuperar senha. Verifique o seu e-mail.');
+        setErrorMsg('Erro ao recuperar a palavra-passe. Verifica o teu e-mail.');
       } else {
-        alert('As instruções de recuperação foram enviadas para o seu e-mail.');
+        alert('As instruções de recuperação foram enviadas para o teu e-mail.');
       }
     } catch {
       setErrorMsg('Erro de ligação ao servidor.');
@@ -134,7 +134,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, 
           <p className="text-slate-500 dark:text-slate-400 text-sm">
             {isRegister
               ? 'Registe-se para aceder a ferramentas exclusivas.'
-              : 'Faça login para continuar a usar o Resolve.AO.'}
+              : 'Faz login para continuar a usar o Resolve.AO.'}
           </p>
         </div>
 
@@ -160,7 +160,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, 
                       setErrorMsg('');
                     }}
                     className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-800 border border-orange-500/20 rounded-lg focus:ring-2 focus:ring-orange-500/20 outline-none text-slate-900 dark:text-white placeholder:text-slate-400 transition-all font-medium"
-                    placeholder="Seu nome"
+                    placeholder="O teu nome"
                   />
                 </div>
               </div>

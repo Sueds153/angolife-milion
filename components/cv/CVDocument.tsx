@@ -107,7 +107,7 @@ export const CVDocument: React.FC<CVDocumentProps> = ({ data }) => (
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Text style={styles.name}>{data.fullName || 'Seu Nome'}</Text>
+          <Text style={styles.name}>{data.fullName || 'Nome Completo'}</Text>
           <Text style={styles.title}>{data.title || 'Título Profissional'}</Text>
           <View style={styles.contact}>
             {data.email && <Text>Email: {data.email}</Text>}

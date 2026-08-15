@@ -225,10 +225,10 @@ export const ProfilePage: React.FC = () => {
       
       await NotificationService.subscribeUser(user.id);
       setNotificationPermission('granted');
-      NotificationService.sendNativeNotification('Notificações Ativadas', 'Você receberá alertas de mercado e vagas urgentes em segundo plano.');
+      NotificationService.sendNativeNotification('Notificações Ativadas', 'Vais receber alertas de mercado e vagas urgentes em segundo plano.');
     } catch (error) {
       console.error('Erro ao ativar notificações push:', error);
-      alert('Não foi possível ativar as notificações push. Verifique se o seu navegador suporta esta funcionalidade.');
+      alert('Não foi possível ativar as notificações push. Verifica se o teu navegador suporta esta funcionalidade.');
     }
   };
 

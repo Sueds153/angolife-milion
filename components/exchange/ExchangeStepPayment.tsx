@@ -145,7 +145,7 @@ export const ExchangeStepPayment: React.FC<ExchangeStepPaymentProps> = ({
                   ))
                 ) : (
                   [
-                    "Escolha a sua carteira (Unitel/Afri)",
+                    "Escolhe a tua carteira (Unitel/Afri)",
                     "Realize a transferência para os dados exibidos acima"
                   ].map((step, idx) => (
                     <div key={idx} className="flex items-center gap-3 bg-slate-800/30 p-3 rounded-xl border border-white/5">

@@ -83,7 +83,7 @@ export const ExchangeStepIdentity: React.FC<ExchangeStepIdentityProps> = ({
               ALERTA DE SISTEMA
             </span>
             <p className="text-xs font-bold text-white leading-tight">
-              Sistema em atualização de taxas. Por favor, tente novamente em
+              Sistema em atualização de taxas. Tenta novamente em
               instantes.
             </p>
           </div>
@@ -145,7 +145,7 @@ export const ExchangeStepIdentity: React.FC<ExchangeStepIdentityProps> = ({
         <>
           <div className="space-y-4">
             <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">
-              Escolha sua Carteira Digital
+              Escolhe a tua Carteira Digital
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {[

@@ -214,7 +214,7 @@ export const AdminPage: React.FC = () => {
     if (jobToApprove) {
       const updated = await JobsService.updateJob(id, jobToApprove);
       if (!updated) {
-        alert('Erro ao guardar alterações da vaga. Verifique a consola para mais detalhes.');
+        alert('Erro ao guardar alterações da vaga. Verifica a consola para mais detalhes.');
         setLoading(false);
         return;
       }
@@ -224,7 +224,7 @@ export const AdminPage: React.FC = () => {
       setPendingJobs(prev => prev.filter(job => job.id !== id));
       alert('Vaga publicada com sucesso!');
     } else {
-      alert('Erro ao publicar vaga. Verifique a consola para mais detalhes.');
+      alert('Erro ao publicar vaga. Verifica a consola para mais detalhes.');
     }
     setLoading(false);
   };
@@ -755,7 +755,7 @@ export const AdminPage: React.FC = () => {
             setLoading(true);
             const count = await AdminService.triggerDealsScraper();
             if (count > 0) {
-              alert(`${count} novas ofertas capturadas pela IA para sua revisão!`);
+              alert(`${count} novas ofertas capturadas pela IA para a tua revisão!`);
               loadPendingDeals();
             } else {
               alert('Nenhuma oferta nova encontrada no momento.');

@@ -92,9 +92,9 @@ const FALLBACK_NEWS: NewsArticle[] = [
   {
     id: "n1",
     title:
-      "ALERTA: BNA anuncia medida drástica que vai impactar o seu bolso amanhã!",
+      "ALERTA: BNA anuncia medida drástica que vai impactar o teu bolso amanhã!",
     summary:
-      "Ninguém esperava por esta mudança repentina nas taxas de juro. Saiba urgente como proteger o seu património antes que seja tarde.",
+      "Ninguém esperava por esta mudança repentina nas taxas de juro. Sabe urgentemente como proteger o teu património antes que seja tarde.",
     source: "Mercado Secreto",
     url: "#",
     category: "Urgente",
@@ -106,7 +106,7 @@ const FALLBACK_NEWS: NewsArticle[] = [
     title:
       "Vazou: A lista secreta das empresas que vão contratar em massa em Luanda",
     summary:
-      "Documentos internos revelam salários milionários e benefícios nunca vistos. Veja se a sua área está na lista dourada.",
+      "Documentos internos revelam salários milionários e benefícios nunca vistos. Vê se a tua área está na lista dourada.",
     source: "Insider Luanda",
     url: "#",
     category: "Exclusivo",

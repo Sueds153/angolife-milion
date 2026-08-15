@@ -328,7 +328,7 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
                   <span className="text-[10px] font-black uppercase tracking-widest">Dica Resolve.AO</span>
                 </div>
                 <p className="text-xs text-amber-200/90 font-medium leading-relaxed italic">
-                  "Destaque as suas principais competências e envie sempre o seu CV em formato PDF para garantir que seja bem visualizado pelos recrutadores."
+                  "Destaca as tuas principais competências e envia sempre o teu CV em formato PDF para garantir que seja bem visualizado pelos recrutadores."
                 </p>
               </div>
 
