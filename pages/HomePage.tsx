@@ -34,12 +34,12 @@ interface HomeBanner {
 }
 
 const TICKER_MESSAGES = [
-  { icon: '📊', text: 'Taxas de câmbio atualizadas em tempo real' },
-  { icon: '💼', text: 'Vagas de emprego atualizadas diariamente' },
-  { icon: '📰', text: 'Notícias verificadas antes de publicar' },
-  { icon: '🛡️', text: 'Os teus dados protegidos com encriptação' },
-  { icon: '⚡', text: 'Câmbio informal atualizado a cada minuto' },
-  { icon: '🤝', text: 'Comunidade de mais de 50.000 utilizadores' },
+  { text: 'Taxas de câmbio atualizadas em tempo real' },
+  { text: 'Vagas de emprego atualizadas diariamente' },
+  { text: 'Notícias verificadas antes de publicar' },
+  { text: 'Os teus dados protegidos com encriptação' },
+  { text: 'Câmbio informal atualizado a cada minuto' },
+  { text: 'Comunidade de mais de 50.000 utilizadores' },
 ];
 
 export const HomePage: React.FC = () => {
@@ -439,7 +439,7 @@ export const HomePage: React.FC = () => {
               key={tickerIndex}
               className="flex items-center gap-3 animate-fade-in"
             >
-              <span className="text-slate-500 dark:text-slate-400 text-sm">{TICKER_MESSAGES[tickerIndex].icon}</span>
+              <span className="w-1.5 h-1.5 bg-brand-gold rounded-full flex-shrink-0" />
               <span className="text-xs font-medium text-slate-700 dark:text-slate-200 tracking-normal whitespace-nowrap">
                 {TICKER_MESSAGES[tickerIndex].text}
               </span>
@@ -515,7 +515,7 @@ export const HomePage: React.FC = () => {
         <div className="relative z-10">
           <p className="text-xs md:text-sm font-semibold text-brand-gold mb-3">A tua plataforma de confiança</p>
           <h2 className="text-fluid-h2 font-black text-slate-900 dark:text-white tracking-tight mb-8">
-            Por que <span className="text-brand-gold">milhares</span> escolhem a Resolve.AO?
+            Porque é que <span className="text-brand-gold">milhares</span> escolhem a Resolve.AO?
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
             {[

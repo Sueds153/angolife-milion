@@ -11,7 +11,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegal }) => {
   const handleShareApp = async () => {
     const shareData = {
       title: 'Resolve.AO Su-Golden',
-      text: 'Descubra o Resolve.AO: A plataforma de elite para Câmbio, Empregos e Negócios em Angola.',
+      text: 'Descobre o Resolve.AO: a plataforma de referência para Câmbio, Empregos e Negócios em Angola.',
       url: window.location.origin,
     };
 
@@ -45,7 +45,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegal }) => {
             </span>
           </div>
           <p className="text-slate-500 dark:text-slate-400 text-xs font-medium leading-relaxed max-w-[280px]">
-            Liderança, transparência e inteligência de mercado. A sua fonte definitiva para economia e negócios de alto padrão em Angola.
+            Liderança, transparência e inteligência de mercado. A tua fonte de referência para a economia e os negócios em Angola.
           </p>
         </div>
 
@@ -129,7 +129,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegal }) => {
             </div>
             <div className="text-left">
               <span className="block text-white text-xs font-black uppercase tracking-wide">Partilhar Resolve.AO</span>
-              <span className="block text-slate-500 text-[10px] font-bold">Convide amigos e ganhe estatuto</span>
+              <span className="block text-slate-500 text-[10px] font-bold">Convida amigos e ganha acesso a vantagens</span>
             </div>
           </div>
           <ChevronRight size={16} className="text-slate-600 group-hover:text-white transition-colors" />
@@ -139,7 +139,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegal }) => {
         <div className="pt-6 border-t border-orange-500/10 flex flex-col md:flex-row justify-center md:justify-start items-center gap-4">
           <div className="space-y-1 text-center md:text-left">
             <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest">
-              © 2024 RESOLVE.AO BY SU-GOLDEN.
+              © 2026 RESOLVE.AO BY SU-GOLDEN.
             </p>
           </div>
         </div>
