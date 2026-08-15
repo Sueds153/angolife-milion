@@ -12,6 +12,7 @@ import { NotificationService } from './services/integrations/notificationService
 import { AuthService } from './services/core/auth.service';
 import { JobsService } from './services/api/jobs.service';
 import { NewsService } from './services/api/news.service';
+import { AdService } from './services/api/adService';
 import type { User } from '@supabase/supabase-js';
 import { UserProfile, AppNotification, ProductDeal } from './types';
 import { LegalModals } from './components/modals/LegalModals';
@@ -260,7 +261,7 @@ const App: React.FC = () => {
     if (page !== currentPage) setSelectedDeal(null);
     if (page === currentPage) return;
     const highValueTransitions = ['jobs', 'exchange', 'news', 'deals', 'cv-builder'];
-    const shouldShowAd = !(user?.isPremium || user?.isAdmin) && highValueTransitions.includes(page) && Math.random() > 0.6;
+    const shouldShowAd = !(user?.isPremium || user?.isAdmin) && highValueTransitions.includes(page) && Math.random() > 0.6 && AdService.canShowInterstitial();
 
     if (shouldShowAd) {
       setPendingAdPage(page);
@@ -418,6 +419,8 @@ const App: React.FC = () => {
               navigate(pendingAdPage === 'home' ? '/' : `/${pendingAdPage}`);
               window.scrollTo(0, 0);
             }
+            // Regista sempre o cooldown de 2h, com ou sem callback
+            AdService.recordInterstitialShown();
             if (interstitialCallback) {
               setLastInterstitialTime(Date.now());
               interstitialCallback();

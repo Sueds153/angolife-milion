@@ -33,7 +33,6 @@ const loadAdsenseScript = (client: string) => {
   adsenseScriptLoaded = true;
   const script = document.createElement('script');
   script.async = true;
-  script.crossOrigin = 'anonymous';
   script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}`;
   document.head.appendChild(script);
 };
@@ -78,7 +77,8 @@ export const AdBanner: React.FC<AdBannerProps> = ({ format, customLocation = 'al
   };
   const adSlot = getAdSlot();
 
-  // Pick an active partner ad matching location & format
+  // Pick an active partner ad matching location & format, rotating every 15s
+  const [rotIndex, setRotIndex] = useState(0);
   const partnerAd = useMemo<Ad | null>(() => {
     if (activeAds.length === 0) return null;
     const matching = activeAds.filter(a =>
@@ -87,7 +87,19 @@ export const AdBanner: React.FC<AdBannerProps> = ({ format, customLocation = 'al
       (a.format === 'banner' || a.format === 'all')
     );
     if (matching.length === 0) return null;
-    return matching[0];
+    return matching[rotIndex % matching.length];
+  }, [activeAds, customLocation, rotIndex]);
+
+  useEffect(() => {
+    if (activeAds.length === 0) return;
+    const matching = activeAds.filter(a =>
+      a.is_active &&
+      (a.location === customLocation || a.location === 'all') &&
+      (a.format === 'banner' || a.format === 'all')
+    );
+    if (matching.length <= 1) return;
+    const interval = setInterval(() => setRotIndex((i) => i + 1), 15000);
+    return () => clearInterval(interval);
   }, [activeAds, customLocation]);
 
   const isGoogleEnabled = adsConfig.enabled && !partnerAd;

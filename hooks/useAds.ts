@@ -31,7 +31,10 @@ export const useAds = ({ onShowInterstitial, onRequestReward }: UseAdsProps) => 
             },
             () => {
               setIsAdLoading(false);
-              alert('Assista ao vídeo completo para desbloquear este recurso.');
+              // Reseta o contador para que o utilizador não fique preso num loop de anúncios
+              sessionStorage.setItem('jobs_view_count', '0');
+              setViewCount(0);
+              alert('Assiste ao vídeo completo para desbloquear este recurso.');
             }
           );
         }, 1000);

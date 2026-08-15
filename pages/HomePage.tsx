@@ -69,12 +69,12 @@ export const HomePage: React.FC = () => {
   const interstitialTimerRef = useRef<number | null>(null);
 
   const heroBanners: HomeBanner[] = useMemo(() => {
-    const filtered = ads.filter(a => a.type === 'hero' && a.is_active && (a.location === 'home' || a.location === 'all') && a.format === 'banner');
+    const filtered = ads.filter(a => a.type === 'hero' && a.is_active && (a.location === 'home' || a.location === 'all') && (a.format === 'banner' || a.format === 'all'));
     return filtered.length > 0 ? filtered : PARTNER_ADS.heroBanners;
   }, [ads]);
     
   const adBanners: HomeBanner[] = useMemo(() => {
-    const filtered = ads.filter(a => a.type === 'partner' && a.is_active && (a.location === 'home' || a.location === 'all') && a.format === 'banner');
+    const filtered = ads.filter(a => a.type === 'partner' && a.is_active && (a.location === 'home' || a.location === 'all') && (a.format === 'banner' || a.format === 'all'));
     return filtered.length > 0 ? filtered : PARTNER_ADS.partnerBanners.filter(b => b.isActive);
   }, [ads]);
 

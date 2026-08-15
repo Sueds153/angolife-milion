@@ -26,7 +26,6 @@ export const RewardedAdModal: React.FC<RewardedAdModalProps> = ({
   const [isWatchingRewardAd, setIsWatchingRewardAd] = useState(false);
   const [showRedirectButton, setShowRedirectButton] = useState(false);
   const [adId] = useState(() => `REW-${Math.random().toString(36).substring(7).toUpperCase()}`);
-  const [prevOpen, setPrevOpen] = useState(isOpen);
 
   // Interstitial States
   // 'idle': Initial state
@@ -36,16 +35,24 @@ export const RewardedAdModal: React.FC<RewardedAdModalProps> = ({
   const [interstitialState, setInterstitialState] = useState<'idle' | 'loading' | 'ready' | 'showing'>('idle');
   const [interstitialTimer, setInterstitialTimer] = useState(5);
   const [rewardTimer, setRewardTimer] = useState(15);
+  const [prevOpen, setPrevOpen] = useState(isOpen);
+
+  // Ref que espelha o estado atual para evitar closures stale nos timeouts
+  const interstitialStateRef = React.useRef(interstitialState);
+  useEffect(() => {
+    interstitialStateRef.current = interstitialState;
+  }, [interstitialState]);
 
   useScrollLock(isOpen);
 
-  // Reset interstitial state when modal opens
+  // Reset interstitial state when modal opens (padrão React "adjust state during render")
   if (prevOpen !== isOpen) {
     setPrevOpen(isOpen);
     if (isOpen) {
       setInterstitialState('idle');
       setInterstitialTimer(5);
       setShowRedirectButton(false);
+      setIsWatchingRewardAd(false);
     }
   }
 
@@ -99,7 +106,8 @@ export const RewardedAdModal: React.FC<RewardedAdModalProps> = ({
     } else {
       setInterstitialState('loading');
       setTimeout(() => {
-        if (interstitialState !== 'showing') {
+        // Usa a ref para ler o estado ATUAL, não o capturado na closure
+        if (interstitialStateRef.current !== 'showing') {
           setInterstitialState('idle');
           handleFinalRedirect();
         }

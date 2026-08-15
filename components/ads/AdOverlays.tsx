@@ -16,6 +16,7 @@ export const InterstitialAd: React.FC<InterstitialAdProps> = ({ onClose, duratio
 
   useScrollLock(true);
 
+  // Ajusta o estado quando o prop `duration` muda (padrão React recomendado)
   if (prevDuration !== duration) {
     setPrevDuration(duration);
     setTimeLeft(duration);
@@ -56,22 +57,24 @@ export const InterstitialAd: React.FC<InterstitialAdProps> = ({ onClose, duratio
 
       <div className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] overflow-hidden relative flex flex-col gold-border-subtle scale-95 md:scale-100">
         <div className="bg-slate-100 dark:bg-white/[0.03] flex-grow flex flex-col items-center justify-center p-8 md:p-14 text-center">
-            <span className="text-[8px] md:text-[9px] uppercase tracking-[0.4em] text-slate-400 mb-8 border gold-border-subtle px-5 py-2.5 rounded-full font-black">Resolve.AO Elite Network</span>
+            <span className="text-[8px] md:text-[9px] uppercase tracking-[0.4em] text-slate-400 mb-8 border gold-border-subtle px-5 py-2.5 rounded-full font-black">Resolve.AO</span>
             
-            {/* Imagem de Sucesso Negra no anúncio - Atualizada para ser exclusiva */}
             <div className="w-28 h-28 md:w-40 md:h-40 rounded-full overflow-hidden mb-8 border-4 border-brand-gold shadow-2xl transform hover:scale-105 transition-transform duration-500">
-               <img src={PLACEHOLDER_IMAGE} className="w-full h-full object-cover" alt="Elite Business" />
+               <img src={PLACEHOLDER_IMAGE} className="w-full h-full object-cover" alt="Publicidade" />
             </div>
             
-            <h3 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white mb-4 uppercase tracking-tighter leading-none">Resolve.AO <br/><span className="text-brand-gold">Premium Plus</span></h3>
-            <p className="text-slate-500 dark:text-slate-400 mb-10 font-bold text-sm md:text-lg max-w-sm">Junte-se ao círculo dos líderes económicos em Luanda.</p>
+            <h3 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white mb-4 uppercase tracking-tighter leading-none">Resolve.AO</h3>
+            <p className="text-slate-500 dark:text-slate-400 mb-10 font-bold text-sm md:text-lg max-w-sm">O teu portal de câmbio, empregos e oportunidades em Angola.</p>
             
-            <button className="w-full bg-brand-gold text-white py-5 rounded-2xl font-black shadow-[0_20px_40px_rgba(245,158,11,0.3)] uppercase text-xs tracking-[0.2em] active:scale-95 transition-all">
-               Visitar Terminal do Anunciante
+            <button 
+              onClick={onClose}
+              className="w-full bg-brand-gold text-white py-5 rounded-2xl font-black shadow-[0_20px_40px_rgba(245,158,11,0.3)] uppercase text-xs tracking-[0.2em] active:scale-95 transition-all"
+            >
+               Continuar
             </button>
         </div>
         <div className="bg-slate-50 dark:bg-black py-4 text-center text-[8px] md:text-[10px] text-slate-500 uppercase font-black tracking-[0.3em]">
-           Patrocinado via Google AdMob Elite
+           Publicidade
         </div>
       </div>
     </div>
@@ -131,8 +134,8 @@ export const RewardedAd: React.FC<RewardedAdProps> = ({ onReward, onClose }) => 
               {completed && <Award size={40} className="absolute -top-4 -right-4 text-white bg-brand-gold rounded-full p-2 shadow-2xl border-4 border-black" />}
            </div>
            
-           <h2 className="text-2xl md:text-4xl text-white font-black mb-6 uppercase tracking-tight leading-tight">ACEDE À INTELIGÊNCIA <br/><span className="text-brand-gold">SU-GOLDEN AI</span></h2>
-           <p className="text-slate-400 text-sm md:text-base font-medium max-w-xs mx-auto mb-12">Desbloqueia agora a visão estratégica que o teu negócio precisa.</p>
+           <h2 className="text-2xl md:text-4xl text-white font-black mb-6 uppercase tracking-tight leading-tight">RECOMPENSA <br/><span className="text-brand-gold">EM BREVE</span></h2>
+           <p className="text-slate-400 text-sm md:text-base font-medium max-w-xs mx-auto mb-12">Obrigado por apoiares o Resolve.AO. A tua recompensa está pronta.</p>
            
            <div className="w-full h-1.5 bg-white/10 rounded-full mx-auto overflow-hidden">
                <svg className="w-full h-full">
@@ -155,10 +158,10 @@ export const RewardedAd: React.FC<RewardedAdProps> = ({ onReward, onClose }) => 
             className="w-full max-w-sm flex items-center justify-center gap-4 bg-brand-gold text-slate-950 px-12 py-6 rounded-3xl text-xs md:text-sm font-black uppercase tracking-[0.25em] shadow-[0_25px_60px_rgba(245,158,11,0.4)] animate-float"
           >
             <Award size={24} />
-            REIVINDICAR ACESSO ELITE
+            OBTER RECOMPENSA
           </button>
         ) : (
-          <div className="text-slate-600 text-[10px] font-black uppercase tracking-[0.5em] text-center">Conexão Segura Resolve.AO Ads</div>
+          <div className="text-slate-600 text-[10px] font-black uppercase tracking-[0.5em] text-center">Resolve.AO Ads</div>
         )}
       </div>
     </div>

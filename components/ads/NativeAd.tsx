@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Sparkles } from 'lucide-react';
+import { useAppStore } from '../../store/useAppStore';
 
 interface NativeAdProps {
   className?: string;
@@ -11,17 +12,46 @@ interface NativeAdProps {
  * Appears as a "Sponsored Tip" card
  */
 export const NativeAd: React.FC<NativeAdProps> = ({ className = '' }) => {
-  // PLACEHOLDER: Replace with actual ad content from provider
-  const adData = {
-    title: 'Protege o Teu Futuro Financeiro',
-    description: 'Descubra como investir em AOA e USD com segurança. Consultoria gratuita disponível.',
-    sponsor: 'Banco Atlântico',
-    ctaText: 'Saiba Mais',
-    ctaUrl: '#'
-  };
+  const activeAds = useAppStore((state) => state.activeAds);
+  const [rotIndex, setRotIndex] = useState(0);
+
+  // Usa um anúncio real (location all/exchange, formato banner/all) com rotação simples
+  const matching = activeAds.filter(
+    (a) =>
+      a.is_active &&
+      (a.location === 'exchange' || a.location === 'all') &&
+      (a.format === 'banner' || a.format === 'all')
+  );
+
+  useEffect(() => {
+    if (matching.length <= 1) return;
+    const interval = setInterval(() => setRotIndex((i) => i + 1), 15000);
+    return () => clearInterval(interval);
+  }, [matching.length]);
+
+  const ad = matching.length > 0
+    ? matching[rotIndex % matching.length]
+    : null;
+
+  // Fallback factual do próprio Resolve.AO (nunca inventa marcas nem links falsos)
+  const adData = ad
+    ? {
+        title: ad.title || 'Publicidade',
+        description: ad.company_name || 'Anúncio patrocinado no Resolve.AO',
+        sponsor: ad.company_name || 'Patrocinado',
+        ctaText: 'Visitar',
+        ctaUrl: ad.link || '#'
+      }
+    : {
+        title: 'Encontra as Melhores Oportunidades',
+        description: 'Câmbio, empregos e notícias atualizadas no Resolve.AO. Tudo gratuito, num só lugar.',
+        sponsor: 'Resolve.AO',
+        ctaText: 'Explorar',
+        ctaUrl: '/'
+      };
 
   return (
-    <div className={`bg-gradient-to-br from-slate-900/50 to-slate-800/30 rounded-[2rem] border border-slate-700/50 p-6 shadow-xl backdrop-blur-sm ${className}`}>
+    <div className={`relative bg-gradient-to-br from-slate-900/50 to-slate-800/30 rounded-[2rem] border border-slate-700/50 p-6 shadow-xl backdrop-blur-sm ${className}`}>
       {/* Sponsored Label */}
       <div className="flex items-center gap-2 mb-4">
         <Sparkles size={12} className="text-[#F59E0B]/50" />
@@ -47,16 +77,14 @@ export const NativeAd: React.FC<NativeAdProps> = ({ className = '' }) => {
           <span className="text-[10px] font-bold text-slate-600 uppercase">
             {adData.sponsor}
           </span>
-          
+
           <a
             href={adData.ctaUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="px-4 py-2 bg-[#F59E0B]/10 hover:bg-[#F59E0B]/20 border border-[#F59E0B]/30 rounded-xl text-[10px] font-black text-[#F59E0B] uppercase tracking-widest transition-all hover:scale-105"
             onClick={() => {
-              // PLACEHOLDER: Track ad click
-              console.log('📊 Native ad clicked');
-              // In production, report to ad provider
+              if (ad) console.log('📊 Native ad clicked');
             }}
           >
             {adData.ctaText}
