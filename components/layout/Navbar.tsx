@@ -54,14 +54,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenLegal }) => {
             className="flex items-center gap-3 md:gap-4 cursor-pointer select-none group"
             onClick={() => window.scrollTo(0, 0)}
           >
-            <div className="flex flex-col items-center">
-              <span className="text-[8px] md:text-[11px] font-black tracking-widest text-orange-500 uppercase border-b border-orange-500/50 pb-0.5 leading-none">
-                SU-GOLDEN
-              </span>
-            </div>
-            <div className="flex items-center text-lg md:text-2xl font-bold tracking-tighter">
+            <div className="flex items-center text-lg md:text-2xl font-bold tracking-tight">
               <h1 className="flex items-center">
-                <span className="text-slate-900 dark:text-white">RESOLVE</span>
+                <span className="text-slate-900 dark:text-white">Resolve</span>
                 <span className="text-orange-500 ml-0.5">.AO</span>
               </h1>
             </div>
@@ -74,7 +69,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenLegal }) => {
                 key={item.id}
                 to={item.path}
                 className={({ isActive }) => 
-                  `px-3 py-2 rounded-lg flex items-center space-x-2 text-[11px] font-bold uppercase tracking-wider transition-all ${isActive
+                  `px-3 py-2 rounded-lg flex items-center space-x-2 text-sm font-medium tracking-wide transition-all ${isActive
                   ? 'text-orange-500 bg-slate-200/50 dark:bg-white/5'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/5'
                   }`
@@ -111,13 +106,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenLegal }) => {
               <div className="flex items-center gap-2 ml-2">
                 <button
                   onClick={() => setAuthModal(true, 'login')}
-                  className="text-[11px] font-black uppercase tracking-widest px-4 py-2 text-slate-500 dark:text-slate-400 hover:text-orange-500 dark:hover:text-orange-500 transition-colors"
+                  className="text-sm font-medium px-4 py-2 text-slate-500 dark:text-slate-400 hover:text-orange-500 dark:hover:text-orange-500 transition-colors"
                 >
                   Entrar
                 </button>
                 <button
                   onClick={() => setAuthModal(true, 'register')}
-                  className="text-[11px] font-black uppercase tracking-widest px-5 py-2.5 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-all shadow-lg shadow-amber-900/10 border border-orange-500/50"
+                  className="text-sm font-semibold px-5 py-2.5 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-all shadow-lg shadow-amber-900/10 border border-orange-500/50"
                 >
                   Criar conta
                 </button>
@@ -165,7 +160,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenLegal }) => {
                   to={item.path}
                   onClick={() => setIsOpen(false)}
                   className={({ isActive }) => 
-                    `flex items-center space-x-4 w-full px-5 py-4 rounded-xl text-sm font-black uppercase tracking-widest transition-all ${isActive ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5'}`
+                    `flex items-center space-x-4 w-full px-5 py-4 rounded-xl text-sm font-medium tracking-wide transition-all ${isActive ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5'}`
                   }
                 >
                   {({ isActive }) => (
@@ -185,7 +180,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenLegal }) => {
                       to="/perfil"
                       onClick={() => setIsOpen(false)}
                       className={({ isActive }) => 
-                        `flex items-center space-x-4 w-full px-5 py-4 rounded-xl text-sm font-black uppercase tracking-widest ${isActive ? 'bg-orange-500/10 text-orange-500' : 'text-slate-500 dark:text-slate-400'}`
+                        `flex items-center space-x-4 w-full px-5 py-4 rounded-xl text-sm font-medium tracking-wide ${isActive ? 'bg-orange-500/10 text-orange-500' : 'text-slate-500 dark:text-slate-400'}`
                       }
                     >
                       <User size={20} />
@@ -193,7 +188,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenLegal }) => {
                     </NavLink>
                     <button
                       onClick={() => { handleLogout(); setIsOpen(false); }}
-                      className="flex items-center space-x-4 w-full px-5 py-4 rounded-xl text-sm font-black uppercase tracking-widest text-red-400 hover:bg-red-400/5 transition-colors"
+                      className="flex items-center space-x-4 w-full px-5 py-4 rounded-xl text-sm font-medium tracking-wide text-red-400 hover:bg-red-400/5 transition-colors"
                     >
                       <LogOut size={20} />
                       <span>Terminar Sessão</span>
@@ -203,14 +198,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenLegal }) => {
                   <div className="grid grid-cols-1 gap-3">
                     <button
                       onClick={() => { setAuthModal(true, 'login'); setIsOpen(false); }}
-                      className="flex items-center justify-center gap-3 w-full py-4 text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white border border-orange-500/20 rounded-2xl bg-slate-100 dark:bg-white/5"
+                      className="flex items-center justify-center gap-3 w-full py-4 text-sm font-semibold tracking-wide text-slate-900 dark:text-white border border-orange-500/20 rounded-2xl bg-slate-100 dark:bg-white/5"
                     >
                       <LogIn size={18} className="text-orange-500" />
                       Entrar
                     </button>
                     <button
                       onClick={() => { setAuthModal(true, 'register'); setIsOpen(false); }}
-                      className="flex items-center justify-center gap-3 w-full py-4 text-xs font-black uppercase tracking-widest bg-orange-500 text-white rounded-2xl shadow-xl shadow-amber-900/20 active:scale-95 transition-all"
+                      className="flex items-center justify-center gap-3 w-full py-4 text-sm font-semibold tracking-wide bg-orange-500 text-white rounded-2xl shadow-xl shadow-amber-900/20 active:scale-95 transition-all"
                     >
                       <UserPlus size={18} />
                       Criar conta
@@ -221,7 +216,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenLegal }) => {
 
               {/* Mobile Legal & Apoio Section */}
               <div className="pt-6 mt-6 border-t border-orange-500/20">
-                <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 px-5">Legal & Apoio</h4>
+                <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-4 px-5">Legal & Apoio</h4>
                 <div className="space-y-1">
                   <button
                     onClick={() => { onOpenLegal?.('privacy'); setIsOpen(false); }}

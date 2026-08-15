@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Briefcase, ShoppingBag, DollarSign, ChevronRight, MessageCircle, Activity, Volume2, VolumeX, X, Newspaper, FileText, Tag, Users, Shield, Zap, Star, TrendingUp, Quote, CheckCircle } from 'lucide-react';
+import { ArrowRight, Briefcase, ShoppingBag, DollarSign, ChevronRight, MessageCircle, Volume2, VolumeX, X, Newspaper, FileText, Tag, Users, Shield, Zap, TrendingUp, Quote, CheckCircle } from 'lucide-react';
 import { ExchangeService } from '../services/api/exchange.service';
 import { DealsService } from '../services/api/deals.service';
 import { JobsService } from '../services/api/jobs.service';
@@ -34,12 +34,12 @@ interface HomeBanner {
 }
 
 const TICKER_MESSAGES = [
-  { icon: '📊', text: 'Dados de mercado atualizados em tempo real' },
-  { icon: '💼', text: 'Vagas atualizadas diariamente das maiores empresas' },
+  { icon: '📊', text: 'Taxas de câmbio atualizadas em tempo real' },
+  { icon: '💼', text: 'Vagas de emprego atualizadas diariamente' },
   { icon: '📰', text: 'Notícias verificadas antes de publicar' },
-  { icon: '🛡️', text: 'Dados protegidos com encriptação bancária' },
+  { icon: '🛡️', text: 'Os teus dados protegidos com encriptação' },
   { icon: '⚡', text: 'Câmbio informal atualizado a cada minuto' },
-  { icon: '🤝', text: 'Comunidade de +50.000 utilizadores ativos' },
+  { icon: '🤝', text: 'Comunidade de mais de 50.000 utilizadores' },
 ];
 
 export const HomePage: React.FC = () => {
@@ -187,9 +187,9 @@ export const HomePage: React.FC = () => {
     <ErrorBoundary>
       <div className="space-y-6 md:space-y-12 animate-fade-in">
       <Helmet>
-        <title>Resolve.AO Su-Golden | Inteligência de Mercado e Elite em Angola</title>
-        <meta name="description" content="Lidere a economia nacional com a Resolve.AO Su-Golden. Câmbio em tempo real, vagas de elite e as melhores ofertas do mercado angolano." />
-        <meta name="keywords" content="vagas angola, cambio angola, economia angola, empregos angola, mercado angolano, su-golden" />
+        <title>Resolve.AO | Câmbio, Emprego, Notícias e Ofertas em Angola</title>
+        <meta name="description" content="Câmbio formal e informal, vagas de emprego, notícias e promoções atualizados em Angola. Tudo o que precisas num só lugar." />
+        <meta name="keywords" content="vagas angola, cambio angola, economia angola, empregos angola, notícias angola, ofertas angola" />
       </Helmet>
 
       {/* Site Preview Modal */}
@@ -239,8 +239,8 @@ export const HomePage: React.FC = () => {
                 <img src={interstitialAd.image_url} className="w-full h-full object-cover" alt="interstitial" />
               )}
               <div className="absolute inset-x-0 bottom-0 p-8 bg-gradient-to-t from-black via-black/60 to-transparent">
-                <span className="text-[10px] font-black text-brand-gold uppercase tracking-[0.2em] mb-2 block animate-pulse">Publicidade Exclusiva</span>
-                <h3 className="text-2xl font-black text-white uppercase mb-4">{interstitialAd.company_name}</h3>
+                <span className="text-[11px] font-semibold text-brand-gold uppercase tracking-wide mb-2 block">Publicidade</span>
+                <h3 className="text-2xl font-bold text-white mb-4">{interstitialAd.company_name}</h3>
                 <button 
                   onClick={() => {
                     if (interstitialAd.link) {
@@ -250,9 +250,9 @@ export const HomePage: React.FC = () => {
                     }
                     setShowInterstitial(false);
                   }}
-                  className="w-full bg-brand-gold text-slate-950 py-4 rounded-2xl font-black uppercase text-xs tracking-widest shadow-lg active:scale-95 transition-all"
+                  className="w-full bg-brand-gold text-slate-950 py-4 rounded-2xl font-bold text-sm tracking-wide shadow-lg active:scale-95 transition-all"
                 >
-                  Ver Site / Oferta
+                  Ver site / oferta
                 </button>
               </div>
             </div>
@@ -265,10 +265,10 @@ export const HomePage: React.FC = () => {
         <>
           <button 
             onClick={() => setShowRewarded(true)}
-            className="fixed bottom-24 right-6 z-[150] bg-brand-gold text-slate-950 p-4 rounded-full shadow-2xl animate-bounce hover:scale-110 active:scale-95 transition-all text-[10px] font-black uppercase tracking-tight flex items-center gap-2"
+            className="fixed bottom-24 right-6 z-[150] bg-brand-gold text-slate-950 px-5 py-4 rounded-full shadow-2xl animate-bounce hover:scale-110 active:scale-95 transition-all text-xs font-bold tracking-wide flex items-center gap-2"
             title="Ver Oferta Especial"
           >
-            <DollarSign size={16} /> Ganhar Bónus
+            <DollarSign size={16} /> Ganhar bónus
           </button>
 
           {showRewarded && (
@@ -279,8 +279,8 @@ export const HomePage: React.FC = () => {
                     <DollarSign size={40} />
                   </div>
                   <div>
-                    <h3 className="text-xl font-black text-white uppercase mb-2">Oferta Exclusiva</h3>
-                    <p className="text-slate-400 text-xs font-bold leading-relaxed px-4">Veja este anúncio premium da <span className="text-brand-gold">{rewardedAd.company_name}</span> para desbloquear a sua recompensa.</p>
+                    <h3 className="text-xl font-bold text-white mb-2">Oferta exclusiva</h3>
+                    <p className="text-slate-400 text-sm font-medium leading-relaxed px-4">Veja este anúncio premium da <span className="text-brand-gold">{rewardedAd.company_name}</span> para desbloquear a sua recompensa.</p>
                   </div>
                   
                   <div className="rounded-2xl overflow-hidden border border-white/5 aspect-video">
@@ -317,13 +317,13 @@ export const HomePage: React.FC = () => {
                       }
                       setShowRewarded(false);
                     }}
-                    className="w-full bg-brand-gold text-slate-950 py-4 rounded-2xl font-black uppercase text-xs tracking-widest shadow-lg shadow-amber-500/20 active:scale-95 transition-all"
+                    className="w-full bg-brand-gold text-slate-950 py-4 rounded-2xl font-bold text-sm tracking-wide shadow-lg shadow-amber-500/20 active:scale-95 transition-all"
                   >
-                    Resgatar Bónus & Ver Site
+                    Resgatar bónus e ver site
                   </button>
                   <button 
                     onClick={() => setShowRewarded(false)} 
-                    className="text-slate-500 text-[10px] font-black uppercase tracking-widest hover:text-white transition-colors"
+                    className="text-slate-500 text-xs font-semibold tracking-wide hover:text-white transition-colors"
                     title="Fechar"
                     aria-label="Fechar Oferta"
                   >
@@ -402,45 +402,45 @@ export const HomePage: React.FC = () => {
         </div>
         
         <div className="relative z-10 p-6 md:p-24 max-w-5xl w-full">
-          <div className="inline-flex items-center gap-2 bg-brand-gold/20 border border-brand-gold/40 backdrop-blur-xl px-4 py-2 rounded-full text-brand-gold text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] mb-6 md:mb-12 shadow-lg">
-            <Activity size={10} className="animate-pulse" />
-            MERCADO EM TEMPO REAL
+          <div className="inline-flex items-center gap-2 bg-white/5 border border-white/15 backdrop-blur-xl px-4 py-2 rounded-full text-slate-200 text-[11px] md:text-xs font-semibold tracking-wide mb-6 md:mb-12">
+            <span className="w-1.5 h-1.5 rounded-full bg-brand-gold" />
+            Atualizado a cada minuto
           </div>
           
-          <h1 className="text-fluid-h1 font-black text-white mb-4 md:mb-8 tracking-tighter leading-[1.1] md:leading-[0.85] uppercase">
+          <h1 className="text-fluid-h1 font-black text-white mb-4 md:mb-8 tracking-tight leading-[1.05] md:leading-[0.95]">
             Resolve.AO <br/>
             <span className="text-brand-gold">Su-Golden</span>
           </h1>
           
-          <p className="text-fluid-p text-slate-100 font-bold max-w-md mb-6 md:mb-12 opacity-90 uppercase tracking-tight">
-            Lidere a economia nacional com inteligência de mercado e oportunidades exclusivas em Angola.
+          <p className="text-fluid-p text-slate-200 font-medium max-w-md mb-6 md:mb-12">
+            O essencial do mercado angolano num só lugar: câmbio, emprego, notícias e ofertas que fazem a diferença no teu dia a dia.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-3">
             <button 
               onClick={(e) => { e.stopPropagation(); navigate('/cambio'); }}
-              className="w-full sm:w-auto bg-brand-gold hover:bg-amber-600 text-white font-black py-4 px-8 rounded-xl md:rounded-2xl transition-all flex items-center justify-center shadow-xl active:scale-95 text-[10px] md:text-sm uppercase tracking-widest border border-brand-gold/50 cursor-pointer"
+              className="w-full sm:w-auto bg-brand-gold hover:bg-amber-600 text-slate-950 font-bold py-4 px-8 rounded-xl md:rounded-2xl transition-all flex items-center justify-center shadow-xl active:scale-95 text-sm md:text-base cursor-pointer"
             >
-              Consultar Câmbio <ArrowRight size={16} className="ml-2" />
+              Consultar câmbio <ArrowRight size={16} className="ml-2" />
             </button>
           </div>
         </div>
       </div>
 
       {/* Live Ticker */}
-      <div className="overflow-hidden rounded-2xl bg-slate-900 dark:bg-black border border-orange-500/20 shadow-lg relative">
+      <div className="overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-sm relative">
         <div className="flex items-center gap-3">
-          <div className="flex-shrink-0 bg-orange-500 px-4 py-3 flex items-center gap-2">
-            <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
-            <span className="text-[9px] font-black text-white uppercase tracking-widest whitespace-nowrap">AO VIVO</span>
+          <div className="flex-shrink-0 border-r border-slate-200 dark:border-white/10 px-4 py-3 flex items-center gap-2">
+            <span className="w-1.5 h-1.5 bg-brand-gold rounded-full" />
+            <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap tracking-wide">Em destaque</span>
           </div>
           <div className="flex-1 overflow-hidden py-3 relative">
             <div
               key={tickerIndex}
               className="flex items-center gap-3 animate-fade-in"
             >
-              <span className="text-lg leading-none">{TICKER_MESSAGES[tickerIndex].icon}</span>
-              <span className="text-[11px] font-bold text-slate-200 uppercase tracking-wide whitespace-nowrap">
+              <span className="text-slate-500 dark:text-slate-400 text-sm">{TICKER_MESSAGES[tickerIndex].icon}</span>
+              <span className="text-xs font-medium text-slate-700 dark:text-slate-200 tracking-normal whitespace-nowrap">
                 {TICKER_MESSAGES[tickerIndex].text}
               </span>
             </div>
@@ -450,7 +450,7 @@ export const HomePage: React.FC = () => {
               <button
                 key={i}
                 onClick={() => setTickerIndex(i)}
-                className={`w-1.5 h-1.5 rounded-full transition-all ${i === tickerIndex ? 'bg-orange-500 w-4' : 'bg-slate-600 hover:bg-slate-400'}`}
+                className={`w-1.5 h-1.5 rounded-full transition-all ${i === tickerIndex ? 'bg-brand-gold w-4' : 'bg-slate-300 dark:bg-slate-700 hover:bg-slate-400'}`}
                 aria-label={`Mensagem ${i + 1}`}
               />
             ))}
@@ -481,7 +481,7 @@ export const HomePage: React.FC = () => {
             </div>
             <ChevronRight size={16} className="text-slate-300 group-hover:translate-x-1 transition-transform" />
           </div>
-          <span className="text-[8px] md:text-[11px] text-slate-400 font-black uppercase tracking-widest block mb-1">Câmbio Rua</span>
+          <span className="text-xs md:text-sm text-slate-500 dark:text-slate-400 font-medium block mb-1">Câmbio rua · venda</span>
           <span className="text-2xl md:text-5xl font-black text-brand-gold">{usdRate?.informalSell.toFixed(0)} <span className="text-xs md:text-sm font-bold text-brand-gold">Kz</span></span>
         </div>
 
@@ -492,7 +492,7 @@ export const HomePage: React.FC = () => {
             </div>
             <ChevronRight size={16} className="text-slate-300 group-hover:translate-x-1 transition-transform" />
           </div>
-          <span className="text-[8px] md:text-[11px] text-slate-400 font-black uppercase tracking-widest block mb-1">Vagas de Elite</span>
+          <span className="text-xs md:text-sm text-slate-500 dark:text-slate-400 font-medium block mb-1">Vagas disponíveis</span>
           <span className="text-2xl md:text-5xl font-black text-brand-gold">{featuredJobs.length}+ <span className="text-xs md:text-sm font-bold text-slate-400">Abertas</span></span>
         </div>
 
@@ -503,32 +503,32 @@ export const HomePage: React.FC = () => {
             </div>
             <ChevronRight size={16} className="text-slate-300 group-hover:translate-x-1 transition-transform" />
           </div>
-          <span className="text-[8px] md:text-[11px] text-slate-400 font-black uppercase tracking-widest block mb-1">Promoções</span>
+          <span className="text-xs md:text-sm text-slate-500 dark:text-slate-400 font-medium block mb-1">Promoções em destaque</span>
           <span className="text-2xl md:text-5xl font-black text-brand-gold">{featuredDeals.length} <span className="text-xs md:text-sm font-bold text-slate-400">Destaques</span></span>
         </div>
         </div>
       )}
 
       {/* Por Que a Resolve.AO */}
-      <div className="relative overflow-hidden rounded-[2rem] bg-white dark:bg-slate-900 border border-orange-500/10 shadow-xl p-6 md:p-12">
+      <div className="relative overflow-hidden rounded-[2rem] bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-sm p-6 md:p-12">
         <div className="absolute top-0 right-0 w-64 h-64 bg-brand-gold/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
         <div className="relative z-10">
-          <p className="text-[9px] font-black text-brand-gold uppercase tracking-[0.25em] mb-3">A Tua Plataforma de Confiança</p>
-          <h2 className="text-fluid-h2 font-black text-slate-900 dark:text-white uppercase tracking-tight mb-8">
+          <p className="text-xs md:text-sm font-semibold text-brand-gold mb-3">A tua plataforma de confiança</p>
+          <h2 className="text-fluid-h2 font-black text-slate-900 dark:text-white tracking-tight mb-8">
             Por que <span className="text-brand-gold">milhares</span> escolhem a Resolve.AO?
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
             {[
               { icon: TrendingUp, title: '#1 em Angola', desc: 'A plataforma de referência para o mercado angolano', color: 'text-brand-gold' },
-              { icon: Zap, title: 'Gratuito Para Sempre', desc: 'Acesso completo a câmbio, vagas e notícias sem pagar nada', color: 'text-green-400' },
-              { icon: Shield, title: '100% Seguro', desc: 'Os teus dados protegidos com encriptação de nível bancário', color: 'text-blue-400' },
+              { icon: Zap, title: 'Gratuito para sempre', desc: 'Acesso completo a câmbio, vagas e notícias sem pagar nada', color: 'text-green-500' },
+              { icon: Shield, title: '100% seguro', desc: 'Os teus dados protegidos com encriptação de nível bancário', color: 'text-blue-500' },
             ].map((item) => (
-              <div key={item.title} className="flex flex-col items-start p-5 rounded-[1.5rem] bg-slate-50 dark:bg-white/5 border border-orange-500/10 hover:border-brand-gold/30 transition-all group">
+              <div key={item.title} className="flex flex-col items-start p-5 rounded-[1.5rem] bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:border-brand-gold/30 transition-all group">
                 <div className={`w-12 h-12 rounded-2xl bg-brand-gold/10 flex items-center justify-center mb-4 ${item.color}`}>
                   <item.icon size={22} />
                 </div>
-                <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight mb-2">{item.title}</h3>
-                <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-relaxed">{item.desc}</p>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white tracking-tight mb-2">{item.title}</h3>
+                <p className="text-sm font-medium text-slate-500 dark:text-slate-400 leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -538,8 +538,8 @@ export const HomePage: React.FC = () => {
       {/* Funcionalidades */}
       <div>
         <div className="text-center mb-8">
-          <p className="text-[9px] font-black text-brand-gold uppercase tracking-[0.25em] mb-2">Tudo num só lugar</p>
-          <h2 className="text-fluid-h2 font-black text-slate-900 dark:text-white uppercase tracking-tight">
+          <p className="text-xs md:text-sm font-semibold text-brand-gold mb-2">Tudo num só lugar</p>
+          <h2 className="text-fluid-h2 font-black text-slate-900 dark:text-white tracking-tight">
             O que podes fazer <span className="text-brand-gold">agora</span>
           </h2>
         </div>
@@ -547,20 +547,18 @@ export const HomePage: React.FC = () => {
           {[
             {
               icon: DollarSign,
-              label: 'Câmbio em Tempo Real',
+              label: 'Câmbio em tempo real',
               desc: 'Acompanha a taxa formal e informal ao minuto. Compra ou vende divisas com segurança.',
               cta: 'Ver taxas agora',
               path: '/cambio',
-              badge: '🔴 AO VIVO',
               highlight: true,
             },
             {
               icon: Briefcase,
-              label: 'Vagas de Elite',
-              desc: 'As melhores ofertas de emprego em Angola, de Luanda a todas as províncias.',
+              label: 'Vagas de emprego',
+              desc: 'As melhores ofertas de trabalho em Angola, de Luanda a todas as províncias.',
               cta: 'Explorar vagas',
               path: '/vagas',
-              badge: '⚡ NOVO',
               highlight: false,
             },
             {
@@ -569,70 +567,59 @@ export const HomePage: React.FC = () => {
               desc: 'Cria um CV profissional em minutos com a ajuda da nossa inteligência artificial.',
               cta: 'Criar o meu CV',
               path: '/cv-criador',
-              badge: '✨ IA',
               highlight: false,
             },
             {
               icon: Newspaper,
-              label: 'Notícias Angola',
+              label: 'Notícias de Angola',
               desc: 'Fica a par do que acontece em Angola antes de toda a gente.',
               cta: 'Ler notícias',
               path: '/noticias',
-              badge: '📰 HOJE',
               highlight: false,
             },
             {
               icon: Tag,
-              label: 'Descontos Exclusivos',
+              label: 'Descontos exclusivos',
               desc: 'Promoções e ofertas das melhores marcas e lojas de Angola — por tempo limitado.',
               cta: 'Ver promoções',
               path: '/ofertas',
-              badge: '🛍️ LIMITADO',
               highlight: false,
             },
             {
               icon: Users,
-              label: 'Comunidade Elite',
-              desc: 'Faz parte da rede exclusiva de angolanos que lideram o mercado nacional.',
+              label: 'Cria a tua conta',
+              desc: 'Regista-te grátis e recebe notificações das oportunidades mais relevantes para ti.',
               cta: 'Criar conta grátis',
               path: '/perfil',
-              badge: '🏆 GRÁTIS',
               highlight: false,
             },
           ].map((feature) => (
             <div
               key={feature.path}
               onClick={() => navigate(feature.path)}
-              className={`group relative cursor-pointer rounded-[2rem] p-6 border transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl active:scale-95 ${
+              className={`group relative cursor-pointer rounded-[1.5rem] p-6 border transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg active:scale-95 ${
                 feature.highlight
-                  ? 'bg-slate-900 dark:bg-black border-brand-gold/30 shadow-xl shadow-amber-500/10'
-                  : 'bg-white dark:bg-slate-900 border-orange-500/10 hover:border-brand-gold/30 shadow-lg'
+                  ? 'bg-slate-900 dark:bg-black border-brand-gold/30 shadow-md'
+                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 hover:border-brand-gold/30 shadow-sm'
               }`}
             >
               <div className="flex items-start justify-between mb-4">
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
                   feature.highlight ? 'bg-brand-gold text-slate-950' : 'bg-brand-gold/10 text-brand-gold'
                 }`}>
                   <feature.icon size={22} />
                 </div>
-                <span className={`text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full border ${
-                  feature.highlight
-                    ? 'border-brand-gold/40 text-brand-gold bg-brand-gold/10'
-                    : 'border-orange-500/20 text-orange-400 bg-orange-500/5'
-                }`}>
-                  {feature.badge}
-                </span>
               </div>
-              <h3 className={`text-sm font-black uppercase tracking-tight mb-2 ${
+              <h3 className={`text-base font-bold tracking-tight mb-2 ${
                 feature.highlight ? 'text-white' : 'text-slate-900 dark:text-white'
               }`}>{feature.label}</h3>
-              <p className={`text-[11px] font-medium leading-relaxed mb-4 ${
+              <p className={`text-sm font-medium leading-relaxed mb-4 ${
                 feature.highlight ? 'text-slate-400' : 'text-slate-500 dark:text-slate-400'
               }`}>{feature.desc}</p>
-              <div className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest ${
-                feature.highlight ? 'text-brand-gold' : 'text-orange-500'
+              <div className={`flex items-center gap-2 text-sm font-semibold ${
+                feature.highlight ? 'text-brand-gold' : 'text-brand-gold'
               } group-hover:gap-3 transition-all`}>
-                {feature.cta} <ArrowRight size={12} />
+                {feature.cta} <ArrowRight size={14} />
               </div>
             </div>
           ))}
@@ -640,10 +627,10 @@ export const HomePage: React.FC = () => {
       </div>
 
       {/* Depoimentos */}
-      <div className="relative overflow-hidden rounded-[2rem] bg-slate-50 dark:bg-slate-900/60 border border-orange-500/10 p-6 md:p-12">
+      <div className="relative overflow-hidden rounded-[2rem] bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-white/10 p-6 md:p-12">
         <div className="text-center mb-8">
-          <p className="text-[9px] font-black text-brand-gold uppercase tracking-[0.25em] mb-2">Histórias Reais</p>
-          <h2 className="text-fluid-h2 font-black text-slate-900 dark:text-white uppercase tracking-tight">
+          <p className="text-xs md:text-sm font-semibold text-brand-gold mb-2">Histórias reais</p>
+          <h2 className="text-fluid-h2 font-black text-slate-900 dark:text-white tracking-tight">
             O que dizem os nossos <span className="text-brand-gold">utilizadores</span>
           </h2>
         </div>
@@ -654,49 +641,41 @@ export const HomePage: React.FC = () => {
               name: 'Carlos M.',
               city: 'Luanda',
               role: 'Engenheiro Civil',
-              stars: 5,
             },
             {
               quote: 'Poupei mais de 15 000 Kz por semana só por acompanhar a taxa informal pelo app.',
               name: 'Ana F.',
               city: 'Benguela',
               role: 'Empresária',
-              stars: 5,
             },
             {
               quote: 'O CV que criei aqui com a IA foi o que me fez passar na entrevista. Recomendo a todos.',
               name: 'Pedro S.',
               city: 'Huambo',
               role: 'Técnico de TI',
-              stars: 5,
             },
           ].map((t) => (
-            <div key={t.name} className="bg-white dark:bg-slate-800/80 rounded-[1.5rem] p-6 border border-orange-500/10 shadow-sm hover:shadow-md transition-all">
+            <div key={t.name} className="bg-white dark:bg-slate-800/80 rounded-[1.5rem] p-6 border border-slate-200 dark:border-white/10 shadow-sm hover:shadow-md transition-all">
               <Quote size={20} className="text-brand-gold mb-4 opacity-60" />
-              <p className="text-[12px] font-medium text-slate-700 dark:text-slate-300 leading-relaxed mb-5 italic">&ldquo;{t.quote}&rdquo;</p>
+              <p className="text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed mb-5">&ldquo;{t.quote}&rdquo;</p>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-wide">{t.name}</p>
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{t.role} · {t.city}</p>
-                </div>
-                <div className="flex gap-0.5">
-                  {Array.from({ length: t.stars }).map((_, i) => (
-                    <Star key={i} size={12} className="fill-brand-gold text-brand-gold" />
-                  ))}
+                  <p className="text-sm font-bold text-slate-900 dark:text-white">{t.name}</p>
+                  <p className="text-xs font-medium text-slate-400">{t.role} · {t.city}</p>
                 </div>
               </div>
             </div>
           ))}
         </div>
-        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 pt-8 border-t border-orange-500/10">
-          <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500 dark:text-slate-400">
-            <CheckCircle size={16} className="text-green-400" /> Acesso gratuito imediato
+        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 pt-8 border-t border-slate-200 dark:border-white/10">
+          <div className="flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400">
+            <CheckCircle size={16} className="text-green-500" /> Acesso gratuito imediato
           </div>
-          <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500 dark:text-slate-400">
-            <CheckCircle size={16} className="text-green-400" /> Sem cartão de crédito
+          <div className="flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400">
+            <CheckCircle size={16} className="text-green-500" /> Sem cartão de crédito
           </div>
-          <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500 dark:text-slate-400">
-            <CheckCircle size={16} className="text-green-400" /> Cancela quando quiseres
+          <div className="flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400">
+            <CheckCircle size={16} className="text-green-500" /> Cancela quando quiseres
           </div>
         </div>
       </div>
@@ -768,18 +747,18 @@ export const HomePage: React.FC = () => {
 
         <div className="relative z-10 p-6 md:p-24 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12 w-full text-center md:text-left stack-narrow">
           <div className="max-w-3xl">
-            <p className="text-brand-gold text-[8px] md:text-sm font-black uppercase tracking-[0.2em] mb-4 drop-shadow-md animate-pulse">
-              Anuncie e veja o seu negócio crescer
+            <p className="text-brand-gold text-sm md:text-base font-semibold mb-4">
+              Publicidade para o teu negócio
             </p>
             
-            <h2 className="text-fluid-h2 font-black text-white uppercase mb-6">
-              ALCANCE O <br/>
-              <span className="text-brand-gold">TOPO</span> DO MERCADO
+            <h2 className="text-fluid-h2 font-black text-white tracking-tight mb-6">
+              Leva a tua marca<br/>
+              <span className="text-brand-gold">mais longe</span>
             </h2>
             
-            <div className="block border-l-2 md:border-l-4 border-brand-gold pl-4 md:pl-6 py-2 mb-6 md:mb-0">
-              <p className="text-fluid-p text-slate-200 font-bold">
-                Alcance o topo do mercado angolano. Anuncie na rede exclusiva de empresários e investidores da Resolve.AO.
+            <div className="border-l-2 md:border-l-4 border-brand-gold pl-4 md:pl-6 py-2 mb-6 md:mb-0">
+              <p className="text-fluid-p text-slate-200 font-medium">
+                Coloca o teu negócio diante de milhares de angolanos todos os dias, em câmbio, vagas, notícias e promoções.
               </p>
             </div>
           </div>
@@ -787,10 +766,10 @@ export const HomePage: React.FC = () => {
           <div className="w-full md:w-auto">
             <button 
               onClick={(e) => { e.stopPropagation(); handleWhatsAppContact(); }}
-              className="w-full md:w-auto bg-brand-gold px-10 py-5 rounded-2xl font-black text-slate-950 uppercase tracking-[0.2em] text-[10px] md:text-sm transition-all active:scale-95 flex items-center justify-center gap-3 shadow-[0_15px_40px_rgba(245,158,11,0.3)] cursor-pointer"
+              className="w-full md:w-auto bg-brand-gold px-10 py-5 rounded-2xl font-bold text-slate-950 text-sm md:text-base transition-all active:scale-95 flex items-center justify-center gap-3 shadow-[0_15px_40px_rgba(245,158,11,0.3)] cursor-pointer"
             >
               <MessageCircle size={20} />
-              <span>ANUNCIAR AGORA</span>
+              <span>Anunciar agora</span>
             </button>
           </div>
         </div>
