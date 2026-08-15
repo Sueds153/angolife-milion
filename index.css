@@ -3,9 +3,52 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-brand-gold: #f59e0b;
-  --color-brand-dark: #0f172a;
-  --color-brand-light: #f8fafc;
+  /* Marca */
+  --color-brand-gold: #a16207;
+  --color-brand-dark: #1d1915;
+  --color-brand-light: #f6f3ec;
+
+  /* Neutros quentes — "papel & tinta" */
+  --color-white: #fdfcfa;
+  --color-black: #0f0c08;
+  --color-slate-50: #f8f6f1;
+  --color-slate-100: #f1eee5;
+  --color-slate-200: #e6e1d4;
+  --color-slate-300: #d3ccbb;
+  --color-slate-400: #aba28f;
+  --color-slate-500: #84796a;
+  --color-slate-600: #5f5549;
+  --color-slate-700: #463e35;
+  --color-slate-800: #2d2822;
+  --color-slate-900: #1d1915;
+  --color-slate-950: #110e0b;
+
+  /* Ouro-bronze — substitui o laranja padrão */
+  --color-orange-50: #fbf4e2;
+  --color-orange-100: #f6e9c4;
+  --color-orange-200: #edd58f;
+  --color-orange-300: #e2bc57;
+  --color-orange-400: #c8952f;
+  --color-orange-500: #a16207;
+  --color-orange-600: #855000;
+  --color-orange-700: #653c00;
+  --color-orange-800: #4a2d00;
+  --color-orange-900: #382100;
+
+  --color-amber-50: #fbf4e2;
+  --color-amber-100: #f6e9c4;
+  --color-amber-200: #edd58f;
+  --color-amber-300: #e2bc57;
+  --color-amber-400: #c8952f;
+  --color-amber-500: #a16207;
+  --color-amber-600: #855000;
+  --color-amber-700: #653c00;
+  --color-amber-800: #4a2d00;
+  --color-amber-900: #382100;
+
+  /* Tipografia */
+  --font-sans: 'Figtree', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
 
   --breakpoint-xs: 420px;
   --breakpoint-sm: 640px;
@@ -15,8 +58,6 @@
 
   --animate-fade-in: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   --animate-slide-up: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  --animate-float: float 25s ease-in-out infinite;
-  --animate-drift: drift 20s linear infinite;
 
   @keyframes fadeIn {
     0% {
@@ -34,31 +75,6 @@
     100% {
       transform: translateY(0);
       opacity: 1;
-    }
-  }
-  @keyframes float {
-    0%,
-    100% {
-      transform: translate(0, 0);
-    }
-    50% {
-      transform: translate(1%, 2%);
-    }
-  }
-  @keyframes drift {
-    0% {
-      transform: translateY(0) rotate(0deg);
-      opacity: 0;
-    }
-    20% {
-      opacity: 0.3;
-    }
-    80% {
-      opacity: 0.3;
-    }
-    100% {
-      transform: translateY(-100vh) rotate(180deg);
-      opacity: 0;
     }
   }
 }
@@ -85,7 +101,7 @@
 }
 
 :root {
-  --brand-gold: #f59e0b;
+  --brand-gold: #a16207;
   --sab: env(safe-area-inset-bottom);
   --sat: env(safe-area-inset-top);
 }
@@ -128,9 +144,9 @@ body {
   transition: width 0.7s ease-out;
 }
 
-/* Gold border for elite components */
+/* Hairline border neutra (antes "gold border") */
 .gold-border-subtle {
-  border: 1px solid rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(30, 24, 15, 0.12);
 }
 
 /* --- PWA & Mobile Optimization --- */
@@ -306,72 +322,15 @@ button {
   width: var(--progress-width);
 }
 
-/* ── World-Class Aesthetic Enhancements ── */
-
-/* Ambient Glow Effects for Hero & Card Containers */
-.glow-ambient-gold {
-  position: absolute;
-  width: 320px;
-  height: 320px;
-  background: radial-gradient(circle, rgba(245, 158, 11, 0.14) 0%, rgba(245, 158, 11, 0) 70%);
-  filter: blur(50px);
-  pointer-events: none;
-  border-radius: 50%;
-  z-index: 0;
-}
-
-.glow-ambient-emerald {
-  position: absolute;
-  width: 280px;
-  height: 280px;
-  background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(16, 185, 129, 0) 70%);
-  filter: blur(50px);
-  pointer-events: none;
-  border-radius: 50%;
-  z-index: 0;
-}
-
-/* Shimmer Skeleton Loader */
-@keyframes shimmerPulse {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-.skeleton-shimmer {
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.03) 25%,
-    rgba(245, 158, 11, 0.1) 37%,
-    rgba(255, 255, 255, 0.03) 63%
-  );
-  background-size: 200% 100%;
-  animation: shimmerPulse 1.8s ease-in-out infinite;
-}
-
-/* Subtle card hover elevation */
-.card-glow-hover {
-  transition: all 0.3s ease;
-}
-
-.card-glow-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 32px -16px rgba(15, 23, 42, 0.15);
-  border-color: rgba(245, 158, 11, 0.3);
-}
-
-/* Typography: tone down the all-caps micro-labels that read as templated */
+/* Eyebrow — micro-labels com carácter editorial */
 .text-eyebrow {
   font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
-/* Balanced card radius used across the app */
+/* Raio de cartão usado de forma consistente */
 .card-radius {
   border-radius: 1.25rem;
 }

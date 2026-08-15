@@ -692,7 +692,7 @@ export const ProfilePage: React.FC = () => {
         
         <div className="relative z-10 flex flex-col md:flex-row items-center gap-10">
           <div className="w-32 h-32 flex-shrink-0 bg-brand-gold/10 rounded-full flex items-center justify-center border border-brand-gold/20 shadow-[0_0_50px_rgba(212,175,55,0.1)]">
-            <Award size={64} className="text-brand-gold animate-bounce-slow" />
+            <Award size={64} className="text-brand-gold" />
           </div>
           
           <div className="flex-1 text-center md:text-left space-y-4">

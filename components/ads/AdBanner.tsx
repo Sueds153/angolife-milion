@@ -283,10 +283,8 @@ export const AdBanner: React.FC<AdBannerProps> = ({ format, customLocation = 'al
            <div className="bg-orange-500 hover:bg-orange-600 text-white px-3.5 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-md">
              Saber Mais
            </div>
-         )}
+          )}
       </div>
-      
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-orange-500/5 to-transparent -translate-x-full animate-[drift_12s_linear_infinite] pointer-events-none" />
     </div>
   );
 };
