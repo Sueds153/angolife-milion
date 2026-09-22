@@ -109,9 +109,38 @@ export const StorageService = {
   uploadReceipt: async (file: File): Promise<string | null> => {
     const fileName = `${Math.random()}.${file.name.split(".").pop()}`;
     const filePath = `receipts/${fileName}`;
-    const { error } = await supabase.storage.from("payment-receipts").upload(filePath, file);
-    if (error) return null;
-    return supabase.storage.from("payment-receipts").getPublicUrl(filePath).data.publicUrl;
+    const { data, error } = await supabase.storage
+      .from("payment-receipts")
+      .upload(filePath, file);
+
+    if (!error && data) {
+      return supabase.storage.from("payment-receipts").getPublicUrl(data.path).data.publicUrl;
+    }
+
+    console.warn('[StorageService] payment-receipts bucket upload failed, using fallback:', error?.message);
+
+    // Fallback: comprimir imagem para base64 se o bucket falhar
+    const isImage = file.type.startsWith('image/');
+    if (isImage) {
+      return await compressImageToDataUrl(file);
+    }
+
+    // PDFs: tentar outros buckets
+    const bucketsToTry = ['exchange-proofs', 'avatars'];
+    for (const bucketName of bucketsToTry) {
+      try {
+        const { data: d, error: e } = await supabase.storage
+          .from(bucketName)
+          .upload(`receipts/${fileName}`, file, { upsert: true });
+        if (!e && d) {
+          return supabase.storage.from(bucketName).getPublicUrl(d.path).data.publicUrl;
+        }
+      } catch {
+        // continua para o próximo bucket
+      }
+    }
+
+    return null;
   },
 
   uploadAvatar: async (file: File): Promise<string | null> => {

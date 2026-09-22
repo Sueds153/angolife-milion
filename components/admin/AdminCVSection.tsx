@@ -10,6 +10,9 @@ interface CVSubscription {
   email: string;
   status: string;
   created_at: string;
+  type?: string | null;           // 'pack3', 'monthly', 'yearly'
+  receipt_url?: string | null;    // URL ou base64 do comprovativo
+  // Compatibilidade com dados antigos (antes da migração)
   plano_escolhido?: string | null;
   url_comprovativo?: string | null;
 }
@@ -82,15 +85,15 @@ export const AdminCVSection: React.FC<AdminCVSectionProps> = ({
                 <div className="flex items-center gap-2 text-xs text-slate-400 italic">
                   <Clock size={14} /> Solicitado em {new Date(sub.created_at).toLocaleDateString('pt-AO')}
                 </div>
-                {sub.plano_escolhido && (
+                {(sub.type || sub.plano_escolhido) && (
                   <div className="flex items-center gap-2 text-xs text-slate-500">
-                    <Crown size={14} className="text-amber-500" /> Plano: {sub.plano_escolhido}
+                    <Crown size={14} className="text-amber-500" /> Plano: {sub.type || sub.plano_escolhido}
                   </div>
                 )}
-                {sub.url_comprovativo && (
+                {(sub.receipt_url || sub.url_comprovativo) && (
                   <div className="flex items-center gap-2 text-xs">
                     <FileText size={14} className="text-blue-500" />
-                    <a href={sub.url_comprovativo} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline text-[10px] font-bold">
+                    <a href={sub.receipt_url || sub.url_comprovativo!} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline text-[10px] font-bold">
                       Ver Comprovativo
                     </a>
                   </div>

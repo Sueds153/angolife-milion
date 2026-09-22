@@ -10,8 +10,8 @@ export interface CVSubscriptionRow {
   user_id: string;
   status: string;
   created_at?: string;
-  url_comprovativo?: string | null;
-  plano_escolhido?: string | null;
+  receipt_url?: string | null;        // coluna real na DB
+  type?: string | null;               // coluna real na DB ('pack3', 'monthly', 'yearly')
   profiles?: { email?: string; full_name?: string } | null;
 }
 
@@ -21,14 +21,18 @@ export const SubscriptionService = {
     planId: string,
     receiptUrl: string,
   ): Promise<boolean> => {
+    // Usar nomes exactos das colunas do schema (type, receipt_url)
     const { error } = await supabase.from("subscriptions_pending").insert([
       {
         user_id: userId,
-        plano_escolhido: planId,
-        url_comprovativo: receiptUrl,
-        status: "aguardando",
+        type: planId,
+        receipt_url: receiptUrl,
+        status: "pending",
       },
     ]);
+    if (error) {
+      console.error('[SubscriptionService] submitCVSubscription error:', error);
+    }
     return !error;
   },
 
@@ -38,7 +42,10 @@ export const SubscriptionService = {
       .select("*, profiles(email, full_name)")
       .order("created_at", { ascending: false });
 
-    if (error) return [];
+    if (error) {
+      console.error('[SubscriptionService] getCVSubscriptions error:', error);
+      return [];
+    }
     return data.map((sub: CVSubscriptionRow): CVSubscriptionRow => ({
       ...sub,
       status: ServiceUtils.mapStatus(sub.status)

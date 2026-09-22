@@ -241,13 +241,17 @@ export const CVBuilderPage: React.FC = () => {
 
     setIsUploadingReceipt(true);
     try {
-      // 1. Upload receipt to storage
+      // 1. Upload receipt to storage (com fallback automático para base64 se o bucket falhar)
       const publicUrl = await StorageService.uploadReceipt(receiptFile);
-      console.log('[Payment] Upload URL:', publicUrl);
+      console.log('[Payment] Upload URL:', publicUrl ? publicUrl.substring(0, 80) + '...' : 'null');
 
-      if (!publicUrl) throw new Error('Erro no upload do ficheiro');
+      if (!publicUrl) {
+        // Só PDFs sem bucket disponível chegam aqui — pedir ao utilizador para usar uma imagem
+        alert('Não foi possível carregar o ficheiro PDF. Por favor, envie o comprovativo como imagem (JPG ou PNG) e tente novamente.');
+        return;
+      }
 
-      // 2. Create subscription record
+      // 2. Registar subscrição na base de dados
       const success = await SubscriptionService.submitCVSubscription(
         user.id,
         selectedPlan,
@@ -259,7 +263,7 @@ export const CVBuilderPage: React.FC = () => {
         setPaymentStep('pending');
         alert('Comprovativo enviado com sucesso! Aguarde a aprovação do Admin.');
       } else {
-        throw new Error('Erro ao registar subscrição');
+        throw new Error('Erro ao registar subscrição na base de dados. Verifica a tua ligação e tenta novamente.');
       }
     } catch (error) {
       console.error('[Payment] Error:', error);
