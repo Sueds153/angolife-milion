@@ -47,7 +47,7 @@ export const AuthService = {
 
   resetPassword: async (email: string) => {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/perfil`,
+      redirectTo: `https://resolveao.vercel.app/perfil`,
     });
     return { error };
   },
