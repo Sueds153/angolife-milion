@@ -59,6 +59,44 @@ log = logging.getLogger("AngoNewsScraper")
 
 RESOLVEAO_PLACEHOLDER = "https://resolveao.vercel.app/og-image.jpg"
 
+
+def is_junk_title(title: str) -> bool:
+    """Títulos de navegação/marca que não são manchetes de artigo."""
+    t = (title or "").strip()
+    if len(t) < 5:
+        return True
+    s = t.lower()
+    if re.search(
+        r"(página inicial|pagina inicial|não encontrado|nao encontrado|"
+        r"error 404|top news|últimas notícias|ultimas noticias)",
+        s,
+    ):
+        return True
+    if s in {
+        "home", "início", "inicio", "notícias", "noticias",
+        "últimas", "ultimas", "404",
+        "política", "politica", "economia", "sociedade", "cultura",
+        "desporto", "mundo", "áfrica", "africa", "institucional",
+        "saúde", "saude", "educação", "educacao", "turismo",
+        "transportes", "transporte", "agricultura",
+    }:
+        return True
+    return False
+
+
+def is_junk_url(url: str) -> bool:
+    """Links de navegação/secção que não são artigos (ex.: ANGOP ?vtab=…)."""
+    u = (url or "").strip().lower()
+    if not u:
+        return True
+    if "vtab=" in u:
+        return True
+    path = u.split("?", 1)[0].rstrip("/")
+    if re.search(r"/(noticias|noticia|news|articles|artigos)$", path):
+        return True
+    return False
+
+
 # ─────────────────────────────────────────────────────────────────────────
 # INTELIGÊNCIA: Palavras-chave para categorização e prioridade
 # ─────────────────────────────────────────────────────────────────────────
@@ -300,7 +338,20 @@ class AngoNewsScraper:
         # Nível 1: og:image
         og = soup.find("meta", property="og:image")
         if og and og.get("content"):
-            return og["content"]
+            img = og["content"].strip()
+            # Alguns sites angolanos emitem "https:/dominio" (barra em falta)
+            img = re.sub(r"^https:/([^/])", r"https://\1", img)
+            if img.startswith("http"):
+                return img
+            if img.startswith("//"):
+                return "https:" + img
+
+        # Nível 1b: twitter:image
+        tw = soup.find("meta", attrs={"name": "twitter:image"})
+        if tw and tw.get("content"):
+            timg = re.sub(r"^https:/([^/])", r"https://\1", tw["content"].strip())
+            if timg.startswith("http"):
+                return timg
 
         # Nível 2: Primeira imagem no conteúdo principal
         content_area = None
@@ -318,6 +369,82 @@ class AngoNewsScraper:
 
         # Nível 3: Placeholder Resolve.AO (Tratamento de Nulos)
         return RESOLVEAO_PLACEHOLDER
+
+    # ── Extração de Data (meta-tags, sem LLM) ─────────────────────────────
+    @staticmethod
+    def extract_date(soup: BeautifulSoup) -> Optional[str]:
+        """Devolve data de publicação em ISO-8601 (UTC) ou None. Sem LLM."""
+        candidates = []
+
+        for prop in ("article:published_time", "og:article:published_time", "article:published"):
+            tag = soup.find("meta", property=prop)
+            if tag and tag.get("content"):
+                candidates.append(tag["content"].strip())
+
+        for name in ("date", "pubdate", "publishdate", "DC.date", "dcterms.created"):
+            tag = soup.find("meta", attrs={"name": name})
+            if tag and tag.get("content"):
+                candidates.append(tag["content"].strip())
+
+        time_tag = soup.find("time", datetime=True)
+        if time_tag and time_tag.get("datetime"):
+            candidates.append(time_tag["datetime"].strip())
+
+        # JSON-LD (schema.org NewsArticle)
+        for script in soup.find_all("script", type="application/ld+json"):
+            if not script.string:
+                continue
+            try:
+                data = json.loads(script.string)
+            except (json.JSONDecodeError, TypeError):
+                continue
+            items = data if isinstance(data, list) else [data]
+            for item in items:
+                if not isinstance(item, dict):
+                    continue
+                for key in ("datePublished", "dateCreated", "uploadDate"):
+                    val = item.get(key)
+                    if val:
+                        candidates.append(str(val).strip())
+
+        for raw in candidates:
+            iso = AngoNewsScraper._to_iso(raw)
+            if iso:
+                return iso
+        return None
+
+    @staticmethod
+    def _to_iso(raw: str) -> Optional[str]:
+        """Normaliza timestamps Unix / strings comuns para ISO-8601."""
+        if not raw:
+            return None
+        # Unix epoch (s ou ms)
+        if re.fullmatch(r"\d{10,13}", raw):
+            try:
+                ts = int(raw)
+                if ts > 10**12:
+                    ts //= 1000
+                return datetime.fromtimestamp(ts, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+            except (OverflowError, OSError, ValueError):
+                return None
+        # Já ISO-like (2026-09-22T…, 2026-09-22 10:54, com ou sem timezone)
+        m = re.match(
+            r"^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2}(?::\d{2})?)(?:\.\d+)?\s*(Z|[+-]\d{2}:?\d{2})?$",
+            raw,
+        )
+        if m:
+            date_p, time_p, tz_p = m.group(1), m.group(2), m.group(3)
+            if len(time_p) == 5:
+                time_p += ":00"
+            if not tz_p or tz_p.upper() == "Z":
+                return f"{date_p}T{time_p}Z"
+            if ":" not in tz_p:
+                tz_p = tz_p[:3] + ":" + tz_p[3:]
+            return f"{date_p}T{time_p}{tz_p}"
+        # Só data: 2026-09-22
+        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", raw):
+            return f"{raw}T00:00:00Z"
+        return None
 
     # ── Classificação Inteligente ─────────────────────────────────────────
     def classify(self, title: str, fixed_category: str) -> tuple:
@@ -361,6 +488,52 @@ class AngoNewsScraper:
         except Exception:
             return False
 
+    # ── Fallback ScrapeGraphAI (USE_SGAI=auto) ────────────────────────────
+    @staticmethod
+    def sgai_enabled() -> bool:
+        """USE_SGAI=auto|on + GEMINI_API_KEY + scrapegraphai → permite fallback LLM."""
+        mode = os.getenv("USE_SGAI", "auto").strip().lower()
+        if mode in ("off", "0", "false", "no"):
+            return False
+        if mode not in ("auto", "on", "1", "true"):
+            return False
+        if not os.getenv("GEMINI_API_KEY", "").strip():
+            return False
+        # sgai_news_scraper faz sys.exit se scrapegraphai faltar — verifica antes
+        import importlib.util
+
+        return importlib.util.find_spec("scrapegraphai") is not None
+
+    @staticmethod
+    def _sgai_graph_cfg():
+        from sgai_news_scraper import build_graph_config
+
+        model = os.getenv("SGAI_GEMINI_MODEL", "google_genai/gemini-3.6-flash")
+        return build_graph_config(model, os.getenv("GEMINI_API_KEY", "").strip())
+
+    def _sgai_listing(self, site_name: str, cfg: dict) -> List[Dict[str, str]]:
+        from sgai_news_scraper import sgai_listing
+
+        return sgai_listing(site_name, cfg, self._sgai_graph_cfg())
+
+    def _sgai_detail(self, site_name: str, article_url: str) -> Dict[str, str]:
+        from sgai_news_scraper import sgai_detail
+
+        return sgai_detail(site_name, article_url, self._sgai_graph_cfg())
+
+    # ── Helper: corpo de texto simples → HTML de parágrafos ────────────────
+    @staticmethod
+    def corpo_to_html(text: str) -> str:
+        """Converte texto simples (parágrafos separados por linha em branco) em <p>."""
+        paragraphs = [
+            p.strip()
+            for p in re.split(r"\n{2,}|\r\n{2,}", text or "")
+            if p.strip()
+        ]
+        if not paragraphs:
+            paragraphs = [text.strip()] if text and text.strip() else []
+        return "".join(f"<p>{p}</p>" for p in paragraphs)
+
     # ── Scraper por Adaptador ─────────────────────────────────────────────
     def scrape_site(self, site_name: str, cfg: dict):
         """
@@ -384,19 +557,58 @@ class AngoNewsScraper:
             resp.raise_for_status()
             soup = BeautifulSoup(resp.text, "html.parser")
 
-            articles = soup.select(cfg["article_selector"])[:12]  # Máx 12 por ciclo
+            candidates = soup.select(cfg["article_selector"])
+            articles: List = []
+            for art in candidates:
+                # Pré-filtro de navegação para o slice [:12] não ser só lixo
+                if cfg["link_selector"] == ".":
+                    raw = art.get("href", "")
+                else:
+                    lt = art.select_one(cfg["link_selector"])
+                    raw = lt.get("href", "") if lt else ""
+                if not raw and art.name == "a":
+                    raw = art.get("href", "")
+                art_url = self.normalize_url(raw, cfg["base_url"])
+                if not art_url or art_url == cfg["base_url"] or is_junk_url(art_url):
+                    continue
+                articles.append(art)
+                if len(articles) >= 12:
+                    break
+
+            listing_items: List[Dict[str, str]] = []
             if not articles:
-                log.warning(f"  ⚠️  Nenhum artigo encontrado. Seletor: '{cfg['article_selector']}'.")
-                # Depuração: Mostrar pedaço do HTML se não encontrar nada
-                snippet = soup.prettify()[:1000].replace("\n", " ")
-                log.debug(f"  Snippet do HTML ({site_name}): {snippet}")
-                self.stats["errors"] += 1
+                # Fallback híbrido: BS4 vazia → listagem via LLM
+                if self.sgai_enabled():
+                    log.info("  🤖 Listagem BS4 vazia → fallback ScrapeGraphAI…")
+                    try:
+                        listing_items = self._sgai_listing(site_name, cfg)
+                        log.info(f"  📋 SGAI devolveu {len(listing_items)} artigos.")
+                    except Exception as sgai_err:
+                        log.warning(f"  ⚠️  Fallback SGAI (listagem) falhou: {sgai_err}")
+                        listing_items = []
+                if not listing_items:
+                    log.warning(f"  ⚠️  Nenhum artigo encontrado. Seletor: '{cfg['article_selector']}'.")
+                    # Depuração: Mostrar pedaço do HTML se não encontrar nada
+                    snippet = soup.prettify()[:1000].replace("\n", " ")
+                    log.debug(f"  Snippet do HTML ({site_name}): {snippet}")
+                    self.stats["errors"] += 1
+                    return
+                log.info(f"  📋 {len(listing_items)} artigos encontrados (LLM). Processando...")
+                for item in listing_items:
+                    self._process_article(
+                        site_name,
+                        cfg,
+                        item["url"],
+                        title_hint=item.get("titulo", ""),
+                        verify=verify,
+                        headers=headers,
+                    )
+                time.sleep(3)
                 return
 
             log.info(f"  📋 {len(articles)} artigos encontrados. Processando...")
 
             for art in articles:
-                self.stats["processed"] += 1
                 try:
                     # ── Extração do Link ──────────────────────────────────
                     if cfg["link_selector"] == ".":
@@ -404,7 +616,7 @@ class AngoNewsScraper:
                     else:
                         link_tag = art.select_one(cfg["link_selector"])
                         raw_url = link_tag.get("href", "") if link_tag else ""
-                    
+
                     if not raw_url and art.name == "a":
                         raw_url = art.get("href", "")
 
@@ -413,10 +625,8 @@ class AngoNewsScraper:
                     if not article_url or article_url == cfg["base_url"]:
                         continue
 
-                    # ── Deduplicação ──────────────────────────────────────
-                    if self.is_duplicate(article_url):
-                        log.info(f"  ⏭️  Já existe: {article_url[:70]}")
-                        self.stats["skipped_dup"] += 1
+                    if is_junk_url(article_url):
+                        log.debug(f"      ⏭️  URL de navegação em {site_name}: {article_url[:80]}")
                         continue
 
                     # ── Extração do Título (do card de lista) ─────────────
@@ -436,55 +646,18 @@ class AngoNewsScraper:
                     # Limpeza de título
                     title = re.sub(r'\s+', ' ', title).strip()
 
-                    log.info(f"  ✨ Capturando: {title[:65]}...")
+                    if is_junk_title(title):
+                        log.debug(f"      ⏭️  Título de navegação em {site_name}: {title!r}")
+                        continue
 
-                    # ── Busca Detalhe do Artigo ────────────────────────────
-                    detail_resp = self.session.get(article_url, timeout=15)
-                    detail_resp.raise_for_status()
-                    detail_soup = BeautifulSoup(detail_resp.text, "html.parser")
-
-                    # Título mais preciso vindo da página de detalhe
-                    detail_title_tag = detail_soup.select_one("h1, .entry-title, .article-title")
-                    final_title = detail_title_tag.get_text(strip=True) if detail_title_tag else title
-                    if not final_title or len(final_title) < 5:
-                        final_title = title
-
-                    # ── Extração de Imagem (3 níveis) ────────────────────
-                    image_url = self.extract_image(detail_soup, cfg["base_url"])
-
-                    # ── Extração do Corpo ─────────────────────────────────
-                    body_area = detail_soup.select_one(
-                        "article, .entry-content, .post-content, .content-body, "
-                        ".article-content, .td-post-content, main"
+                    self._process_article(
+                        site_name,
+                        cfg,
+                        article_url,
+                        title_hint=title,
+                        verify=verify,
+                        headers=headers,
                     )
-                    body_html = self.sanitize_html(body_area) if body_area else ""
-                    body_text = body_area.get_text(separator=" ") if body_area else detail_soup.get_text()
-                    summary = self.get_summary(body_text)
-
-                    # ── Classificação e Prioridade ────────────────────────
-                    categoria, is_priority = self.classify(final_title, cfg.get("fixed_category", "Geral"))
-
-                    # ── Payload para Supabase (Check de Nulos e Colunas) ─────
-                    payload = {
-                        "titulo": final_title[:500],
-                        "resumo": (summary or "")[:1000],
-                        "corpo": (body_html or "")[:50000],
-                        "imagem_url": image_url or RESOLVEAO_PLACEHOLDER,
-                        "categoria": categoria or "Geral",
-                        "fonte": site_name,
-                        "url_origem": article_url,
-                        "is_priority": bool(is_priority),
-                        "status": "pendente",
-                    }
-
-                    success = self.db.insert("news_articles", payload)
-                    if success:
-                        label = "🔴 URGENTE" if is_priority else "✅"
-                        log.info(f"    {label} Guardada | Cat: {categoria} | Prio: {is_priority}")
-                        self.stats["saved"] += 1
-                    else:
-                        self.stats["errors"] += 1
-
                     time.sleep(1.5)  # Respeito ao servidor entre artigos
 
                 except Exception as art_err:
@@ -499,17 +672,136 @@ class AngoNewsScraper:
             log.error(f"   → Saltando para o próximo site...")
             self.stats["errors"] += 1
 
+    # ── Processamento de um artigo (completo: detalhe + payload + insert) ─
+    def _process_article(
+        self,
+        site_name: str,
+        cfg: dict,
+        article_url: str,
+        title_hint: str = "",
+        verify: bool = True,
+        headers: Optional[Dict[str, str]] = None,
+    ) -> None:
+        if not article_url or is_junk_url(article_url):
+            return
+
+        if self.is_duplicate(article_url):
+            log.info(f"  ⏭️  Já existe: {article_url[:70]}")
+            self.stats["skipped_dup"] += 1
+            return
+
+        title = title_hint
+        if not title or len(title) < 5:
+            log.debug(f"      ⏭️  Título muito curto ou vazio em {site_name}")
+            return
+
+        log.info(f"  ✨ Capturando: {title[:65]}...")
+
+        # ── Busca Detalhe do Artigo ───────────────────────────────────
+        detail_resp = self.session.get(
+            article_url, timeout=15, verify=verify, headers=headers
+        )
+        detail_resp.raise_for_status()
+        detail_soup = BeautifulSoup(detail_resp.text, "html.parser")
+
+        # Título: prefere h1 do detalhe se não for lixo de navegação/marca
+        detail_title_tag = detail_soup.select_one("h1, .entry-title, .article-title")
+        detail_title = detail_title_tag.get_text(strip=True) if detail_title_tag else ""
+        if detail_title and not is_junk_title(detail_title):
+            final_title = detail_title
+        elif title and not is_junk_title(title):
+            final_title = title
+        else:
+            final_title = detail_title or title
+        if not final_title or len(final_title) < 5 or is_junk_title(final_title):
+            log.debug(f"      ⏭️  Título inválido em {site_name}: {final_title!r}")
+            return
+
+        # ── Extração de Imagem (3 níveis + reparo de URL) ─────────────
+        image_url = self.extract_image(detail_soup, cfg["base_url"])
+
+        # ── Extração de Data (meta-tags, sem LLM) ─────────────────────
+        published_at = self.extract_date(detail_soup)
+
+        # ── Extração do Corpo ─────────────────────────────────────────
+        body_area = detail_soup.select_one(
+            "article, .entry-content, .post-content, .content-body, "
+            ".article-content, .td-post-content, main"
+        )
+        body_html = self.sanitize_html(body_area) if body_area else ""
+        body_text = body_area.get_text(separator=" ") if body_area else detail_soup.get_text()
+
+        # Fallback híbrido: corpo vazio/curto → LLM
+        if self.sgai_enabled() and len((body_text or "").strip()) < 200:
+            log.info("    🤖 Corpo BS4 fraco → fallback ScrapeGraphAI…")
+            try:
+                detail = self._sgai_detail(site_name, article_url)
+                sgai_corpo = (detail.get("corpo") or "").strip()
+                if len(sgai_corpo) >= 200:
+                    body_html = self.corpo_to_html(sgai_corpo)
+                    body_text = sgai_corpo
+                    if not published_at:
+                        published_at = self._to_iso(detail.get("data_publicacao") or "")
+                    if image_url == RESOLVEAO_PLACEHOLDER and detail.get("imagem_url"):
+                        img = detail["imagem_url"].strip()
+                        img = re.sub(r"^https:/([^/])", r"https://\1", img)
+                        if img.startswith("http"):
+                            image_url = img
+            except Exception as sgai_err:
+                log.warning(f"    ⚠️  Fallback SGAI (detalhe) falhou: {sgai_err}")
+
+        summary = self.get_summary(body_text)
+
+        # ── Classificação e Prioridade ────────────────────────────────
+        categoria, is_priority = self.classify(final_title, cfg.get("fixed_category", "Geral"))
+
+        # ── Payload para Supabase (Check de Nulos e Colunas) ─────
+        payload = {
+            "titulo": final_title[:500],
+            "resumo": (summary or "")[:1000],
+            "corpo": (body_html or "")[:50000],
+            "imagem_url": image_url or RESOLVEAO_PLACEHOLDER,
+            "categoria": categoria or "Geral",
+            "fonte": site_name,
+            "url_origem": article_url,
+            "is_priority": bool(is_priority),
+            "status": "pendente",
+        }
+        if published_at:
+            payload["published_at"] = published_at
+
+        success = self.db.insert("news_articles", payload)
+        if success:
+            label = "🔴 URGENTE" if is_priority else "✅"
+            log.info(f"    {label} Guardada | Cat: {categoria} | Prio: {is_priority}")
+            self.stats["saved"] += 1
+        else:
+            self.stats["errors"] += 1
+
+        self.stats["processed"] += 1
+
     # ── Loop Principal ────────────────────────────────────────────────────
-    def run(self):
+    def run(self, site_filter: Optional[List[str]] = None):
         """Itera por todos os sites de forma independente."""
         start_time = datetime.now(timezone.utc)
+        sites = dict(SITES_CONFIG)
+        if site_filter:
+            wanted = {s.strip().lower() for s in site_filter}
+            sites = {
+                k: v
+                for k, v in sites.items()
+                if k.strip().lower() in wanted
+                or v.get("base_url", "").lower().replace("https://", "").replace("http://", "").split("/")[0]
+                in wanted
+            }
         log.info(f"\n{'█' * 60}")
         log.info(f"  AngoNewsScraper v2 — INICIANDO VARREDURA")
-        log.info(f"  {len(SITES_CONFIG)} fontes configuradas")
+        log.info(f"  {len(sites)} fontes configuradas | USE_SGAI={os.getenv('USE_SGAI', 'auto')} "
+                 f"({'ativo' if self.sgai_enabled() else 'inativo'})")
         log.info(f"  {start_time.strftime('%Y-%m-%d %H:%M:%S UTC')}")
         log.info(f"{'█' * 60}\n")
 
-        for site_name, cfg in SITES_CONFIG.items():
+        for site_name, cfg in sites.items():
             self.scrape_site(site_name, cfg)
 
         elapsed = (datetime.now(timezone.utc) - start_time).seconds
@@ -526,6 +818,8 @@ class AngoNewsScraper:
 # PONTO DE ENTRADA
 # ─────────────────────────────────────────────
 if __name__ == "__main__":
+    import argparse
+
     load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", ".env.local"))
     SUPABASE_URL = os.getenv("VITE_SUPABASE_URL")
     SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("VITE_SUPABASE_ANON_KEY")
@@ -534,6 +828,24 @@ if __name__ == "__main__":
         log.error("❌ Credenciais Supabase em falta. Defina VITE_SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY no .env.local")
         exit(1)
 
+    parser = argparse.ArgumentParser(description="AngoNewsScraper v2 (BS4 + fallback SGAI)")
+    parser.add_argument(
+        "--site",
+        action="append",
+        default=[],
+        help="Restringe a um site (ex.: --site ANGOP). Repetível.",
+    )
+    parser.add_argument(
+        "--sgai",
+        choices=["auto", "off"],
+        default=None,
+        help="Sobrescreve USE_SGAI para esta execução.",
+    )
+    args = parser.parse_args()
+
+    if args.sgai is not None:
+        os.environ["USE_SGAI"] = args.sgai
+
     db_client = SupabaseRestClient(SUPABASE_URL, SUPABASE_KEY)
     scraper = AngoNewsScraper(db_client)
-    scraper.run()
+    scraper.run(site_filter=args.site or None)
