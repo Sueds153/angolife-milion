@@ -16,6 +16,7 @@ import { Helmet } from 'react-helmet-async';
 import { ErrorBoundary } from '../components/ui/ErrorBoundary';
 import { SitePreviewModal } from '../components/modals/SitePreviewModal';
 import { Reveal } from '../components/ui/Reveal';
+import { openExternal } from '../services/core/openExternal';
 
 interface HomeBanner {
   mediaType?: string;
@@ -171,7 +172,7 @@ export const HomePage: React.FC = () => {
   const handleWhatsAppContact = () => {
     const phone = systemSettings?.contact_info.whatsapp || APP_CONFIG.WHATSAPP_NUMBER; 
     const message = "Olá! Gostaria de saber mais sobre as opções de publicidade premium no Resolve.AO para o meu negócio.";
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+    openExternal(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`);
   };
 
   const usdRate = rates.find(r => r.currency === 'USD');

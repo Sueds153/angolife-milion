@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { RefreshCw, Copy, ChevronDown, Sparkles, MessageCircle, CheckCircle, Upload } from 'lucide-react';
 import { APP_CONFIG } from '../../constants/app';
+import { openExternal } from '../../services/core/openExternal';
 
 interface ExchangeStepPaymentProps {
   tradeAction: 'buy' | 'sell';
@@ -179,7 +180,7 @@ export const ExchangeStepPayment: React.FC<ExchangeStepPaymentProps> = ({
             type="button"
             onClick={() => {
               const msg = `Olá Resolve.AO! Estou no meio de uma operação de ${tradeAction === 'buy' ? 'Compra' : 'Venda'} e tive um problema. Podem ajudar?`;
-              window.open(`https://wa.me/${APP_CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+              openExternal(`https://wa.me/${APP_CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`);
             }}
             className="flex items-center gap-2 px-4 py-2 bg-slate-800/40 backdrop-blur-sm border border-white/5 rounded-full hover:bg-slate-800/60 transition-all group"
           >

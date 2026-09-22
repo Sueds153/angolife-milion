@@ -11,6 +11,7 @@ import { PLACEHOLDER_IMAGE as FALLBACK_IMAGE } from '../constants/placeholders';
 import { useAppStore } from '../store/useAppStore';
 import { Helmet } from 'react-helmet-async';
 import { useScrollLock } from '../hooks/useScrollLock';
+import { openExternal } from '../services/core/openExternal';
 
 interface NewsPageProps {
   onRequestReward?: (callback: () => void) => void;
@@ -458,7 +459,7 @@ export const NewsPage: React.FC<NewsPageProps> = () => {
               
               <div className="mt-12 pt-8 border-t border-white/10">
                  <button 
-                   onClick={() => window.open(selectedArticle.url, '_blank')}
+                   onClick={() => openExternal(selectedArticle.url)}
                    className="w-full bg-white/5 hover:bg-brand-gold hover:text-slate-900 border border-brand-gold/30 text-brand-gold py-4 rounded-xl font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3"
                  >
                     Ver Fonte Original <ExternalLink size={18} />

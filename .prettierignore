@@ -3,3 +3,8 @@ node_modules
 _archive
 public
 *.log
+android
+scratch
+.agents
+.claude
+scraper/sgai_results

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, ExternalLink, Globe, ShieldCheck, Image as ImageIcon } from 'lucide-react';
+import { openExternal } from '../../services/core/openExternal';
 
 interface SitePreviewModalProps {
   isOpen: boolean;
@@ -25,7 +26,7 @@ export const SitePreviewModal: React.FC<SitePreviewModalProps> = ({
   const screenshotUrl = `https://image.thum.io/get/width/1200/crop/628/${targetUrl}`;
 
   const handleOpenSite = () => {
-    window.open(targetUrl, '_blank', 'noopener,noreferrer');
+    openExternal(targetUrl);
   };
 
   return (

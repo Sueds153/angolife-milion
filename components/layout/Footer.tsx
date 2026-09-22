@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Share2, ShieldCheck, FileText, ChevronRight, Lock } from 'lucide-react';
+import { openExternal } from '../../services/core/openExternal';
 
 interface FooterProps {
   onOpenLegal: (type: 'privacy' | 'terms' | 'data') => void;
@@ -23,7 +24,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegal }) => {
       }
     } else {
       const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`${shareData.text}\n${shareData.url}`)}`;
-      window.open(whatsappUrl, '_blank');
+      openExternal(whatsappUrl);
     }
   };
 

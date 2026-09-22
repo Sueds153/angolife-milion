@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Car, Check, Loader2, RefreshCw, ShieldCheck, X, User } from "lucide-react";
 import { VaiJaService } from "../../services/api/vaija.service";
+import { openExternal } from "../../services/core/openExternal";
 
 interface MotoristaPendente {
   userId: string;
@@ -31,7 +32,7 @@ export const AdminVaiJaSection: React.FC = () => {
     if (!m.fotoDocumentoUrl) return;
     const url = await VaiJaService.verDocumento(m.fotoDocumentoUrl);
     if (url) {
-      window.open(url, "_blank", "noopener,noreferrer");
+      openExternal(url);
     } else {
       window.alert("Não foi possível abrir o documento. Verifica se ainda existe no Storage.");
     }

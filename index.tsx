@@ -11,6 +11,7 @@ import './index.css';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { initSentry } from './services/integrations/sentry';
 import { HelmetProvider } from 'react-helmet-async';
+import { Capacitor } from '@capacitor/core';
 
 // Initialize Monitoring
 initSentry();
@@ -31,8 +32,8 @@ root.render(
   </React.StrictMode>
 );
 
-// Register Service Worker for PWA
-if ('serviceWorker' in navigator) {
+// Register Service Worker for PWA (apenas web; no app nativo o Capacitor serve os assets localmente)
+if (!Capacitor.isNativePlatform() && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch(() => {});
   });

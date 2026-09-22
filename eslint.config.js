@@ -7,7 +7,7 @@ import react from 'eslint-plugin-react';
 import prettier from 'eslint-config-prettier';
 
 export default tseslint.config(
-  { ignores: ['dist', 'node_modules', '_archive', 'supabase', 'scraper', 'scripts'] },
+  { ignores: ['dist', 'node_modules', '_archive', 'supabase', 'scraper', 'scripts', 'android', 'scratch', '.agents', '.claude'] },
   {
     extends: [
       js.configs.recommended,

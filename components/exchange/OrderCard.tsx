@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { OrderService, OrderRow } from '../../services/api/order.service';
 import { Clock, Eye, Send, ArrowRight, ExternalLink } from 'lucide-react';
+import { openExternal } from '../../services/core/openExternal';
 
 interface OrderCardProps {
   orderId: string;
@@ -119,7 +120,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({ orderId, onComplete, whats
 <div className="flex gap-2">
             {order.status === 'pending' && whatsappLink && (
               <button
-                onClick={() => window.open(whatsappLink, '_blank')}
+                onClick={() => openExternal(whatsappLink)}
                 className="bg-orange-500 text-black px-3 py-1.5 rounded-lg text-[10px] font-black uppercase flex items-center gap-1 hover:scale-105 transition-transform"
               >
                 <ExternalLink size={10} /> Finalizar no WhatsApp

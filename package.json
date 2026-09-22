@@ -13,6 +13,11 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/browser": "^8.0.4",
+    "@capacitor/cli": "^8.5.0",
+    "@capacitor/core": "^8.5.0",
     "@react-pdf/renderer": "^4.3.2",
     "@sentry/react": "^10.41.0",
     "@sentry/tracing": "^7.120.4",

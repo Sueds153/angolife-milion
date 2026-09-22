@@ -1,5 +1,6 @@
 import React from 'react';
 import { Share2 } from 'lucide-react';
+import { openExternal } from '../../services/core/openExternal';
 
 interface ShareButtonProps {
   title: string;
@@ -23,7 +24,7 @@ export const ShareButton: React.FC<ShareButtonProps> = ({ title, text, url = win
       }
     } else {
       const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`${shareData.title}\n${shareData.text}\n${shareData.url}`)}`;
-      window.open(whatsappUrl, '_blank');
+      openExternal(whatsappUrl);
     }
   };
 

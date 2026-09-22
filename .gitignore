@@ -36,3 +36,34 @@ dist-ssr
 
 .vercel
 .env*
+
+# Android / Capacitor build output
+android/.gradle
+android/local.properties
+android/build
+android/app/build
+android/capacitor-cordova-android-plugins/build
+android/capacitor-android/build
+android/capacitor-browser/build
+
+# Generated app assets (regenerable via @capacitor/assets)
+assets/icon-only.png
+assets/icon-background.png
+assets/icon-foreground.png
+assets/splash.png
+
+# APK output
+*.apk
+*.aab
+
+# Agent skills / tooling (not product code)
+.agents/
+.claude/
+skills-lock.json
+scratch/
+
+# Python scraper artefacts
+__pycache__/
+*.pyc
+scraper/__pycache__/
+scraper/sgai_results/

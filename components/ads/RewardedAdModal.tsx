@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { X, Zap, Play, Loader2, MessageCircle } from 'lucide-react';
 import { useScrollLock } from '../../hooks/useScrollLock';
+import { openExternal } from '../../services/core/openExternal';
 
 interface RewardedAdModalProps {
   isOpen: boolean;
@@ -59,13 +60,13 @@ export const RewardedAdModal: React.FC<RewardedAdModalProps> = ({
   // Test ID for Interstitial
   const ADMOB_INTERSTITIAL_ID = 'ca-app-pub-3940256069387121/1033173712';
 
-  const handleFinalRedirect = useCallback((overrideLink?: string | null) => {
+  const handleFinalRedirect = useCallback(async (overrideLink?: string | null) => {
     const finalLink = overrideLink || whatsappLink;
     if (finalLink) {
-      const openedWindow = window.open(finalLink, '_blank');
-      
-      // If window.open was blocked, show the manual button as fallback
-      if (!openedWindow) {
+      const opened = await openExternal(finalLink);
+
+      // Se a abertura foi bloqueada, mostra o botão manual como fallback
+      if (!opened) {
         setShowRedirectButton(true);
       } else {
         if (onFinalize) onFinalize();

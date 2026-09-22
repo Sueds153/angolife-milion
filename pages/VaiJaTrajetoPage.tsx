@@ -9,6 +9,7 @@ import { VaiJaService } from "../services/api/vaija.service";
 import { useVaiJaRealtime } from "../hooks/useVaiJaRealtime";
 import { formatPreco, tipoVeiculoLabel, formatExpira, buildWhatsAppShare, isLotado } from "../components/vaija/helpers";
 import type { TrajetoAtivo, MotoristaPublico, Confirmacao } from "../types";
+import { openExternal } from "../services/core/openExternal";
 
 interface PassageiroRow {
   confirmacaoId: string;
@@ -132,7 +133,7 @@ export const VaiJaTrajetoPage: React.FC = () => {
             </div>
           </div>
           <button
-            onClick={() => window.open(buildWhatsAppShare(trajeto), "_blank")}
+            onClick={() => openExternal(buildWhatsAppShare(trajeto))}
             title="Partilhar no WhatsApp"
             className="p-3 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 transition-all shrink-0"
           >

@@ -1,6 +1,7 @@
 import React from "react";
 import { ArrowRight, Share2, Users, MapPin, ShieldCheck, Clock } from "lucide-react";
 import type { TrajetoAtivo, MotoristaPublico } from "../../types";
+import { openExternal } from "../../services/core/openExternal";
 import {
   formatPreco,
   tipoVeiculoLabel,
@@ -25,7 +26,7 @@ export const VaiJaTrajetoCard: React.FC<VaiJaTrajetoCardProps> = ({ trajeto, mot
 
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
-    window.open(buildWhatsAppShare(trajeto), "_blank");
+    openExternal(buildWhatsAppShare(trajeto));
   };
 
   return (

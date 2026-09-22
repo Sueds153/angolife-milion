@@ -20,6 +20,7 @@ import { AdBanner } from '../components/ads/AdBanner';
 import { RewardedAdModal } from '../components/ads/RewardedAdModal';
 import { AdService } from '../services/api/adService';
 import { APP_CONFIG } from '../constants/app';
+import { openExternal } from '../services/core/openExternal';
 
 import { useAppStore } from '../store/useAppStore';
 import { Helmet } from 'react-helmet-async';
@@ -297,7 +298,7 @@ export const ExchangePage: React.FC = () => {
       if (!isPriority) {
         setIsRewardedAdModalOpen(true);
       } else {
-        window.open(link, '_blank');
+        openExternal(link);
         finalizeCleanup();
       }
     } else if (result && !result.orderId) {

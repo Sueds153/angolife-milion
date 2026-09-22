@@ -15,6 +15,7 @@ import {
 import { DealsService } from '../services/api/deals.service';
 import { AdBanner } from '../components/ads/AdBanner';
 import { ProductDeal } from '../types';
+import { openExternal } from '../services/core/openExternal';
 interface DealDetailPageProps {
     /** Objeto deal opcional (se vier da lista para loading instantâneo) */
     deal?: ProductDeal | null;
@@ -83,7 +84,7 @@ export const DealDetailPage: React.FC<DealDetailPageProps> = ({ deal: initialDea
         const rawPhone = deal.phone || deal.storeNumber;
         if (!rawPhone) return;
         const cleaned = rawPhone.replace(/\D/g, '');
-        window.open(`https://wa.me/${cleaned}`, '_blank');
+        openExternal(`https://wa.me/${cleaned}`);
     };
 
     const handleShare = async () => {
@@ -105,7 +106,7 @@ export const DealDetailPage: React.FC<DealDetailPageProps> = ({ deal: initialDea
     const handleMap = () => {
         if (!deal) return;
         const query = encodeURIComponent(`${deal.store} ${deal.location}`);
-        window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
+        openExternal(`https://www.google.com/maps/search/?api=1&query=${query}`);
     };
 
     // ── Variáveis derivadas ────────────────────────────────────────────────────

@@ -10,6 +10,7 @@ import { JobDetailsModal } from '../components/jobs/JobDetailsModal';
 import { ServiceUtils } from '../services/utils/utils';
 import { JobUtils } from '../services/utils/jobUtils';
 import { Helmet } from 'react-helmet-async';
+import { openExternal } from '../services/core/openExternal';
 
 interface JobsPageProps {
   onRequestReward?: (onSuccess: () => void, onCancel: () => void) => void;
@@ -128,7 +129,7 @@ export const JobsPage: React.FC<JobsPageProps> = ({
       const appLink = "https://resolveao.vercel.app";
       const text = `🚀 *Vaga Imperdível:* ${job.title}\n🏢 *Empresa:* ${job.company}\n📍 *Local:* ${job.location}\n\nOlha esta vaga que encontrei na Resolve.AO! Sê o primeiro a candidatar-te.\n\nBaixa aqui o app e vê mais: ${appLink}`;
       const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
-      window.open(url, '_blank');
+      openExternal(url);
     };
 
     executeWithInterstitial(executeShare);
@@ -157,7 +158,7 @@ export const JobsPage: React.FC<JobsPageProps> = ({
         onUpdateUser({ applicationHistory: newHistory });
       }
 
-      window.open(`mailto:${job.applicationEmail}?subject=Candidatura: ${job.title}`, '_blank');
+      openExternal(`mailto:${job.applicationEmail}?subject=Candidatura: ${job.title}`);
       setJobs(prev => prev.map(j => j.id === job.id ? { ...j, applicationCount: (j.applicationCount || 0) + 1 } : j));
     };
 

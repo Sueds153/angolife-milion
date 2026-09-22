@@ -9,6 +9,7 @@ import { JobLogo } from './JobLogo';
 import { ServiceUtils } from '../../services/utils/utils';
 import { JobUtils } from '../../services/utils/jobUtils';
 import { useScrollLock } from '../../hooks/useScrollLock';
+import { openExternal } from '../../services/core/openExternal';
 
 interface JobDetailsModalProps {
   job: Job | null;
@@ -66,7 +67,7 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
 
   const handleApplyClick = () => {
     if (parsed.applyMethod === 'url' && parsed.applyTarget && parsed.applyTarget.startsWith('http')) {
-      window.open(parsed.applyTarget, '_blank', 'noopener,noreferrer');
+      openExternal(parsed.applyTarget);
     } else {
       onApply(job);
     }

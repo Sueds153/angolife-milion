@@ -12,6 +12,7 @@ import { useAppStore } from '../store/useAppStore';
 import { VaiJaService } from '../services/api/vaija.service';
 import { DadosMotoristaForm } from '../components/vaija/DadosMotoristaForm';
 import { nivelClasses, nivelEmoji, nivelLabel, nivelPorPontos } from '../components/multicaixa/helpers';
+import { openExternal } from '../services/core/openExternal';
 
 export const ProfilePage: React.FC = () => {
   const { user, setUser, setIsAuthenticated } = useAppStore();
@@ -135,7 +136,7 @@ export const ProfilePage: React.FC = () => {
       const newHistory = await JobsService.submitJobApplication(user.id || '', user.applicationHistory || [], job);
       onUpdateUser({ applicationHistory: newHistory });
     }
-    window.open(`mailto:${job.applicationEmail}?subject=Candidatura: ${job.title}`, '_blank');
+    openExternal(`mailto:${job.applicationEmail}?subject=Candidatura: ${job.title}`);
     setSavedJobsData(prev => prev.map(j => j.id === job.id ? { ...j, applicationCount: (j.applicationCount || 0) + 1 } : j));
   };
 
@@ -143,7 +144,7 @@ export const ProfilePage: React.FC = () => {
     e.stopPropagation();
     const appLink = "https://resolveao.vercel.app";
     const text = `🚀 *Vaga Imperdível:* ${job.title}\n🏢 *Empresa:* ${job.company}\n📍 *Local:* ${job.location}\n\nOlha esta vaga que encontrei na Resolve.AO! Sê o primeiro a candidatar-te.\n\nBaixa aqui o app e vê mais: ${appLink}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    openExternal(`https://wa.me/?text=${encodeURIComponent(text)}`);
   };
 
   const firstName = user?.fullName || user?.email?.split('@')[0] || '';
