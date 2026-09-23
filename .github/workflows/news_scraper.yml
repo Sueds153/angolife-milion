@@ -29,11 +29,18 @@ jobs:
       - name: Instalar Dependências
         run: |
           pip install -r scraper/requirements.txt
+          pip install -r scraper/requirements-sgai.txt
+
+      - name: Instalar Playwright Chromium
+        run: playwright install --with-deps chromium
 
       - name: Executar Scraper de Notícias
+        timeout-minutes: 90
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          USE_SGAI: auto
         run: |
           python scraper/news_scraper.py
