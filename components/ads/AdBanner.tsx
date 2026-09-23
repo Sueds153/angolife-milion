@@ -156,7 +156,7 @@ export const AdBanner: React.FC<AdBannerProps> = ({ format, customLocation = 'al
     // the embed URL is not available — we show the poster image instead.
     const canEmbedVideo = isVideo && embedInfo.isEmbed && embedInfo.embedUrl;
     const canPlayDirectVideo = isVideo && !embedInfo.isEmbed && partnerAd.video_url
-      && (partnerAd.video_url.endsWith('.mp4') || partnerAd.video_url.includes('supabase'));
+      && (partnerAd.video_url.endsWith('.mp4') || partnerAd.video_url.includes('supabase') || partnerAd.video_url.includes('r2.dev'));
 
     const handleAdClick = () => {
       if (partnerAd.link) {

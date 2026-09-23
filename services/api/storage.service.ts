@@ -3,6 +3,7 @@
  */
 
 import { supabase } from "../core/supabaseClient";
+import { uploadViaR2, r2Configured } from "./r2";
 
 /** Resize and compress an image file to a lightweight data URL fallback (<150KB) */
 const compressImageToDataUrl = (file: File): Promise<string | null> => {
@@ -46,16 +47,26 @@ export const StorageService = {
   uploadAdMedia: async (file: File): Promise<string | null> => {
     const isVideo = file.type.startsWith('video/') || file.name.match(/\.(mp4|webm|mov|avi|mkv)$/i);
     const ext = file.name.split('.').pop() || (isVideo ? 'mp4' : 'jpg');
-    const fileName = `ads/${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`;
+    const key = `ads/${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`;
 
-    // Try list of known public buckets in Supabase
+    // Prefer Cloudflare R2 (public media bucket)
+    const r2Url = await uploadViaR2(key, file);
+    if (r2Url) return r2Url;
+
+    if (r2Configured()) {
+      // R2 is configured but upload failed — do not fall through to Supabase
+      if (!isVideo) return await compressImageToDataUrl(file);
+      return null;
+    }
+
+    // Legacy fallback: Supabase public buckets
     const bucketsToTry = ['ads', 'discount-images', 'avatars', 'exchange-proofs', 'payment-receipts'];
 
     for (const bucketName of bucketsToTry) {
       try {
         const { data, error } = await supabase.storage
           .from(bucketName)
-          .upload(fileName, file, { cacheControl: '3600', upsert: true });
+          .upload(key, file, { cacheControl: '3600', upsert: true });
 
         if (!error && data) {
           const { data: { publicUrl } } = supabase.storage.from(bucketName).getPublicUrl(data.path);
@@ -78,10 +89,16 @@ export const StorageService = {
 
   uploadDiscountImage: async (file: File): Promise<string | null> => {
     try {
-      const fileName = `${Date.now()}_${file.name.replace(/\s+/g, "_")}`;
+      const name = `${Date.now()}_${file.name.replace(/\s+/g, "_")}`;
+      const key = `discount-images/${name}`;
+
+      const r2Url = await uploadViaR2(key, file);
+      if (r2Url) return r2Url;
+      if (r2Configured()) return null;
+
       const { data, error } = await supabase.storage
         .from("discount-images")
-        .upload(fileName, file, {
+        .upload(name, file, {
           cacheControl: "3600",
           upsert: false,
         });
@@ -144,10 +161,14 @@ export const StorageService = {
   },
 
   uploadAvatar: async (file: File): Promise<string | null> => {
-    const fileName = `${Math.random()}.${file.name.split(".").pop()}`;
-    const filePath = `avatars/${fileName}`;
-    const { error } = await supabase.storage.from("avatars").upload(filePath, file);
+    const key = `avatars/${Math.random()}.${file.name.split(".").pop()}`;
+
+    const r2Url = await uploadViaR2(key, file);
+    if (r2Url) return r2Url;
+    if (r2Configured()) return null;
+
+    const { error } = await supabase.storage.from("avatars").upload(key, file);
     if (error) return null;
-    return supabase.storage.from("avatars").getPublicUrl(filePath).data.publicUrl;
+    return supabase.storage.from("avatars").getPublicUrl(key).data.publicUrl;
   },
 };

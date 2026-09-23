@@ -167,6 +167,230 @@ function extFromContentType(contentType: string | null): string {
   return ".jpg";
 }
 
+// Minimal AWS SigV4 signing helpers for R2 S3 API from the edge function.
+function encodeRfc3986(str: string): string {
+  return encodeURIComponent(str).replace(
+    /[!'()*]/g,
+    (c) => "%" + c.charCodeAt(0).toString(16).toUpperCase(),
+  );
+}
+
+function toHex(buf: ArrayBuffer): string {
+  return Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+async function hmacSha256(key: ArrayBuffer | Uint8Array, data: string): Promise<ArrayBuffer> {
+  const cryptoKey = await crypto.subtle.importKey(
+    "raw",
+    key as BufferSource,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  return crypto.subtle.sign("HMAC", cryptoKey, new TextEncoder().encode(data));
+}
+
+async function sha256(data: ArrayBuffer | string): Promise<ArrayBuffer> {
+  const bytes = typeof data === "string" ? new TextEncoder().encode(data) : data;
+  return crypto.subtle.digest("SHA-256", bytes as BufferSource);
+}
+
+/** Uploads an image buffer to Cloudflare R2 and returns its public URL (or null). */
+async function uploadNewsImageToR2(
+  path: string, // e.g. news/abc.jpg — under news-images/ prefix in the shared bucket
+  buffer: ArrayBuffer,
+  contentType: string,
+): Promise<string | null> {
+  const accountId = Deno.env.get("R2_ACCOUNT_ID");
+  const bucket = Deno.env.get("R2_BUCKET");
+  const accessKeyId = Deno.env.get("R2_ACCESS_KEY_ID");
+  const secretAccessKey = Deno.env.get("R2_SECRET_ACCESS_KEY");
+  const endpoint = Deno.env.get("R2_S3_ENDPOINT");
+  const publicBase = (Deno.env.get("R2_PUBLIC_BASE_URL") || "").replace(/\/+$/, "");
+
+  if (!accountId || !bucket || !accessKeyId || !secretAccessKey || !endpoint || !publicBase) {
+    console.warn("  ⚠️ R2 env incompleta — a saltar cache de imagem");
+    return null;
+  }
+
+  const key = `news-images/${path}`; // single shared bucket + prefix per former Supabase bucket
+  const region = "auto";
+  const host = new URL(endpoint).host;
+  const now = new Date();
+  const amzDate = now.toISOString().replace(/[:-]|\.\d{3}/g, "");
+  const dateStamp = amzDate.slice(0, 8);
+  const payloadHash = toHex(await sha256(buffer));
+
+  const canonicalUri = `/${encodeRfc3986(bucket)}/${key.split("/").map(encodeRfc3986).join("/")}`;
+  const canonicalHeaders =
+    `content-type:${contentType}\nhost:${host}\nx-amz-content-sha256:${payloadHash}\nx-amz-date:${amzDate}\n`;
+  const signedHeaders = "content-type;host;x-amz-content-sha256;x-amz-date";
+
+  const canonicalRequest = [
+    "PUT",
+    canonicalUri,
+    "",
+    canonicalHeaders,
+    signedHeaders,
+    payloadHash,
+  ].join("\n");
+
+  const scope = `${dateStamp}/${region}/s3/aws4_request`;
+  const stringToSign = [
+    "AWS4-HMAC-SHA256",
+    amzDate,
+    scope,
+    toHex(await sha256(canonicalRequest)),
+  ].join("\n");
+
+  const kDate = await hmacSha256(new TextEncoder().encode(`AWS4${secretAccessKey}`), dateStamp);
+  const kRegion = await hmacSha256(kDate, region);
+  const kService = await hmacSha256(kRegion, "s3");
+  const kSigning = await hmacSha256(kService, "aws4_request");
+  const signature = toHex(await hmacSha256(kSigning, stringToSign));
+
+  const authorization =
+    `AWS4-HMAC-SHA256 Credential=${accessKeyId}/${scope}, ` +
+    `SignedHeaders=${signedHeaders}, Signature=${signature}`;
+
+  const putUrl = `${endpoint}${canonicalUri}`;
+  try {
+    const putRes = await fetch(putUrl, {
+      method: "PUT",
+      headers: {
+        "Content-Type": contentType,
+        Host: host,
+        "x-amz-content-sha256": payloadHash,
+        "x-amz-date": amzDate,
+        Authorization: authorization,
+      },
+      body: buffer,
+    });
+    if (!putRes.ok) {
+      console.warn(`  ⚠️ R2 PUT falhou (${putRes.status}): ${path}`);
+      return null;
+    }
+    return `${publicBase}/${key}`;
+  } catch (err) {
+    console.warn(`  ⚠️ R2 PUT erro: ${String(err).slice(0, 120)}`);
+    return null;
+  }
+}
+
+// Minimal AWS SigV4 signing helpers for R2 S3 API from the edge function.
+function encodeRfc3986(str: string): string {
+  return encodeURIComponent(str).replace(
+    /[!'()*]/g,
+    (c) => "%" + c.charCodeAt(0).toString(16).toUpperCase(),
+  );
+}
+
+function toHex(buf: ArrayBuffer): string {
+  return Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+async function hmacSha256(key: ArrayBuffer | Uint8Array, data: string): Promise<ArrayBuffer> {
+  const cryptoKey = await crypto.subtle.importKey(
+    "raw",
+    key as BufferSource,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  return crypto.subtle.sign("HMAC", cryptoKey, new TextEncoder().encode(data));
+}
+
+async function sha256(data: ArrayBuffer | string): Promise<ArrayBuffer> {
+  const bytes = typeof data === "string" ? new TextEncoder().encode(data) : data;
+  return crypto.subtle.digest("SHA-256", bytes as BufferSource);
+}
+
+/** Uploads an image buffer to Cloudflare R2 and returns its public URL (or null). */
+async function uploadNewsImageToR2(
+  path: string, // e.g. news/abc.jpg — under news-images/ prefix in the shared bucket
+  buffer: ArrayBuffer,
+  contentType: string,
+): Promise<string | null> {
+  const accountId = Deno.env.get("R2_ACCOUNT_ID");
+  const bucket = Deno.env.get("R2_BUCKET");
+  const accessKeyId = Deno.env.get("R2_ACCESS_KEY_ID");
+  const secretAccessKey = Deno.env.get("R2_SECRET_ACCESS_KEY");
+  const endpoint = Deno.env.get("R2_S3_ENDPOINT");
+  const publicBase = (Deno.env.get("R2_PUBLIC_BASE_URL") || "").replace(/\/+$/, "");
+
+  if (!accountId || !bucket || !accessKeyId || !secretAccessKey || !endpoint || !publicBase) {
+    console.warn("  ⚠️ R2 env incompleta — a saltar cache de imagem");
+    return null;
+  }
+
+  const key = `news-images/${path}`; // single shared bucket + prefix per former Supabase bucket
+  const region = "auto";
+  const host = new URL(endpoint).host;
+  const now = new Date();
+  const amzDate = now.toISOString().replace(/[:-]|\.\d{3}/g, "");
+  const dateStamp = amzDate.slice(0, 8);
+  const payloadHash = toHex(await sha256(buffer));
+
+  const canonicalUri = `/${encodeRfc3986(bucket)}/${key.split("/").map(encodeRfc3986).join("/")}`;
+  const canonicalHeaders =
+    `content-type:${contentType}\nhost:${host}\nx-amz-content-sha256:${payloadHash}\nx-amz-date:${amzDate}\n`;
+  const signedHeaders = "content-type;host;x-amz-content-sha256;x-amz-date";
+
+  const canonicalRequest = [
+    "PUT",
+    canonicalUri,
+    "",
+    canonicalHeaders,
+    signedHeaders,
+    payloadHash,
+  ].join("\n");
+
+  const scope = `${dateStamp}/${region}/s3/aws4_request`;
+  const stringToSign = [
+    "AWS4-HMAC-SHA256",
+    amzDate,
+    scope,
+    toHex(await sha256(canonicalRequest)),
+  ].join("\n");
+
+  const kDate = await hmacSha256(new TextEncoder().encode(`AWS4${secretAccessKey}`), dateStamp);
+  const kRegion = await hmacSha256(kDate, region);
+  const kService = await hmacSha256(kRegion, "s3");
+  const kSigning = await hmacSha256(kService, "aws4_request");
+  const signature = toHex(await hmacSha256(kSigning, stringToSign));
+
+  const authorization =
+    `AWS4-HMAC-SHA256 Credential=${accessKeyId}/${scope}, ` +
+    `SignedHeaders=${signedHeaders}, Signature=${signature}`;
+
+  const putUrl = `${endpoint}${canonicalUri}`;
+  try {
+    const putRes = await fetch(putUrl, {
+      method: "PUT",
+      headers: {
+        "Content-Type": contentType,
+        Host: host,
+        "x-amz-content-sha256": payloadHash,
+        "x-amz-date": amzDate,
+        Authorization: authorization,
+      },
+      body: buffer,
+    });
+    if (!putRes.ok) {
+      console.warn(`  ⚠️ R2 PUT falhou (${putRes.status}): ${path}`);
+      return null;
+    }
+    return `${publicBase}/${key}`;
+  } catch (err) {
+    console.warn(`  ⚠️ R2 PUT erro: ${String(err).slice(0, 120)}`);
+    return null;
+  }
+}
+
 async function cacheImage(imageUrl: string): Promise<string> {
   if (!imageUrl || imageUrl === RESOLVEAO_PLACEHOLDER) return RESOLVEAO_PLACEHOLDER;
   if (!/^https?:\/\//i.test(imageUrl)) return RESOLVEAO_PLACEHOLDER;
@@ -186,21 +410,8 @@ async function cacheImage(imageUrl: string): Promise<string> {
 
     const hash = await sha256Hex(imageUrl);
     const path = `news/${hash}${extFromContentType(contentType)}`;
-
-    const { error: upErr } = await supabase.storage
-      .from("news-images")
-      .upload(path, buffer, { contentType: contentType ?? "image/jpeg", upsert: false });
-
-    if (upErr) {
-      // Já existe (mesmo hash) -> reutilizamos o objecto
-      if (/duplicate/i.test(upErr.message)) {
-        return supabase.storage.from("news-images").getPublicUrl(path).data.publicUrl;
-      }
-      console.warn(`  ⚠️ Upload imagem falhou: ${upErr.message}`);
-      return RESOLVEAO_PLACEHOLDER;
-    }
-
-    return supabase.storage.from("news-images").getPublicUrl(path).data.publicUrl;
+    const publicUrl = await uploadNewsImageToR2(path, buffer, contentType ?? "image/jpeg");
+    return publicUrl || RESOLVEAO_PLACEHOLDER;
   } catch (err) {
     console.warn(`  ⚠️ Erro a cachear imagem: ${String(err).slice(0, 120)}`);
     return RESOLVEAO_PLACEHOLDER;

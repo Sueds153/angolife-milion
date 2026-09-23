@@ -3,6 +3,7 @@
  */
 
 import { supabase } from "../core/supabaseClient";
+import { uploadViaR2, r2Configured } from "./r2";
 import { ProductDeal } from "../../types";
 import { ServiceUtils } from "../utils/utils";
 
@@ -206,10 +207,16 @@ export const DealsService = {
 
   uploadDiscountImage: async (file: File): Promise<string | null> => {
     try {
-      const fileName = `${Date.now()}_${file.name.replace(/\s+/g, "_")}`;
+      const name = `${Date.now()}_${file.name.replace(/\s+/g, "_")}`;
+      const key = `discount-images/${name}`;
+
+      const r2Url = await uploadViaR2(key, file);
+      if (r2Url) return r2Url;
+      if (r2Configured()) return null;
+
       const { data, error } = await supabase.storage
         .from("discount-images")
-        .upload(fileName, file, {
+        .upload(name, file, {
           cacheControl: "3600",
           upsert: false,
         });
