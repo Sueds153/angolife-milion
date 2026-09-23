@@ -1,6 +1,7 @@
 # Camada de avaliação ScrapeGraphAI (motor principal candidato)
 # Instalar: pip install -r requirements-sgai.txt && playwright install chromium
 scrapegraphai>=1.2.0
+langchain-google-genai>=4.4.0,<5
 playwright>=1.40.0
 pydantic>=2.0.0
 python-dotenv>=1.0.1

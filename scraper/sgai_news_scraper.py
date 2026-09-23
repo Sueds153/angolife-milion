@@ -406,7 +406,7 @@ class SgaiNewsScraper:
             "fonte": site_name,
             "url_origem": article_url,
             "is_priority": bool(is_priority),
-            "status": "pendente",
+            "status": "publicado",
         }
         # Data de publicação → coluna published_at (timestamptz)
         raw_date = (detail.get("data_publicacao") or "").strip()

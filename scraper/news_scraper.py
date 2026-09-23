@@ -765,7 +765,7 @@ class AngoNewsScraper:
             "fonte": site_name,
             "url_origem": article_url,
             "is_priority": bool(is_priority),
-            "status": "pendente",
+            "status": "publicado",
         }
         if published_at:
             payload["published_at"] = published_at

@@ -619,7 +619,7 @@ class AngoJobScraper:
                 "imagem_url": image_url,
                 "source_url": job_url,
                 "categoria": categoria,
-                "status": "pendente",
+                "status": "publicado",
                 "posted_at": datetime.now(timezone.utc).isoformat(),
                 "salary": salary or None,
             }
