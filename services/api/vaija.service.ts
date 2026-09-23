@@ -3,6 +3,7 @@
  */
 
 import { supabase } from "../core/supabaseClient";
+import { uploadViaR2Private, r2PrivateDownloadUrl, r2Configured } from "./r2";
 import type {
   TrajetoAtivo,
   DriverData,
@@ -52,13 +53,18 @@ export const VaiJaService = {
     return { error: error?.message || null };
   },
 
-  /** Upload do BI/carta de condução para o bucket privado; devolve o path. */
+  /** Upload do BI/carta de condução para o bucket R2 privado; devolve a key. */
   uploadDriverDocument: async (userId: string, file: File): Promise<string | null> => {
     const ext = file.name.split(".").pop() || "jpg";
-    const filePath = `${userId}/${Date.now()}.${ext}`;
+    const key = `documentos-motorista/${userId}/${Date.now()}.${ext}`;
+
+    const r2Key = await uploadViaR2Private(key, file);
+    if (r2Key) return r2Key;
+    if (r2Configured()) return null;
+
     const { data, error } = await supabase.storage
       .from("documentos-motorista")
-      .upload(filePath, file, { upsert: false });
+      .upload(`${userId}/${Date.now()}.${ext}`, file, { upsert: false });
     if (error || !data) return null;
     return data.path;
   },
@@ -314,6 +320,12 @@ export const VaiJaService = {
 
   /** URL assinado do documento (validade curta) para o admin rever. */
   verDocumento: async (path: string): Promise<string | null> => {
+    // R2 private key (new uploads)
+    if (path.startsWith("documentos-motorista/")) {
+      return await r2PrivateDownloadUrl(path);
+    }
+
+    // Legacy Supabase path
     const { data, error } = await supabase.storage
       .from("documentos-motorista")
       .createSignedUrl(path, 300);

@@ -53,3 +53,65 @@ export const uploadViaR2 = async (
     return null;
   }
 };
+
+/**
+ * Upload a file to R2 private bucket and return the storage key (not a URL).
+ * Used for documentos-motorista — viewing requires a presigned GET via r2-sign-download.
+ * Returns null on any failure.
+ */
+export const uploadViaR2Private = async (
+  key: string,
+  file: File | Blob,
+  contentType?: string,
+): Promise<string | null> => {
+  if (!r2Configured()) return null;
+  try {
+    const { data, error } = await supabase.functions.invoke("r2-sign-upload", {
+      body: { key, contentType: contentType || (file as File).type || "application/octet-stream" },
+    });
+    if (error) {
+      console.warn("[r2] private sign error:", error.message);
+      return null;
+    }
+    const res = data as SignResponse;
+    if (!res?.url) {
+      console.warn("[r2] no private signed url:", res?.error);
+      return null;
+    }
+    const put = await fetch(res.url, {
+      method: "PUT",
+      headers: { "Content-Type": contentType || (file as File).type || "application/octet-stream" },
+      body: file,
+    });
+    if (!put.ok) {
+      console.warn("[r2] private PUT failed:", put.status);
+      return null;
+    }
+    return res.key || key;
+  } catch (err) {
+    console.warn("[r2] private upload exception:", err);
+    return null;
+  }
+};
+
+/**
+ * Get a presigned GET URL for a private R2 object (300s validity).
+ * Returns null on any failure.
+ */
+export const r2PrivateDownloadUrl = async (key: string): Promise<string | null> => {
+  if (!r2Configured()) return null;
+  try {
+    const { data, error } = await supabase.functions.invoke("r2-sign-download", {
+      body: { key },
+    });
+    if (error) {
+      console.warn("[r2] download sign error:", error.message);
+      return null;
+    }
+    const res = data as SignResponse;
+    return res?.url || null;
+  } catch (err) {
+    console.warn("[r2] download sign exception:", err);
+    return null;
+  }
+};

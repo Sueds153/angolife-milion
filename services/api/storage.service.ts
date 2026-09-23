@@ -117,18 +117,33 @@ export const StorageService = {
 
   uploadProof: async (file: File): Promise<string | null> => {
     const fileName = `${Math.random()}.${file.name.split(".").pop()}`;
-    const filePath = `proofs/${fileName}`;
-    const { error } = await supabase.storage.from("exchange-proofs").upload(filePath, file);
+    const key = `exchange-proofs/proofs/${fileName}`;
+
+    const r2Url = await uploadViaR2(key, file);
+    if (r2Url) return r2Url;
+    if (r2Configured()) return null;
+
+    const { error } = await supabase.storage.from("exchange-proofs").upload(`proofs/${fileName}`, file);
     if (error) return null;
-    return supabase.storage.from("exchange-proofs").getPublicUrl(filePath).data.publicUrl;
+    return supabase.storage.from("exchange-proofs").getPublicUrl(`proofs/${fileName}`).data.publicUrl;
   },
 
   uploadReceipt: async (file: File): Promise<string | null> => {
     const fileName = `${Math.random()}.${file.name.split(".").pop()}`;
-    const filePath = `receipts/${fileName}`;
+    const key = `payment-receipts/receipts/${fileName}`;
+
+    const r2Url = await uploadViaR2(key, file);
+    if (r2Url) return r2Url;
+
+    if (r2Configured()) {
+      // R2 configured but failed — base64 fallback for images only
+      if (file.type.startsWith("image/")) return await compressImageToDataUrl(file);
+      return null;
+    }
+
     const { data, error } = await supabase.storage
       .from("payment-receipts")
-      .upload(filePath, file);
+      .upload(`receipts/${fileName}`, file);
 
     if (!error && data) {
       return supabase.storage.from("payment-receipts").getPublicUrl(data.path).data.publicUrl;

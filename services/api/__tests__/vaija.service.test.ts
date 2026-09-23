@@ -44,12 +44,29 @@ vi.mock("../../core/supabaseClient", () => ({
   supabase: hoisted.supabase,
 }));
 
+const r2State = {
+  uploadPrivate: null as string | null,
+  downloadUrl: null as string | null,
+  configured: true,
+  uploadPrivateFn: vi.fn(),
+  downloadFn: vi.fn(),
+};
+
+vi.mock("../r2", () => ({
+  uploadViaR2Private: (...args: unknown[]) => r2State.uploadPrivateFn(...args),
+  r2PrivateDownloadUrl: (...args: unknown[]) => r2State.downloadFn(...args),
+  r2Configured: () => r2State.configured,
+}));
+
 describe("VaiJaService", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     hoisted.state.result = { data: null, error: null };
     hoisted.state.rpcResult = { data: null, error: null };
     hoisted.state.uploadResult = { data: null, error: null };
+    r2State.configured = true;
+    r2State.uploadPrivateFn.mockReset();
+    r2State.downloadFn.mockReset();
   });
 
   it("getTrajetosAtivos devolve lista quando nÃ£o hÃ¡ erro", async () => {
@@ -149,18 +166,28 @@ describe("VaiJaService", () => {
     expect(mockSupabase.from).not.toHaveBeenCalled();
   });
 
-  it("uploadDriverDocument devolve o path do upload", async () => {
+  it("uploadDriverDocument devolve a key R2 no sucesso", async () => {
     const file = new File([""], "bi.jpg", { type: "image/jpeg" });
-    hoisted.state.uploadResult = { data: { path: "u1/123.bi.jpg" }, error: null };
+    r2State.uploadPrivateFn.mockResolvedValue("documentos-motorista/u1/1790179565481.jpg");
     const path = await VaiJaService.uploadDriverDocument("u1", file);
-    expect(path).toBe("u1/123.bi.jpg");
-    expect(mockSupabase.storage.from).toHaveBeenCalledWith("documentos-motorista");
+    expect(path).toBe("documentos-motorista/u1/1790179565481.jpg");
+    expect(r2State.uploadPrivateFn).toHaveBeenCalledTimes(1);
+    const [key, uploaded] = r2State.uploadPrivateFn.mock.calls[0];
+    expect(key).toMatch(/^documentos-motorista\/u1\/\d+\.jpg$/);
+    expect(uploaded).toBe(file);
   });
 
-  it("uploadDriverDocument devolve null quando o upload falha", async () => {
+  it("uploadDriverDocument devolve null quando o upload R2 falha", async () => {
     const file = new File([""], "bi.jpg", { type: "image/jpeg" });
-    hoisted.state.uploadResult = { data: null, error: { message: "bucket nÃ£o existe" } };
+    r2State.uploadPrivateFn.mockResolvedValue(null);
     await expect(VaiJaService.uploadDriverDocument("u1", file)).resolves.toBeNull();
+  });
+
+  it("verDocumento usa presigned R2 para keys privadas", async () => {
+    r2State.downloadFn.mockResolvedValue("https://s3.example/signed");
+    const url = await VaiJaService.verDocumento("documentos-motorista/u1/1.jpg");
+    expect(url).toBe("https://s3.example/signed");
+    expect(r2State.downloadFn).toHaveBeenCalledWith("documentos-motorista/u1/1.jpg");
   });
 
   it("criarPedido devolve id em caso de sucesso", async () => {

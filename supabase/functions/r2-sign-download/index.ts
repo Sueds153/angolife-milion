@@ -1,19 +1,8 @@
-// r2-sign-upload: returns a presigned PUT URL for browser uploads to Cloudflare R2.
-// Secrets: R2_ACCOUNT_ID, R2_BUCKET, R2_PRIVATE_BUCKET, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_S3_ENDPOINT
+// r2-sign-download: returns a presigned GET URL for private R2 objects.
+// Secrets: R2_ACCOUNT_ID, R2_PRIVATE_BUCKET, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_S3_ENDPOINT
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-const PUBLIC_PREFIXES = ["ads/", "discount-images/", "avatars/", "exchange-proofs/", "payment-receipts/"];
 const PRIVATE_PREFIXES = ["documentos-motorista/"];
-
-function bucketForKey(key: string): string | null {
-  if (PRIVATE_PREFIXES.some((p) => key.startsWith(p))) {
-    return Deno.env.get("R2_PRIVATE_BUCKET") || "resolveao-private";
-  }
-  if (PUBLIC_PREFIXES.some((p) => key.startsWith(p))) {
-    return Deno.env.get("R2_BUCKET") || "resolveao-media";
-  }
-  return null;
-}
 
 function hmac(key: Uint8Array, data: string): Promise<Uint8Array> {
   return crypto.subtle.importKey(
@@ -41,17 +30,16 @@ function encodeRfc3986(str: string): string {
   );
 }
 
-async function signPutUrl(opts: {
+async function signGetUrl(opts: {
   endpoint: string;
   region: string;
   accessKeyId: string;
   secretAccessKey: string;
   bucket: string;
   key: string;
-  contentType: string;
   expiresIn: number;
 }): Promise<string> {
-  const { endpoint, region, accessKeyId, secretAccessKey, bucket, key, contentType, expiresIn } = opts;
+  const { endpoint, region, accessKeyId, secretAccessKey, bucket, key, expiresIn } = opts;
   const host = new URL(endpoint).host;
   const now = new Date();
   const amzDate = now.toISOString().replace(/[:-]|\.\d{3}/g, "");
@@ -60,7 +48,6 @@ async function signPutUrl(opts: {
   const canonicalUri = `/${encodeRfc3986(bucket)}/${key.split("/").map(encodeRfc3986).join("/")}`;
 
   const headers = [
-    `content-type:${contentType}`,
     `host:${host}`,
     `x-amz-content-sha256:${payloadHash}`,
     `x-amz-date:${amzDate}`,
@@ -71,17 +58,17 @@ async function signPutUrl(opts: {
     ["X-Amz-Credential", `${accessKeyId}/${dateStamp}/${region}/s3/aws4_request`],
     ["X-Amz-Date", amzDate],
     ["X-Amz-Expires", String(expiresIn)],
-    ["X-Amz-SignedHeaders", "content-type;host;x-amz-content-sha256;x-amz-date"],
+    ["X-Amz-SignedHeaders", "host;x-amz-content-sha256;x-amz-date"],
   ]
     .map(([k, v]) => `${encodeRfc3986(k)}=${encodeRfc3986(v)}`)
     .join("&");
 
   const canonicalRequest = [
-    "PUT",
+    "GET",
     canonicalUri,
     canonicalQuery,
     headers,
-    "content-type;host;x-amz-content-sha256;x-amz-date",
+    "host;x-amz-content-sha256;x-amz-date",
     payloadHash,
   ].join("\n");
 
@@ -124,7 +111,6 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "method not allowed" }), { status: 405, headers: cors });
     }
 
-    // Require a valid user JWT (verify_jwt is also on at deploy time).
     const authHeader = req.headers.get("Authorization") || "";
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
@@ -138,29 +124,26 @@ Deno.serve(async (req) => {
 
     const body = await req.json();
     const key: string = String(body?.key || "").replace(/^\/+/, "");
-    const contentType: string = String(body?.contentType || "application/octet-stream");
 
     if (!key || key.includes("..") || key.startsWith("/")) {
       return new Response(JSON.stringify({ error: "invalid key" }), { status: 400, headers: cors });
     }
-    const bucket = bucketForKey(key);
-    if (!bucket) {
+    if (!PRIVATE_PREFIXES.some((p) => key.startsWith(p))) {
       return new Response(JSON.stringify({ error: "prefix not allowed" }), { status: 403, headers: cors });
     }
 
-    const accountId = Deno.env.get("R2_ACCOUNT_ID")!;
     const accessKeyId = Deno.env.get("R2_ACCESS_KEY_ID")!;
     const secretAccessKey = Deno.env.get("R2_SECRET_ACCESS_KEY")!;
     const endpoint = Deno.env.get("R2_S3_ENDPOINT")!;
+    const bucket = Deno.env.get("R2_PRIVATE_BUCKET") || "resolveao-private";
 
-    const url = await signPutUrl({
+    const url = await signGetUrl({
       endpoint,
       region: "auto",
       accessKeyId,
       secretAccessKey,
       bucket,
       key,
-      contentType,
       expiresIn: 300,
     });
 
