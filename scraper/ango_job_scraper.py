@@ -181,12 +181,13 @@ JOBS_CONFIG: Dict[str, dict] = {
         "base_url": "https://www.jobartis.com",
         "list_url": "https://www.jobartis.com/vagas-emprego/luanda",
         "job_card_selector": ".job, .thumbnail-card, .panel-default",
-        "title_selector": ".job-link, h2, h3",
+        "title_selector": "h2.job__title, .job__title, h2, h3",
         "company_selector": "h5",
         "location_selector": "li, .location",
         "link_selector": "a.job-link, a",
         "detail_enabled": True,
-        "detail_description_selector": ".job-description",
+        "detail_description_selector": ".description, .job__description, [class*=description], .job-description",
+        "card_description_selector": ".job__description",
         "detail_requirements_selector": ".job-requirements",
         "request_delay_range": (3, 6),
     },
@@ -223,6 +224,149 @@ JOBS_CONFIG: Dict[str, dict] = {
     },
 }
 
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# LIMPEZA DE TÍTULOS DE VAGAS — cards colados (título+empresa+local+meta+desc)
+# ─────────────────────────────────────────────────────────────────────────
+JOB_META_PATTERNS = [
+    r"Tempo indeterminado",
+    r"Tempo determinado",
+    r"Full[- ]?time",
+    r"Part[- ]?time",
+    r"A definir",
+    r"Est[áa]gio",
+    r"\d+\s*(?:ou\s+mais\s+)?anos?\s+de\s+experi[êe]ncia\s+exigido",
+    r"nenhuma\s+experi[êe]ncia\s+necess[áa]ria!?",
+    r"Contrato de servi[çc]os",
+]
+JOB_DESC_VERBS = (
+    r"Assegurar|Garantir|Realizar|Coordenar|Gerenciar|Respons[áa]vel|Supervisionar|"
+    r"Apoiar|Desenvolver|Elaborar|Executar|Prestar|Manter|Controlar|Analisar|"
+    r"Prospetar|Acompanhar|Participar|Prestar"
+)
+_GLUE_BOUNDARY = re.compile(r"(?<=[a-zà-ÿ0-9)\]])(?=[A-ZÀ-Þ])")
+_GLUE_SKIP_WORDS = {
+    "whatsapp", "iphone", "iphones", "ios", "ebay", "android",
+    "facebook", "instagram", "tiktok", "youtube", "linkedin",
+}
+
+
+def fix_mojibake(text: str) -> str:
+    """Repara UTF-8 decodificado como latin-1/cp1252 (ex.: 'experiÃªncia')."""
+    if not text:
+        return text
+    s = text.lstrip("\ufeff")
+    if not re.search(r"Ã[\x80-\xbf]|Â[\x80-\xbf]|â€", s):
+        return s
+
+    def _tokens(src: str, enc: str) -> str:
+        def repl(m: "re.Match[str]") -> str:
+            try:
+                return m.group(0).encode(enc, "strict").decode("utf-8", "strict")
+            except (UnicodeEncodeError, UnicodeDecodeError):
+                return m.group(0)
+
+        return re.sub(r"(?:Ã[\x80-\xbf]|Â[\x80-\xbf])+", repl, src)
+
+    out = _tokens(s, "latin-1")
+    if "â€" in out:
+        def repl2(m: "re.Match[str]") -> str:
+            try:
+                return m.group(0).encode("cp1252", "strict").decode("utf-8", "strict")
+            except (UnicodeEncodeError, UnicodeDecodeError):
+                return m.group(0)
+
+        out = re.sub(
+            "â€[€\\u2018\\u2019\\u201c\\u201d\\u2013\\u2014\\u0080-\\u009f]",
+            repl2,
+            out,
+        )
+    return out
+
+
+def _skip_boundary(t: str, i: int) -> bool:
+    wb = re.search(r"[\wÀ-ÿ]+$", t[:i])
+    wa = re.match(r"[\wÀ-ÿ]+", t[i:])
+    cand = ((wb.group(0) if wb else "") + (wa.group(0) if wa else "")).lower()
+    if not cand:
+        return False
+    return cand in _GLUE_SKIP_WORDS or any(cand.startswith(b) for b in _GLUE_SKIP_WORDS)
+
+
+def _glue_split(t: str) -> tuple:
+    """(cabeça, cauda) cortando no primeiro 'minúsculo→Maiúsculo' colado."""
+    if len(t) <= 60:
+        return t, ""
+    for m in _GLUE_BOUNDARY.finditer(t):
+        i = m.start()
+        if i < 20:
+            continue
+        head, tail = t[:i].rstrip(), t[i:]
+        if len(head) < 40 or len(tail) < 20:
+            continue
+        if _skip_boundary(t, i):
+            continue
+        return head, tail
+    return t, ""
+
+
+def split_job_title(title: str, company: str = "", location: str = "") -> tuple:
+    """Separa 'título+empresa+local+metadados+descrição' colados pelo card → (título, cauda)."""
+    t = fix_mojibake(title or "")
+    t = re.sub(r"\s+", " ", t).strip()
+    if len(t) < 15:
+        return t, ""
+    markers = []
+    for m in (company, location):
+        if m and len(m) >= 3 and m not in ("Empresa Confidencial", "Angola"):
+            i = t.find(m, 1)
+            if i >= 1:
+                markers.append((i, t[i - 1] != " "))
+    for pat in JOB_META_PATTERNS:
+        mm = re.search(pat, t)
+        if mm and mm.start() >= 8:
+            markers.append((mm.start(), t[mm.start() - 1] != " "))
+    vm = re.search(JOB_DESC_VERBS, t)
+    if vm and vm.start() >= 15:
+        markers.append((vm.start(), t[vm.start() - 1] != " "))
+    if not markers:
+        return _glue_split(t)
+    # escolhe o primeiro marcador individualmente aceitável (cola, ou cadeia, ou título gigante)
+    for pos, glued in sorted(markers):
+        head = t[:pos].rstrip(" ,;:/-–—")
+        chained = any(p > pos for p, _ in markers)
+        accept = len(head) >= 6 and (
+            glued or (pos >= 20 and chained) or (pos >= 25 and len(t) > 110)
+        )
+        if accept:
+            return head, t[pos:]
+    return _glue_split(t)
+
+
+def strip_meta_prefix(tail: str, company: str = "", location: str = "") -> str:
+    """Remove empresa/local/metadados do início de uma cauda de título → texto de descrição."""
+    t = (tail or "").strip()
+    for _ in range(8):
+        cut = False
+        ts = t.lstrip(" /,;|-–—•·")
+        for m in (company, location):
+            if m and len(m) >= 3 and ts.startswith(m):
+                t = ts[len(m):]
+                cut = True
+                break
+        if cut:
+            continue
+        ts2 = t.lstrip()
+        for pat in JOB_META_PATTERNS:
+            mm = re.match(pat, ts2)
+            if mm:
+                t = ts2[mm.end():]
+                cut = True
+                break
+        if not cut:
+            break
+    return t.lstrip(" /,;|•·-–—\t")
 
 
 # ─────────────────────────────────────────────
@@ -305,6 +449,7 @@ class AngoJobScraper:
     def _clean(self, text: Optional[str]) -> str:
         if not text:
             return ""
+        text = fix_mojibake(text)
         text = unicodedata.normalize("NFKC", text)
         text = re.sub(r"[\x00-\x08\x0b-\x1f\x7f]", "", text)
         return re.sub(r"\s+", " ", text).strip()
@@ -565,6 +710,12 @@ class AngoJobScraper:
             loc_tag = card.select_one(cfg["location_selector"]) if cfg.get("location_selector") else None
             location = self._clean(loc_tag.get_text() if loc_tag else "Angola")
 
+            # 3.5 Separa metadados colados no título (título | empresa+local+meta+descrição)
+            title, title_tail = split_job_title(title, company, location)
+            if not title or len(title) < 3:
+                log.warning(f"  ⏭️  Título inválido após limpeza em {site_name}")
+                return False
+
             # 4. DEEP SCRAPING (Página de Detalhe)
             description = ""
             requirements_list = []
@@ -600,6 +751,15 @@ class AngoJobScraper:
                     salary = self._extract_salary(detail_soup)
             
             # 5. Fallbacks e Limpeza
+            if not description and cfg.get("card_description_selector"):
+                cd_tag = card.select_one(cfg["card_description_selector"])
+                if cd_tag:
+                    description = self._clean(cd_tag.get_text(separator="\n"))
+            if not description and title_tail:
+                tail_desc = strip_meta_prefix(title_tail, company, location)
+                if len(tail_desc) >= 40:
+                    description = tail_desc
+
             if not image_url:
                 image_url = self._get_category_placeholder(title)
             

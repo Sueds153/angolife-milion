@@ -68,7 +68,8 @@ def is_junk_title(title: str) -> bool:
     s = t.lower()
     if re.search(
         r"(página inicial|pagina inicial|não encontrado|nao encontrado|"
-        r"error 404|top news|últimas notícias|ultimas noticias)",
+        r"error 404|top news|últimas notícias|ultimas noticias|"
+        r"global media|novagazeta - gem|gem angola)",
         s,
     ):
         return True
@@ -80,6 +81,9 @@ def is_junk_title(title: str) -> bool:
         "saúde", "saude", "educação", "educacao", "turismo",
         "transportes", "transporte", "agricultura",
     }:
+        return True
+    # 'Sociedade 106' / 'Politica 108' — páginas de categoria com id numérico
+    if re.fullmatch(r"[a-zà-ú]+(?: [a-zà-ú]+)? \d{1,5}", s):
         return True
     return False
 
@@ -95,6 +99,237 @@ def is_junk_url(url: str) -> bool:
     if re.search(r"/(noticias|noticia|news|articles|artigos)$", path):
         return True
     return False
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# LIMPEZA DE CONTEÚDO — títulos colados, mojibake e resumos com navegação
+# ─────────────────────────────────────────────────────────────────────────
+def fix_mojibake(text: str) -> str:
+    """Repara UTF-8 decodificado como latin-1/cp1252 (ex.: 'LÃ­deres' → 'Líderes')."""
+    if not text:
+        return text
+    s = text.lstrip("\ufeff")
+    if not re.search(r"Ã[\x80-\xbf]|Â[\x80-\xbf]|â€", s):
+        return s
+
+    def _tokens(src: str, enc: str) -> str:
+        def repl(m: "re.Match[str]") -> str:
+            try:
+                return m.group(0).encode(enc, "strict").decode("utf-8", "strict")
+            except (UnicodeEncodeError, UnicodeDecodeError):
+                return m.group(0)
+
+        return re.sub(r"(?:Ã[\x80-\xbf]|Â[\x80-\xbf])+", repl, src)
+
+    out = _tokens(s, "latin-1")
+    if "â€" in out:
+        def repl2(m: "re.Match[str]") -> str:
+            try:
+                return m.group(0).encode("cp1252", "strict").decode("utf-8", "strict")
+            except (UnicodeEncodeError, UnicodeDecodeError):
+                return m.group(0)
+
+        out = re.sub(
+            "â€[€\\u2018\\u2019\\u201c\\u201d\\u2013\\u2014\\u0080-\\u009f]",
+            repl2,
+            out,
+        )
+    return out
+
+
+def decode_html(resp) -> str:
+    """Decodifica a resposta HTML contornando o default ISO-8859-1 do requests."""
+    raw = resp.content
+    declared = (resp.encoding or "").lower().replace("_", "-")
+    if declared in ("", "iso-8859-1", "latin-1", "latin1", "us-ascii"):
+        try:
+            return raw.decode("utf-8")
+        except UnicodeDecodeError:
+            try:
+                return raw.decode(resp.apparent_encoding or "latin-1", errors="replace")
+            except LookupError:
+                return raw.decode("latin-1", errors="replace")
+    try:
+        return raw.decode(resp.encoding, errors="replace")
+    except LookupError:
+        return raw.decode("utf-8", errors="replace")
+
+
+_CAT_PREFIX = re.compile(
+    r"^(?:Sociedade|Pol[íi]tica|Economia|Desporto|Cultura|Mundo|Opini[ãa]o|"
+    r"Entretenimento|Sa[úu]de|Educa[çc][ãa]o|Tecnologia|Angola|Oficial|Utilidade|"
+    r"Investiga[çc][ãa]o|Geral|Oportunidades|Internacional|Brasil)"
+    r"(?:/\s*)?(?:Seman[áa]rio\s+Novo\s+Jornal)?(?=[A-ZÀ-Þ])"
+)
+_GLUE_BOUNDARY = re.compile(r"(?<=[a-zà-ÿ0-9)\]])(?=[A-ZÀ-Þ])")
+_GLUE_SKIP_WORDS = {
+    "whatsapp", "iphone", "iphones", "ios", "ebay", "android",
+    "facebook", "instagram", "tiktok", "youtube", "linkedin",
+}
+
+
+def _skip_boundary(t: str, i: int) -> bool:
+    """True se o 'minúsculo→Maiúsculo' está dentro de uma marca conhecida (ex.: WhatsApp)."""
+    wb = re.search(r"[\wÀ-ÿ]+$", t[:i])
+    wa = re.match(r"[\wÀ-ÿ]+", t[i:])
+    cand = ((wb.group(0) if wb else "") + (wa.group(0) if wa else "")).lower()
+    if not cand:
+        return False
+    return cand in _GLUE_SKIP_WORDS or any(cand.startswith(b) for b in _GLUE_SKIP_WORDS)
+
+
+def _glue_cut(t: str) -> str:
+    """Corta 'manchete+lead' colados no primeiro 'minúsculo→Maiúsculo' sem espaço."""
+    if len(t) <= 60:
+        return t
+    for m in _GLUE_BOUNDARY.finditer(t):
+        i = m.start()
+        if i < 20:
+            continue
+        head, tail = t[:i].rstrip(), t[i:]
+        if len(head) < 40 or len(tail) < 20:
+            continue
+        if _skip_boundary(t, i):
+            continue
+        return head
+    return t
+
+
+def _insert_glue_spaces(s: str) -> str:
+    """Insere espaço em colagens de texto ('mercadoDIPLOMA' → 'mercado DIPLOMA')."""
+    res = s
+    pos = 0
+    while True:
+        m = _GLUE_BOUNDARY.search(res, pos)
+        if not m:
+            break
+        i = m.start()
+        if _skip_boundary(res, i):
+            pos = i + 1
+            continue
+        res = res[:i] + " " + res[i:]
+        pos = i + 2
+    return res
+
+
+def clean_news_title(title: str) -> str:
+    """Limpa títulos: mojibake, prefixos de categoria colados e manchete+lead colados."""
+    t = fix_mojibake(title or "")
+    t = re.sub(r"\s+", " ", t).strip()
+    if not t:
+        return t
+    # prefixo de secção colado sem espaço (ex.: 'SociedadeÁfrica: …')
+    for _ in range(3):
+        m = _CAT_PREFIX.match(t)
+        if not m:
+            break
+        t = t[m.end():].lstrip(" /")
+    # marca da fonte no início (ex.: 'NovaGazeta - GEM Angola <manchete>')
+    t = re.sub(r"^\S+\s*-\s*GEM Angola\s+", "", t)
+    return _glue_cut(t).strip(" -–—:,;/")
+
+
+def clean_summary_text(text: str) -> str:
+    """Limpa resumos: mojibake, BOM, navegação do site no início e colagens de texto."""
+    s = fix_mojibake(text or "")
+    s = s.lstrip("\ufeff")
+    s = re.sub(r"\s+", " ", s).strip()
+    # lixo de script/analytics no meio do resumo (ex.: ANGONOTÍCIAS "host = '…'; (function…")
+    s = re.split(r"\s+host\s*=\s*['\"]https?://|\s+\(function\s*\(", s, maxsplit=1)[0].strip()
+    if re.search(r"(?i:p[áa]gina inicial)", s):
+        m = re.search(r"^.*?(?i:p[áa]gina inicial).*?(?i:v[íi]deos)\s*", s)
+        if m:
+            s = s[m.end():]
+        else:
+            p_end = re.search(r"(?i:p[áa]gina inicial)", s).end()
+            # consome o sufixo tipo ' Angola' (uma palavra capitalizada)
+            m2 = re.match(r"\s*[-–—]?\s*[A-ZÀ-Þ][a-zà-ÿ]+", s[p_end:])
+            if m2:
+                s = s[p_end + m2.end():]
+            else:
+                gb = _GLUE_BOUNDARY.search(s, p_end)
+                if gb and gb.start() - p_end <= 30:
+                    s = s[gb.start():]
+    s = _insert_glue_spaces(s)
+    return s.lstrip(" |-–—:")
+
+
+# seletores de corpo por ordem de prioridade (o ANCESTRAL 'main' nunca
+# deve vencer um 'article' concreto — era isso que poluía resumo/corpo)
+# '.details-content' = NovaGazeta (corpo real); 'article' ali são promos de sidebar
+BODY_SELECTORS = (
+    ".details-content",
+    "article",
+    ".entry-content",
+    ".post-content",
+    ".content-body",
+    ".article-content",
+    ".td-post-content",
+    ".node-content",
+    ".field--name-body",
+    ".content",
+    "main",
+)
+
+
+def extract_body(detail_soup) -> tuple:
+    """(body_html, body_text) — prioriza contentores de artigo reais; fallback sem <head>/nav."""
+    body_area = None
+    for sel in BODY_SELECTORS:
+        body_area = detail_soup.select_one(sel)
+        if body_area is not None:
+            break
+    if body_area is not None:
+        for junk in body_area.select("script, style, iframe, ins, nav, footer, aside, form"):
+            junk.decompose()
+        if body_area.name == "main":
+            for junk in body_area.select("title, header, h1"):
+                junk.decompose()
+    body_text = body_area.get_text(separator=" ") if body_area is not None else ""
+    body_html = ""
+    if body_area is not None and len(body_text.strip()) >= 80:
+        body_html = str(body_area)
+        return body_html, body_text
+    # fallback: página inteira sem <head>/navegação/script
+    fb = BeautifulSoup(str(detail_soup), "html.parser")
+    for junk in fb(["script", "style", "nav", "header", "footer", "aside", "form", "title"]):
+        junk.decompose()
+    fb_text = fb.get_text(separator=" ")
+    if len(fb_text.strip()) > len(body_text.strip()):
+        body_text = fb_text
+        for junk in fb(["script", "style"]):
+            junk.decompose()
+        body_html = str(fb)
+    return body_html, body_text
+
+
+def pick_detail_title(detail_soup, fallback_hint: str = "") -> str:
+    """Título do detalhe: og:title → h1 (se não for marca) → <title> da página → listagem."""
+    og = detail_soup.select_one('meta[property="og:title"]')
+    if og is not None:
+        og_text = (og.get("content") or "").strip()
+        if og_text:
+            og_clean = clean_news_title(og_text)
+            if og_clean and not is_junk_title(og_clean) and len(og_clean) >= 12:
+                # corta sufixo de marca tipo ' - NovaGazeta'
+                og_clean = re.split(r"\s+[|–—]\s+|\s+-\s+", og_clean, maxsplit=1)[0].strip()
+                return og_clean
+    h1 = detail_soup.select_one("h1, .entry-title, .article-title")
+    h1_text = h1.get_text(strip=True) if h1 else ""
+    if h1_text:
+        h1_clean = clean_news_title(h1_text)
+        if h1_clean and not is_junk_title(h1_clean) and len(h1_clean) >= 12:
+            return h1_clean
+    page_title = ""
+    if detail_soup.title:
+        page_title = detail_soup.title.get_text(strip=True)
+    if page_title:
+        page_title = re.split(r"\s+[|–—]\s+|\s+-\s+", page_title, maxsplit=1)[0].strip()
+    if page_title and len(page_title) >= 15 and not is_junk_title(page_title):
+        return clean_news_title(page_title)
+    if fallback_hint and not is_junk_title(fallback_hint):
+        return clean_news_title(fallback_hint)
+    return clean_news_title(h1_text or fallback_hint)
 
 
 # ─────────────────────────────────────────────────────────────────────────
@@ -470,7 +705,7 @@ class AngoNewsScraper:
 
     # ── Resumo do Texto ───────────────────────────────────────────────────
     def get_summary(self, text: str, max_len: int = 220) -> str:
-        clean = re.sub(r"\s+", " ", text).strip()
+        clean = clean_summary_text(text)
         return (clean[:max_len] + "...") if len(clean) > max_len else clean
 
     # ── Sanitização HTML ──────────────────────────────────────────────────
@@ -555,7 +790,7 @@ class AngoNewsScraper:
             
             resp = self.session.get(cfg["list_url"], timeout=20, verify=verify, headers=headers)
             resp.raise_for_status()
-            soup = BeautifulSoup(resp.text, "html.parser")
+            soup = BeautifulSoup(decode_html(resp), "html.parser")
 
             candidates = soup.select(cfg["article_selector"])
             articles: List = []
@@ -702,17 +937,10 @@ class AngoNewsScraper:
             article_url, timeout=15, verify=verify, headers=headers
         )
         detail_resp.raise_for_status()
-        detail_soup = BeautifulSoup(detail_resp.text, "html.parser")
+        detail_soup = BeautifulSoup(decode_html(detail_resp), "html.parser")
 
-        # Título: prefere h1 do detalhe se não for lixo de navegação/marca
-        detail_title_tag = detail_soup.select_one("h1, .entry-title, .article-title")
-        detail_title = detail_title_tag.get_text(strip=True) if detail_title_tag else ""
-        if detail_title and not is_junk_title(detail_title):
-            final_title = detail_title
-        elif title and not is_junk_title(title):
-            final_title = title
-        else:
-            final_title = detail_title or title
+        # Título: h1 do detalhe → <title> da página → listagem (limpos de colagens)
+        final_title = pick_detail_title(detail_soup, title)
         if not final_title or len(final_title) < 5 or is_junk_title(final_title):
             log.debug(f"      ⏭️  Título inválido em {site_name}: {final_title!r}")
             return
@@ -723,13 +951,8 @@ class AngoNewsScraper:
         # ── Extração de Data (meta-tags, sem LLM) ─────────────────────
         published_at = self.extract_date(detail_soup)
 
-        # ── Extração do Corpo ─────────────────────────────────────────
-        body_area = detail_soup.select_one(
-            "article, .entry-content, .post-content, .content-body, "
-            ".article-content, .td-post-content, main"
-        )
-        body_html = self.sanitize_html(body_area) if body_area else ""
-        body_text = body_area.get_text(separator=" ") if body_area else detail_soup.get_text()
+        # ── Extração do Corpo (ordem de prioridade: article real > main) ─
+        body_html, body_text = extract_body(detail_soup)
 
         # Fallback híbrido: corpo vazio/curto → LLM
         if self.sgai_enabled() and len((body_text or "").strip()) < 200:
@@ -757,9 +980,9 @@ class AngoNewsScraper:
 
         # ── Payload para Supabase (Check de Nulos e Colunas) ─────
         payload = {
-            "titulo": final_title[:500],
+            "titulo": clean_news_title(final_title)[:500],
             "resumo": (summary or "")[:1000],
-            "corpo": (body_html or "")[:50000],
+            "corpo": fix_mojibake(body_html or "")[:50000],
             "imagem_url": image_url or RESOLVEAO_PLACEHOLDER,
             "categoria": categoria or "Geral",
             "fonte": site_name,

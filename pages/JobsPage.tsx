@@ -127,7 +127,8 @@ export const JobsPage: React.FC<JobsPageProps> = ({
 
     const executeShare = () => {
       const appLink = "https://resolveao.vercel.app";
-      const text = `🚀 *Vaga Imperdível:* ${job.title}\n🏢 *Empresa:* ${job.company}\n📍 *Local:* ${job.location}\n\nOlha esta vaga que encontrei na Resolve.AO! Sê o primeiro a candidatar-te.\n\nBaixa aqui o app e vê mais: ${appLink}`;
+      const cleanTitle = JobUtils.parseJobData(job).cleanTitle || job.title;
+      const text = `🚀 *Vaga Imperdível:* ${cleanTitle}\n🏢 *Empresa:* ${job.company}\n📍 *Local:* ${job.location}\n\nOlha esta vaga que encontrei na Resolve.AO! Sê o primeiro a candidatar-te.\n\nBaixa aqui o app e vê mais: ${appLink}`;
       const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
       openExternal(url);
     };

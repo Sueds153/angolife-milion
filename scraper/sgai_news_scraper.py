@@ -50,6 +50,9 @@ from news_scraper import (  # noqa: E402
     RESOLVEAO_PLACEHOLDER,
     SITES_CONFIG,
     SupabaseRestClient,
+    clean_news_title,
+    clean_summary_text,
+    fix_mojibake,
     is_junk_url,
 )
 
@@ -388,11 +391,15 @@ class SgaiNewsScraper:
     def build_payload(
         self, site_name: str, cfg: dict, article_url: str, title: str, detail: Dict[str, str]
     ) -> Dict[str, Any]:
-        final_title = (detail.get("titulo") or title or "").strip()
+        final_title = clean_news_title(
+            fix_mojibake((detail.get("titulo") or title or "").strip())
+        )
         if is_junk_title(final_title):
-            final_title = title
+            final_title = clean_news_title(title)
         corpo_html = corpo_to_html(detail.get("corpo") or "")
-        summary = make_summary(re.sub(r"<[^>]+>", " ", corpo_html) or title, 220)
+        summary = clean_summary_text(
+            make_summary(re.sub(r"<[^>]+>", " ", corpo_html) or title, 220)
+        )
         image = detail.get("imagem_url") or RESOLVEAO_PLACEHOLDER
         if not image.startswith("http"):
             image = RESOLVEAO_PLACEHOLDER
@@ -400,7 +407,7 @@ class SgaiNewsScraper:
         payload: Dict[str, Any] = {
             "titulo": final_title[:500],
             "resumo": (summary or "")[:1000],
-            "corpo": corpo_html[:50000],
+            "corpo": fix_mojibake(corpo_html)[:50000],
             "imagem_url": image,
             "categoria": categoria or "Geral",
             "fonte": site_name,

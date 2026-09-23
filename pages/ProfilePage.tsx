@@ -13,6 +13,7 @@ import { VaiJaService } from '../services/api/vaija.service';
 import { DadosMotoristaForm } from '../components/vaija/DadosMotoristaForm';
 import { nivelClasses, nivelEmoji, nivelLabel, nivelPorPontos } from '../components/multicaixa/helpers';
 import { openExternal } from '../services/core/openExternal';
+import { JobUtils } from '../services/utils/jobUtils';
 
 export const ProfilePage: React.FC = () => {
   const { user, setUser, setIsAuthenticated } = useAppStore();
@@ -143,7 +144,8 @@ export const ProfilePage: React.FC = () => {
   const handleSavedJobShare = (e: React.MouseEvent, job: Job) => {
     e.stopPropagation();
     const appLink = "https://resolveao.vercel.app";
-    const text = `🚀 *Vaga Imperdível:* ${job.title}\n🏢 *Empresa:* ${job.company}\n📍 *Local:* ${job.location}\n\nOlha esta vaga que encontrei na Resolve.AO! Sê o primeiro a candidatar-te.\n\nBaixa aqui o app e vê mais: ${appLink}`;
+    const cleanTitle = JobUtils.parseJobData(job).cleanTitle || job.title;
+    const text = `🚀 *Vaga Imperdível:* ${cleanTitle}\n🏢 *Empresa:* ${job.company}\n📍 *Local:* ${job.location}\n\nOlha esta vaga que encontrei na Resolve.AO! Sê o primeiro a candidatar-te.\n\nBaixa aqui o app e vê mais: ${appLink}`;
     openExternal(`https://wa.me/?text=${encodeURIComponent(text)}`);
   };
 

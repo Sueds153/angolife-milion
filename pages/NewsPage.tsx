@@ -403,17 +403,21 @@ export const NewsPage: React.FC<NewsPageProps> = () => {
                        {selectedArticle.body ? (
                          <div dangerouslySetInnerHTML={{ __html: selectedArticle.body }} />
                        ) : (
-                         <>
-                           <p>
-                              Informações exclusivas obtidas pelo Resolve.AO indicam movimentos estratégicos nos bastidores que podem alterar completamente o cenário atual. Fontes próximas confirmam que a situação descrita é apenas a ponta do iceberg.
+                         <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+                           <p className="text-slate-300 font-medium leading-relaxed">
+                             O corpo completo deste artigo não está disponível offline. Lê a notícia na fonte original.
                            </p>
-                           <p>
-                              "A maioria das pessoas não está a ver o que está por vir", afirmou um analista de mercado que preferiu não ser identificado. Os dados preliminares sugerem um impacto direto nas próximas 48 horas.
-                           </p>
-                           <p>
-                              Especialistas recomendam cautela e atenção redobrada. Se os rumores se confirmarem, estaremos diante de um dos maiores eventos do ano no setor. Continue a acompanhar o Resolve.AO para atualizações em tempo real sobre este desenvolvimento.
-                           </p>
-                         </>
+                           {selectedArticle.url && (
+                             <a
+                               href={selectedArticle.url}
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               className="mt-4 inline-flex items-center gap-2 text-brand-gold font-black text-xs uppercase tracking-widest hover:underline"
+                             >
+                               Abrir em {selectedArticle.source || 'origem'} <ExternalLink size={14} />
+                             </a>
+                           )}
+                         </div>
                        )}
                     </div>
 ) : (
@@ -424,14 +428,16 @@ export const NewsPage: React.FC<NewsPageProps> = () => {
                           {selectedArticle.body ? (
                             <div dangerouslySetInnerHTML={{ __html: selectedArticle.body }} />
                           ) : (
-                            <>
-                              <p>
-                                 Informações exclusivas obtidas pelo Resolve.AO indicam movimentos estratégicos nos bastidores que podem alterar completamente o cenário atual. Fontes próximas confirmam que a situação descrita é apenas a ponta do iceberg.
+                            <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+                              <p className="text-slate-300 font-medium leading-relaxed">
+                                O corpo completo deste artigo não está disponível offline. Lê a notícia na fonte original.
                               </p>
-                              <p>
-                                 "A maioria das pessoas não está a ver o que está por vir", afirmou um analista de mercado que preferiu não ser identificado.
-                              </p>
-                            </>
+                              {selectedArticle.url && (
+                                <span className="mt-4 inline-flex items-center gap-2 text-brand-gold font-black text-xs uppercase tracking-widest">
+                                  Abrir em {selectedArticle.source || 'origem'}
+                                </span>
+                              )}
+                            </div>
                           )}
                        </div>
                        {/* Overlay de bloqueio */}
