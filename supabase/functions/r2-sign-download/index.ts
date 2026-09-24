@@ -19,7 +19,11 @@ function hmac(key: Uint8Array, data: string): Promise<Uint8Array> {
     { name: "HMAC", hash: "SHA-256" },
     false,
     ["sign"],
-  ).then((k) => crypto.subtle.sign("HMAC", k, new TextEncoder().encode(data)));
+  ).then(async (k) =>
+    new Uint8Array(
+      await crypto.subtle.sign("HMAC", k, new TextEncoder().encode(data)),
+    ),
+  );
 }
 
 async function sha256(data: Uint8Array | string): Promise<Uint8Array> {
@@ -52,31 +56,27 @@ async function signGetUrl(opts: {
   const now = new Date();
   const amzDate = now.toISOString().replace(/[:-]|\.\d{3}/g, "");
   const dateStamp = amzDate.slice(0, 8);
-  const payloadHash = toHex(await sha256(new Uint8Array(0)));
   const canonicalUri = `/${encodeRfc3986(bucket)}/${key.split("/").map(encodeRfc3986).join("/")}`;
 
-  const headers = [
-    `host:${host}`,
-    `x-amz-content-sha256:${payloadHash}`,
-    `x-amz-date:${amzDate}`,
-  ].join("\n");
-
+  const headers = `host:${host}\n`;
   const canonicalQuery = [
     ["X-Amz-Algorithm", "AWS4-HMAC-SHA256"],
     ["X-Amz-Credential", `${accessKeyId}/${dateStamp}/${region}/s3/aws4_request`],
     ["X-Amz-Date", amzDate],
     ["X-Amz-Expires", String(expiresIn)],
-    ["X-Amz-SignedHeaders", "host;x-amz-content-sha256;x-amz-date"],
+    ["X-Amz-SignedHeaders", "host"],
   ]
     .map(([k, v]) => `${encodeRfc3986(k)}=${encodeRfc3986(v)}`)
     .join("&");
+
+  const payloadHash = "UNSIGNED-PAYLOAD";
 
   const canonicalRequest = [
     "GET",
     canonicalUri,
     canonicalQuery,
     headers,
-    "host;x-amz-content-sha256;x-amz-date",
+    "host",
     payloadHash,
   ].join("\n");
 
