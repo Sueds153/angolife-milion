@@ -6,6 +6,7 @@ import { ProductDeal } from '../types';
 import { useAppStore } from '../store/useAppStore';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { PLACEHOLDER_IMAGE } from '../constants/placeholders';
+import { AdBanner } from '../components/ads/AdBanner';
 
 interface DealsPageProps {
   onSelectDeal: (deal: ProductDeal) => void;
@@ -152,6 +153,11 @@ export const DealsPage: React.FC<DealsPageProps> = ({ onSelectDeal, onShowInters
           <h2 className="text-fluid-h2 font-black text-brand-gold uppercase tracking-tighter leading-none">Descontos</h2>
           <p className="text-slate-500 font-bold text-[10px] md:text-xs uppercase tracking-widest mt-1">Preços reais encontrados em Luanda</p>
         </div>
+      </div>
+
+      {/* BANNER ANÚNCIO - Rodapé da lista de ofertas */}
+      <div className="mt-2">
+        <AdBanner format="leaderboard" customLocation="deals" />
       </div>
 
       {/* FAB - POSICIONADO ACIMA DA TAB BAR E DO ANÚNCIO */}

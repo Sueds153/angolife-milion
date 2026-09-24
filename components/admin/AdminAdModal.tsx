@@ -32,7 +32,6 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
     location: 'home',
     duration_seconds: 6,
     is_active: true,
-    display_order: 0,
     image_url: '',
     video_url: '',
     link: '',
@@ -51,7 +50,6 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
         location: 'home',
         duration_seconds: 6,
         is_active: true,
-        display_order: 0,
         image_url: '',
         video_url: '',
         link: '',
@@ -159,7 +157,11 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
       if (editingAd?.id) {
         await AdsService.updateAd(editingAd.id, payload);
       } else {
-        await AdsService.createAd(payload as Omit<Ad, 'id' | 'display_order'> & { display_order?: number });
+        // Omit display_order/id em criações — createAd auto-incrementa (max+1)
+        const createPayload: Partial<Ad> = { ...payload };
+        delete createPayload.display_order;
+        delete createPayload.id;
+        await AdsService.createAd(createPayload as Omit<Ad, 'id' | 'display_order'> & { display_order?: number });
       }
       onSuccess();
       onClose();
@@ -359,6 +361,8 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
                   <option value="home" className="bg-slate-900">Página Inicial (Home)</option>
                   <option value="jobs" className="bg-slate-900">Página de Empregos</option>
                   <option value="exchange" className="bg-slate-900">Página de Câmbio</option>
+                  <option value="news" className="bg-slate-900">Página de Notícias</option>
+                  <option value="deals" className="bg-slate-900">Página de Ofertas</option>
                   <option value="all" className="bg-slate-900">Todas as Páginas</option>
                 </select>
               </div>
@@ -390,12 +394,15 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
                   onChange={(e) => setFormData({...formData, format: e.target.value as Ad['format']})}
                   className="w-full bg-slate-50 dark:bg-white/5 border border-white/10 rounded-2xl p-4 pl-10 text-xs font-bold appearance-none focus:ring-2 focus:ring-orange-500/50 text-white"
                 >
-                  <option value="all" className="bg-slate-900">Todos os Formatos (Banner, Popup e Vídeo)</option>
-                  <option value="banner" className="bg-slate-900">Banner (Carrossel / Secção)</option>
-                  <option value="interstitial" className="bg-slate-900">Interstitial (Ecrã Inteiro Popup)</option>
-                  <option value="rewarded" className="bg-slate-900">Rewarded (Bonificado com Vídeo)</option>
+                  <option value="banner" className="bg-slate-900">Banner (carrossel, secção, leaderboard, sticky)</option>
+                  <option value="interstitial" className="bg-slate-900">Interstitial (popup ecrã inteiro)</option>
+                  <option value="rewarded" className="bg-slate-900">Rewarded (vídeo com recompensa)</option>
+                  <option value="all" className="bg-slate-900">Banner em qualquer slot (não gera popups)</option>
                 </select>
               </div>
+              <p className="text-[10px] text-slate-500 font-bold ml-1 leading-relaxed">
+                Interstitial e Rewarded são consumidos nos slots de popup (Home e transições). “Banner em qualquer slot” aparece só em leaderboards/stickies — nunca como popup.
+              </p>
             </div>
 
             {/* Duração */}

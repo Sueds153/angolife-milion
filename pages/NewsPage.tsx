@@ -76,7 +76,7 @@ const NewsImage: React.FC<{ src?: string; alt: string; className?: string; aspec
 };
 
 export const NewsPage: React.FC<NewsPageProps> = () => {
-  const { isAuthenticated, setAuthModal } = useAppStore();
+  const { isAuthenticated, setAuthModal, activeAds } = useAppStore();
   const onRequireAuth = () => setAuthModal(true, 'login');
   const [news, setNews] = useState<NewsArticle[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
@@ -85,6 +85,18 @@ export const NewsPage: React.FC<NewsPageProps> = () => {
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [visibleCount, setVisibleCount] = useState(9);
   const NEWS_PAGE_STEP = 9;
+
+  // Creative do rewarded vindo da BD (location news|all)
+  const rewardedCreative = React.useMemo(() => {
+    const match = activeAds.find(a =>
+      a.is_active && a.format === 'rewarded' && (a.location === 'news' || a.location === 'all')
+    );
+    return match ? {
+      image_url: match.image_url,
+      title: match.title || match.company_name,
+      company_name: match.company_name,
+    } : null;
+  }, [activeAds]);
 
   useEffect(() => {
     const handleOnline = () => setIsOffline(false);
@@ -317,7 +329,7 @@ export const NewsPage: React.FC<NewsPageProps> = () => {
         {/* BANNER ADAPTATIVO - Rodapé da lista de notícias */}
         {news.length > 0 && (
           <div className="mt-4">
-            <AdBanner format="leaderboard" />
+            <AdBanner format="leaderboard" customLocation="news" />
           </div>
         )}
 
@@ -339,6 +351,7 @@ export const NewsPage: React.FC<NewsPageProps> = () => {
       {/* REWARDED VIDEO - Desbloquear o corpo da notícia */}
       {showRewardedAd && (
         <RewardedAd 
+          creative={rewardedCreative}
           onReward={handleRewardedComplete} 
           onClose={handleRewardedCancel} 
         />
@@ -381,7 +394,7 @@ export const NewsPage: React.FC<NewsPageProps> = () => {
 
                  {/* BANNER ADAPTATIVO - Entre o título e o corpo */}
                  <div className="mb-8">
-                   <AdBanner format="leaderboard" />
+                   <AdBanner format="leaderboard" customLocation="news" />
                  </div>
 
                  <NewsImage 

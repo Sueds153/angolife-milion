@@ -6,7 +6,7 @@ create table if not exists public.ads (
     type text not null check (type in ('hero', 'partner')),
     media_type text not null check (media_type in ('image', 'video')),
     format text default 'banner' check (format in ('banner', 'interstitial', 'rewarded', 'all')),
-    location text default 'home' check (location in ('home', 'jobs', 'exchange', 'all')),
+    location text default 'home' check (location in ('home', 'jobs', 'exchange', 'news', 'deals', 'all')),
     duration_seconds int default 6,
     image_url text,
     video_url text,

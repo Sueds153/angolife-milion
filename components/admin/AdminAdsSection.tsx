@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Monitor, Plus, Trash2, Edit2, Check, X, ExternalLink, Image as ImageIcon, Video, Settings, Save, Globe, MessageCircle, Clock, MapPin, Layout } from 'lucide-react';
+import { Monitor, Plus, Trash2, Edit2, Check, X, ExternalLink, Image as ImageIcon, Video, Settings, Save, Globe, MessageCircle, Clock, MapPin, Layout, ArrowUp, ArrowDown } from 'lucide-react';
 import { Ad, SystemSettings, AdsService, isValidAdsenseClient } from '../../services/api/ads.service';
 import { isSafeHttpUrl, safeHttpUrl } from '../../services/utils/safeUrl';
 import { AdminAdModal } from './AdminAdModal';
@@ -73,6 +73,24 @@ export const AdminAdsSection: React.FC<AdminAdsSectionProps> = ({
     } catch (error) {
       console.error("Toggle ad error", error);
       setActionError('Não foi possível alterar o estado do anúncio.');
+    }
+  };
+
+  // Reordena dois anúncios adjacentes (sobe/desce) e regrava display_order sequencial
+  const handleMoveAd = async (index: number, direction: -1 | 1) => {
+    setActionError(null);
+    try {
+      const sorted = [...ads].sort((a, b) => a.display_order - b.display_order);
+      const j = index + direction;
+      if (j < 0 || j >= sorted.length) return;
+      [sorted[index], sorted[j]] = [sorted[j], sorted[index]];
+      await Promise.all(sorted.map((ad, i) =>
+        AdsService.updateAd(ad.id, { display_order: i + 1 })
+      ));
+      onRefresh();
+    } catch (error) {
+      console.error("Move ad error", error);
+      setActionError('Não foi possível reordenar o anúncio.');
     }
   };
 
@@ -219,8 +237,30 @@ export const AdminAdsSection: React.FC<AdminAdsSectionProps> = ({
           <h4 className="font-black text-sm uppercase tracking-tight ml-2">Lista de Anúncios Ativos</h4>
           
           <div className="grid grid-cols-1 gap-4">
-            {ads.map((ad) => (
+            {ads.map((ad, adIndex) => (
               <div key={ad.id} className="bg-white dark:bg-slate-900 p-4 rounded-3xl border border-orange-500/10 shadow-sm flex items-center gap-4 group hover:border-brand-gold/30 transition-all">
+                {/* Ordenação */}
+                <div className="flex flex-col gap-1 flex-shrink-0">
+                  <button
+                    onClick={() => handleMoveAd(adIndex, -1)}
+                    disabled={adIndex === 0}
+                    className="p-1.5 bg-slate-100 dark:bg-white/5 text-slate-400 hover:text-brand-gold rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                    title="Subir na lista"
+                    aria-label={`Subir anúncio ${ad.company_name || ad.title || ad.id}`}
+                  >
+                    <ArrowUp size={14} />
+                  </button>
+                  <button
+                    onClick={() => handleMoveAd(adIndex, 1)}
+                    disabled={adIndex === ads.length - 1}
+                    className="p-1.5 bg-slate-100 dark:bg-white/5 text-slate-400 hover:text-brand-gold rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                    title="Descer na lista"
+                    aria-label={`Descer anúncio ${ad.company_name || ad.title || ad.id}`}
+                  >
+                    <ArrowDown size={14} />
+                  </button>
+                </div>
+
                 {/* Preview Thumbnail */}
                 <div className="w-20 h-20 rounded-2xl bg-slate-100 dark:bg-white/5 overflow-hidden flex-shrink-0 relative">
                   {ad.media_type === 'video' ? (
@@ -245,7 +285,7 @@ export const AdminAdsSection: React.FC<AdminAdsSectionProps> = ({
                       {ad.media_type === 'video' ? <Video size={8}/> : <ImageIcon size={8}/>} {ad.media_type}
                     </span>
                     <span className="text-[7px] font-black uppercase bg-amber-500/10 text-amber-600 px-2 py-0.5 rounded-full flex items-center gap-1">
-                      <Layout size={8}/> {ad.format === 'all' ? 'Todos os Formatos' : ad.format}
+                      <Layout size={8}/> {ad.format === 'all' ? 'Banner (qualquer slot)' : ad.format}
                     </span>
                     <span className="text-[7px] font-black uppercase bg-emerald-500/10 text-emerald-600 px-2 py-0.5 rounded-full flex items-center gap-1">
                       <MapPin size={8}/> {ad.location}

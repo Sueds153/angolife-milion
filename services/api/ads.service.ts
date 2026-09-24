@@ -5,7 +5,7 @@ export interface Ad {
   type: 'hero' | 'partner';
   media_type: 'image' | 'video';
   format: 'banner' | 'interstitial' | 'rewarded' | 'all';
-  location: 'home' | 'jobs' | 'exchange' | 'all';
+  location: 'home' | 'jobs' | 'exchange' | 'news' | 'deals' | 'all';
   duration_seconds: number;
   image_url: string;
   video_url?: string;

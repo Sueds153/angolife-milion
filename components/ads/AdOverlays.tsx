@@ -4,12 +4,20 @@ import { X, Clock, Award } from 'lucide-react';
 import { useScrollLock } from '../../hooks/useScrollLock';
 import { PLACEHOLDER_IMAGE } from '../../constants/placeholders';
 
+/** Creative fields shared by DB-backed interstitial/rewarded ads */
+export interface OverlayCreative {
+  image_url?: string;
+  title?: string;
+  company_name?: string;
+}
+
 interface InterstitialAdProps {
   onClose: () => void;
   duration?: number;
+  creative?: OverlayCreative | null;
 }
 
-export const InterstitialAd: React.FC<InterstitialAdProps> = ({ onClose, duration = 5 }) => {
+export const InterstitialAd: React.FC<InterstitialAdProps> = ({ onClose, duration = 5, creative }) => {
   const [canClose, setCanClose] = useState(false);
   const [timeLeft, setTimeLeft] = useState(duration);
   const [prevDuration, setPrevDuration] = useState(duration);
@@ -66,11 +74,17 @@ export const InterstitialAd: React.FC<InterstitialAdProps> = ({ onClose, duratio
             <span className="text-[8px] md:text-[9px] uppercase tracking-[0.4em] text-slate-400 mb-8 border gold-border-subtle px-5 py-2.5 rounded-full font-black">Resolve.AO</span>
             
             <div className="w-28 h-28 md:w-40 md:h-40 rounded-full overflow-hidden mb-8 border-4 border-brand-gold shadow-2xl transform hover:scale-105 transition-transform duration-500">
-               <img src={PLACEHOLDER_IMAGE} className="w-full h-full object-cover" alt="Publicidade" />
+               <img src={creative?.image_url || PLACEHOLDER_IMAGE} className="w-full h-full object-cover" alt={creative?.title || 'Publicidade'} />
             </div>
             
-            <h3 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white mb-4 uppercase tracking-tighter leading-none">Resolve.AO</h3>
-            <p className="text-slate-500 dark:text-slate-400 mb-10 font-bold text-sm md:text-lg max-w-sm">O teu portal de câmbio, empregos e oportunidades em Angola.</p>
+            <h3 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white mb-4 uppercase tracking-tighter leading-none">
+              {creative?.title || creative?.company_name || 'Resolve.AO'}
+            </h3>
+            <p className="text-slate-500 dark:text-slate-400 mb-10 font-bold text-sm md:text-lg max-w-sm">
+              {creative?.company_name && creative?.title
+                ? `Patrocinado por ${creative.company_name}`
+                : 'O teu portal de câmbio, empregos e oportunidades em Angola.'}
+            </p>
             
             <button 
               onClick={onClose}
@@ -90,9 +104,10 @@ export const InterstitialAd: React.FC<InterstitialAdProps> = ({ onClose, duratio
 interface RewardedAdProps {
   onReward: () => void;
   onClose: () => void;
+  creative?: OverlayCreative | null;
 }
 
-export const RewardedAd: React.FC<RewardedAdProps> = ({ onReward, onClose }) => {
+export const RewardedAd: React.FC<RewardedAdProps> = ({ onReward, onClose, creative }) => {
   const DURATION = 15;
   const [timeLeft, setTimeLeft] = useState(DURATION);
   const [completed, setCompleted] = useState(false);
@@ -139,9 +154,9 @@ export const RewardedAd: React.FC<RewardedAdProps> = ({ onReward, onClose }) => 
       <div className="w-full h-full max-w-5xl max-h-[75vh] flex items-center justify-center relative border-y border-orange-500/10 bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.05)_0%,transparent_70%)]">
         <div className="text-center p-8 max-w-md">
            <div className="relative inline-block mb-12">
-              <div className={`w-32 h-32 md:w-48 md:h-48 rounded-full border-2 overflow-hidden shadow-2xl transition-all duration-1000 ${completed ? 'border-brand-gold scale-110' : 'border-white/10 opacity-30 grayscale'}`}>
-                 <img src={PLACEHOLDER_IMAGE} className="w-full h-full object-cover" alt="Reward" />
-              </div>
+               <div className={`w-32 h-32 md:w-48 md:h-48 rounded-full border-2 overflow-hidden shadow-2xl transition-all duration-1000 ${completed ? 'border-brand-gold scale-110' : 'border-white/10 opacity-30 grayscale'}`}>
+                  <img src={creative?.image_url || PLACEHOLDER_IMAGE} className="w-full h-full object-cover" alt={creative?.title || 'Reward'} />
+               </div>
               {completed && <Award size={40} className="absolute -top-4 -right-4 text-white bg-brand-gold rounded-full p-2 shadow-2xl border-4 border-black" />}
            </div>
            

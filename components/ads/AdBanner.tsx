@@ -9,7 +9,7 @@ import { SitePreviewModal } from '../modals/SitePreviewModal';
 
 interface AdBannerProps {
   format: 'leaderboard' | 'rectangle' | 'skyscraper' | 'sticky-footer';
-  customLocation?: 'home' | 'jobs' | 'exchange' | 'all';
+  customLocation?: 'home' | 'jobs' | 'exchange' | 'news' | 'deals' | 'all';
 }
 
 // Shared in-flight fetch so many AdBanner instances share one request.

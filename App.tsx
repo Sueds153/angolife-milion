@@ -4,7 +4,7 @@ import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import { Background } from './components/layout/Background';
 import { AdBanner } from './components/ads/AdBanner';
-import { InterstitialAd, RewardedAd } from './components/ads/AdOverlays';
+import { InterstitialAd, RewardedAd, OverlayCreative } from './components/ads/AdOverlays';
 import { AuthModal } from './components/modals/AuthModal';
 import { RecoveryPasswordModal } from './components/modals/RecoveryPasswordModal';
 import { NotificationToast } from './components/ui/NotificationToast';
@@ -52,7 +52,8 @@ const App: React.FC = () => {
     isDarkMode,
     isAuthModalOpen, authMode, setAuthModal,
     setPasswordRecovery,
-    notifications, addNotification, removeNotification
+    notifications, addNotification, removeNotification,
+    activeAds
   } = useAppStore();
 
   const getPageFromPath = (path: string): Page => {
@@ -157,11 +158,37 @@ const App: React.FC = () => {
   }, [setAuthModal, setIsAuthLoading, setIsAuthenticated, setUser, setPasswordRecovery]);
 
   const [showInterstitial, setShowInterstitial] = useState(false);
-  const [interstitialDuration, setInterstitialDuration] = useState(5);
   const [interstitialCallback, setInterstitialCallback] = useState<(() => void) | null>(null);
   const [onAdCancel, setOnAdCancel] = useState<(() => void) | null>(null);
+  const [overlayCreative, setOverlayCreative] = useState<OverlayCreative | null>(null);
   // Cooldown unificada em AdService (localStorage 2h) — sem timer local 5min
   const [subscribedCategories, setSubscribedCategories] = useState<string[]>([]);
+
+  // Creative de interstitial/rewarded a partir da BD (fallback: criativo da casa)
+  const pickOverlayCreative = (format: 'interstitial' | 'rewarded', page: Page): OverlayCreative | null => {
+    const match = activeAds.find(a =>
+      a.is_active &&
+      a.format === format &&
+      (a.location === page || a.location === 'all')
+    );
+    return match ? {
+      image_url: match.image_url,
+      title: match.title || match.company_name,
+      company_name: match.company_name,
+    } : null;
+  };
+
+  const openInterstitial = (page: Page, callback?: () => void) => {
+    const creative = pickOverlayCreative('interstitial', page);
+    setOverlayCreative(creative);
+    if (callback) setInterstitialCallback(() => callback);
+    setShowInterstitial(true);
+  };
+
+  const openRewarded = (page: Page) => {
+    setOverlayCreative(pickOverlayCreative('rewarded', page));
+    setShowRewarded(true);
+  };
 
   // Real-time Update Checker (real: só notifica quando há conteúdo novo)
   useEffect(() => {
@@ -265,8 +292,7 @@ const App: React.FC = () => {
 
     if (shouldShowAd) {
       setPendingAdPage(page);
-      setInterstitialDuration(5);
-      setShowInterstitial(true);
+      openInterstitial(page);
     } else {
       navigate(page === 'home' ? '/' : `/${page}`);
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -280,6 +306,11 @@ const App: React.FC = () => {
   };
 
   const showStickyAd = !(user?.isPremium || user?.isAdmin);
+  // Sticky footer lê a location da página actual (home/jobs/exchange/news/deals ou all)
+  const stickyLocation: 'home' | 'jobs' | 'exchange' | 'news' | 'deals' | 'all' =
+    currentPage === 'home' || currentPage === 'jobs' || currentPage === 'exchange' || currentPage === 'news' || currentPage === 'deals'
+      ? currentPage
+      : 'all';
 
   return (
     <div className="min-h-dvh bg-white dark:bg-slate-900 flex justify-center text-slate-900 dark:text-white transition-colors duration-300 print:bg-white print:text-black">
@@ -315,15 +346,13 @@ const App: React.FC = () => {
                   onRequestReward={(onSuccess, onCancel) => {
                     setRewardCallback(() => onSuccess);
                     setOnAdCancel(() => onCancel);
-                    setShowRewarded(true);
+                    openRewarded('jobs');
                   }}
                   onShowInterstitial={(callback) => {
                     if (!AdService.canShowInterstitial()) {
                       callback();
                     } else {
-                      setInterstitialDuration(5);
-                      setInterstitialCallback(() => callback);
-                      setShowInterstitial(true);
+                      openInterstitial('jobs', callback);
                     }
                   }}
                   subscribedCategories={subscribedCategories}
@@ -346,9 +375,7 @@ const App: React.FC = () => {
                       if (!AdService.canShowInterstitial()) {
                         callback();
                       } else {
-                        setInterstitialDuration(5);
-                        setInterstitialCallback(() => callback);
-                        setShowInterstitial(true);
+                        openInterstitial('deals', callback);
                       }
                     }}
                   />
@@ -363,15 +390,13 @@ const App: React.FC = () => {
                   onRequestReward={(onSuccess) => {
                     setRewardCallback(() => onSuccess);
                     setOnAdCancel(() => () => { });
-                    setShowRewarded(true);
+                    openRewarded('news');
                   }}
                   onShowInterstitial={(callback) => {
                     if (!AdService.canShowInterstitial()) {
                       callback();
                     } else {
-                      setInterstitialDuration(5);
-                      setInterstitialCallback(() => callback);
-                      setShowInterstitial(true);
+                      openInterstitial('news', callback);
                     }
                   }}
                 />
@@ -397,7 +422,7 @@ const App: React.FC = () => {
         {showStickyAd && (
           <div className="fixed bottom-0 left-1/2 -translate-x-1/2 md:hidden w-full max-w-lg z-[110] bg-white dark:bg-black border-t border-orange-500/10 shadow-2xl print:hidden">
             <div className="pb-safe">
-              <AdBanner format="sticky-footer" />
+              <AdBanner format="sticky-footer" customLocation={stickyLocation} />
             </div>
           </div>
         )}
@@ -414,7 +439,8 @@ const App: React.FC = () => {
 
       {showInterstitial && (
         <InterstitialAd
-          duration={interstitialDuration}
+          duration={5}
+          creative={overlayCreative}
           onClose={() => {
             setShowInterstitial(false);
             if (pendingAdPage) {
@@ -433,6 +459,7 @@ const App: React.FC = () => {
 
       {showRewarded && (
         <RewardedAd
+          creative={overlayCreative}
           onReward={() => { setShowRewarded(false); rewardCallback?.(); }}
           onClose={() => { setShowRewarded(false); onAdCancel?.(); }}
         />

@@ -319,7 +319,7 @@ export const DealDetailPage: React.FC<DealDetailPageProps> = ({ deal: initialDea
 
             {/* ═══ AD BANNER FIXO ═══════════════════════════════════════════════════ */}
             <div className="fixed bottom-[50px] left-1/2 -translate-x-1/2 w-full max-w-[480px] z-[95] bg-white dark:bg-black border-t border-orange-500/10 shadow-2xl print:hidden">
-                <AdBanner format="sticky-footer" />
+                <AdBanner format="sticky-footer" customLocation="deals" />
             </div>
 
         </div>
