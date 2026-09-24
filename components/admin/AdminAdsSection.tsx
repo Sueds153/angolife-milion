@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Monitor, Plus, Trash2, Edit2, Check, X, ExternalLink, Image as ImageIcon, Video, Settings, Save, Globe, MessageCircle, Clock, MapPin, Layout } from 'lucide-react';
 import { Ad, SystemSettings, AdsService } from '../../services/api/ads.service';
+import { isSafeHttpUrl, safeHttpUrl } from '../../services/utils/safeUrl';
 import { AdminAdModal } from './AdminAdModal';
 
 interface AdminAdsSectionProps {
@@ -257,10 +258,10 @@ export const AdminAdsSection: React.FC<AdminAdsSectionProps> = ({
                   >
                     <Trash2 size={16} />
                   </button>
-                  {ad.link && (
-                    <a 
-                      href={ad.link} 
-                      target="_blank" 
+                  {ad.link && isSafeHttpUrl(ad.link) && (
+                    <a
+                      href={safeHttpUrl(ad.link)!}
+                      target="_blank"
                       rel="noopener noreferrer"
                       title="Abrir Link"
                       className="p-2 bg-slate-100 dark:bg-white/5 text-slate-400 hover:text-brand-gold rounded-xl transition-all"

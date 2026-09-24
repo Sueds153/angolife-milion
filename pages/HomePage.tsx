@@ -17,6 +17,7 @@ import { ErrorBoundary } from '../components/ui/ErrorBoundary';
 import { SitePreviewModal } from '../components/modals/SitePreviewModal';
 import { Reveal } from '../components/ui/Reveal';
 import { openExternal } from '../services/core/openExternal';
+import { safeHttpUrl } from '../services/utils/safeUrl';
 
 interface HomeBanner {
   mediaType?: string;
@@ -80,25 +81,27 @@ export const HomePage: React.FC = () => {
   }, [ads]);
 
   useEffect(() => {
-    const setupBannerRotation = () => {
-      if (heroBanners.length === 0 || adBanners.length === 0) return;
+    // Hero and partner ads rotate independently — a missing one must not
+    // stop the other (and PARTNER_ADS fallbacks normally keep both non-empty).
+    const timers: number[] = [];
 
-      const heroInterval = setInterval(() => {
-        setHeroImageIndex((prev) => (prev + 1) % heroBanners.length);
-      }, (heroBanners[0]?.duration_seconds || 6) * 1000);
+    if (heroBanners.length > 1) {
+      timers.push(
+        window.setInterval(() => {
+          setHeroImageIndex((prev) => (prev + 1) % heroBanners.length);
+        }, (heroBanners[0]?.duration_seconds || 6) * 1000)
+      );
+    }
 
-      const adInterval = setInterval(() => {
-        setAdImageIndex((prev) => (prev + 1) % adBanners.length);
-      }, (adBanners[0]?.duration_seconds || 5) * 1000);
+    if (adBanners.length > 1) {
+      timers.push(
+        window.setInterval(() => {
+          setAdImageIndex((prev) => (prev + 1) % adBanners.length);
+        }, (adBanners[0]?.duration_seconds || 5) * 1000)
+      );
+    }
 
-      return () => {
-        clearInterval(heroInterval);
-        clearInterval(adInterval);
-      };
-    };
-
-    const cleanup = setupBannerRotation();
-    return cleanup;
+    return () => timers.forEach((t) => clearInterval(t));
   }, [heroBanners, adBanners]);
 
   useEffect(() => {
@@ -130,8 +133,11 @@ export const HomePage: React.FC = () => {
           const interstitial = adsData.find(a => a.is_active && a.format === 'interstitial' && (a.location === 'home' || a.location === 'all'));
           if (interstitial && AdService.canShowInterstitial()) {
             setInterstitialAd(interstitial);
-            AdService.recordInterstitialShown();
-            interstitialTimerRef.current = window.setTimeout(() => setShowInterstitial(true), 3000);
+            // Record cooldown only when the ad actually shows (inside timeout)
+            interstitialTimerRef.current = window.setTimeout(() => {
+              setShowInterstitial(true);
+              AdService.recordInterstitialShown();
+            }, 3000);
           }
           
           const rewarded = adsData.find(a => a.is_active && a.format === 'rewarded' && (a.location === 'home' || a.location === 'all'));
@@ -161,8 +167,9 @@ export const HomePage: React.FC = () => {
   }, []);
 
   const handleBannerClick = (banner: HomeBanner) => {
-    if (banner.link) {
-      setSitePreviewUrl(banner.link);
+    const safe = safeHttpUrl(banner.link);
+    if (safe) {
+      setSitePreviewUrl(safe);
       setSitePreviewTitle(banner.title);
       setSitePreviewCompany(banner.companyName || banner.company_name);
       setShowSitePreview(true);
@@ -235,10 +242,11 @@ export const HomePage: React.FC = () => {
               <div className="absolute inset-x-0 bottom-0 p-8 bg-gradient-to-t from-black via-black/60 to-transparent">
                 <span className="text-[11px] font-semibold text-brand-gold uppercase tracking-wide mb-2 block">Publicidade</span>
                 <h3 className="text-2xl font-bold text-white mb-4">{interstitialAd.company_name}</h3>
-                <button 
+                <button
                   onClick={() => {
-                    if (interstitialAd.link) {
-                      setSitePreviewUrl(interstitialAd.link);
+                    const safe = safeHttpUrl(interstitialAd.link);
+                    if (safe) {
+                      setSitePreviewUrl(safe);
                       setSitePreviewCompany(interstitialAd.company_name);
                       setShowSitePreview(true);
                     }
@@ -302,10 +310,11 @@ export const HomePage: React.FC = () => {
                     )}
                   </div>
 
-                  <button 
+                  <button
                     onClick={() => {
-                      if (rewardedAd.link) {
-                        setSitePreviewUrl(rewardedAd.link);
+                      const safe = safeHttpUrl(rewardedAd.link);
+                      if (safe) {
+                        setSitePreviewUrl(safe);
                         setSitePreviewCompany(rewardedAd.company_name);
                         setShowSitePreview(true);
                       }

@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Sparkles } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
+import { isSafeHttpUrl } from '../../services/utils/safeUrl';
 
 interface NativeAdProps {
   className?: string;
@@ -15,12 +16,15 @@ export const NativeAd: React.FC<NativeAdProps> = ({ className = '' }) => {
   const activeAds = useAppStore((state) => state.activeAds);
   const [rotIndex, setRotIndex] = useState(0);
 
-  // Usa um anúncio real (location all/exchange, formato banner/all) com rotação simples
-  const matching = activeAds.filter(
-    (a) =>
-      a.is_active &&
-      (a.location === 'exchange' || a.location === 'all') &&
-      (a.format === 'banner' || a.format === 'all')
+  const matching = useMemo(
+    () =>
+      activeAds.filter(
+        (a) =>
+          a.is_active &&
+          (a.location === 'exchange' || a.location === 'all') &&
+          (a.format === 'banner' || a.format === 'all')
+      ),
+    [activeAds]
   );
 
   useEffect(() => {
@@ -29,9 +33,8 @@ export const NativeAd: React.FC<NativeAdProps> = ({ className = '' }) => {
     return () => clearInterval(interval);
   }, [matching.length]);
 
-  const ad = matching.length > 0
-    ? matching[rotIndex % matching.length]
-    : null;
+  const ad = matching.length > 0 ? matching[rotIndex % matching.length] : null;
+  const externalUrl = ad && isSafeHttpUrl(ad.link) ? (ad.link as string) : null;
 
   // Fallback factual do próprio Resolve.AO (nunca inventa marcas nem links falsos)
   const adData = ad
@@ -40,14 +43,16 @@ export const NativeAd: React.FC<NativeAdProps> = ({ className = '' }) => {
         description: ad.company_name || 'Anúncio patrocinado no Resolve.AO',
         sponsor: ad.company_name || 'Patrocinado',
         ctaText: 'Visitar',
-        ctaUrl: ad.link || '#'
+        ctaUrl: externalUrl || '/',
+        isExternal: !!externalUrl,
       }
     : {
         title: 'Encontra as Melhores Oportunidades',
         description: 'Câmbio, empregos e notícias atualizadas no Resolve.AO. Tudo gratuito, num só lugar.',
         sponsor: 'Resolve.AO',
         ctaText: 'Explorar',
-        ctaUrl: '/'
+        ctaUrl: '/',
+        isExternal: false,
       };
 
   return (
@@ -80,12 +85,9 @@ export const NativeAd: React.FC<NativeAdProps> = ({ className = '' }) => {
 
           <a
             href={adData.ctaUrl}
-            target="_blank"
+            target={adData.isExternal ? '_blank' : undefined}
             rel="noopener noreferrer"
             className="px-4 py-2 bg-[#F59E0B]/10 hover:bg-[#F59E0B]/20 border border-[#F59E0B]/30 rounded-xl text-[10px] font-black text-[#F59E0B] uppercase tracking-widest transition-all hover:scale-105"
-            onClick={() => {
-              if (ad) console.log('📊 Native ad clicked');
-            }}
           >
             {adData.ctaText}
           </a>

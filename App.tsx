@@ -160,7 +160,7 @@ const App: React.FC = () => {
   const [interstitialDuration, setInterstitialDuration] = useState(5);
   const [interstitialCallback, setInterstitialCallback] = useState<(() => void) | null>(null);
   const [onAdCancel, setOnAdCancel] = useState<(() => void) | null>(null);
-  const [lastInterstitialTime, setLastInterstitialTime] = useState(0);
+  // Cooldown unificada em AdService (localStorage 2h) — sem timer local 5min
   const [subscribedCategories, setSubscribedCategories] = useState<string[]>([]);
 
   // Real-time Update Checker (real: só notifica quando há conteúdo novo)
@@ -318,9 +318,7 @@ const App: React.FC = () => {
                     setShowRewarded(true);
                   }}
                   onShowInterstitial={(callback) => {
-                    const now = Date.now();
-                    const FIVE_MINUTES = 5 * 60 * 1000;
-                    if (now - lastInterstitialTime < FIVE_MINUTES) {
+                    if (!AdService.canShowInterstitial()) {
                       callback();
                     } else {
                       setInterstitialDuration(5);
@@ -336,16 +334,22 @@ const App: React.FC = () => {
                   }}
                 />
               } />
-              <Route path="/cambio" element={<ExchangePage />} />
+              <Route path="/cambio" element={
+                <ExchangePage />
+              } />
               <Route path="/ofertas" element={
                 selectedDeal
                   ? <Navigate to={`/ofertas/${selectedDeal.id}`} replace />
                   : <DealsPage
                     onSelectDeal={setSelectedDeal}
                     onShowInterstitial={(callback) => {
-                      setInterstitialDuration(5);
-                      setInterstitialCallback(() => callback);
-                      setShowInterstitial(true);
+                      if (!AdService.canShowInterstitial()) {
+                        callback();
+                      } else {
+                        setInterstitialDuration(5);
+                        setInterstitialCallback(() => callback);
+                        setShowInterstitial(true);
+                      }
                     }}
                   />
               } />
@@ -362,9 +366,7 @@ const App: React.FC = () => {
                     setShowRewarded(true);
                   }}
                   onShowInterstitial={(callback) => {
-                    const now = Date.now();
-                    const FIVE_MINUTES = 5 * 60 * 1000;
-                    if (now - lastInterstitialTime < FIVE_MINUTES) {
+                    if (!AdService.canShowInterstitial()) {
                       callback();
                     } else {
                       setInterstitialDuration(5);
@@ -419,10 +421,9 @@ const App: React.FC = () => {
               navigate(pendingAdPage === 'home' ? '/' : `/${pendingAdPage}`);
               window.scrollTo(0, 0);
             }
-            // Regista sempre o cooldown de 2h, com ou sem callback
+            // Regista cooldown unificado (AdService 2h) sempre que o anúncio fecha
             AdService.recordInterstitialShown();
             if (interstitialCallback) {
-              setLastInterstitialTime(Date.now());
               interstitialCallback();
               setInterstitialCallback(null);
             }

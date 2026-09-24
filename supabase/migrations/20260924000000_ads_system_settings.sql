@@ -1,8 +1,8 @@
--- 📺 Tabela de Anúncios (Banners e Vídeos)
--- ⚠️ Preferir supabase/migrations/20260924000000_ads_system_settings.sql
--- (idempotente + policies com public.is_admin(), sem recursão em profiles)
+-- 📺 ads + system_settings: schema oficial idempotente + RLS com public.is_admin()
+-- Evita depender de database/ads_management.sql avulso e de policies recursivas.
+
 create table if not exists public.ads (
-    id uuid default uuid_generate_v4() primary key,
+    id uuid default gen_random_uuid() primary key,
     type text not null check (type in ('hero', 'partner')),
     media_type text not null check (media_type in ('image', 'video')),
     format text default 'banner' check (format in ('banner', 'interstitial', 'rewarded', 'all')),
@@ -18,43 +18,42 @@ create table if not exists public.ads (
     created_at timestamp with time zone default timezone('utc'::text, now()),
     updated_at timestamp with time zone default timezone('utc'::text, now())
 );
--- ⚙️ Tabela de Configurações Globais do Sistema
+
 create table if not exists public.system_settings (
     key text primary key,
     value jsonb not null,
     description text,
     updated_at timestamp with time zone default timezone('utc'::text, now())
 );
--- Habilitar RLS
+
 alter table public.ads enable row level security;
 alter table public.system_settings enable row level security;
--- Políticas de Leitura Pública
+
+-- Leitura pública
 drop policy if exists "Anyone can view active ads" on public.ads;
-create policy "Anyone can view active ads" on public.ads for
-select using (is_active = true);
+create policy "Anyone can view active ads" on public.ads
+    for select using (is_active = true);
+
 drop policy if exists "Anyone can view public settings" on public.system_settings;
-create policy "Anyone can view public settings" on public.system_settings for
-select using (true);
--- Políticas de Gestão para Admins
+create policy "Anyone can view public settings" on public.system_settings
+    for select using (true);
+
+-- Gestão admin via SECURITY DEFINER is_admin() (sem recursão em profiles)
 drop policy if exists "Admins manage ads" on public.ads;
-create policy "Admins manage ads" on public.ads for all using (
-    exists (
-        select 1
-        from public.profiles
-        where id = auth.uid()
-            and is_admin = true
-    )
-);
+create policy "Admins manage ads" on public.ads
+    for all using (public.is_admin()) with check (public.is_admin());
+
 drop policy if exists "Admins manage settings" on public.system_settings;
-create policy "Admins manage settings" on public.system_settings for all using (
-    exists (
-        select 1
-        from public.profiles
-        where id = auth.uid()
-            and is_admin = true
-    )
-);
--- Inserir Configurações Iniciais
+create policy "Admins manage settings" on public.system_settings
+    for all using (public.is_admin()) with check (public.is_admin());
+
+-- Grants
+grant select on public.ads to anon, authenticated;
+grant select on public.system_settings to anon, authenticated;
+grant insert, update, delete on public.ads to authenticated;
+grant insert, update, delete on public.system_settings to authenticated;
+
+-- Seed idempotente
 insert into public.system_settings (key, value, description)
 values (
         'google_ads',
@@ -76,3 +75,5 @@ values (
   }'::jsonb,
         'Informações de contacto globais'
     ) on conflict (key) do nothing;
+
+notify pgrst, 'reload schema';

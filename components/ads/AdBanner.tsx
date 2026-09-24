@@ -4,6 +4,7 @@ import { useAppStore } from '../../store/useAppStore';
 import { PARTNER_ADS } from '../../constants/ads';
 import { AdsService, Ad } from '../../services/api/ads.service';
 import { VideoUtils } from '../../services/utils/videoUtils';
+import { safeHttpUrl } from '../../services/utils/safeUrl';
 import { SitePreviewModal } from '../modals/SitePreviewModal';
 
 interface AdBannerProps {
@@ -11,9 +12,9 @@ interface AdBannerProps {
   customLocation?: 'home' | 'jobs' | 'exchange' | 'all';
 }
 
-// Global flag to prevent multiple concurrent fetches when many AdBanner
-// instances mount at the same time on the same page.
-let isFetchingAds = false;
+// Shared in-flight fetch so many AdBanner instances share one request.
+// Cleared after settle (success or failure) so later mounts can refresh/retry.
+let adsFetchPromise: Promise<Ad[]> | null = null;
 // Global flag so the Google AdSense script is injected only once per session
 let adsenseScriptLoaded = false;
 
@@ -23,9 +24,11 @@ declare global {
   }
 }
 
-/** Builds a thum.io screenshot URL — raw URL in path, no encodeURIComponent */
-const buildScreenshotUrl = (url?: string) =>
-  url ? `https://image.thum.io/get/width/1200/crop/628/${url}` : null;
+/** Builds a thum.io screenshot URL for a validated http(s) URL only */
+const buildScreenshotUrl = (url?: string) => {
+  const safe = safeHttpUrl(url);
+  return safe ? `https://image.thum.io/get/width/1200/crop/628/${safe}` : null;
+};
 
 /** Injects the Google AdSense script once (no-op if already loaded) */
 const loadAdsenseScript = (client: string) => {
@@ -50,21 +53,25 @@ export const AdBanner: React.FC<AdBannerProps> = ({ format, customLocation = 'al
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [previewModalUrl, setPreviewModalUrl] = useState<string>('');
 
-  // Always load fresh ads on mount — ensures admin changes are visible
-  // without a hard page reload. The module-level flag prevents concurrent
-  // duplicate fetches when multiple AdBanner instances mount simultaneously.
+  // Shared single-flight fetch; clears after settle so failures retry
+  // and later mounts can refresh admin changes without a hard reload.
   useEffect(() => {
-    if (hasFetched.current || isFetchingAds) return;
+    if (hasFetched.current) return;
     hasFetched.current = true;
-    isFetchingAds = true;
-    AdsService.getAds(true)
-      .then(data => {
+
+    if (!adsFetchPromise) {
+      const p = AdsService.getAds(true);
+      adsFetchPromise = p;
+      void p.finally(() => {
+        if (adsFetchPromise === p) adsFetchPromise = null;
+      });
+    }
+
+    adsFetchPromise
+      .then((data) => {
         setActiveAds(data);
       })
-      .catch(() => {})
-      .finally(() => {
-        isFetchingAds = false;
-      });
+      .catch(() => {});
   }, [setActiveAds]);
 
   const adsConfig = systemSettings?.google_ads || PARTNER_ADS.googleAds;
@@ -159,8 +166,9 @@ export const AdBanner: React.FC<AdBannerProps> = ({ format, customLocation = 'al
       && (partnerAd.video_url.endsWith('.mp4') || partnerAd.video_url.includes('supabase') || partnerAd.video_url.includes('r2.dev'));
 
     const handleAdClick = () => {
-      if (partnerAd.link) {
-        setPreviewModalUrl(partnerAd.link);
+      const safe = safeHttpUrl(partnerAd.link);
+      if (safe) {
+        setPreviewModalUrl(safe);
         setShowPreviewModal(true);
       }
     };

@@ -85,11 +85,22 @@ export const AdsService = {
     return data;
   },
 
-  async createAd(ad: Omit<Ad, 'id' | 'display_order'>) {
+  async createAd(ad: Omit<Ad, 'id' | 'display_order'> & { display_order?: number }) {
+    let displayOrder = ad.display_order;
+    if (displayOrder == null) {
+      const { data: last } = await supabase
+        .from('ads')
+        .select('display_order')
+        .order('display_order', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      displayOrder = ((last?.display_order as number) ?? 0) + 1;
+    }
+
     const { data, error } = await supabase
       .from('ads')
-      .insert([ad]);
-    
+      .insert([{ ...ad, display_order: displayOrder }]);
+
     if (error) throw error;
     return data;
   },

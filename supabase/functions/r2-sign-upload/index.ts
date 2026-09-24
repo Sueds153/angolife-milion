@@ -160,6 +160,29 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "forbidden path" }), { status: 403, headers: cors });
     }
 
+    // Ads are admin-only: require profiles.is_admin or ADMIN_EMAILS membership
+    if (key.startsWith("ads/")) {
+      const service = createClient(
+        supabaseUrl,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+        { auth: { persistSession: false } },
+      );
+      const { data: profile } = await service
+        .from("profiles")
+        .select("is_admin")
+        .eq("id", userData.user.id)
+        .maybeSingle();
+      const email = (userData.user.email ?? "").toLowerCase();
+      const adminEmails = (Deno.env.get("ADMIN_EMAILS") || "suedjosue@gmail.com")
+        .toLowerCase()
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      if (profile?.is_admin !== true && !adminEmails.includes(email)) {
+        return new Response(JSON.stringify({ error: "forbidden" }), { status: 403, headers: cors });
+      }
+    }
+
     const accountId = Deno.env.get("R2_ACCOUNT_ID")!;
     const accessKeyId = Deno.env.get("R2_ACCESS_KEY_ID")!;
     const secretAccessKey = Deno.env.get("R2_SECRET_ACCESS_KEY")!;

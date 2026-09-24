@@ -6,6 +6,7 @@ import { VideoUtils } from '../../services/utils/videoUtils';
 import { UrlPreviewService } from '../../services/api/urlPreview.service';
 import { useScrollLock } from '../../hooks/useScrollLock';
 import { PLACEHOLDER_IMAGE } from '../../constants/placeholders';
+import { safeHttpUrl } from '../../services/utils/safeUrl';
 
 interface AdminAdModalProps {
   isOpen: boolean;
@@ -137,7 +138,10 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
 
     try {
       const payload = { ...formData };
-      
+      if (payload.link) {
+        payload.link = safeHttpUrl(payload.link) || '';
+      }
+
       if (payload.media_type === 'video' && !payload.image_url) {
         payload.image_url = PLACEHOLDER_IMAGE;
       }
@@ -149,7 +153,7 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
       if (editingAd?.id) {
         await AdsService.updateAd(editingAd.id, payload);
       } else {
-        await AdsService.createAd(payload as Omit<Ad, 'id' | 'display_order'>);
+        await AdsService.createAd(payload as Omit<Ad, 'id' | 'display_order'> & { display_order?: number });
       }
       onSuccess();
       onClose();
@@ -290,7 +294,7 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
               <div className="relative flex-1">
                 <Globe size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-400" />
                 <input 
-                  type="text"
+                  type="url"
                   value={formData.link || ''}
                   onChange={(e) => setFormData({...formData, link: e.target.value})}
                   className="w-full bg-slate-900 border border-white/10 rounded-xl p-3.5 pl-10 text-xs font-bold text-white placeholder-slate-500"
