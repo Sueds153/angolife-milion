@@ -25,6 +25,23 @@ const initialCV: CVData = {
   skills: []
 };
 
+// Outside parent: stable identity avoids full preview remount every render
+const PreviewCV: React.FC<{
+  type: CVTemplateType;
+  cv: CVData;
+  educationFirst: boolean;
+  showWatermark: boolean;
+}> = ({ type, cv, educationFirst, showWatermark }) => (
+  <div id="cv-preview" className="relative print:m-0 print:p-0">
+    <CVTemplateSelector type={type} cv={cv} educationFirst={educationFirst} />
+    {showWatermark && (
+      <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-[0.03] rotate-45 select-none overflow-hidden">
+        <span className="text-8xl font-black uppercase tracking-[2em]">Resolve.AO</span>
+      </div>
+    )}
+  </div>
+);
+
 export const CVBuilderPage: React.FC = () => {
   const { user, setUser, isAuthenticated, setAuthModal } = useAppStore();
   
@@ -57,7 +74,24 @@ export const CVBuilderPage: React.FC = () => {
   const [showPaywall, setShowPaywall] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<CVTemplateType>('classic');
 
+  const PLAN_META: Record<'pack3' | 'monthly' | 'yearly', { name: string; price: string }> = {
+    pack3: { name: 'Bronze', price: '199,99' },
+    monthly: { name: 'Prata', price: '999,99' },
+    yearly: { name: 'Ouro', price: '1.999,99' },
+  };
+
   useScrollLock(showPaywall);
+
+  // Always open paywall on plans step (avoids landing on stale checkout/pending)
+  const openPaywall = useCallback(() => {
+    setPaymentStep('plans');
+    setShowPaywall(true);
+  }, []);
+
+  const closePaywall = useCallback(() => {
+    setShowPaywall(false);
+    setPaymentStep('plans');
+  }, []);
 
   const [educationFirst, setEducationFirst] = useState(false);
   const [aiUsageCount, setAiUsageCount] = useState(0);
@@ -140,7 +174,7 @@ export const CVBuilderPage: React.FC = () => {
       console.error('[ImproveText] Error:', error);
       const code = (error as GeminiError)?.code;
       if (code === 'limit' || code === 'no_credits') {
-        setShowPaywall(true);
+        openPaywall();
       } else if (code === 'unauth') {
         onRequireAuth();
       } else {
@@ -149,7 +183,7 @@ export const CVBuilderPage: React.FC = () => {
     } finally {
       setIsImproving(false);
     }
-  }, [isAuthenticated, onRequireAuth, updateField]);
+  }, [isAuthenticated, onRequireAuth, updateField, openPaywall]);
 
   const addExperience = () => {
     const newExp: CVExperience = {
@@ -193,7 +227,7 @@ export const CVBuilderPage: React.FC = () => {
     if (isDownloading) return; // evita duplo clique
 
     if (!canDownload) {
-      setShowPaywall(true);
+      openPaywall();
       return;
     }
 
@@ -203,7 +237,7 @@ export const CVBuilderPage: React.FC = () => {
         const ok = await onDecrementCredit();
         if (!ok) {
           alert('Não foi possível debitar o crédito. Verifica o teu saldo.');
-          setShowPaywall(true);
+          openPaywall();
           return;
         }
         const currentUser = useAppStore.getState().user;
@@ -260,10 +294,11 @@ export const CVBuilderPage: React.FC = () => {
       console.log('[Payment] Subscription result:', success);
 
       if (success) {
+        setReceiptFile(null);
         setPaymentStep('pending');
         alert('Comprovativo enviado com sucesso! Aguarde a aprovação do Admin.');
       } else {
-        throw new Error('Erro ao registar subscrição na base de dados. Verifica a tua ligação e tenta novamente.');
+        throw new Error('Erro ao registar subscrição na base de dados. Verifica a tua ligação e tente novamente.');
       }
     } catch (error) {
       console.error('[Payment] Error:', error);
@@ -282,7 +317,7 @@ export const CVBuilderPage: React.FC = () => {
   // "Otimizar Textos com IA (ATS)" - improve summary + each experience description + categorize skills
   const handleEnhanceAll = useCallback(async () => {
     if (!isAuthenticated) { onRequireAuth(); return; }
-    if (!canUseAI()) { setShowPaywall(true); return; }
+    if (!canUseAI()) { openPaywall(); return; }
     if (!cv.summary.trim() && cv.experiences.length === 0) {
       alert('Adicione um resumo ou experiência antes de otimizar.');
       return;
@@ -319,7 +354,7 @@ export const CVBuilderPage: React.FC = () => {
       console.error('[EnhanceAll] Error:', error);
       const code = (error as GeminiError)?.code;
       if (code === 'limit' || code === 'no_credits') {
-        setShowPaywall(true);
+        openPaywall();
       } else if (code === 'unauth') {
         onRequireAuth();
       } else {
@@ -328,7 +363,7 @@ export const CVBuilderPage: React.FC = () => {
     } finally {
       setIsImproving(false);
     }
-  }, [isAuthenticated, onRequireAuth, canUseAI, cv, isPremiumValid, user?.isAdmin, incrementAIUsage]);
+  }, [isAuthenticated, onRequireAuth, canUseAI, cv, isPremiumValid, user?.isAdmin, incrementAIUsage, openPaywall]);
 
   // --- STEPS RENDERING ---
   const renderStep1 = () => (
@@ -452,7 +487,7 @@ export const CVBuilderPage: React.FC = () => {
             </>
           ) : (
             <button
-              onClick={() => setShowPaywall(true)}
+              onClick={openPaywall}
               className="bg-slate-900 text-brand-gold px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 w-full mx-auto"
             >
               <Lock size={14} /> Desbloquear IA Premium
@@ -609,20 +644,6 @@ export const CVBuilderPage: React.FC = () => {
     </div>
   );
 
-  // --- PREVIEW RENDER (CSS FOR PRINT) ---
-  const PreviewCV = () => (
-    <div id="cv-preview" className="relative print:m-0 print:p-0">
-      <CVTemplateSelector type={selectedTemplate} cv={cv} educationFirst={educationFirst} />
-
-      {/* Watermark for non-premium */}
-      {!isPremiumValid && (
-        <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-[0.03] rotate-45 select-none overflow-hidden">
-          <span className="text-8xl font-black uppercase tracking-[2em]">Resolve.AO</span>
-        </div>
-      )}
-    </div>
-  );
-
   return (
     <div className="min-h-dvh pb-20 relative">
       <div className="flex flex-col md:flex-row gap-8 print:hidden">
@@ -722,7 +743,7 @@ export const CVBuilderPage: React.FC = () => {
               <div className="flex items-center justify-between px-2">
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Selecione o Estilo do CV</span>
                 {!isAuthenticated && (
-                  <span className="flex items-center gap-1 text-[9px] font-bold text-red-400 uppercase tracking-widest"><Lock size={10} /> Login necessário</span>
+                  <span className="flex items-center gap-1 text-[9px] font-bold text-slate-400 uppercase tracking-widest"><Lock size={10} /> Download requer login</span>
                 )}
               </div>
 
@@ -754,7 +775,12 @@ export const CVBuilderPage: React.FC = () => {
               <div className="w-full max-w-[500px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] bg-white origin-top transition-transform duration-500 hover:scale-[1.02] relative">
                 <div className="aspect-[1/1.414] overflow-hidden select-none">
                   <div className="w-[210mm] scale-[0.38] sm:scale-[0.42] md:scale-[0.40] lg:scale-[0.43] xl:scale-[0.46] origin-top-left p-0 m-0">
-                    <PreviewCV />
+                    <PreviewCV
+                      type={selectedTemplate}
+                      cv={cv}
+                      educationFirst={educationFirst}
+                      showWatermark={!isPremiumValid}
+                    />
                   </div>
                 </div>
               </div>
@@ -774,7 +800,7 @@ export const CVBuilderPage: React.FC = () => {
                     <Crown size={32} />
                   </div>
                   <button
-                    onClick={() => setShowPaywall(false)}
+                    onClick={closePaywall}
                     className="absolute top-0 right-0 p-4 text-slate-500 hover:text-white transition-colors"
                     title="Fechar"
                     aria-label="Fechar janela"
@@ -876,6 +902,10 @@ export const CVBuilderPage: React.FC = () => {
                       <div className="text-center">
                         <h4 className="text-white font-black uppercase tracking-widest text-sm mb-2">Dados para Pagamento</h4>
                         <p className="text-slate-400 text-xs">Efectue a transferência para os dados abaixo</p>
+                        <div className="mt-3 inline-flex items-center gap-2 bg-brand-gold/15 border border-brand-gold/40 rounded-full px-4 py-1.5">
+                          <span className="text-brand-gold text-[10px] font-black uppercase tracking-widest">Plano {PLAN_META[selectedPlan].name}</span>
+                          <span className="text-white text-sm font-black">{PLAN_META[selectedPlan].price} Kz</span>
+                        </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">
@@ -920,14 +950,12 @@ export const CVBuilderPage: React.FC = () => {
                           {isUploadingReceipt ? "Enviando..." : "Finalizar Pedido"}
                         </button>
 
-                        <div className="grid grid-cols-2 gap-3">
-                          <button className="bg-slate-700 text-white py-3 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-slate-600 flex items-center justify-center gap-2">
-                            <FileText size={14} /> Passo a Passo
-                          </button>
-                          <button className="bg-slate-700 text-white py-3 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-slate-600 flex items-center justify-center gap-2">
-                            <Sparkles size={14} /> Suporte
-                          </button>
-                        </div>
+                        <button
+                          onClick={() => setPaymentStep('plans')}
+                          className="w-full bg-slate-700 text-white py-3 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-slate-600"
+                        >
+                          Voltar aos Planos
+                        </button>
                       </div>
                     </div>
                   )}
@@ -938,8 +966,11 @@ export const CVBuilderPage: React.FC = () => {
                         <Clock size={32} />
                       </div>
                       <h4 className="text-white font-black uppercase tracking-widest text-lg mb-2">Aguardando Aprovação</h4>
+                      <p className="text-slate-400 text-sm font-medium mb-2">
+                        Comprovativo do <span className="text-brand-gold font-bold">Plano {PLAN_META[selectedPlan].name}</span> recebido.
+                      </p>
                       <p className="text-slate-400 text-sm font-medium mb-6">
-                        Recebemos o teu comprovativo. O nosso administrador irá validar o pagamento em breve.
+                        O nosso administrador irá validar o pagamento em breve. Os benefícios são activados após aprovação.
                       </p>
                       <button
                         onClick={() => setPaymentStep('plans')}

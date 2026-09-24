@@ -21,11 +21,12 @@ export const SubscriptionService = {
     planId: string,
     receiptUrl: string,
   ): Promise<boolean> => {
-    // Usar nomes exactos das colunas do schema (type, receipt_url)
+    // Escrever type (coluna principal) E plano_escolhido (legado) — edge function lê type primeiro
     const { error } = await supabase.from("subscriptions_pending").insert([
       {
         user_id: userId,
         type: planId,
+        plano_escolhido: planId,
         receipt_url: receiptUrl,
         status: "pending",
       },

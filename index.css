@@ -145,16 +145,26 @@ body {
 }
 
 
-/* Touch targets optimization (iOS/Android compliance) */
-button,
+/* Touch targets optimization (iOS/Android compliance)
+   Fields only — global button min-size broke small icon buttons (skill chips, X, etc.).
+   Primary CTAs opt in via .touch-target (or their own py-* classes). */
 input,
 select,
 a.btn {
   min-height: 44px;
-  min-width: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+/* Explicit touch-target class for primary CTAs that need full 44x44 */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
 }
 
 /* Responsive containers — NOTE: .container provided by Tailwind CDN; we only add padding override here */

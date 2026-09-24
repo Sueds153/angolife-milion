@@ -177,13 +177,6 @@ export const HomePage: React.FC = () => {
 
   const usdRate = rates.find(r => r.currency === 'USD');
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTickerIndex(prev => (prev + 1) % TICKER_MESSAGES.length);
-    }, 3500);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
     <ErrorBoundary>
       <div className="space-y-6 md:space-y-12 animate-fade-in">

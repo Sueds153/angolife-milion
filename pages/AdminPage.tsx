@@ -591,12 +591,12 @@ export const AdminPage: React.FC = () => {
   };
 
   const handleApproveCvSub = async (id: string, userId: string) => {
-    const confirmed = window.confirm("Aprovar este pagamento e libertar Premium?");
+    const confirmed = window.confirm("Aprovar este pagamento e activar os benefícios do plano?");
     if (!confirmed) return;
 
     const success = await SubscriptionService.approveCVSubscription(id, userId);
     if (success) {
-      alert("Pagamento aprovado! Utilizador agora é Premium.");
+      alert("Pagamento aprovado! Benefícios do plano activados para o utilizador.");
       loadCvSubscriptions();
     } else {
       alert("Erro ao aprovar pagamento.");

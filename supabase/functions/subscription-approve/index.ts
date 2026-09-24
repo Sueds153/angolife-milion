@@ -71,13 +71,14 @@ serve(async (req: Request) => {
     }
 
     // Ler o plano escolhido para aplicar as regras corretas
+    // Coluna principal: type (inserida pelo cliente). Fallback: plano_escolhido (legado).
     const { data: sub } = await supabaseAdmin
       .from("subscriptions_pending")
-      .select("plano_escolhido")
+      .select("type, plano_escolhido")
       .eq("id", id)
       .single();
 
-    const plan = sub?.plano_escolhido || "monthly";
+    const plan = sub?.type || sub?.plano_escolhido || "monthly";
 
     // Marcar subscrição como aprovada
     const { error: subError } = await supabaseAdmin
