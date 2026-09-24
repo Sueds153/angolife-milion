@@ -639,6 +639,7 @@ export const AdminPage: React.FC = () => {
       loadAdsData();
     } catch (error) {
       console.error("Update setting error", error);
+      throw error;
     }
   };
 

@@ -3,6 +3,8 @@
  * Fetches Open Graph images, title, publisher, and live screenshots for any website URL
  */
 
+import { safeHttpUrl } from '../utils/safeUrl';
+
 export interface UrlMetadata {
   title?: string;
   companyName?: string;
@@ -13,12 +15,13 @@ export interface UrlMetadata {
 
 export const UrlPreviewService = {
   fetchMetadata: async (targetUrl: string): Promise<UrlMetadata | null> => {
-    let url = targetUrl.trim();
-    if (!url) return null;
+    const trimmed = targetUrl.trim();
+    if (!trimmed) return null;
 
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      url = 'https://' + url;
-    }
+    const url = safeHttpUrl(
+      trimmed.startsWith('http://') || trimmed.startsWith('https://') ? trimmed : `https://${trimmed}`
+    );
+    if (!url) return null;
 
     // ── Step 1: Build baseline result from domain parsing + thum.io screenshot ──
     // This always works and is the guaranteed fallback.

@@ -380,13 +380,6 @@ export const ExchangePage: React.FC = () => {
         return { orderId: null };
       }
 
-      // Mostramos Interstitial se permitido
-      if (AdService.canShowInterstitial()) {
-        setTimeout(() => {
-          AdService.showInterstitial();
-        }, 1500);
-      }
-
       return { orderId };
     } catch (error) {
       console.error('Exchange order error:', (error as Error)?.message || error);

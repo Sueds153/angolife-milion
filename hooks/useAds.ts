@@ -16,11 +16,10 @@ export const useAds = ({ onShowInterstitial, onRequestReward }: UseAdsProps) => 
     const currentCount = Number(sessionStorage.getItem('jobs_view_count')) || 0;
     const newCount = currentCount + 1;
 
-    // RULE: Every 2 clicks (1st and 2nd OK), the 3rd click triggers an ad.
+    // 1º e 2º cliques passam sem anúncio; o 3º pede o rewarded
     if (newCount >= 3) {
       if (onRequestReward) {
         setIsAdLoading(true);
-        // Delay to show the loading screen
         setTimeout(() => {
           onRequestReward(
             () => {
@@ -34,7 +33,6 @@ export const useAds = ({ onShowInterstitial, onRequestReward }: UseAdsProps) => 
               // Reseta o contador para que o utilizador não fique preso num loop de anúncios
               sessionStorage.setItem('jobs_view_count', '0');
               setViewCount(0);
-              alert('Assiste ao vídeo completo para desbloquear este recurso.');
             }
           );
         }, 1000);

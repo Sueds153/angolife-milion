@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, ExternalLink, Globe, ShieldCheck, Image as ImageIcon } from 'lucide-react';
 import { openExternal } from '../../services/core/openExternal';
+import { safeHttpUrl } from '../../services/utils/safeUrl';
 
 interface SitePreviewModalProps {
   isOpen: boolean;
@@ -21,7 +22,8 @@ export const SitePreviewModal: React.FC<SitePreviewModalProps> = ({
 
   if (!isOpen || !url) return null;
 
-  const targetUrl = url.startsWith('http') ? url : `https://${url}`;
+  const targetUrl = safeHttpUrl(url.startsWith('http') ? url : `https://${url}`);
+  if (!targetUrl) return null;
   // thum.io generates a high-quality screenshot — raw URL in path, no encodeURIComponent
   const screenshotUrl = `https://image.thum.io/get/width/1200/crop/628/${targetUrl}`;
 
@@ -30,7 +32,7 @@ export const SitePreviewModal: React.FC<SitePreviewModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[250] flex items-center justify-center p-3 md:p-6 bg-black/90 backdrop-blur-md animate-fade-in">
+    <div className="fixed inset-0 z-[250] flex items-center justify-center p-3 md:p-6 bg-black/90 backdrop-blur-md animate-fade-in" role="dialog" aria-modal="true" aria-label="Pré-visualização do anúncio">
       <div className="bg-slate-900 w-full max-w-4xl h-[85vh] rounded-[2.5rem] overflow-hidden border border-orange-500/30 shadow-2xl flex flex-col">
         
         {/* Header Browser Bar */}

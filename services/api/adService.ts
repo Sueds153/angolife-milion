@@ -35,20 +35,16 @@ export const AdService = {
   },
 
   /**
-   * Show a rewarded ad (placeholder - integrate with actual ad provider)
+   * Show a rewarded ad (placeholder — integrate with actual ad provider SDK)
    * Returns a promise that resolves when user completes the ad
    */
   async showRewardedAd(): Promise<boolean> {
     return new Promise((resolve) => {
-      // PLACEHOLDER: Replace with actual ad provider SDK
-      // Example: Google AdMob rewarded ad
-      console.log('🎬 Rewarded ad would show here');
-      
-      // Simulate ad watching (15 seconds)
+      // PLACEHOLDER: Replace with actual ad provider SDK (e.g. AdMob rewarded)
+      // Resolve after a short simulated delay until a real provider is wired.
       setTimeout(() => {
-        console.log('✅ Rewarded ad completed');
         resolve(true);
-      }, 1000); // In production, this would be triggered by ad SDK callback
+      }, 1000);
     });
   },
 
@@ -84,20 +80,16 @@ export const AdService = {
   },
 
   /**
-   * Show interstitial ad (placeholder)
+   * Show interstitial ad (placeholder — no-op when on cooldown)
    */
   async showInterstitial(): Promise<void> {
     if (!this.canShowInterstitial()) {
-      console.log('⏳ Interstitial capped - too soon');
       return;
     }
 
     // PLACEHOLDER: Replace with actual ad provider SDK
-    console.log('📺 Interstitial ad would show here');
-    
-    // Simulate ad display
     await new Promise(resolve => setTimeout(resolve, 500));
-    
+
     this.recordInterstitialShown();
   },
 

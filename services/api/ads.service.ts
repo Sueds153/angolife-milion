@@ -31,8 +31,20 @@ export interface SystemSettings {
   };
 }
 
+/** Rejects AdSense placeholder clients (ca-pub-XXXX...) */
+export const isValidAdsenseClient = (client?: string): boolean =>
+  !!client && /^ca-pub-\d{10,}$/.test(client.trim());
+
 export const AdsService = {
+  // In-flight de-dupe: HomePage + AdBanner podem pedir ads em paralelo
+  privateAdsFetch: null as Promise<Ad[]> | null,
+  privateActiveAdsFetch: null as Promise<Ad[]> | null,
+
   async getAds(onlyActive = true): Promise<Ad[]> {
+    const slot = onlyActive ? 'privateActiveAdsFetch' : 'privateAdsFetch';
+    const inFlight = this[slot];
+    if (inFlight) return inFlight;
+
     let query = supabase
       .from('ads')
       .select('*')
@@ -42,9 +54,17 @@ export const AdsService = {
       query = query.eq('is_active', true);
     }
 
-    const { data, error } = await query;
-    if (error) throw error;
-    return data || [];
+    const promise = query
+      .then(({ data, error }) => {
+        if (error) throw error;
+        return data || [];
+      })
+      .finally(() => {
+        if (this[slot] === promise) this[slot] = null;
+      });
+
+    this[slot] = promise;
+    return promise;
   },
 
   async getSettings(): Promise<SystemSettings> {

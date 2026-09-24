@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { Info, Sparkles, ExternalLink } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { PARTNER_ADS } from '../../constants/ads';
-import { AdsService, Ad } from '../../services/api/ads.service';
+import { AdsService, Ad, isValidAdsenseClient } from '../../services/api/ads.service';
 import { VideoUtils } from '../../services/utils/videoUtils';
 import { safeHttpUrl } from '../../services/utils/safeUrl';
 import { SitePreviewModal } from '../modals/SitePreviewModal';
@@ -14,6 +14,7 @@ interface AdBannerProps {
 
 // Shared in-flight fetch so many AdBanner instances share one request.
 // Cleared after settle (success or failure) so later mounts can refresh/retry.
+// (AdsService.getAds itself also de-dupes; this stays for explicit retry semantics.)
 let adsFetchPromise: Promise<Ad[]> | null = null;
 // Global flag so the Google AdSense script is injected only once per session
 let adsenseScriptLoaded = false;
@@ -30,13 +31,13 @@ const buildScreenshotUrl = (url?: string) => {
   return safe ? `https://image.thum.io/get/width/1200/crop/628/${safe}` : null;
 };
 
-/** Injects the Google AdSense script once (no-op if already loaded) */
+/** Injects the Google AdSense script once (no-op if already loaded or invalid) */
 const loadAdsenseScript = (client: string) => {
-  if (adsenseScriptLoaded || !client) return;
+  if (adsenseScriptLoaded || !isValidAdsenseClient(client)) return;
   adsenseScriptLoaded = true;
   const script = document.createElement('script');
   script.async = true;
-  script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}`;
+  script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client.trim()}`;
   document.head.appendChild(script);
 };
 
@@ -109,7 +110,7 @@ export const AdBanner: React.FC<AdBannerProps> = ({ format, customLocation = 'al
     return () => clearInterval(interval);
   }, [activeAds, customLocation]);
 
-  const isGoogleEnabled = adsConfig.enabled && !partnerAd;
+  const isGoogleEnabled = adsConfig.enabled && isValidAdsenseClient(adsConfig.client) && !partnerAd;
 
   // Image source: prefer stored image, fall back to a live screenshot of the destination
   const imgSrc = useMemo<string | null>(() => {
@@ -177,6 +178,10 @@ export const AdBanner: React.FC<AdBannerProps> = ({ format, customLocation = 'al
       <>
         <div
           onClick={handleAdClick}
+          role="link"
+          tabIndex={0}
+          aria-label={`Anúncio: ${partnerAd.title || partnerAd.company_name || 'patrocinado'}. Abrir site do anunciante.`}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleAdClick(); } }}
           className={`relative overflow-hidden cursor-pointer group flex items-center justify-center ${getStyles()} bg-gradient-to-br from-slate-900 to-slate-800 border border-orange-500/20 shadow-xl transition-all hover:border-orange-500/50`}
         >
           {/* Media Background */}
@@ -254,7 +259,11 @@ export const AdBanner: React.FC<AdBannerProps> = ({ format, customLocation = 'al
   // --- 2. Google AdSense Fallback ---
   if (isGoogleEnabled && adSlot) {
     return (
-      <div className={`flex items-center justify-center overflow-hidden ${getStyles()}`}>
+      <div
+        role="complementary"
+        aria-label="Publicidade Google AdSense"
+        className={`flex items-center justify-center overflow-hidden ${getStyles()}`}
+      >
         <ins className="adsbygoogle block"
              data-ad-client={adsConfig.client}
              data-ad-slot={adSlot}
@@ -266,7 +275,11 @@ export const AdBanner: React.FC<AdBannerProps> = ({ format, customLocation = 'al
 
   // --- 3. Default Resolve.AO Ad Fallback ---
   return (
-    <div className={`bg-slate-900 border border-orange-500/20 flex flex-col items-center justify-center relative overflow-hidden transition-all ${getStyles()} ${!isSticky ? 'shadow-lg' : ''} backdrop-blur-sm`}>
+    <div
+      role="complementary"
+      aria-label="Publicidade Resolve.AO"
+      className={`bg-slate-900 border border-orange-500/20 flex flex-col items-center justify-center relative overflow-hidden transition-all ${getStyles()} ${!isSticky ? 'shadow-lg' : ''} backdrop-blur-sm`}
+    >
       <div className="absolute top-0 right-0 bg-white/10 border-b border-l border-white/10 px-2 py-0.5 z-10 rounded-bl-lg">
         <div className="flex items-center gap-1">
           <span className="text-[7px] text-slate-400 font-black uppercase tracking-tighter">PUBLICIDADE</span>
@@ -276,6 +289,19 @@ export const AdBanner: React.FC<AdBannerProps> = ({ format, customLocation = 'al
 
       <div 
         className="w-full h-full flex items-center justify-between px-5 group cursor-pointer hover:bg-white/[0.03] transition-colors"
+        role="link"
+        tabIndex={0}
+        aria-label={
+          format === 'leaderboard' ? 'Publica a tua vaga no Resolve.AO'
+          : format === 'rectangle' ? 'Ver câmbio em tempo real'
+          : 'Publicidade Resolve.AO'
+        }
+        onKeyDown={(e) => {
+          if (e.key !== 'Enter' && e.key !== ' ') return;
+          e.preventDefault();
+          if (format === 'leaderboard') window.location.href = '/vagas';
+          if (format === 'rectangle') window.location.href = '/cambio';
+        }}
         onClick={() => {
           if (format === 'leaderboard') window.location.href = '/vagas';
           if (format === 'rectangle') window.location.href = '/cambio';

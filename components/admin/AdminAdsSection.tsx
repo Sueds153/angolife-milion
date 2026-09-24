@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Monitor, Plus, Trash2, Edit2, Check, X, ExternalLink, Image as ImageIcon, Video, Settings, Save, Globe, MessageCircle, Clock, MapPin, Layout } from 'lucide-react';
-import { Ad, SystemSettings, AdsService } from '../../services/api/ads.service';
+import { Ad, SystemSettings, AdsService, isValidAdsenseClient } from '../../services/api/ads.service';
 import { isSafeHttpUrl, safeHttpUrl } from '../../services/utils/safeUrl';
 import { AdminAdModal } from './AdminAdModal';
 
@@ -23,6 +23,7 @@ export const AdminAdsSection: React.FC<AdminAdsSectionProps> = ({
   const [editedSettings, setEditedSettings] = useState<SystemSettings | null>(settings);
   const [isAdModalOpen, setIsAdModalOpen] = useState(false);
   const [editingAd, setEditingAd] = useState<Ad | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const handleOpenNewAd = () => {
     setEditingAd(null);
@@ -36,31 +37,42 @@ export const AdminAdsSection: React.FC<AdminAdsSectionProps> = ({
 
   const handleSaveSettings = async () => {
     if (!editedSettings) return;
+    setActionError(null);
     try {
-      await onUpdateSetting('google_ads', editedSettings.google_ads);
+      const client = editedSettings.google_ads.client?.trim() || '';
+      if (editedSettings.google_ads.enabled && !isValidAdsenseClient(client)) {
+        setActionError('Para ativar o Google AdSense, define um Client ID válido (ca-pub-1234567890).');
+        return;
+      }
+      await onUpdateSetting('google_ads', { ...editedSettings.google_ads, client });
       await onUpdateSetting('contact_info', editedSettings.contact_info);
       setIsEditingSettings(false);
     } catch (error) {
       console.error("Save settings error", error);
+      setActionError('Não foi possível guardar as configurações. Tenta novamente.');
     }
   };
 
   const handleDeleteAd = async (id: string) => {
     if (!window.confirm("Tem certeza que deseja excluir este anúncio?")) return;
+    setActionError(null);
     try {
       await AdsService.deleteAd(id);
       onRefresh();
     } catch (error) {
       console.error("Delete ad error", error);
+      setActionError('Não foi possível eliminar o anúncio.');
     }
   };
 
   const handleToggleActive = async (id: string, current: boolean) => {
+    setActionError(null);
     try {
       await AdsService.updateAd(id, { is_active: !current });
       onRefresh();
     } catch (error) {
       console.error("Toggle ad error", error);
+      setActionError('Não foi possível alterar o estado do anúncio.');
     }
   };
 
@@ -86,6 +98,20 @@ export const AdminAdsSection: React.FC<AdminAdsSectionProps> = ({
         </button>
       </div>
 
+      {actionError && (
+        <div role="alert" className="bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-xs font-bold rounded-2xl p-4 flex items-start justify-between gap-3">
+          <span>{actionError}</span>
+          <button
+            type="button"
+            onClick={() => setActionError(null)}
+            className="shrink-0 p-1 rounded-lg hover:bg-red-500/10"
+            aria-label="Fechar erro"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* Coluna de Configurações Globais (Google Ads / WhatsApp) */}
@@ -104,6 +130,8 @@ export const AdminAdsSection: React.FC<AdminAdsSectionProps> = ({
                     setIsEditingSettings(true);
                   }
                 }}
+                aria-label={isEditingSettings ? 'Guardar configurações' : 'Editar configurações'}
+                title={isEditingSettings ? 'Guardar' : 'Editar'}
                 className={`p-2 rounded-xl transition-all ${isEditingSettings ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-500 hover:text-brand-gold'}`}
               >
                 {isEditingSettings ? <Save size={18} /> : <Edit2 size={18} />}
@@ -240,6 +268,7 @@ export const AdminAdsSection: React.FC<AdminAdsSectionProps> = ({
                     onClick={() => handleEditAd(ad)}
                     className="p-2 bg-slate-100 dark:bg-white/5 text-slate-500 hover:text-brand-gold rounded-xl transition-all"
                     title="Editar Anúncio"
+                    aria-label={`Editar anúncio ${ad.company_name || ad.title || ad.id}`}
                   >
                     <Edit2 size={16} />
                   </button>
@@ -247,6 +276,7 @@ export const AdminAdsSection: React.FC<AdminAdsSectionProps> = ({
                     onClick={() => handleToggleActive(ad.id, ad.is_active)}
                     className={`p-2 rounded-xl transition-all ${ad.is_active ? 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-400'}`}
                     title={ad.is_active ? 'Desativar' : 'Ativar'}
+                    aria-label={ad.is_active ? `Desativar anúncio ${ad.company_name || ad.title || ad.id}` : `Ativar anúncio ${ad.company_name || ad.title || ad.id}`}
                   >
                     {ad.is_active ? <Check size={16} /> : <X size={16} />}
                   </button>

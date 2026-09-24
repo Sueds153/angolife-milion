@@ -54,16 +54,18 @@ grant insert, update, delete on public.ads to authenticated;
 grant insert, update, delete on public.system_settings to authenticated;
 
 -- Seed idempotente
+-- client vazio de propósito: placeholders (ca-pub-XXXX) são rejeitados no runtime;
+-- preencher no Admin → Publicidade → Google AdSense com o ID real.
 insert into public.system_settings (key, value, description)
 values (
         'google_ads',
         '{
     "enabled": false,
-    "client": "ca-pub-XXXXXXXXXXXXXXXX",
+    "client": "",
     "slots": {
-      "homeHero": "XXXXXXXXXX",
-      "homeFooter": "XXXXXXXXXX",
-      "jobsList": "XXXXXXXXXX"
+      "homeHero": "",
+      "homeFooter": "",
+      "jobsList": ""
     }
   }'::jsonb,
         'Configurações do Google AdSense'

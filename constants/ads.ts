@@ -58,7 +58,7 @@ export const PARTNER_ADS = {
   // Configurações do Google AdSense
   googleAds: {
     enabled: false,
-    client: "ca-pub-XXXXXXXXXXXXXXXX", // Substituir pelo ID real do Google Ads
+    client: "", // ca-pub-1234567890 quando ativado (placeholders são rejeitados)
     slots: {
       homeHero: "XXXXXXXXXX",
       homeFooter: "XXXXXXXXXX",

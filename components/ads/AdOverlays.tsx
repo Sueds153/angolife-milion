@@ -38,12 +38,18 @@ export const InterstitialAd: React.FC<InterstitialAdProps> = ({ onClose, duratio
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-black/95 backdrop-blur-md animate-fade-in p-4 overflow-y-auto">
+    <div
+      className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-black/95 backdrop-blur-md animate-fade-in p-4 overflow-y-auto"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Anúncio interstitial"
+    >
       <div className="absolute top-6 right-6 z-[210]">
         {canClose ? (
           <button 
             onClick={onClose}
             className="bg-white/10 text-white rounded-full p-2.5 hover:bg-white/20 transition-all flex items-center gap-2 px-6 border border-orange-500/20 shadow-xl"
+            aria-label="Fechar anúncio"
           >
             <span className="text-xs font-black uppercase tracking-widest">Fechar</span>
             <X size={22} />
@@ -108,7 +114,12 @@ export const RewardedAd: React.FC<RewardedAdProps> = ({ onReward, onClose }) => 
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-black animate-fade-in overflow-y-auto">
+    <div
+      className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-black animate-fade-in overflow-y-auto"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Anúncio com recompensa"
+    >
       <div className="absolute top-0 left-0 w-full p-8 flex justify-between items-center bg-gradient-to-b from-black via-black/80 to-transparent">
         <div className="flex items-center gap-4 text-white">
           <div className={`p-2.5 rounded-lg ${completed ? 'bg-brand-gold text-black' : 'bg-white/10'}`}>
@@ -119,7 +130,7 @@ export const RewardedAd: React.FC<RewardedAdProps> = ({ onReward, onClose }) => 
           </span>
         </div>
         {!completed && (
-           <button onClick={onClose} className="text-white/40 text-[10px] font-black uppercase tracking-widest hover:text-white border border-orange-500/20 px-5 py-2.5 rounded-xl hover:bg-white/5 transition-all">
+           <button onClick={onClose} aria-label="Interromper anúncio" className="text-white/40 text-[10px] font-black uppercase tracking-widest hover:text-white border border-orange-500/20 px-5 py-2.5 rounded-xl hover:bg-white/5 transition-all">
              Interromper
            </button>
         )}
@@ -155,6 +166,7 @@ export const RewardedAd: React.FC<RewardedAdProps> = ({ onReward, onClose }) => 
         {completed ? (
           <button 
             onClick={onReward}
+            aria-label="Obter recompensa"
             className="w-full max-w-sm flex items-center justify-center gap-4 bg-brand-gold text-slate-950 px-12 py-6 rounded-3xl text-xs md:text-sm font-black uppercase tracking-[0.25em] shadow-[0_25px_60px_rgba(245,158,11,0.4)] animate-float"
           >
             <Award size={24} />

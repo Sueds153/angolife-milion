@@ -141,6 +141,12 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
       if (payload.link) {
         payload.link = safeHttpUrl(payload.link) || '';
       }
+      if (payload.image_url) {
+        payload.image_url = safeHttpUrl(payload.image_url) || '';
+      }
+      if (payload.video_url) {
+        payload.video_url = safeHttpUrl(payload.video_url) || '';
+      }
 
       if (payload.media_type === 'video' && !payload.image_url) {
         payload.image_url = PLACEHOLDER_IMAGE;

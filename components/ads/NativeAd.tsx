@@ -56,7 +56,11 @@ export const NativeAd: React.FC<NativeAdProps> = ({ className = '' }) => {
       };
 
   return (
-    <div className={`relative bg-gradient-to-br from-slate-900/50 to-slate-800/30 rounded-[2rem] border border-slate-700/50 p-6 shadow-xl backdrop-blur-sm ${className}`}>
+    <div
+      role="complementary"
+      aria-label={ad ? `Anúncio patrocinado: ${adData.title}` : 'Conteúdo patrocinado Resolve.AO'}
+      className={`relative bg-gradient-to-br from-slate-900/50 to-slate-800/30 rounded-[2rem] border border-slate-700/50 p-6 shadow-xl backdrop-blur-sm ${className}`}
+    >
       {/* Sponsored Label */}
       <div className="flex items-center gap-2 mb-4">
         <Sparkles size={12} className="text-[#F59E0B]/50" />
@@ -87,6 +91,7 @@ export const NativeAd: React.FC<NativeAdProps> = ({ className = '' }) => {
             href={adData.ctaUrl}
             target={adData.isExternal ? '_blank' : undefined}
             rel="noopener noreferrer"
+            aria-label={`${adData.ctaText}: ${adData.title}`}
             className="px-4 py-2 bg-[#F59E0B]/10 hover:bg-[#F59E0B]/20 border border-[#F59E0B]/30 rounded-xl text-[10px] font-black text-[#F59E0B] uppercase tracking-widest transition-all hover:scale-105"
           >
             {adData.ctaText}
