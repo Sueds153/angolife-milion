@@ -8,9 +8,10 @@ const PRIVATE_PREFIXES = [
   "exchange-proofs/",
 ];
 
-const ADMIN_EMAILS = (Deno.env.get("ADMIN_EMAILS") ?? "suedjosue@gmail.com")
+const ADMIN_EMAILS = (Deno.env.get("ADMIN_EMAILS") ?? "")
   .split(",")
-  .map((e) => e.trim().toLowerCase());
+  .map((e) => e.trim().toLowerCase())
+  .filter(Boolean);
 
 function hmac(key: Uint8Array, data: string): Promise<Uint8Array> {
   return crypto.subtle.importKey(
@@ -174,7 +175,9 @@ Deno.serve(async (req) => {
         return new Response(JSON.stringify({ error: "forbidden" }), { status: 403, headers: cors });
       }
     } else if (key.startsWith("exchange-proofs/")) {
-      if (!isAdmin) {
+      // Admin ou dono (path contém o userId como primeira pasta após o prefixo)
+      const ownerPath = key.startsWith(`exchange-proofs/${user.id}/`);
+      if (!isAdmin && !ownerPath) {
         return new Response(JSON.stringify({ error: "forbidden" }), { status: 403, headers: cors });
       }
     }

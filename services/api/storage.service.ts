@@ -117,22 +117,29 @@ export const StorageService = {
 
   /** Comprovativo de câmbio → R2 privado; devolve a key (não URL pública). */
   uploadProof: async (file: File): Promise<string | null> => {
+    const { data: authData } = await supabase.auth.getUser();
+    const uid = authData.user?.id;
+    if (!uid) return null;
     const fileName = `${Math.random()}.${file.name.split(".").pop()}`;
-    const key = `exchange-proofs/proofs/${fileName}`;
+    const key = `exchange-proofs/${uid}/${fileName}`;
 
     const r2Key = await uploadViaR2Private(key, file);
     if (r2Key) return r2Key;
     if (r2Configured()) return null;
 
-    const { error } = await supabase.storage.from("exchange-proofs").upload(`proofs/${fileName}`, file);
+    const path = `${uid}/${fileName}`;
+    const { error } = await supabase.storage.from("exchange-proofs").upload(path, file);
     if (error) return null;
-    return supabase.storage.from("exchange-proofs").getPublicUrl(`proofs/${fileName}`).data.publicUrl;
+    return supabase.storage.from("exchange-proofs").getPublicUrl(path).data.publicUrl;
   },
 
   /** Comprovativo de pagamento → R2 privado; devolve a key (não URL pública). Sem fallback base64. */
   uploadReceipt: async (file: File): Promise<string | null> => {
+    const { data: authData } = await supabase.auth.getUser();
+    const uid = authData.user?.id;
+    if (!uid) return null;
     const fileName = `${Math.random()}.${file.name.split(".").pop()}`;
-    const key = `payment-receipts/receipts/${fileName}`;
+    const key = `payment-receipts/${uid}/${fileName}`;
 
     const r2Key = await uploadViaR2Private(key, file);
     if (r2Key) return r2Key;
@@ -140,7 +147,7 @@ export const StorageService = {
 
     const { data, error } = await supabase.storage
       .from("payment-receipts")
-      .upload(`receipts/${fileName}`, file);
+      .upload(`${uid}/${fileName}`, file);
 
     if (!error && data) {
       return supabase.storage.from("payment-receipts").getPublicUrl(data.path).data.publicUrl;

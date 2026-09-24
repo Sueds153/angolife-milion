@@ -160,6 +160,14 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "forbidden path" }), { status: 403, headers: cors });
     }
 
+    // Own-path required for user content buckets (payment-receipts / exchange-proofs)
+    if (key.startsWith("payment-receipts/") || key.startsWith("exchange-proofs/")) {
+      const afterPrefix = key.replace(/^(payment-receipts|exchange-proofs)\//, "");
+      if (!afterPrefix.startsWith(`${userId}/`)) {
+        return new Response(JSON.stringify({ error: "forbidden path" }), { status: 403, headers: cors });
+      }
+    }
+
     // Ads are admin-only: require profiles.is_admin or ADMIN_EMAILS membership
     if (key.startsWith("ads/")) {
       const service = createClient(
@@ -173,7 +181,7 @@ Deno.serve(async (req) => {
         .eq("id", userData.user.id)
         .maybeSingle();
       const email = (userData.user.email ?? "").toLowerCase();
-      const adminEmails = (Deno.env.get("ADMIN_EMAILS") || "suedjosue@gmail.com")
+      const adminEmails = (Deno.env.get("ADMIN_EMAILS") || "")
         .toLowerCase()
         .split(",")
         .map((s) => s.trim())

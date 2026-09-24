@@ -10,6 +10,7 @@ import { ServiceUtils } from '../../services/utils/utils';
 import { JobUtils } from '../../services/utils/jobUtils';
 import { useScrollLock } from '../../hooks/useScrollLock';
 import { openExternal } from '../../services/core/openExternal';
+import { safeHttpUrl } from '../../services/utils/safeUrl';
 
 interface JobDetailsModalProps {
   job: Job | null;
@@ -260,7 +261,7 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
               {job.sourceUrl && (
                 <div className="pt-2">
                   <a
-                    href={job.sourceUrl}
+                    href={safeHttpUrl(job.sourceUrl) ?? '#'}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 text-xs font-bold text-orange-400 hover:text-orange-300 underline underline-offset-4 transition-colors"

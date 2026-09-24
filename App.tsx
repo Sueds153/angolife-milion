@@ -37,8 +37,8 @@ const MulticaixaPage = lazy(() => import('./pages/MulticaixaPage').then(m => ({ 
 type Page = 'home' | 'jobs' | 'exchange' | 'deals' | 'news' | 'admin' | 'profile' | 'cv-builder' | 'vaija' | 'multicaixa';
 
 // Emails com privilégio de admin. Configurável via VITE_ADMIN_EMAILS (separado por
-// vírgulas); por defeito mantém o antigo owner para não bloquear acesso.
-const ADMIN_EMAILS = (import.meta.env.VITE_ADMIN_EMAILS || 'suedjosue@gmail.com')
+// vírgulas). Sem fallback hardcoded — sem env, só profiles.is_admin conta.
+const ADMIN_EMAILS = (import.meta.env.VITE_ADMIN_EMAILS || '')
   .split(',')
   .map((e: string) => e.trim().toLowerCase())
   .filter(Boolean);

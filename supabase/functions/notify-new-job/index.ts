@@ -13,6 +13,35 @@ webpush.setVapidDetails(
 );
 
 serve(async (req) => {
+  // Só aceita service_role (webhook) ou admin autenticado — nunca anon/random
+  const authHeader = req.headers.get("Authorization") ?? "";
+  const token = authHeader.replace("Bearer ", "");
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  if (!token || (token !== serviceKey && !token.startsWith("eyJ"))) {
+    return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 });
+  }
+
+  const probe = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    { auth: { persistSession: false } },
+  );
+  if (token !== serviceKey) {
+    const { data: { user }, error: userErr } = await probe.auth.getUser(token);
+    if (userErr || !user) {
+      return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 });
+    }
+    const { data: profile } = await probe
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", user.id)
+      .maybeSingle();
+    const adminEmails = (Deno.env.get("ADMIN_EMAILS") ?? "").toLowerCase().split(",").map((s) => s.trim()).filter(Boolean);
+    if (profile?.is_admin !== true && !adminEmails.includes((user.email ?? "").toLowerCase())) {
+      return new Response(JSON.stringify({ error: "forbidden" }), { status: 403 });
+    }
+  }
+
   const { record, type, table } = await req.json();
 
   // Somente notificamos em caso de nova inserção na tabela de jobs

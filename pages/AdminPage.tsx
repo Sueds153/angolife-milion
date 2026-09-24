@@ -141,7 +141,9 @@ export const AdminPage: React.FC = () => {
   }, [setGlobalActiveAds]);
 
   useEffect(() => {
-    // Carregar dados iniciais ao montar o componente
+    // Só admins carregam dados/pensam canais — visitantes não disparam fetches admin
+    if (!user?.isAdmin) return;
+
     loadPendingJobs();
     loadPendingNews();
     loadPendingDeals();
@@ -158,9 +160,10 @@ export const AdminPage: React.FC = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [loadAdsData]);
+  }, [user?.isAdmin, loadAdsData]);
 
   useEffect(() => {
+    if (!user?.isAdmin) return;
     if (activeTab === 'jobs') {
       loadPendingJobs();
     } else if (activeTab === 'news') {
@@ -175,7 +178,7 @@ export const AdminPage: React.FC = () => {
     } else if (activeTab === 'ads') {
       loadAdsData();
     }
-  }, [activeTab, loadAdsData]);
+  }, [user?.isAdmin, activeTab, loadAdsData]);
 
   const [rates, setRates] = useState<ExchangeRate[]>([]);
   const loadExchangeRates = async () => {

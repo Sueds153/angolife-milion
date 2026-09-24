@@ -23,7 +23,6 @@ const corsHeaders = {
 };
 
 const DEFAULT_LIMIT = 2;
-const MAX_LIMIT = 50;
 
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -56,12 +55,8 @@ serve(async (req: Request) => {
       );
     }
 
-    const { limit: requestedLimit } = await req.json().catch(() => ({}));
-
-    const limit = Math.min(
-      Math.max(Number(requestedLimit) || DEFAULT_LIMIT, 1),
-      MAX_LIMIT,
-    );
+    // Limite fixo por servidor — ignora limit vindo do cliente
+    const limit = DEFAULT_LIMIT;
 
     const { data: allowed, error: rpcError } = await supabase.rpc(
       "check_notification_limit",

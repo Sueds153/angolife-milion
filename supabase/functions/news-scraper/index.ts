@@ -557,7 +557,18 @@ async function processArticle(
     if (bodyArea.length > 0) {
       const raw = bodyArea.html() ?? "";
       const $body = cheerio.load(raw);
-      $body("script, style, iframe, ins, nav, footer, aside, form, noscript").remove();
+      $body("script, style, iframe, ins, nav, footer, aside, form, noscript, object, embed, svg").remove();
+      // Strip event handlers e javascript: (stored XSS)
+      $body("*").each((_, el) => {
+        const attribs = (el as unknown as { attribs?: Record<string, string> }).attribs ?? {};
+        for (const name of Object.keys(attribs)) {
+          if (/^on/i.test(name)) $body(el).removeAttr(name);
+          if ((name === "href" || name === "src" || name === "xlink:href") &&
+              /^\s*(javascript|data|vbscript):/i.test(attribs[name] ?? "")) {
+            $body(el).removeAttr(name);
+          }
+        }
+      });
       const root = $body.root();
       bodyHtml = root.html() ?? "";
       bodyText = root.text();
@@ -603,7 +614,26 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
-Deno.serve(async () => {
+Deno.serve(async (req) => {
+  // Exige admin autenticado ou service_role — scrapers são caros/abutíveis
+  const authHeader = req.headers.get("Authorization") ?? "";
+  const token = authHeader.replace("Bearer ", "");
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  if (!token) {
+    return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401, headers: { "Content-Type": "application/json" } });
+  }
+  if (token !== serviceKey) {
+    const { data: { user }, error: userErr } = await supabase.auth.getUser(token);
+    if (userErr || !user) {
+      return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401, headers: { "Content-Type": "application/json" } });
+    }
+    const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).maybeSingle();
+    const adminEmails = (Deno.env.get("ADMIN_EMAILS") ?? "").toLowerCase().split(",").map((s) => s.trim()).filter(Boolean);
+    if (profile?.is_admin !== true && !adminEmails.includes((user.email ?? "").toLowerCase())) {
+      return new Response(JSON.stringify({ error: "forbidden" }), { status: 403, headers: { "Content-Type": "application/json" } });
+    }
+  }
+
   const began = Date.now();
   console.log("🚀 AngoNewsScraper (Edge) — INICIANDO");
 

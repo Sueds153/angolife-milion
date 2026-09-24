@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
+import DOMPurify from 'dompurify';
 import { NewsService } from '../services/api/news.service';
 import { NewsArticle } from '../types';
 import { ExternalLink, Calendar, Eye, Flame, Lock, X, Clock, Zap, Newspaper, ArrowRight } from 'lucide-react';
@@ -12,6 +13,22 @@ import { useAppStore } from '../store/useAppStore';
 import { Helmet } from 'react-helmet-async';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { openExternal } from '../services/core/openExternal';
+import { safeHttpUrl } from '../services/utils/safeUrl';
+
+const sanitizeArticleBody = (html: string): string =>
+  DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: [
+      'p', 'br', 'b', 'strong', 'i', 'em', 'u', 's', 'a', 'ul', 'ol', 'li',
+      'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'code', 'pre',
+      'figure', 'figcaption', 'img', 'span', 'div', 'hr', 'table', 'thead',
+      'tbody', 'tr', 'th', 'td',
+    ],
+    ALLOWED_ATTR: [
+      'href', 'title', 'target', 'rel', 'src', 'alt', 'width', 'height',
+      'class', 'colspan', 'rowspan',
+    ],
+    ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
+  });
 
 interface NewsPageProps {
   onRequestReward?: (callback: () => void) => void;
@@ -414,7 +431,7 @@ export const NewsPage: React.FC<NewsPageProps> = () => {
                   {contentUnlocked ? (
                     <div className="text-slate-300 space-y-6 font-medium leading-loose text-lg prose prose-invert max-w-none">
                        {selectedArticle.body ? (
-                         <div dangerouslySetInnerHTML={{ __html: selectedArticle.body }} />
+                         <div dangerouslySetInnerHTML={{ __html: sanitizeArticleBody(selectedArticle.body) }} />
                        ) : (
                          <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
                            <p className="text-slate-300 font-medium leading-relaxed">
@@ -422,7 +439,7 @@ export const NewsPage: React.FC<NewsPageProps> = () => {
                            </p>
                            {selectedArticle.url && (
                              <a
-                               href={selectedArticle.url}
+                               href={safeHttpUrl(selectedArticle.url) ?? '#'}
                                target="_blank"
                                rel="noopener noreferrer"
                                className="mt-4 inline-flex items-center gap-2 text-brand-gold font-black text-xs uppercase tracking-widest hover:underline"
@@ -439,7 +456,7 @@ export const NewsPage: React.FC<NewsPageProps> = () => {
                        {/* Preview desfocado do conteúdo */}
                        <div className="text-slate-300 space-y-6 font-medium leading-loose text-lg prose prose-invert max-w-none select-none blur-[6px] pointer-events-none">
                           {selectedArticle.body ? (
-                            <div dangerouslySetInnerHTML={{ __html: selectedArticle.body }} />
+                            <div dangerouslySetInnerHTML={{ __html: sanitizeArticleBody(selectedArticle.body) }} />
                           ) : (
                             <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
                               <p className="text-slate-300 font-medium leading-relaxed">

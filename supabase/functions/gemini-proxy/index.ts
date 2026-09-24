@@ -32,25 +32,6 @@ function getAuthToken(req: Request): string | null {
   return auth.slice(7).trim()
 }
 
-function base64UrlDecode(s: string): string {
-  s = s.replace(/-/g, '+').replace(/_/g, '/')
-  while (s.length % 4) s += '='
-  const bin = atob(s)
-  const bytes = new Uint8Array(bin.length)
-  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i)
-  return new TextDecoder().decode(bytes)
-}
-
-function decodeJwt(token: string): { sub?: string } | null {
-  try {
-    const parts = token.split('.')
-    if (parts.length !== 3) return null
-    return JSON.parse(base64UrlDecode(parts[1]))
-  } catch {
-    return null
-  }
-}
-
 // ── Admin client (service_role) ────────────────────────────────────
 let admin: SupabaseClient | null = null
 function getAdmin(): SupabaseClient {
@@ -135,9 +116,10 @@ serve(async (req: Request) => {
       return json({ error: { code: 'unauth', message: 'Autenticação necessária.' } }, 401)
     }
 
-    const claims = decodeJwt(token)
-    const userId = claims?.sub
-    if (!userId) {
+    // Verificação real da assinatura JWT (não confiar em decodeJwt do payload)
+    const { data: { user }, error: authError } = await getAdmin().auth.getUser(token)
+    const userId = user?.id
+    if (authError || !userId) {
       return json({ error: { code: 'unauth', message: 'Token inválido.' } }, 401)
     }
 

@@ -21,9 +21,10 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-const ADMIN_EMAILS = (Deno.env.get("ADMIN_EMAILS") ?? "suedjosue@gmail.com")
+const ADMIN_EMAILS = (Deno.env.get("ADMIN_EMAILS") ?? "")
   .split(",")
-  .map((e) => e.trim().toLowerCase());
+  .map((e) => e.trim().toLowerCase())
+  .filter(Boolean);
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -63,10 +64,10 @@ serve(async (req: Request) => {
     const { payload } = await req.json().catch(() => ({ payload: {} }));
 
     if (route === "notify") {
-      // Rate-limit por dia (2 notificações por defeito)
+      // Rate-limit fixo no servidor (2/dia) — ignora limit do cliente
       const { data: allowed } = await supabase.rpc(
         "check_notification_limit",
-        { p_user_id: userId, p_limit: Number(payload.limit) || 2 },
+        { p_user_id: userId, p_limit: 2 },
       );
       if (allowed !== true) {
         return json({ error: "Limite atingido." }, 429);
@@ -75,6 +76,19 @@ serve(async (req: Request) => {
     }
 
     if (route === "exchange-rate" && req.method === "POST") {
+      // Exige admin (profiles.is_admin ou ADMIN_EMAILS) — escrita sensível
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("is_admin")
+        .eq("id", userId)
+        .maybeSingle();
+      const isAdmin =
+        profile?.is_admin === true ||
+        ADMIN_EMAILS.includes((user?.email ?? "").toLowerCase());
+      if (!isAdmin) {
+        return json({ error: "Apenas administradores." }, 403);
+      }
+
       const { currency, buy, sell } = payload;
       if (!currency || buy == null || sell == null) {
         return json({ error: "Parâmetros em falta." }, 400);

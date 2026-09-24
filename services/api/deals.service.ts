@@ -117,8 +117,13 @@ export const DealsService = {
   },
 
   submitDeal: async (
-    deal: Omit<ProductDeal, "id" | "status" | "createdAt" | "views" | "likes">,
+    deal: Omit<ProductDeal, "id" | "status" | "createdAt" | "views" | "likes"> & {
+      status?: string;
+    },
   ): Promise<void> => {
+    // Cliente pode pedir approved se for admin; o trigger force_deal_moderation
+    // no servidor força pending/verified=false/is_admin=false para não-admins.
+    const wantsAdmin = deal.is_admin === true;
     const { error } = await supabase.from("product_deals").insert([
       {
         title: deal.title,
@@ -133,9 +138,9 @@ export const DealsService = {
         image_url: deal.imageUrl,
         category: deal.category,
         submitted_by: deal.submittedBy,
-        verified: deal.verified ?? false,
-        is_admin: deal.is_admin ?? false,
-        status: deal.is_admin ? "approved" : "pending",
+        status: wantsAdmin ? deal.status || "approved" : "pending",
+        verified: wantsAdmin ? deal.verified ?? true : false,
+        is_admin: wantsAdmin,
       },
     ]);
 

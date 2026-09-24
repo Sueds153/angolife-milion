@@ -14,6 +14,7 @@ import { DadosMotoristaForm } from '../components/vaija/DadosMotoristaForm';
 import { nivelClasses, nivelEmoji, nivelLabel, nivelPorPontos } from '../components/multicaixa/helpers';
 import { openExternal } from '../services/core/openExternal';
 import { JobUtils } from '../services/utils/jobUtils';
+import { safeHttpUrl } from '../services/utils/safeUrl';
 
 export const ProfilePage: React.FC = () => {
   const { user, setUser, setIsAuthenticated } = useAppStore();
@@ -448,7 +449,7 @@ export const ProfilePage: React.FC = () => {
                   {user.cvHistory && user.cvHistory.length > 0 ? (
                     <div className="space-y-3">
                       {user.cvHistory.map(cv => (
-                        <a key={cv.id} href={cv.url} className="flex items-center justify-between p-3 bg-white/10 rounded-xl hover:bg-white/20 transition-colors border border-white/5 group">
+                        <a key={cv.id} href={safeHttpUrl(cv.url) ?? '#'} className="flex items-center justify-between p-3 bg-white/10 rounded-xl hover:bg-white/20 transition-colors border border-white/5 group">
                            <div className="flex items-center gap-3">
                              <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
                                <Award size={14} className="text-white" />

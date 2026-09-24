@@ -18,9 +18,10 @@ const corsHeaders = {
 };
 
 // Emails permitidos como admin (fallback caso is_admin não esteja marcado na DB)
-const ADMIN_EMAILS = (Deno.env.get("ADMIN_EMAILS") ?? "suedjosue@gmail.com")
+const ADMIN_EMAILS = (Deno.env.get("ADMIN_EMAILS") ?? "")
   .split(",")
-  .map((e) => e.trim().toLowerCase());
+  .map((e) => e.trim().toLowerCase())
+  .filter(Boolean);
 
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") {

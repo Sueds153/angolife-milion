@@ -15,9 +15,10 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-const ADMIN_EMAILS = (Deno.env.get("ADMIN_EMAILS") ?? "suedjosue@gmail.com")
+const ADMIN_EMAILS = (Deno.env.get("ADMIN_EMAILS") ?? "")
   .split(",")
-  .map((e) => e.trim().toLowerCase());
+  .map((e) => e.trim().toLowerCase())
+  .filter(Boolean);
 
 const mask = (v: string | null | undefined) =>
   v ? `${v.slice(0, 4)}...` : null;
@@ -71,14 +72,20 @@ serve(async (req: Request) => {
       );
     }
 
-    // Não-admins só veem dados mascarados (nunca proof_url)
+    // Não-admins: nunca expõem IBAN, nome completo nem proof_url
     const safeOrders = orders.map((o) =>
       isAdmin
         ? o
         : {
-            ...o,
+            id: o.id,
             wallet: mask(o.wallet),
-            full_name: o.full_name ?? null,
+            iban: mask(o.iban),
+            full_name: null,
+            amount: o.amount,
+            currency: o.currency,
+            order_type: o.order_type,
+            status: o.status,
+            created_at: o.created_at,
             proof_url: null,
           },
     );
