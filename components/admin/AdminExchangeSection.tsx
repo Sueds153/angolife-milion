@@ -1,6 +1,9 @@
 
 import React from 'react';
-import { DollarSign, TrendingUp, Save, ShieldCheck } from 'lucide-react';
+import { DollarSign, TrendingUp, Save, ShieldCheck, FileText, RefreshCw, ArrowUpDown } from 'lucide-react';
+import { OrderRow } from '../../services/api/order.service';
+import { resolvePrivateStorageUrl } from '../../services/api/r2';
+import { openExternal } from '../../services/core/openExternal';
 
 interface ExchangeRate {
   currency: string;
@@ -13,14 +16,29 @@ interface AdminExchangeSectionProps {
   setRates: React.Dispatch<React.SetStateAction<ExchangeRate[]>>;
   loading: boolean;
   handleUpdateRate: (currency: string, buy: number, sell: number) => void;
+  recentOrders: OrderRow[];
+  isLoadingOrders?: boolean;
+  loadRecentOrders?: () => void;
 }
 
 export const AdminExchangeSection: React.FC<AdminExchangeSectionProps> = ({
   rates,
   setRates,
   loading,
-  handleUpdateRate
+  handleUpdateRate,
+  recentOrders,
+  isLoadingOrders = false,
+  loadRecentOrders,
 }) => {
+  const verComprovativo = async (e: React.MouseEvent, value: string) => {
+    e.preventDefault();
+    const url = await resolvePrivateStorageUrl(value);
+    if (url) {
+      await openExternal(url);
+    } else {
+      window.alert("Não foi possível abrir o comprovativo. Verifique se ainda existe no Storage.");
+    }
+  };
   return (
     <div className="space-y-6">
       <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-orange-500/10 shadow-sm">
@@ -91,6 +109,77 @@ export const AdminExchangeSection: React.FC<AdminExchangeSectionProps> = ({
             As alterações no câmbio informal têm impacto imediato em todas as calculadoras e conversores da aplicação. Certifique-se de validar as taxas antes de guardar.
           </p>
         </div>
+      </div>
+
+      <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-orange-500/10 shadow-sm space-y-6">
+        <div className="flex flex-col md:flex-row items-center md:items-start gap-4 text-center md:text-left stack-narrow">
+          <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 shrink-0">
+            <ArrowUpDown size={24} />
+          </div>
+          <div className="w-full md:w-auto flex-1">
+            <h3 className="font-black text-lg uppercase leading-tight">Últimas Ordens</h3>
+            <p className="text-xs text-slate-500">Comprovativos de câmbio em R2 privado — só admins podem abrir.</p>
+          </div>
+          {loadRecentOrders && (
+            <button
+              onClick={loadRecentOrders}
+              className="p-3 bg-slate-100 dark:bg-white/5 rounded-2xl text-slate-400 hover:text-brand-gold transition-all"
+              title="Atualizar ordens"
+            >
+              <RefreshCw size={18} className={isLoadingOrders ? 'animate-spin' : ''} />
+            </button>
+          )}
+        </div>
+
+        {recentOrders.length === 0 && !isLoadingOrders ? (
+          <div className="py-12 text-center bg-slate-50 dark:bg-white/5 rounded-[2rem] border border-dashed border-orange-500/20">
+            <p className="font-black text-slate-400 uppercase tracking-widest text-[10px]">Sem ordens recentes.</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {recentOrders.map((order) => (
+              <div
+                key={order.id}
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 dark:bg-white/5 p-4 rounded-2xl border border-slate-200 dark:border-white/5"
+              >
+                <div className="min-w-0 space-y-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-black text-sm uppercase tracking-tight truncate">
+                      {order.full_name || 'Utilizador'}
+                    </span>
+                    <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${
+                      order.status === 'pending'
+                        ? 'bg-amber-500/10 text-amber-500'
+                        : order.status === 'completed'
+                          ? 'bg-emerald-500/10 text-emerald-500'
+                          : 'bg-slate-500/10 text-slate-500'
+                    }`}>
+                      {order.status || '—'}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500">
+                    {order.amount} {order.currency} · {order.order_type || order.type || '—'}
+                    {order.created_at ? ` · ${new Date(order.created_at).toLocaleString('pt-AO')}` : ''}
+                  </p>
+                </div>
+                <div className="shrink-0">
+                  {order.proof_url ? (
+                    <button
+                      onClick={(e) => void verComprovativo(e, order.proof_url!)}
+                      className="inline-flex items-center gap-2 px-3 py-2 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                    >
+                      <FileText size={14} /> Ver Comprovativo
+                    </button>
+                  ) : (
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                      Sem comprovativo
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

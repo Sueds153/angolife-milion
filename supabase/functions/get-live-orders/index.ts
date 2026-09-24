@@ -55,7 +55,9 @@ serve(async (req: Request) => {
 
     const query = supabase
       .from("orders")
-      .select("id, full_name, wallet, iban, amount, currency, order_type, status, created_at")
+      .select(
+        "id, full_name, wallet, iban, amount, currency, order_type, status, created_at, proof_url",
+      )
       .order("created_at", { ascending: false })
       .limit(50);
 
@@ -69,7 +71,7 @@ serve(async (req: Request) => {
       );
     }
 
-    // Não-admins só veem dados mascarados
+    // Não-admins só veem dados mascarados (nunca proof_url)
     const safeOrders = orders.map((o) =>
       isAdmin
         ? o
@@ -77,6 +79,7 @@ serve(async (req: Request) => {
             ...o,
             wallet: mask(o.wallet),
             full_name: o.full_name ?? null,
+            proof_url: null,
           },
     );
 

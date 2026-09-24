@@ -5,6 +5,7 @@ import { JobsService } from '../services/api/jobs.service';
 import { NewsService } from '../services/api/news.service';
 import { DealsService } from '../services/api/deals.service';
 import { ExchangeService } from '../services/api/exchange.service';
+import { OrderService, OrderRow } from '../services/api/order.service';
 import { AdminService } from '../services/core/admin.service';
 import { SubscriptionService, CVSubscriptionRow } from '../services/api/subscription.service';
 import { NotificationService } from '../services/integrations/notificationService';
@@ -53,6 +54,8 @@ export const AdminPage: React.FC = () => {
   const [showNewDealModal, setShowNewDealModal] = useState(false);
   const [cvSubscriptions, setCvSubscriptions] = useState<CVSubscriptionRow[]>([]);
   const [isLoadingCvSubs, setIsLoadingCvSubs] = useState(false);
+  const [recentOrders, setRecentOrders] = useState<OrderRow[]>([]);
+  const [isLoadingOrders, setIsLoadingOrders] = useState(false);
 
   // Form State
   const [newJob, setNewJob] = useState({
@@ -166,6 +169,7 @@ export const AdminPage: React.FC = () => {
       loadPendingDeals();
     } else if (activeTab === 'exchange') {
       loadExchangeRates();
+      loadRecentOrders();
     } else if (activeTab === 'cv') {
       loadCvSubscriptions();
     } else if (activeTab === 'ads') {
@@ -179,6 +183,13 @@ export const AdminPage: React.FC = () => {
     const data = await ExchangeService.getRates();
     setRates(data);
     setLoading(false);
+  };
+
+  const loadRecentOrders = async () => {
+    setIsLoadingOrders(true);
+    const data = await OrderService.getRecentOrders(20);
+    setRecentOrders(data);
+    setIsLoadingOrders(false);
   };
 
   const handleUpdateRate = async (currency: 'USD' | 'EUR', buy: number, sell: number) => {
@@ -815,6 +826,9 @@ export const AdminPage: React.FC = () => {
           setRates={setRates}
           loading={loading}
           handleUpdateRate={handleUpdateRate}
+          recentOrders={recentOrders}
+          isLoadingOrders={isLoadingOrders}
+          loadRecentOrders={loadRecentOrders}
         />
       )}
 

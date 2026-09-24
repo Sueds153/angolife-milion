@@ -34,6 +34,7 @@ export interface OrderRow {
   bank?: string | null;
   status?: string | null;
   total_kz?: number | null;
+  proof_url?: string | null;
   created_at?: string;
 }
 
@@ -152,5 +153,20 @@ export const OrderService = {
       type: o.order_type === 'venda' ? 'sell' : 'buy',
       bank: o.bank
     }));
+  },
+
+  /** Ordens recentes para o painel admin (inclui proof_url). RLS: só admins. */
+  getRecentOrders: async (limit: number = 20): Promise<OrderRow[]> => {
+    const { data, error } = await supabase
+      .from("orders")
+      .select("id, full_name, amount, currency, order_type, status, created_at, proof_url")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error('[OrderService] getRecentOrders error:', error.code, error.message);
+      return [];
+    }
+    return data as OrderRow[];
   },
 };
