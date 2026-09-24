@@ -115,3 +115,22 @@ export const r2PrivateDownloadUrl = async (key: string): Promise<string | null> 
     return null;
   }
 };
+
+const PRIVATE_KEY_PREFIXES = ["payment-receipts/", "exchange-proofs/", "documentos-motorista/"];
+
+/**
+ * Resolve um valor guardado na DB para uma URL abrível:
+ * - `data:` / `http(s):` → devolve tal como está (legado/base64)
+ * - key R2 privada → presigned GET (300s)
+ * Devolve null se não for possível resolver.
+ */
+export const resolvePrivateStorageUrl = async (value: string): Promise<string | null> => {
+  if (!value) return null;
+  if (value.startsWith("data:") || value.startsWith("http://") || value.startsWith("https://")) {
+    return value;
+  }
+  if (PRIVATE_KEY_PREFIXES.some((p) => value.startsWith(p))) {
+    return await r2PrivateDownloadUrl(value);
+  }
+  return null;
+};

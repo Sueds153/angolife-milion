@@ -275,11 +275,11 @@ export const CVBuilderPage: React.FC = () => {
 
     setIsUploadingReceipt(true);
     try {
-      // 1. Upload receipt to storage (com fallback automático para base64 se o bucket falhar)
-      const publicUrl = await StorageService.uploadReceipt(receiptFile);
-      console.log('[Payment] Upload URL:', publicUrl ? publicUrl.substring(0, 80) + '...' : 'null');
+      // 1. Upload receipt to private R2 (devolve storage key, não URL pública)
+      const receiptKey = await StorageService.uploadReceipt(receiptFile);
+      console.log('[Payment] Upload key:', receiptKey ? receiptKey.substring(0, 80) + '...' : 'null');
 
-      if (!publicUrl) {
+      if (!receiptKey) {
         // Só PDFs sem bucket disponível chegam aqui — pedir ao utilizador para usar uma imagem
         alert('Não foi possível carregar o ficheiro PDF. Por favor, envie o comprovativo como imagem (JPG ou PNG) e tente novamente.');
         return;
@@ -289,7 +289,7 @@ export const CVBuilderPage: React.FC = () => {
       const success = await SubscriptionService.submitCVSubscription(
         user.id,
         selectedPlan,
-        publicUrl
+        receiptKey
       );
       console.log('[Payment] Subscription result:', success);
 

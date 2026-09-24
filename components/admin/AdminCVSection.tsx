@@ -1,6 +1,8 @@
 
 import React from 'react';
 import { Crown, RefreshCw, Check, X, User, Phone, Mail, Clock, FileText } from 'lucide-react';
+import { resolvePrivateStorageUrl } from '../../services/api/r2';
+import { openExternal } from '../../services/core/openExternal';
 
 interface CVSubscription {
   id: string;
@@ -32,6 +34,16 @@ export const AdminCVSection: React.FC<AdminCVSectionProps> = ({
   handleApproveCvSub,
   handleRejectCvSub
 }) => {
+  const verComprovativo = async (e: React.MouseEvent, value: string) => {
+    e.preventDefault();
+    const url = await resolvePrivateStorageUrl(value);
+    if (url) {
+      await openExternal(url);
+    } else {
+      window.alert("Não foi possível abrir o comprovativo. Verifique se ainda existe no Storage.");
+    }
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-orange-500/10 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4 stack-narrow">
@@ -93,7 +105,11 @@ export const AdminCVSection: React.FC<AdminCVSectionProps> = ({
                 {(sub.receipt_url || sub.url_comprovativo) && (
                   <div className="flex items-center gap-2 text-xs">
                     <FileText size={14} className="text-blue-500" />
-                    <a href={sub.receipt_url || sub.url_comprovativo!} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline text-[10px] font-bold">
+                    <a
+                      href="#"
+                      onClick={(e) => void verComprovativo(e, sub.receipt_url || sub.url_comprovativo!)}
+                      className="text-blue-500 hover:underline text-[10px] font-bold"
+                    >
                       Ver Comprovativo
                     </a>
                   </div>

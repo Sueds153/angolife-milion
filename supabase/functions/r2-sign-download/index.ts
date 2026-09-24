@@ -2,7 +2,15 @@
 // Secrets: R2_ACCOUNT_ID, R2_PRIVATE_BUCKET, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_S3_ENDPOINT
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-const PRIVATE_PREFIXES = ["documentos-motorista/"];
+const PRIVATE_PREFIXES = [
+  "documentos-motorista/",
+  "payment-receipts/",
+  "exchange-proofs/",
+];
+
+const ADMIN_EMAILS = (Deno.env.get("ADMIN_EMAILS") ?? "suedjosue@gmail.com")
+  .split(",")
+  .map((e) => e.trim().toLowerCase());
 
 function hmac(key: Uint8Array, data: string): Promise<Uint8Array> {
   return crypto.subtle.importKey(
@@ -121,6 +129,7 @@ Deno.serve(async (req) => {
     if (userErr || !userData?.user) {
       return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401, headers: cors });
     }
+    const user = userData.user;
 
     const body = await req.json();
     const key: string = String(body?.key || "").replace(/^\/+/, "");
@@ -130,6 +139,44 @@ Deno.serve(async (req) => {
     }
     if (!PRIVATE_PREFIXES.some((p) => key.startsWith(p))) {
       return new Response(JSON.stringify({ error: "prefix not allowed" }), { status: 403, headers: cors });
+    }
+
+    const service = createClient(
+      supabaseUrl,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } },
+    );
+    const { data: profile } = await service
+      .from("profiles")
+      .select("is_admin, email")
+      .eq("id", user.id)
+      .maybeSingle();
+    const isAdmin =
+      profile?.is_admin === true ||
+      ADMIN_EMAILS.includes((user.email ?? "").toLowerCase());
+
+    if (key.startsWith("documentos-motorista/")) {
+      const allowed =
+        isAdmin ||
+        key.startsWith(`documentos-motorista/${user.id}/`);
+      if (!allowed) {
+        return new Response(JSON.stringify({ error: "forbidden" }), { status: 403, headers: cors });
+      }
+    } else if (key.startsWith("payment-receipts/")) {
+      const { data: sub } = await service
+        .from("subscriptions_pending")
+        .select("user_id, receipt_url, url_comprovativo")
+        .or(`receipt_url.eq.${key},url_comprovativo.eq.${key}`)
+        .limit(1)
+        .maybeSingle();
+      const isOwner = !!sub && sub.user_id === user.id;
+      if (!isAdmin && !isOwner) {
+        return new Response(JSON.stringify({ error: "forbidden" }), { status: 403, headers: cors });
+      }
+    } else if (key.startsWith("exchange-proofs/")) {
+      if (!isAdmin) {
+        return new Response(JSON.stringify({ error: "forbidden" }), { status: 403, headers: cors });
+      }
     }
 
     const accessKeyId = Deno.env.get("R2_ACCESS_KEY_ID")!;

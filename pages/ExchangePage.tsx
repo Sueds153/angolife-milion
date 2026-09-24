@@ -274,11 +274,17 @@ export const ExchangePage: React.FC = () => {
     let message = "";
     const priorityTag = isPriority ? "⚡ *PRIORITÁRIO* | " : "";
     const finalOrderId = orderId || `MANUAL-${Date.now().toString().slice(-6)}`;
+    // Comprovativos ficam em R2 privado — não expor keys/URLs públicas no WhatsApp
+    const proofLabel = !proofUrl
+      ? "Não anexado"
+      : proofUrl.startsWith("http://") || proofUrl.startsWith("https://")
+        ? proofUrl
+        : "Anexado na ordem (ver no painel admin)";
 
     if (tradeAction === 'buy') {
-      message = `${priorityTag}📥 *NOVO PEDIDO - Resolve.AO*\n\n*ID:* ${finalOrderId}\n\n👤 *Perfil*:\nNome: ${formData.fullName}\nIdade: ${formData.age}\nGénero: ${formData.gender}\n\n🔄 *Operação*:\nTipo: COMPRA\nMontante: ${parseFloat(tradeAmount).toFixed(2)} ${tradeCurrency}\nTotal: ${totalKzFormatted}\n\n📍 *Destino*:\nCarteira: ${formData.wallet}\nID/Coord: ${formData.coordinates}\n\n💳 *Pagamento*:\nMétodo: ${formData.paymentMethod}${isExpired ? '\n\n⚠️ *TEMPO EXPIRADO*' : ''}\n\nLink do Comprovativo:\n${proofUrl || 'Não anexado'}`;
+      message = `${priorityTag}📥 *NOVO PEDIDO - Resolve.AO*\n\n*ID:* ${finalOrderId}\n\n👤 *Perfil*:\nNome: ${formData.fullName}\nIdade: ${formData.age}\nGénero: ${formData.gender}\n\n🔄 *Operação*:\nTipo: COMPRA\nMontante: ${parseFloat(tradeAmount).toFixed(2)} ${tradeCurrency}\nTotal: ${totalKzFormatted}\n\n📍 *Destino*:\nCarteira: ${formData.wallet}\nID/Coord: ${formData.coordinates}\n\n💳 *Pagamento*:\nMétodo: ${formData.paymentMethod}${isExpired ? '\n\n⚠️ *TEMPO EXPIRADO*' : ''}\n\nLink do Comprovativo:\n${proofLabel}`;
     } else {
-      message = `${priorityTag}📥 *ORDEM DE VENDA - Resolve.AO*\n\n*ID:* ${finalOrderId}\n\n👤 *CLIENTE:* ${formData.fullName}, ${formData.age}, ${formData.gender}.\n\n💰 *VALOR A ENTREGAR:* ${parseFloat(tradeAmount).toFixed(2)} ${tradeCurrency}.\n\n🏦 *RECEBER EM KWANZAS:* ${totalKzFormatted} no banco ${formData.bank}.\n\n📍 *DADOS BANCÁRIOS:* IBAN: ${formData.iban} | Titular: ${formData.accountHolder}.\n\n🕒 *STATUS DO TIMER:* ${isExpired ? '⚠️ Expirado' : 'Dentro do Prazo'}.\n\nLink do Comprovativo:\n${proofUrl || 'Não anexado'}`;
+      message = `${priorityTag}📥 *ORDEM DE VENDA - Resolve.AO*\n\n*ID:* ${finalOrderId}\n\n👤 *CLIENTE:* ${formData.fullName}, ${formData.age}, ${formData.gender}.\n\n💰 *VALOR A ENTREGAR:* ${parseFloat(tradeAmount).toFixed(2)} ${tradeCurrency}.\n\n🏦 *RECEBER EM KWANZAS:* ${totalKzFormatted} no banco ${formData.bank}.\n\n📍 *DADOS BANCÁRIOS:* IBAN: ${formData.iban} | Titular: ${formData.accountHolder}.\n\n🕒 *STATUS DO TIMER:* ${isExpired ? '⚠️ Expirado' : 'Dentro do Prazo'}.\n\nLink do Comprovativo:\n${proofLabel}`;
     }
 
     return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;

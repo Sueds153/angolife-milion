@@ -3,7 +3,7 @@
  */
 
 import { supabase } from "../core/supabaseClient";
-import { uploadViaR2, r2Configured } from "./r2";
+import { uploadViaR2, uploadViaR2Private, r2Configured } from "./r2";
 
 /** Resize and compress an image file to a lightweight data URL fallback (<150KB) */
 const compressImageToDataUrl = (file: File): Promise<string | null> => {
@@ -115,12 +115,13 @@ export const StorageService = {
     }
   },
 
+  /** Comprovativo de câmbio → R2 privado; devolve a key (não URL pública). */
   uploadProof: async (file: File): Promise<string | null> => {
     const fileName = `${Math.random()}.${file.name.split(".").pop()}`;
     const key = `exchange-proofs/proofs/${fileName}`;
 
-    const r2Url = await uploadViaR2(key, file);
-    if (r2Url) return r2Url;
+    const r2Key = await uploadViaR2Private(key, file);
+    if (r2Key) return r2Key;
     if (r2Configured()) return null;
 
     const { error } = await supabase.storage.from("exchange-proofs").upload(`proofs/${fileName}`, file);
@@ -128,18 +129,14 @@ export const StorageService = {
     return supabase.storage.from("exchange-proofs").getPublicUrl(`proofs/${fileName}`).data.publicUrl;
   },
 
+  /** Comprovativo de pagamento → R2 privado; devolve a key (não URL pública). Sem fallback base64. */
   uploadReceipt: async (file: File): Promise<string | null> => {
     const fileName = `${Math.random()}.${file.name.split(".").pop()}`;
     const key = `payment-receipts/receipts/${fileName}`;
 
-    const r2Url = await uploadViaR2(key, file);
-    if (r2Url) return r2Url;
-
-    if (r2Configured()) {
-      // R2 configured but failed — base64 fallback for images only
-      if (file.type.startsWith("image/")) return await compressImageToDataUrl(file);
-      return null;
-    }
+    const r2Key = await uploadViaR2Private(key, file);
+    if (r2Key) return r2Key;
+    if (r2Configured()) return null;
 
     const { data, error } = await supabase.storage
       .from("payment-receipts")
@@ -149,29 +146,10 @@ export const StorageService = {
       return supabase.storage.from("payment-receipts").getPublicUrl(data.path).data.publicUrl;
     }
 
-    console.warn('[StorageService] payment-receipts bucket upload failed, using fallback:', error?.message);
-
-    // Fallback: comprimir imagem para base64 se o bucket falhar
-    const isImage = file.type.startsWith('image/');
-    if (isImage) {
+    console.warn('[StorageService] payment-receipts bucket upload failed:', error?.message);
+    if (file.type.startsWith("image/")) {
       return await compressImageToDataUrl(file);
     }
-
-    // PDFs: tentar outros buckets
-    const bucketsToTry = ['exchange-proofs', 'avatars'];
-    for (const bucketName of bucketsToTry) {
-      try {
-        const { data: d, error: e } = await supabase.storage
-          .from(bucketName)
-          .upload(`receipts/${fileName}`, file, { upsert: true });
-        if (!e && d) {
-          return supabase.storage.from(bucketName).getPublicUrl(d.path).data.publicUrl;
-        }
-      } catch {
-        // continua para o próximo bucket
-      }
-    }
-
     return null;
   },
 

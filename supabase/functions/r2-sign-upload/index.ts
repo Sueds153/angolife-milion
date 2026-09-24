@@ -2,8 +2,12 @@
 // Secrets: R2_ACCOUNT_ID, R2_BUCKET, R2_PRIVATE_BUCKET, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_S3_ENDPOINT
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-const PUBLIC_PREFIXES = ["ads/", "discount-images/", "avatars/", "exchange-proofs/", "payment-receipts/"];
-const PRIVATE_PREFIXES = ["documentos-motorista/"];
+const PUBLIC_PREFIXES = ["ads/", "discount-images/", "avatars/"];
+const PRIVATE_PREFIXES = [
+  "documentos-motorista/",
+  "payment-receipts/",
+  "exchange-proofs/",
+];
 
 function bucketForKey(key: string): string | null {
   if (PRIVATE_PREFIXES.some((p) => key.startsWith(p))) {
@@ -146,6 +150,11 @@ Deno.serve(async (req) => {
     const bucket = bucketForKey(key);
     if (!bucket) {
       return new Response(JSON.stringify({ error: "prefix not allowed" }), { status: 403, headers: cors });
+    }
+
+    const userId = userData.user.id;
+    if (key.startsWith("documentos-motorista/") && !key.startsWith(`documentos-motorista/${userId}/`)) {
+      return new Response(JSON.stringify({ error: "forbidden path" }), { status: 403, headers: cors });
     }
 
     const accountId = Deno.env.get("R2_ACCOUNT_ID")!;
