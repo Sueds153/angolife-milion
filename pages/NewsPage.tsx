@@ -5,6 +5,7 @@ import { NewsService } from '../services/api/news.service';
 import { NewsArticle } from '../types';
 import { ExternalLink, Calendar, Eye, Flame, Lock, X, Clock, Zap, Newspaper, ArrowRight } from 'lucide-react';
 import { RewardedAd } from '../components/ads/AdOverlays';
+import { selectAdForPlacement, creativeFromAd } from '../services/api/adSelector';
 import { AdBanner } from '../components/ads/AdBanner';
 import { ServiceUtils } from '../services/utils/utils';
 import { PLACEHOLDER_IMAGE as FALLBACK_IMAGE } from '../constants/placeholders';
@@ -103,17 +104,11 @@ export const NewsPage: React.FC<NewsPageProps> = () => {
   const [visibleCount, setVisibleCount] = useState(9);
   const NEWS_PAGE_STEP = 9;
 
-  // Creative do rewarded vindo da BD (location news|all)
-  const rewardedCreative = React.useMemo(() => {
-    const match = activeAds.find(a =>
-      a.is_active && a.format === 'rewarded' && (a.location === 'news' || a.location === 'all')
-    );
-    return match ? {
-      image_url: match.image_url,
-      title: match.title || match.company_name,
-      company_name: match.company_name,
-    } : null;
-  }, [activeAds]);
+  // Creative do rewarded vindo da BD (matching hierárquico: exact → all → fallback)
+  const rewardedCreative = React.useMemo(
+    () => creativeFromAd(selectAdForPlacement(activeAds, { format: 'rewarded', page: 'news' })),
+    [activeAds]
+  );
 
   useEffect(() => {
     const handleOnline = () => setIsOffline(false);

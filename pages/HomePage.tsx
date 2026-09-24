@@ -9,6 +9,7 @@ import { APP_CONFIG } from '../constants/app';
 import { PARTNER_ADS } from '../constants/ads';
 import { AdBanner } from '../components/ads/AdBanner';
 import { AdsService, Ad } from '../services/api/ads.service';
+import { selectAdForPlacement } from '../services/api/adSelector';
 import { AdService } from '../services/api/adService';
 import { VideoUtils } from '../services/utils/videoUtils';
 import { useAppStore } from '../store/useAppStore';
@@ -130,7 +131,7 @@ export const HomePage: React.FC = () => {
           setAds(adsData);
           setActiveAds(adsData);
 
-          const interstitial = adsData.find(a => a.is_active && a.format === 'interstitial' && (a.location === 'home' || a.location === 'all'));
+          const interstitial = selectAdForPlacement(adsData, { format: 'interstitial', page: 'home' });
           if (interstitial && AdService.canShowInterstitial()) {
             setInterstitialAd(interstitial);
             // Record cooldown only when the ad actually shows (inside timeout)
@@ -140,7 +141,7 @@ export const HomePage: React.FC = () => {
             }, 3000);
           }
           
-          const rewarded = adsData.find(a => a.is_active && a.format === 'rewarded' && (a.location === 'home' || a.location === 'all'));
+          const rewarded = selectAdForPlacement(adsData, { format: 'rewarded', page: 'home' });
           if (rewarded) {
             setRewardedAd(rewarded);
           }

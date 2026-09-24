@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { X, Zap, Play, Loader2, MessageCircle } from 'lucide-react';
 import { useScrollLock } from '../../hooks/useScrollLock';
 import { openExternal } from '../../services/core/openExternal';
+import { AdCreative } from '../../services/api/adSelector';
+import { AdCreativeMedia } from './AdOverlays';
 
 interface RewardedAdModalProps {
   isOpen: boolean;
@@ -10,6 +12,7 @@ interface RewardedAdModalProps {
   onSkip: () => void;
   whatsappLink?: string | null;
   onFinalize?: () => void;
+  creative?: AdCreative | null;
 }
 
 /**
@@ -22,7 +25,8 @@ export const RewardedAdModal: React.FC<RewardedAdModalProps> = ({
   onRewardEarned,
   onSkip,
   whatsappLink,
-  onFinalize
+  onFinalize,
+  creative
 }) => {
   const [isWatchingRewardAd, setIsWatchingRewardAd] = useState(false);
   const [showRedirectButton, setShowRedirectButton] = useState(false);
@@ -203,6 +207,9 @@ export const RewardedAdModal: React.FC<RewardedAdModalProps> = ({
           </div>
 
           <div className="space-y-4">
+            <div className="w-full max-w-[14rem] mx-auto aspect-video rounded-2xl overflow-hidden border border-orange-500/30 shadow-xl">
+              <AdCreativeMedia creative={creative} />
+            </div>
             <h3 className="text-xl font-black text-white uppercase tracking-widest animate-pulse">
               A validar taxas de mercado...
             </h3>
@@ -297,10 +304,26 @@ export const RewardedAdModal: React.FC<RewardedAdModalProps> = ({
             <h3 className="text-2xl font-black text-white uppercase tracking-tighter leading-none">
               A PREPARAR O TEU<br />LUGAR NA FILA...
             </h3>
-            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest px-8">
+            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest px-8">
               O teu atendimento será priorizado após este breve vídeo explicativo.
             </p>
           </div>
+
+          {creative && (
+            <div className="mx-auto w-full max-w-[16rem]">
+              <div className="aspect-video rounded-2xl overflow-hidden border-2 border-orange-500/40 shadow-2xl">
+                <AdCreativeMedia creative={creative} />
+              </div>
+              {creative.title && (
+                <p className="mt-3 text-[10px] font-black text-white uppercase tracking-wider break-words">
+                  {creative.title}
+                  {creative.company_name && creative.title !== creative.company_name && (
+                    <span className="block text-slate-500 font-bold mt-0.5">{creative.company_name}</span>
+                  )}
+                </p>
+              )}
+            </div>
+          )}
 
           <div className="flex items-center gap-3 justify-center text-slate-600">
              <div className="h-px w-8 bg-slate-800"></div>
@@ -367,6 +390,27 @@ export const RewardedAdModal: React.FC<RewardedAdModalProps> = ({
               </div>
             </div>
           </div>
+
+          {/* Creative do anúncio (BD) */}
+          {creative && (
+            <div className="bg-slate-800/60 rounded-2xl border border-white/5 overflow-hidden">
+              <div className="aspect-video">
+                <AdCreativeMedia creative={creative} />
+              </div>
+              {(creative.title || creative.company_name) && (
+                <div className="p-3 text-left">
+                  {creative.title && (
+                    <p className="text-xs font-black text-white uppercase tracking-wide break-words">{creative.title}</p>
+                  )}
+                  {creative.company_name && (
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">
+                      Patrocinado por {creative.company_name}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Actions */}
           <div className="flex flex-col gap-3">

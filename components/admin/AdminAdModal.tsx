@@ -146,13 +146,8 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
         payload.video_url = safeHttpUrl(payload.video_url) || '';
       }
 
-      if (payload.media_type === 'video' && !payload.image_url) {
-        payload.image_url = PLACEHOLDER_IMAGE;
-      }
-
-      if (!payload.image_url) {
-        payload.image_url = PLACEHOLDER_IMAGE;
-      }
+      // image_url é nullable no schema — sem imagem, o overlay mostra
+      // título/empresa em vez do placeholder "RESOLVE.AO"
 
       if (editingAd?.id) {
         await AdsService.updateAd(editingAd.id, payload);
@@ -397,11 +392,11 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
                   <option value="banner" className="bg-slate-900">Banner (carrossel, secção, leaderboard, sticky)</option>
                   <option value="interstitial" className="bg-slate-900">Interstitial (popup ecrã inteiro)</option>
                   <option value="rewarded" className="bg-slate-900">Rewarded (vídeo com recompensa)</option>
-                  <option value="all" className="bg-slate-900">Banner em qualquer slot (não gera popups)</option>
+                  <option value="all" className="bg-slate-900">Todos os slots (banners + popups)</option>
                 </select>
               </div>
               <p className="text-[10px] text-slate-500 font-bold ml-1 leading-relaxed">
-                Interstitial e Rewarded são consumidos nos slots de popup (Home e transições). “Banner em qualquer slot” aparece só em leaderboards/stickies — nunca como popup.
+                Interstitial e Rewarded servem os popups (Home, transições e desbloqueios). “Todos os slots” serve banners e popups em qualquer página.
               </p>
             </div>
 

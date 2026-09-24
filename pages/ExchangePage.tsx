@@ -19,6 +19,7 @@ import { NativeAd } from '../components/ads/NativeAd';
 import { AdBanner } from '../components/ads/AdBanner';
 import { RewardedAdModal } from '../components/ads/RewardedAdModal';
 import { AdService } from '../services/api/adService';
+import { selectAdForPlacement, creativeFromAd } from '../services/api/adSelector';
 import { APP_CONFIG } from '../constants/app';
 import { openExternal } from '../services/core/openExternal';
 
@@ -26,7 +27,7 @@ import { useAppStore } from '../store/useAppStore';
 import { Helmet } from 'react-helmet-async';
 
 export const ExchangePage: React.FC = () => {
-  const { user, isAuthenticated, setAuthModal } = useAppStore();
+  const { user, isAuthenticated, setAuthModal, activeAds } = useAppStore();
   const onRequireAuth = () => setAuthModal(true, 'login');
   const [rates, setRates] = useState<ExchangeRate[]>([]);
   const [, setLoading] = useState(true);
@@ -86,6 +87,12 @@ export const ExchangePage: React.FC = () => {
   const [isRewardedAdModalOpen, setIsRewardedAdModalOpen] = useState(false);
   const [hasPriorityReward, setHasPriorityReward] = useState(false);
   const [whatsappLink, setWhatsappLink] = useState<string | null>(null);
+
+  // Creative do rewarded vindo da BD (matching hierárquico: exact → all → fallback)
+  const rewardedCreative = React.useMemo(
+    () => creativeFromAd(selectAdForPlacement(activeAds, { format: 'rewarded', page: 'exchange' })),
+    [activeAds]
+  );
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -548,6 +555,7 @@ export const ExchangePage: React.FC = () => {
       {/* REWARDED AD MODAL - Fast Pass for WhatsApp */}
       <RewardedAdModal
         isOpen={isRewardedAdModalOpen}
+        creative={rewardedCreative}
         onClose={() => {
           setIsRewardedAdModalOpen(false);
           finalizeCleanup();

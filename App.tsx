@@ -13,6 +13,8 @@ import { AuthService } from './services/core/auth.service';
 import { JobsService } from './services/api/jobs.service';
 import { NewsService } from './services/api/news.service';
 import { AdService } from './services/api/adService';
+import { AdsService } from './services/api/ads.service';
+import { selectAdForPlacement, creativeFromAd } from './services/api/adSelector';
 import type { User } from '@supabase/supabase-js';
 import { UserProfile, AppNotification, ProductDeal } from './types';
 import { LegalModals } from './components/modals/LegalModals';
@@ -53,7 +55,7 @@ const App: React.FC = () => {
     isAuthModalOpen, authMode, setAuthModal,
     setPasswordRecovery,
     notifications, addNotification, removeNotification,
-    activeAds
+    activeAds, setActiveAds
   } = useAppStore();
 
   const getPageFromPath = (path: string): Page => {
@@ -161,32 +163,30 @@ const App: React.FC = () => {
   const [interstitialCallback, setInterstitialCallback] = useState<(() => void) | null>(null);
   const [onAdCancel, setOnAdCancel] = useState<(() => void) | null>(null);
   const [overlayCreative, setOverlayCreative] = useState<OverlayCreative | null>(null);
+  const [overlayDuration, setOverlayDuration] = useState(5);
   // Cooldown unificada em AdService (localStorage 2h) — sem timer local 5min
   const [subscribedCategories, setSubscribedCategories] = useState<string[]>([]);
 
-  // Creative de interstitial/rewarded a partir da BD (fallback: criativo da casa)
-  const pickOverlayCreative = (format: 'interstitial' | 'rewarded', page: Page): OverlayCreative | null => {
-    const match = activeAds.find(a =>
-      a.is_active &&
-      a.format === format &&
-      (a.location === page || a.location === 'all')
-    );
-    return match ? {
-      image_url: match.image_url,
-      title: match.title || match.company_name,
-      company_name: match.company_name,
-    } : null;
-  };
+  // Garante anúncios activos em qualquer página — sem depender da Home/AdBanner
+  // terem carregado primeiro (quem aterra directo em /vagas, /noticias, /cambio)
+  useEffect(() => {
+    if (activeAds.length > 0) return;
+    AdsService.getAds(true)
+      .then(setActiveAds)
+      .catch((err) => console.error('[App] AdsService.getAds failed:', err));
+  }, [activeAds.length, setActiveAds]);
 
   const openInterstitial = (page: Page, callback?: () => void) => {
-    const creative = pickOverlayCreative('interstitial', page);
-    setOverlayCreative(creative);
+    const ad = selectAdForPlacement(activeAds, { format: 'interstitial', page });
+    setOverlayCreative(creativeFromAd(ad));
+    setOverlayDuration(ad?.duration_seconds || 5);
     if (callback) setInterstitialCallback(() => callback);
     setShowInterstitial(true);
   };
 
   const openRewarded = (page: Page) => {
-    setOverlayCreative(pickOverlayCreative('rewarded', page));
+    const ad = selectAdForPlacement(activeAds, { format: 'rewarded', page });
+    setOverlayCreative(creativeFromAd(ad));
     setShowRewarded(true);
   };
 
@@ -439,7 +439,7 @@ const App: React.FC = () => {
 
       {showInterstitial && (
         <InterstitialAd
-          duration={5}
+          duration={overlayDuration}
           creative={overlayCreative}
           onClose={() => {
             setShowInterstitial(false);
