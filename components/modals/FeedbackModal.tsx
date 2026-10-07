@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { OrderService } from '../../services/api/order.service';
 import { Star, CheckCircle, Send, MessageSquare } from 'lucide-react';
 import { useScrollLock } from '../../hooks/useScrollLock';
+import { BrandLogo } from '../ui/BrandLogo';
 
 interface FeedbackOrder {
   id: string;
@@ -140,6 +141,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ order, isOpen, onC
                   
                   {/* Resolve.AO Logo / Header */}
                   <div className="flex flex-col items-center gap-2 relative">
+                     <BrandLogo size={48} alt="" className="drop-shadow-[0_8px_24px_rgba(59,130,246,0.4)]" />
                      <div className="flex items-center gap-2">
                         <Star size={18} className="text-brand-gold fill-brand-gold" />
                         <span className="text-xl font-black text-white tracking-widest uppercase">Resolve.AO</span>

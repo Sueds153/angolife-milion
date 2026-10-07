@@ -19,6 +19,7 @@ import { SitePreviewModal } from '../components/modals/SitePreviewModal';
 import { Reveal } from '../components/ui/Reveal';
 import { openExternal } from '../services/core/openExternal';
 import { safeHttpUrl } from '../services/utils/safeUrl';
+import { BrandLogo } from '../components/ui/BrandLogo';
 
 interface HomeBanner {
   mediaType?: string;
@@ -407,6 +408,11 @@ export const HomePage: React.FC = () => {
         
         <div className="relative z-10 p-6 md:p-24 max-w-5xl w-full">
           <Reveal delay={0}>
+            <BrandLogo
+              size={64}
+              alt=""
+              className="block mb-5 md:mb-8 drop-shadow-[0_12px_32px_rgba(59,130,246,0.45)]"
+            />
             <div className="inline-flex items-center gap-2 bg-white/5 border border-white/15 backdrop-blur-xl px-4 py-2 rounded-full text-slate-200 text-[11px] md:text-xs font-semibold tracking-wide mb-6 md:mb-12">
               <span className="w-1.5 h-1.5 rounded-full bg-brand-gold" />
               Atualizado a cada minuto
@@ -576,7 +582,7 @@ export const HomePage: React.FC = () => {
             },
             {
               icon: FileText,
-              label: 'Criar CV com IA',
+              label: 'Criar CV Profissional',
               desc: 'Cria um CV profissional em minutos com a ajuda da nossa inteligência artificial.',
               cta: 'Criar o meu CV',
               path: '/cv-criador',
@@ -664,7 +670,7 @@ export const HomePage: React.FC = () => {
               role: 'Empresária',
             },
             {
-              quote: 'O CV que criei aqui com a IA foi o que me fez passar na entrevista. Recomendo a todos.',
+              quote: 'O CV que criei aqui foi o que me fez passar na entrevista. Recomendo a todos.',
               name: 'Pedro S.',
               city: 'Huambo',
               role: 'Técnico de TI',

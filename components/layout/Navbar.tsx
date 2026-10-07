@@ -4,6 +4,7 @@ import { Menu, X, Briefcase, DollarSign, Tag, Newspaper, UserCog, Sun, Moon, Hom
 import { useAppStore } from '../../store/useAppStore';
 import { AuthService } from '../../services/core/auth.service';
 import { useScrollLock } from '../../hooks/useScrollLock';
+import { BrandLogo } from '../ui/BrandLogo';
 
 interface NavbarProps {
   onOpenLegal?: (type: 'privacy' | 'terms' | 'data') => void;
@@ -55,8 +56,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenLegal }) => {
             onClick={() => window.scrollTo(0, 0)}
           >
             <div className="flex items-center text-lg md:text-2xl font-bold tracking-tight">
-              <h1 className="flex items-center">
-                <span className="text-slate-900 dark:text-white">Resolve</span>
+              <h1 className="flex items-center" aria-label="Resolve.AO">
+                <BrandLogo size={28} alt="" className="-mr-1 group-hover:scale-105 transition-transform" />
+                <span className="text-slate-900 dark:text-white">esolve</span>
                 <span className="text-orange-500 ml-0.5">.AO</span>
               </h1>
             </div>

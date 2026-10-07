@@ -15,13 +15,15 @@
     />
     <meta name="author" content="Resolve.AO" />
     <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
     <meta name="theme-color" content="#F59E0B" />
 
     <!-- iOS Support -->
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Resolve.AO" />
-    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
@@ -143,8 +145,32 @@
       .app-loading-inner {
         text-align: center;
       }
+      .app-loading-logo {
+        display: block;
+        width: 88px;
+        height: 88px;
+        margin: 0 auto 18px;
+        filter: drop-shadow(0 10px 28px rgba(59, 130, 246, 0.45));
+        animation: app-loading-pulse 1.8s ease-in-out infinite;
+      }
       .app-loading-title {
         color: #f59e0b;
+      }
+      @keyframes app-loading-pulse {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+        50% {
+          transform: scale(1.06);
+          opacity: 0.85;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .app-loading-logo {
+          animation: none;
+        }
       }
     </style>
 
@@ -155,6 +181,7 @@
     <div id="root">
       <div class="app-loading">
         <div class="app-loading-inner">
+          <img class="app-loading-logo" src="/logo.png" alt="Resolve.AO" width="88" height="88" />
           <h1 class="app-loading-title">RESOLVE.AO</h1>
           <p>A carregar aplicação...</p>
         </div>

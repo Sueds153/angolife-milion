@@ -3,6 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Share2, ShieldCheck, FileText, ChevronRight, Lock } from 'lucide-react';
 import { openExternal } from '../../services/core/openExternal';
+import { BrandLogo } from '../ui/BrandLogo';
 
 interface FooterProps {
   onOpenLegal: (type: 'privacy' | 'terms' | 'data') => void;
@@ -36,13 +37,14 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegal }) => {
       <div className="max-w-md mx-auto relative z-10 flex flex-col gap-10">
 
         {/* 1. BRANDING SECTION */}
-        <div className="space-y-5">
-          <div className="flex flex-col items-start gap-1 select-none">
-            <span className="text-[9px] font-black tracking-[0.3em] text-orange-500 uppercase border-b border-orange-500/50 pb-1 mb-1">
-              SU-GOLDEN
-            </span>
+        <div className="space-y-5 select-none">
+          <span className="inline-block text-[9px] font-black tracking-[0.3em] text-orange-500 uppercase border-b border-orange-500/50 pb-1 mb-1">
+            SU-GOLDEN
+          </span>
+          <div className="flex items-center gap-0 select-none" role="img" aria-label="Resolve.AO">
+            <BrandLogo size={32} alt="" className="-mr-1 drop-shadow-lg" />
             <span className="text-3xl font-black tracking-tighter text-slate-900 dark:text-white uppercase leading-none">
-              RESOLVE<span className="text-slate-400 dark:text-slate-600">.AO</span>
+              ESOLVE<span className="text-slate-400 dark:text-slate-600">.AO</span>
             </span>
           </div>
           <p className="text-slate-500 dark:text-slate-400 text-xs font-medium leading-relaxed max-w-[280px]">

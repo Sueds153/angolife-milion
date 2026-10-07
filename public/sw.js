@@ -1,9 +1,11 @@
-const CACHE_NAME = 'resolveao-v2';
+const CACHE_NAME = 'resolveao-v3';
 const PRECACHE_ASSETS = [
   '/',
   '/manifest.json',
   '/icon-192.png',
-  '/icon-512.png'
+  '/icon-512.png',
+  '/logo.png',
+  '/logo-small.png'
 ];
 
 self.addEventListener('install', (event) => {
@@ -67,8 +69,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Static public files (manifest, icons): stale-while-revalidate.
-  if (url.pathname === '/manifest.json' || url.pathname.startsWith('/icon-')) {
+  // Static public files (manifest, icons, logo): stale-while-revalidate.
+  if (url.pathname === '/manifest.json' || url.pathname.startsWith('/icon-') || url.pathname.startsWith('/logo')) {
     event.respondWith(
       caches.match(request).then((cached) => {
         const network = fetch(request)

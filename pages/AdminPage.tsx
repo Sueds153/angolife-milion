@@ -30,6 +30,7 @@ import { AdsService, Ad, SystemSettings } from '../services/api/ads.service';
 import { AdminAdsSection } from '../components/admin/AdminAdsSection';
 import { AdminMulticaixaSection } from '../components/admin/AdminMulticaixaSection';
 import { AdminVaiJaSection } from '../components/admin/AdminVaiJaSection';
+import { BrandLogo } from '../components/ui/BrandLogo';
 
 export const AdminPage: React.FC = () => {
   const { user, setActiveAds: setGlobalActiveAds } = useAppStore();
@@ -668,11 +669,14 @@ export const AdminPage: React.FC = () => {
   return (
     <div className="space-y-6 animate-slide-up pb-20">
       <div className="flex flex-col md:flex-row justify-between items-start gap-2">
-        <div className="pt-safe w-full md:w-auto">
-          <h2 className="text-fluid-h2 font-black text-orange-500 uppercase tracking-tight leading-tight">Painel Admin</h2>
-          <p className="text-slate-500 dark:text-slate-400 font-medium text-[10px] md:text-sm uppercase tracking-widest mt-1">Gerindo a Resolve.AO com precisão.</p>
-          
-          <AdminDiagnostic user={user} />
+        <div className="pt-safe w-full md:w-auto flex items-start gap-3">
+          <BrandLogo size={40} alt="" className="mt-1" />
+          <div>
+            <h2 className="text-fluid-h2 font-black text-orange-500 uppercase tracking-tight leading-tight">Painel Admin</h2>
+            <p className="text-slate-500 dark:text-slate-400 font-medium text-[10px] md:text-sm uppercase tracking-widest mt-1">Gerindo a Resolve.AO com precisão.</p>
+            
+            <AdminDiagnostic user={user} />
+          </div>
         </div>
       </div>
 
@@ -770,7 +774,7 @@ export const AdminPage: React.FC = () => {
             setLoading(true);
             const count = await AdminService.triggerDealsScraper();
             if (count > 0) {
-              alert(`${count} novas ofertas capturadas pela IA para a tua revisão!`);
+              alert(`${count} novas ofertas capturadas automaticamente para a tua revisão!`);
               loadPendingDeals();
             } else {
               alert('Nenhuma oferta nova encontrada no momento.');

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Lock, Mail, User, ArrowRight, Eye, EyeOff, Loader2, Tag } from 'lucide-react';
 import { AuthService } from '../../services/core/auth.service';
 import { useScrollLock } from '../../hooks/useScrollLock';
+import { BrandLogo } from '../ui/BrandLogo';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -125,8 +126,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, 
         </button>
 
         <div className="p-8 pb-0 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-orange-500/10 text-orange-500 mb-4 border border-orange-500/20">
-            <Lock size={32} />
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-500/10 mb-4 border border-blue-500/20">
+            <BrandLogo size={40} alt="" />
           </div>
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
             {isRegister ? 'Criar Conta' : 'Bem-vindo de volta'}
