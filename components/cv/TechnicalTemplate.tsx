@@ -9,14 +9,13 @@ export const TechnicalTemplate: React.FC<TemplateSharedProps> = ({ cv, education
         if (!cv.experiences || cv.experiences.length === 0) return null;
 
         return (
-            <div>
-                <h2 className="creative-section-title">Experiências Profissionais</h2>
+            <div>                        <h2 className="creative-section-title">Experiência Profissional</h2>
                 <div>
                     {cv.experiences.map(exp => (
                         <div key={exp.id} className="creative-item">
                             <div className="creative-item-header">
                                 <h3 className="creative-item-title">{exp.role}</h3>
-                                <span className="creative-item-date">{exp.startDate} - {exp.isCurrent ? 'Presente' : exp.endDate}</span>
+                                <span className="creative-item-date">{exp.startDate} – {exp.isCurrent ? 'Atual' : exp.endDate}</span>
                             </div>
                             <div className="creative-item-subtitle">{exp.company}</div>
                             {exp.description && (
@@ -34,8 +33,7 @@ export const TechnicalTemplate: React.FC<TemplateSharedProps> = ({ cv, education
         if (!cv.education || cv.education.length === 0) return null;
 
         return (
-            <div>
-                <h2 className="creative-section-title">Formações</h2>
+            <div>                        <h2 className="creative-section-title">Formação Académica</h2>
                 <div>
                     {cv.education.map(edu => (
                         <div key={edu.id} className="creative-item">
@@ -88,7 +86,7 @@ export const TechnicalTemplate: React.FC<TemplateSharedProps> = ({ cv, education
                 {/* Contactos */}
                 {(cv.email || cv.phone || cv.location) && (
                     <div>
-                        <h2 className="creative-sidebar-title">Coordenadas</h2>
+                        <h2 className="creative-sidebar-title">Contactos</h2>
                         {cv.phone && (
                             <div className="creative-contact-item">
                                 <Phone size={16} />
@@ -113,7 +111,7 @@ export const TechnicalTemplate: React.FC<TemplateSharedProps> = ({ cv, education
                 {/* Competências */}
                 {cv.skills && cv.skills.length > 0 && (
                     <div>
-                        <h2 className="creative-sidebar-title">Qualidades</h2>
+                        <h2 className="creative-sidebar-title">Competências</h2>
                         <ul className="creative-skills-list">
                             {cv.skills.map((skill, i) => (
                                 <li key={i}>{skill}</li>

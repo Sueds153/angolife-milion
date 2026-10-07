@@ -22,7 +22,7 @@ export const AdminService = {
         application_email: j.applicationEmail,
         imagem_url: j.imageUrl || null,
         categoria: j.category || "Geral",
-        fonte: "IA Bot (Gemini)",
+        fonte: "Bot de Sincronização",
         is_verified: false,
         status: "pendente",
       }));
@@ -77,7 +77,7 @@ export const AdminService = {
         image_url: d.imagePlaceholder,
         category: d.category || "Alimentação",
         status: "pendente",
-        submitted_by: "IA Bot (Gemini)",
+        submitted_by: "Bot de Sincronização",
         created_at: new Date().toISOString(),
         verified: false,
         is_admin: false,

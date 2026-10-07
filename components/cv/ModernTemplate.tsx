@@ -9,14 +9,13 @@ export const ModernTemplate: React.FC<TemplateSharedProps> = ({ cv, educationFir
         if (!cv.experiences || cv.experiences.length === 0) return null;
 
         return (
-            <div className="modern-section">
-                <h2 className="modern-section-title">Experiência Profissional</h2>
+            <div className="modern-section">                        <h2 className="modern-section-title">Experiência Profissional</h2>
                 <div className="modern-section-content">
                     {cv.experiences.map(exp => (
                         <div key={exp.id} className="modern-item">
                             <div className="modern-item-header">
                                 <h3 className="modern-item-title">{exp.role}</h3>
-                                <span className="modern-item-date">{exp.startDate} - {exp.isCurrent ? 'Presente' : exp.endDate}</span>
+                                <span className="modern-item-date">{exp.startDate} – {exp.isCurrent ? 'Atual' : exp.endDate}</span>
                             </div>
                             <div className="modern-item-subtitle">{exp.company}</div>
                             {exp.description && (
@@ -34,8 +33,7 @@ export const ModernTemplate: React.FC<TemplateSharedProps> = ({ cv, educationFir
         if (!cv.education || cv.education.length === 0) return null;
 
         return (
-            <div className="modern-section">
-                <h2 className="modern-section-title">Formação Académica</h2>
+            <div className="modern-section">                        <h2 className="modern-section-title">Formação Académica</h2>
                 <div className="modern-section-content">
                     {cv.education.map(edu => (
                         <div key={edu.id} className="modern-item">
@@ -113,7 +111,7 @@ export const ModernTemplate: React.FC<TemplateSharedProps> = ({ cv, educationFir
                 {/* Competências */}
                 {cv.skills && cv.skills.length > 0 && (
                     <div>
-                        <h2 className="modern-sidebar-title">Habilidades</h2>
+                        <h2 className="modern-sidebar-title">Competências</h2>
                         <div className="modern-skills-container">
                             {cv.skills.map((skill, i) => (
                                 <span key={i} className="modern-skill-tag">{skill}</span>
@@ -128,7 +126,7 @@ export const ModernTemplate: React.FC<TemplateSharedProps> = ({ cv, educationFir
                 {/* Sobre Mim */}
                 {cv.summary && (
                     <div className="modern-section">
-                        <h2 className="modern-section-title">Sobre Mim</h2>
+                        <h2 className="modern-section-title">Resumo Profissional</h2>
                         <p className="modern-summary">{cv.summary}</p>
                     </div>
                 )}

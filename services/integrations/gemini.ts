@@ -195,7 +195,7 @@ async function callEdgeProxy(action: string, payload: Record<string, unknown> = 
     const message =
       (error as any)?.context?.error?.message ||
       error.message ||
-      'Erro ao contactar o serviço de IA.';
+      'Erro ao contactar o serviço de otimização.';
     const e = new Error(message) as GeminiError;
     e.code = code;
     throw e;

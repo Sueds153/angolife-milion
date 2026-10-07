@@ -11,7 +11,7 @@ export const ClassicTemplate: React.FC<TemplateSharedProps> = ({ cv, educationFi
                 {/* Summary */}
                 {cv.summary && (
                     <div>
-                        <h2 className="classic-section-title">Sobre Mim</h2>
+                        <h2 className="classic-section-title">Resumo Profissional</h2>
                         <div className="classic-summary-text">{cv.summary}</div>
                     </div>
                 )}
@@ -19,7 +19,7 @@ export const ClassicTemplate: React.FC<TemplateSharedProps> = ({ cv, educationFi
                 {/* Skills */}
                 {cv.skills && cv.skills.length > 0 && (
                     <div>
-                        <h2 className="classic-section-title">Habilidades</h2>
+                        <h2 className="classic-section-title">Competências</h2>
                         <ul className="classic-skill-list">
                             {cv.skills.map((skill, i) => (
                                 <li key={i}>{skill}</li>
@@ -35,8 +35,7 @@ export const ClassicTemplate: React.FC<TemplateSharedProps> = ({ cv, educationFi
     const renderExperience = () => {
         if (!cv.experiences || cv.experiences.length === 0) return null;
         return (
-            <div>
-                <h2 className="classic-section-title">Experiência Profissional</h2>
+            <div>                        <h2 className="classic-section-title">Experiência Profissional</h2>
                 <div>
                     {cv.experiences.map(exp => (
                         <div key={exp.id} className="classic-item">
@@ -56,8 +55,7 @@ export const ClassicTemplate: React.FC<TemplateSharedProps> = ({ cv, educationFi
     const renderEducation = () => {
         if (!cv.education || cv.education.length === 0) return null;
         return (
-            <div>
-                <h2 className="classic-section-title">Formação Acadêmica</h2>
+            <div>                        <h2 className="classic-section-title">Formação Académica</h2>
                 <div>
                     {cv.education.map(edu => (
                         <div key={edu.id} className="classic-item">

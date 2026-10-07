@@ -25,6 +25,13 @@ const initialCV: CVData = {
   skills: []
 };
 
+/** Máscara MM/AAAA para datas de experiência (limita a 6 dígitos) */
+const maskMonthYear = (input: string) => {
+  const digits = input.replace(/[^\d]/g, '').slice(0, 6);
+  if (digits.length <= 2) return digits;
+  return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+};
+
 // Outside parent: stable identity avoids full preview remount every render
 const PreviewCV: React.FC<{
   type: CVTemplateType;
@@ -47,32 +54,15 @@ export const CVBuilderPage: React.FC = () => {
   
   const onRequireAuth = useCallback(() => setAuthModal(true, 'login'), [setAuthModal]);
   
-  const onDecrementCredit = useCallback(async (): Promise<boolean> => {
-    const currentUser = useAppStore.getState().user;
-    if (!currentUser) return false;
-    // Admin / premium válido nunca gasta crédito
-    if (currentUser.isAdmin ||
-        (currentUser.isPremium && (!currentUser.premiumExpiry || Number(currentUser.premiumExpiry) > Date.now()))) {
-      return true;
-    }
-    const { data, error } = await supabase.rpc('consume_cv_credit');
-    if (error) {
-      console.error('[Credit] consume_cv_credit error:', error);
-      return false;
-    }
-    if (data == null) return false;
-    setUser({ ...currentUser, cvCredits: Number(data) });
-    return true;
-  }, [setUser]);
   const [step, setStep] = useState(1);
   const [cv, setCv] = useState<CVData>(initialCV);
   const [isImproving, setIsImproving] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<CVTemplateType>('classic');
   const [selectedPlan, setSelectedPlan] = useState<'pack3' | 'monthly' | 'yearly'>('monthly');
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [isUploadingReceipt, setIsUploadingReceipt] = useState(false);
   const [paymentStep, setPaymentStep] = useState<'plans' | 'checkout' | 'pending'>('plans');
   const [showPaywall, setShowPaywall] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<CVTemplateType>('classic');
 
   const PLAN_META: Record<'pack3' | 'monthly' | 'yearly', { name: string; price: string }> = {
     pack3: { name: 'Bronze', price: '199,99' },
@@ -123,30 +113,34 @@ export const CVBuilderPage: React.FC = () => {
   const strengthLabel = cvStrength < 30 ? 'Fraco' : cvStrength < 60 ? 'Médio' : cvStrength < 85 ? 'Bom' : 'Excelente';
   const strengthColor = cvStrength < 30 ? 'bg-red-500' : cvStrength < 60 ? 'bg-amber-500' : cvStrength < 85 ? 'bg-brand-gold' : 'bg-emerald-500';
 
-  // Check Access
+  // Access control (premium without expiry = lifetime; free quota: 2/month)
   const hasCredits = (user?.cvCredits || 0) > 0;
   // Premium sem premium_expiry = vitalício; com expiry, só válido se no futuro
   const isPremiumValid = user?.isAdmin || (user?.isPremium && (!user.premiumExpiry || user.premiumExpiry > Date.now()));
   const canDownload = isAuthenticated && (isPremiumValid || hasCredits);
 
-  // AI Enhance Gate Logic
+  // Smart Text Optimisation Gate Logic
+  // Smart Text Optimisation Gate Logic
   const canUseAI = useCallback(() => {
     if (user?.isAdmin) return true;
     if (isPremiumValid) return true; // Bronze, Prata, Ouro
     return aiUsageCount < FREE_AI_MONTHLY_LIMIT; // Free = 2/mês
   }, [user?.isAdmin, isPremiumValid, aiUsageCount]);
 
-  // Carrega o uso real de IA do servidor (server-side é a fonte de verdade)
-  useEffect(() => {
-    if (!isAuthenticated || !user?.id) return;
-    if (user?.isAdmin || isPremiumValid) return; // premium/admin: ilimitado, sem contagem
+  // Carrega o uso real de otimizações do servidor (servidor: fonte de verdade)
+  const refreshAIUsage = useCallback(async () => {
+    const currentUser = useAppStore.getState().user;
+    if (!currentUser?.id) return;
+    if (currentUser.isAdmin || isPremiumValid) return; // premium/admin: ilimitado
     const month = new Date().toISOString().slice(0, 7);
-    supabase
-      .rpc('get_ai_usage', { p_user_id: user.id, p_month: month })
-      .then(({ data, error }) => {
-        if (!error && typeof data === 'number') setAiUsageCount(data);
-      });
-  }, [isAuthenticated, user?.id, user?.isAdmin, isPremiumValid]);
+    const { data, error } = await supabase.rpc('get_ai_usage', { p_user_id: currentUser.id, p_month: month });
+    if (!error && typeof data === 'number') setAiUsageCount(data);
+  }, [isPremiumValid]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    refreshAIUsage();
+  }, [isAuthenticated, user?.id, refreshAIUsage]);
 
   // Helper for Input Changes
   const updateField = useCallback(<K extends keyof CVData>(field: K, value: CVData[K]) => {
@@ -178,7 +172,7 @@ export const CVBuilderPage: React.FC = () => {
       } else if (code === 'unauth') {
         onRequireAuth();
       } else {
-        alert('Erro ao otimizar com IA. Tenta novamente.');
+        alert('Erro ao otimizar o texto. Tenta novamente.');
       }
     } finally {
       setIsImproving(false);
@@ -241,14 +235,21 @@ export const CVBuilderPage: React.FC = () => {
           return;
         }
         const currentUser = useAppStore.getState().user;
-        alert(`1 Crédito usado. Restam ${currentUser?.cvCredits ?? 0} créditos.`);
+        if (currentUser.cvCredits !== undefined) {
+          alert(`1 Crédito usado. Restam ${currentUser.cvCredits} crédito(s).`);
+        }
       }
 
       const [{ pdf }, { CVDocument }] = await Promise.all([
         import('@react-pdf/renderer'),
         import('../components/cv/CVDocument')
       ]);
-      const blob = await pdf(<CVDocument data={cv} />).toBlob();
+      const blob = await pdf(<CVDocument
+        data={cv}
+        template={selectedTemplate}
+        educationFirst={educationFirst}
+        showWatermark={!isPremiumValid}
+      />).toBlob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -308,11 +309,7 @@ export const CVBuilderPage: React.FC = () => {
     }
   };
 
-  // Increment AI usage counter (Free tier: 2/month) — server-side é a fonte de verdade;
-  // aqui apenas atualizamos o contador local para refletir a UI imediatamente.
-  const incrementAIUsage = useCallback(() => {
-    setAiUsageCount(c => c + 1);
-  }, []);
+
 
   // "Otimizar Textos com IA (ATS)" - improve summary + each experience description + categorize skills
   const handleEnhanceAll = useCallback(async () => {
@@ -347,7 +344,7 @@ export const CVBuilderPage: React.FC = () => {
 
       // Free users consume one optimization credit; premium/admin unlimited
       if (!isPremiumValid && !user?.isAdmin) {
-        incrementAIUsage();
+        await refreshAIUsage();
       }
       alert('Textos otimizados com sucesso! Revise na pré-visualização.');
     } catch (error) {
@@ -358,7 +355,7 @@ export const CVBuilderPage: React.FC = () => {
       } else if (code === 'unauth') {
         onRequireAuth();
       } else {
-        alert('Erro ao otimizar com IA. Tenta novamente.');
+        alert('Erro ao otimizar o texto. Tenta novamente.');
       }
     } finally {
       setIsImproving(false);
@@ -421,14 +418,13 @@ export const CVBuilderPage: React.FC = () => {
         </div>
         <div className="space-y-1 md:col-span-2">
           <div className="flex justify-between items-center">
-            <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Resumo Profissional</label>
-            <button
-              onClick={() => improveText(cv.summary, 'summary')}
-              disabled={isImproving || !cv.summary}
-              className="text-[9px] font-black uppercase tracking-widest text-brand-gold flex items-center gap-1 hover:text-amber-600 disabled:opacity-50"
-            >
-              <Sparkles size={12} /> {isImproving ? 'Otimizando...' : 'Melhorar com IA'}
-            </button>
+            <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Resumo Profissional</label>              <button
+                onClick={() => improveText(cv.summary, 'summary')}
+                disabled={isImproving || !cv.summary}
+                className="text-[9px] font-black uppercase tracking-widest text-brand-gold flex items-center gap-1 hover:text-amber-600 disabled:opacity-50"
+              >
+                <Sparkles size={12} /> {isImproving ? 'A otimizar...' : 'Melhorar Texto'}
+              </button>
           </div>
           <textarea
             className="w-full bg-slate-50 dark:bg-white/5 border gold-border-subtle p-3 rounded-xl outline-none h-32 resize-none"
@@ -453,7 +449,7 @@ export const CVBuilderPage: React.FC = () => {
             disabled={isImproving || !cv.summary}
             className="text-[9px] font-black uppercase tracking-widest text-brand-gold flex items-center gap-1 hover:text-amber-600 disabled:opacity-50"
           >
-            <Sparkles size={12} /> {isImproving ? 'Otimizando...' : 'Melhorar com IA'}
+            <Sparkles size={12} /> {isImproving ? 'A otimizar...' : 'Melhorar Texto'}
           </button>
         </div>
         <textarea
@@ -464,7 +460,7 @@ export const CVBuilderPage: React.FC = () => {
         />
         <p className="text-[10px] text-slate-400">💡 Dica: Mencione anos de experiência, sector e o principal valor que entrega ao empregador.</p>
 
-        {/* AI Optimization Button - "Otimizar Textos com IA (ATS)" */}
+        {/* Professional Text Optimization - "Otimização Profissional (ATS)" */}
         <div className="rounded-2xl border-2 border-dashed border-brand-gold/40 bg-brand-gold/5 p-6 text-center space-y-3">
           <div className="flex items-center justify-center gap-2 text-brand-gold">
             <Sparkles size={20} />
@@ -475,22 +471,20 @@ export const CVBuilderPage: React.FC = () => {
               <p className="text-xs text-slate-500 font-medium">
                 {isPremiumValid || user?.isAdmin
                   ? 'Acesso Ilimitado (Plano Premium Ativo)'
-                  : `${Math.max(0, FREE_AI_MONTHLY_LIMIT - aiUsageCount)} de ${FREE_AI_MONTHLY_LIMIT} otimizações gratuitas restantes este mês`}
-              </p>
-              <button
-                onClick={handleEnhanceAll}
-                disabled={isImproving || (!cv.summary.trim() && cv.experiences.length === 0)}
-                className="bg-brand-gold text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg flex items-center justify-center gap-2 hover:bg-amber-600 disabled:opacity-50 w-full mx-auto"
-              >
-                <Sparkles size={16} /> {isImproving ? 'Otimizando tudo...' : 'Otimizar Tudo com IA'}
-              </button>
+                  : `${Math.max(0, FREE_AI_MONTHLY_LIMIT - aiUsageCount)} de ${FREE_AI_MONTHLY_LIMIT} otimizações restantes este mês`}
+              </p>                <button
+                  onClick={handleEnhanceAll}
+                  disabled={isImproving || (!cv.summary.trim() && cv.experiences.length === 0)}
+                  className="bg-brand-gold text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg flex items-center justify-center gap-2 hover:bg-amber-600 disabled:opacity-50 w-full mx-auto"
+                >
+                  <Sparkles size={16} /> {isImproving ? 'A optimizar tudo...' : 'Otimizar Tudo'}
+                </button>
             </>
           ) : (
             <button
               onClick={openPaywall}
               className="bg-slate-900 text-brand-gold px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 w-full mx-auto"
-            >
-              <Lock size={14} /> Desbloquear IA Premium
+            >                <Lock size={14} /> Desbloquear Otimização Premium
             </button>
           )}
         </div>
@@ -541,19 +535,19 @@ export const CVBuilderPage: React.FC = () => {
                 aria-label="Data de Início"
                 className="bg-slate-50 dark:bg-white/5 p-3 rounded-lg w-full outline-none text-xs"
                 value={exp.startDate}
-                onChange={e => updateExperience(exp.id, 'startDate', e.target.value)}
-                maxLength={7}
-              />
-              <input
-                type="text"
-                placeholder="MM/AAAA (Fim)"
-                aria-label="Data de Fim"
-                disabled={exp.isCurrent}
-                className="bg-slate-50 dark:bg-white/5 p-3 rounded-lg w-full outline-none text-xs disabled:opacity-50"
-                value={exp.endDate}
-                onChange={e => updateExperience(exp.id, 'endDate', e.target.value)}
-                maxLength={7}
-              />
+            onChange={e => updateExperience(exp.id, 'startDate', maskMonthYear(e.target.value))}
+            maxLength={2}
+          />
+          <input
+            type="text"
+            placeholder="MM/AAAA (Fim)"
+            aria-label="Data de Fim"
+            disabled={exp.isCurrent}
+            className="bg-slate-50 dark:bg-white/5 p-3 rounded-lg w-full outline-none text-xs disabled:opacity-50"
+            value={exp.endDate}
+            onChange={e => updateExperience(exp.id, 'endDate', maskMonthYear(e.target.value))}
+            maxLength={7}
+          />
             </div>
             <div className="flex items-center gap-2">
               <input type="checkbox" checked={exp.isCurrent} onChange={e => updateExperience(exp.id, 'isCurrent', e.target.checked)} id={`curr-${exp.id}`} className="accent-brand-gold w-4 h-4" />
@@ -727,7 +721,7 @@ export const CVBuilderPage: React.FC = () => {
               </h4>
               <p className="text-sm font-medium leading-relaxed text-slate-300">
                 {step === 1 && "Use um email profissional (nome.sobrenome@email.com). Evite emails informais. No resumo, foque no valor que pode trazer à empresa."}
-                {step === 2 && "Em vez de listar tarefas, liste resultados. Use a IA para transformar 'Vendi produtos' em 'Gerenciei vendas resultando em 20% de aumento de receita'."}
+                {step === 2 && "Em vez de listar tarefas, liste resultados. Use a optimização automática para transformar 'Vendi produtos' em 'Gerenciei vendas resultando em 20% de aumento de receita'."}
                 {step === 3 && "Coloque a educação mais recente primeiro. Se tem experiência, não precisa detalhar o ensino médio."}
                 {step === 4 && "Foque em competências técnicas (Hard Skills) relevantes para a vaga. Soft skills são melhores demonstradas na entrevista."}
                 {step === 5 && "Revê o resumo cuidadosamente. Esta é a primeira coisa que o recrutador lê, e por vezes a única. Sê direto, objetivo e destaca o teu maior diferencial."}

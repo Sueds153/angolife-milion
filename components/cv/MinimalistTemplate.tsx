@@ -8,14 +8,13 @@ export const MinimalistTemplate: React.FC<TemplateSharedProps> = ({ cv, educatio
     const renderExperience = () => {
         if (!cv.experiences || cv.experiences.length === 0) return null;
         return (
-            <div>
-                <h2 className="min-section-title">Experiência</h2>
+            <div>                        <h2 className="min-section-title">Experiência Profissional</h2>
                 <div>
                     {cv.experiences.map(exp => (
                         <div key={exp.id} className="min-item">
                             <div className="min-item-left">
                                 <div className="min-item-company">{exp.company}</div>
-                                <div className="min-item-date">{exp.startDate} – {exp.isCurrent ? 'Presente' : exp.endDate}</div>
+                                <div className="min-item-date">{exp.startDate} – {exp.isCurrent ? 'Atual' : exp.endDate}</div>
                             </div>
                             <div className="min-item-right">
                                 <h3 className="min-item-role">{exp.role}</h3>
@@ -33,8 +32,7 @@ export const MinimalistTemplate: React.FC<TemplateSharedProps> = ({ cv, educatio
     const renderEducation = () => {
         if (!cv.education || cv.education.length === 0) return null;
         return (
-            <div>
-                <h2 className="min-section-title">Formação</h2>
+            <div>                        <h2 className="min-section-title">Formação Académica</h2>
                 <div>
                     {cv.education.map(edu => (
                         <div key={edu.id} className="min-item">
@@ -89,7 +87,7 @@ export const MinimalistTemplate: React.FC<TemplateSharedProps> = ({ cv, educatio
                 {/* Contactos */}
                 {(cv.email || cv.phone || cv.location) && (
                     <div>
-                        <h2 className="min-sidebar-title">Contacto</h2>
+                        <h2 className="min-sidebar-title">Contactos</h2>
                         {cv.phone && (
                             <div className="min-contact-item">
                                 <Phone size={14} className="min-contact-icon" />
@@ -114,7 +112,7 @@ export const MinimalistTemplate: React.FC<TemplateSharedProps> = ({ cv, educatio
                 {/* Skills */}
                 {cv.skills && cv.skills.length > 0 && (
                     <div>
-                        <h2 className="min-sidebar-title">Especialidades</h2>
+                        <h2 className="min-sidebar-title">Competências</h2>
                         <div className="min-skills-list">
                             {cv.skills.map((skill, i) => (
                                 <div key={i} className="min-skill-item">
