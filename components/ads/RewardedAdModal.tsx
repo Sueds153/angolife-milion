@@ -190,7 +190,7 @@ export const RewardedAdModal: React.FC<RewardedAdModalProps> = ({
   // INTERSTITIAL OVERLAY
   if (interstitialState === 'showing') {
     return (
-      <div className="fixed inset-0 bg-black z-[300] flex flex-col items-center justify-center p-6 animate-fade-in">
+      <div className="fixed inset-0 bg-black z-[300] flex flex-col items-center justify-center p-6 animate-fade-in" role="dialog" aria-modal="true" aria-label="Anúncio recompensado">
         <div className="absolute top-0 left-0 w-full p-6 flex justify-between items-center text-white/50 text-[10px] font-mono">
           <span>Resolve.AO AdSystem</span>
           <span>Test ID: {ADMOB_INTERSTITIAL_ID.slice(0, 20)}...</span>

@@ -44,7 +44,7 @@ export const AdminNewJobModal: React.FC<AdminNewJobModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-fade-in overflow-y-auto">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-fade-in overflow-y-auto" role="dialog" aria-modal="true" aria-label="Criar vaga">
       <div className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-[2rem] md:rounded-[2.5rem] shadow-2xl border border-orange-500/30 overflow-hidden flex flex-col max-h-[95vh] mx-auto">
         <div className="p-6 md:p-8 border-b border-orange-500/10 flex justify-between items-center text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800/50 pt-[calc(1.5rem+var(--sat))]">
           <div>

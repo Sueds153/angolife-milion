@@ -13,7 +13,7 @@ export const TermsModal: React.FC<TermsModalProps> = ({ isOpen, onClose, onAccep
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-xl animate-fade-in overflow-y-auto">
+    <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-xl animate-fade-in overflow-y-auto" role="dialog" aria-modal="true" aria-label="Termos e condições">
       <div className="bg-white dark:bg-[#0f172a] w-full max-w-2xl rounded-[2.5rem] border border-orange-500/30 shadow-2xl overflow-hidden flex flex-col max-h-[85dvh] my-auto">
         <div className="bg-slate-50 dark:bg-slate-800/50 p-8 border-b border-orange-500/10 flex justify-between items-center">
           <div className="space-y-1">

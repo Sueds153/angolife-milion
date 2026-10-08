@@ -54,7 +54,8 @@ export const AdsService = {
       query = query.eq('is_active', true);
     }
 
-    const promise = query
+    // O builder do supabase so implementa PromiseLike (sem .finally).
+    const promise = Promise.resolve(query)
       .then(({ data, error }) => {
         if (error) throw error;
         return data || [];

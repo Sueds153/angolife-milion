@@ -1,11 +1,20 @@
 import * as Sentry from "@sentry/react";
 
 /**
+ * DSN público por definição (o Sentry expõe-o no bundle de qualquer forma).
+ * O override por variável de ambiente continua a ter prioridade.
+ */
+const FALLBACK_DSN =
+  "https://5f746ce416d74c6abd7094ca9a26cb97@o4511645656809472.ingest.de.sentry.io/4511645674242128";
+
+const resolveDsn = (): string => import.meta.env.VITE_SENTRY_DSN || FALLBACK_DSN;
+
+/**
  * Initializes Sentry for error tracking and performance monitoring.
- * Requires VITE_SENTRY_DSN in .env
+ * Uses VITE_SENTRY_DSN when set, otherwise the project DSN above.
  */
 export const initSentry = () => {
-  const dsn = import.meta.env.VITE_SENTRY_DSN;
+  const dsn = resolveDsn();
 
   if (!dsn) {
     console.warn("Sentry DSN not found. Monitoring is disabled.");
@@ -33,7 +42,7 @@ export const initSentry = () => {
 };
 
 export const captureError = (error: unknown, context?: unknown) => {
-  if (import.meta.env.VITE_SENTRY_DSN) {
+  if (resolveDsn()) {
     Sentry.captureException(error, context ? { extra: { context } } : undefined);
   } else {
     console.error("Error captured:", error, context);

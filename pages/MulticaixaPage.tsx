@@ -32,6 +32,7 @@ import {
   type FiltroEstado,
 } from "../components/multicaixa/helpers";
 import type { EstadoMulticaixa } from "../types";
+import { Helmet } from "react-helmet-async";
 
 type Tab = "explorar" | "rank" | "adicionar";
 
@@ -120,6 +121,15 @@ export const MulticaixaPage: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 px-4 sm:px-0 pb-20">
+      <Helmet>
+        <title>Multicaixa: Caixos e ATM em Angola | Resolve.AO</title>
+        <meta name="description" content="Encontra caixos Multicaixa perto de ti em Angola: estado em tempo real, filas, mapa, filas de espera e alertas da comunidade." />
+        <meta name="keywords" content="multicaixa, caixos multicaixa, atm angola, caixa eletronico luanda, fila multicaixa" />
+        <meta property="og:title" content="Multicaixa: Caixos e ATM em Angola | Resolve.AO" />
+        <meta property="og:description" content="Estado em tempo real dos caixos Multicaixa em Angola, com mapa e alertas da comunidade." />
+        <meta property="og:url" content="https://resolveao.vercel.app/multicaixa" />
+      </Helmet>
+
       <header className="flex items-center gap-4">
         <div className="w-14 h-14 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500">
           <Banknote size={26} />

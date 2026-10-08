@@ -7,6 +7,7 @@ import { useAppStore } from '../store/useAppStore';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { PLACEHOLDER_IMAGE } from '../constants/placeholders';
 import { AdBanner } from '../components/ads/AdBanner';
+import { Helmet } from 'react-helmet-async';
 
 interface DealsPageProps {
   onSelectDeal: (deal: ProductDeal) => void;
@@ -148,6 +149,15 @@ export const DealsPage: React.FC<DealsPageProps> = ({ onSelectDeal, onShowInters
 
   return (
     <div className="space-y-6 pb-20">
+      <Helmet>
+        <title>Descontos e Promoções em Luanda | Resolve.AO</title>
+        <meta name="description" content="Ofertas reais e verificadas em lojas de Luanda. Compara preços, descontos e promoções atualizados diariamente pela comunidade." />
+        <meta name="keywords" content="descontos luanda, promocoes angola, ofertas lojas, cupoes angola, resolve ao" />
+        <meta property="og:title" content="Descontos e Promoções em Luanda | Resolve.AO" />
+        <meta property="og:description" content="Ofertas reais e verificadas em lojas de Luanda, atualizadas diariamente." />
+        <meta property="og:url" content="https://resolveao.vercel.app/ofertas" />
+      </Helmet>
+
       <div className="px-1 flex flex-col md:flex-row justify-between items-center gap-4 stack-narrow">
         <div>
           <h2 className="text-fluid-h2 font-black text-brand-gold uppercase tracking-tighter leading-none">Descontos</h2>
@@ -231,7 +241,7 @@ export const DealsPage: React.FC<DealsPageProps> = ({ onSelectDeal, onShowInters
 
       {/* FORMULÁRIO DE PUBLICAÇÃO */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[1000] bg-slate-950 flex flex-col animate-fade-in">
+        <div className="fixed inset-0 z-[1000] bg-slate-950 flex flex-col animate-fade-in" role="dialog" aria-modal="true" aria-label="Publicar oferta">
           <div className="px-6 py-10 flex justify-between items-center border-b gold-border-b-subtle pt-[calc(2.5rem+var(--sat))]">
             <div className="flex items-center gap-3 text-brand-gold font-black uppercase text-lg">
               <Camera size={24} /> <span>Publicar Oferta</span>

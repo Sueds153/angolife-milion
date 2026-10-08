@@ -15,6 +15,7 @@ import { nivelClasses, nivelEmoji, nivelLabel, nivelPorPontos } from '../compone
 import { openExternal } from '../services/core/openExternal';
 import { JobUtils } from '../services/utils/jobUtils';
 import { safeHttpUrl } from '../services/utils/safeUrl';
+import { Helmet } from 'react-helmet-async';
 
 export const ProfilePage: React.FC = () => {
   const { user, setUser, setIsAuthenticated } = useAppStore();
@@ -310,6 +311,13 @@ export const ProfilePage: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-slide-up pb-20 px-4 sm:px-0">
+      <Helmet>
+        <title>O Meu Perfil | Resolve.AO</title>
+        <meta name="description" content="Gere o teu perfil Resolve.AO: dados pessoais, currículo, trajetos, encomendas e recomendações." />
+        <meta name="robots" content="noindex, nofollow" />
+        <meta property="og:title" content="O Meu Perfil | Resolve.AO" />
+      </Helmet>
+
       {/* HEADER PREMIUM & PROGRESS */}
       <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-xl overflow-hidden relative border border-orange-500/10 transition-all">
         <div className="absolute top-0 left-0 w-full h-40 bg-gradient-to-br from-orange-500/20 via-orange-500/5 to-transparent dark:from-orange-500/10 dark:via-slate-900"></div>

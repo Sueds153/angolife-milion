@@ -51,7 +51,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ order, isOpen, onC
   };
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
+    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in" role="dialog" aria-modal="true" aria-label="Enviar feedback">
       <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-3xl shadow-2xl border gold-border-subtle overflow-hidden relative">
         
         {step === 'celebration' ? (

@@ -24,7 +24,7 @@ export const AdminEditJobModal: React.FC<AdminEditJobModalProps> = ({
   if (!isOpen || !editingJob) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex animate-fade-in relative z-[100]">
+    <div className="fixed inset-0 z-[100] flex animate-fade-in relative z-[100]" role="dialog" aria-modal="true" aria-label="Editar vaga">
       <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-full max-w-3xl bg-white dark:bg-slate-900 border-l border-orange-500/20 shadow-[-20px_0_50px_rgba(0,0,0,0.3)] h-full ml-auto flex flex-col pt-10 pb-20 md:pb-6">
         <div className="p-6 border-b border-orange-500/10 flex justify-between items-center shrink-0">

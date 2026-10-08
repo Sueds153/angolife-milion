@@ -16,6 +16,7 @@ import { DealsService } from '../services/api/deals.service';
 import { AdBanner } from '../components/ads/AdBanner';
 import { ProductDeal } from '../types';
 import { openExternal } from '../services/core/openExternal';
+import { Helmet } from 'react-helmet-async';
 interface DealDetailPageProps {
     /** Objeto deal opcional (se vier da lista para loading instantâneo) */
     deal?: ProductDeal | null;
@@ -121,6 +122,14 @@ export const DealDetailPage: React.FC<DealDetailPageProps> = ({ deal: initialDea
 
     return (
         <div className="relative flex flex-col min-h-dvh pb-[130px] animate-fade-in -mx-4 -mt-6">
+            <Helmet>
+                <title>{deal.title} | Ofertas e Descontos | Resolve.AO</title>
+                <meta name="description" content={`${deal.title} por ${deal.discountPrice} Kz em ${deal.store}${deal.location ? `, ${deal.location}` : ''}. Desconto verificado pela comunidade Resolve.AO.`} />
+                <meta property="og:title" content={`${deal.title} | Resolve.AO`} />
+                <meta property="og:description" content={`${deal.title} por ${deal.discountPrice} Kz em ${deal.store}.`} />
+                <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : 'https://resolveao.vercel.app/ofertas'} />
+            </Helmet>
+
 
             {/* ═══ HERO IMAGE ═══════════════════════════════════════════════════════ */}
             <div className="relative w-full h-64 md:h-80 overflow-hidden bg-slate-200 dark:bg-slate-800 flex-shrink-0">

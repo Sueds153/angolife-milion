@@ -10,6 +10,7 @@ import { TEMPLATE_OPTIONS } from '../components/cv/templateOptions';
 
 import { useAppStore } from '../store/useAppStore';
 import { useScrollLock } from '../hooks/useScrollLock';
+import { Helmet } from 'react-helmet-async';
 
 const FREE_AI_MONTHLY_LIMIT = 2;
 
@@ -136,6 +137,26 @@ export const CVBuilderPage: React.FC = () => {
     const { data, error } = await supabase.rpc('get_ai_usage', { p_user_id: currentUser.id, p_month: month });
     if (!error && typeof data === 'number') setAiUsageCount(data);
   }, [isPremiumValid]);
+
+  // Debita 1 crédito de CV no servidor antes do download do PDF.
+  // consume_cv_credit() e SECURITY DEFINER, usa auth.uid() por omissao e
+  // devolve o saldo restante; lança 45000 'sem_creditos' se o saldo for 0.
+  const onDecrementCredit = useCallback(async (): Promise<boolean> => {
+    const currentUser = useAppStore.getState().user;
+    if (!currentUser?.id) return false;
+
+    const { data, error } = await supabase.rpc('consume_cv_credit');
+    if (error) {
+      console.error('[CVBuilder] consume_cv_credit:', error.message);
+      return false;
+    }
+
+    setUser({
+      ...currentUser,
+      cvCredits: typeof data === 'number' ? data : Math.max(0, currentUser.cvCredits - 1),
+    });
+    return true;
+  }, [setUser]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -360,7 +381,7 @@ export const CVBuilderPage: React.FC = () => {
     } finally {
       setIsImproving(false);
     }
-  }, [isAuthenticated, onRequireAuth, canUseAI, cv, isPremiumValid, user?.isAdmin, incrementAIUsage, openPaywall]);
+  }, [isAuthenticated, onRequireAuth, canUseAI, cv, isPremiumValid, user?.isAdmin, refreshAIUsage, openPaywall]);
 
   // --- STEPS RENDERING ---
   const renderStep1 = () => (
@@ -640,6 +661,15 @@ export const CVBuilderPage: React.FC = () => {
 
   return (
     <div className="min-h-dvh pb-20 relative">
+      <Helmet>
+        <title>Criador de CV Online em Angola | Resolve.AO</title>
+        <meta name="description" content="Cria, edita e descarrega o teu currículo profissional em PDF. Modelos gratuitos, análise de força do CV e melhoria de texto com IA." />
+        <meta name="keywords" content="criar cv angola, curriculo online, modelo cv luanda, fazer curriculo, resolve ao" />
+        <meta property="og:title" content="Criador de CV Online em Angola | Resolve.AO" />
+        <meta property="og:description" content="Cria e descarrega o teu currículo profissional em PDF com modelos gratuitos e análise de força com IA." />
+        <meta property="og:url" content="https://resolveao.vercel.app/cv-criador" />
+      </Helmet>
+
       <div className="flex flex-col md:flex-row gap-8 print:hidden">
         {/* LEFT SIDE: BUILDER FORM */}
         <div className="w-full md:w-1/2 space-y-6 transition-all duration-500 order-1">
@@ -784,7 +814,7 @@ export const CVBuilderPage: React.FC = () => {
 
         {/* SUBSCRIPTION OVERLAY */}
         {showPaywall && (
-          <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true" aria-label="Desbloquear plano premium">
             <div className="min-h-full flex items-center justify-center p-4">
               <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md"></div>
 

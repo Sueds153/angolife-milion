@@ -371,7 +371,7 @@ export const NewsPage: React.FC<NewsPageProps> = () => {
 
       {/* FULL ARTICLE MODAL */}
       {selectedArticle && (
-        <div className="fixed inset-0 z-[150] flex flex-col bg-slate-950 animate-fade-in overflow-y-auto">
+        <div className="fixed inset-0 z-[150] flex flex-col bg-slate-950 animate-fade-in overflow-y-auto" role="dialog" aria-modal="true" aria-label="Artigo de noticia">
            {/* Modal Header */}
            <div className="sticky top-0 z-10 bg-slate-900/90 backdrop-blur-md border-b gold-border-b-subtle px-6 py-4 flex justify-between items-center shadow-2xl">
               <span className="text-[10px] font-black text-brand-gold uppercase tracking-[0.3em] flex items-center gap-2">

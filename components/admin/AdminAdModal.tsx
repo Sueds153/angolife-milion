@@ -181,7 +181,7 @@ export const AdminAdModal: React.FC<AdminAdModalProps> = ({
   })();
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in overflow-y-auto">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in overflow-y-auto" role="dialog" aria-modal="true" aria-label="Gerir anúncio">
       <div className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-[2.5rem] overflow-hidden shadow-2xl border border-orange-500/20 flex flex-col max-h-[92dvh] my-auto">
         
         {/* Header */}

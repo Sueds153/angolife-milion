@@ -14,6 +14,7 @@ import { PublicarTrajetoForm } from "../components/vaija/PublicarTrajetoForm";
 import { PedirBoleiaForm } from "../components/vaija/PedirBoleiaForm";
 import { formatPreco } from "../components/vaija/helpers";
 import type { TrajetoAtivo, MotoristaPublico, DriverData, PedidoDemanda, TipoVeiculo, TipoUtilizador, Confirmacao } from "../types";
+import { Helmet } from "react-helmet-async";
 
 type Tab = "explorar" | "publicar" | "procurar" | "meus";
 
@@ -73,6 +74,15 @@ export const VaiJaPage: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 px-4 sm:px-0 pb-20">
+      <Helmet>
+        <title>VaiJá: Boleia e Trajetos em Angola | Resolve.AO</title>
+        <meta name="description" content="Encontra e publica trajetos de boleia em Angola. Combina preço, horário e lugares, e partilha a viagem no WhatsApp." />
+        <meta name="keywords" content="boleia angola, carona luanda, trajetos angola, partilha viagem, vaija resolve ao" />
+        <meta property="og:title" content="VaiJá: Boleia e Trajetos em Angola | Resolve.AO" />
+        <meta property="og:description" content="Encontra e publica trajetos de boleia em Angola com preço, horário e lugares disponíveis." />
+        <meta property="og:url" content="https://resolveao.vercel.app/vaija" />
+      </Helmet>
+
       <header className="flex items-center gap-4">
         <div className="w-14 h-14 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500">
           <Car size={26} />

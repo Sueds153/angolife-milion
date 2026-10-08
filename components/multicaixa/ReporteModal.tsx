@@ -72,7 +72,7 @@ export const ReporteModal: React.FC<ReporteModalProps> = ({ atm, onClose, onRepo
   const valorFormatado = valor === null ? "" : String(valor);
 
   return (
-    <div className="fixed inset-0 z-[140] flex items-end sm:items-center justify-center bg-slate-950/70 backdrop-blur-sm p-0 sm:p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-[140] flex items-end sm:items-center justify-center bg-slate-950/70 backdrop-blur-sm p-0 sm:p-4" onClick={onClose} role="dialog" aria-modal="true" aria-label="Reportar caixão Multicaixa">
       <div
         className="bg-white dark:bg-slate-900 w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl p-6 animate-slide-up"
         onClick={(e) => e.stopPropagation()}

@@ -100,7 +100,7 @@ export const LegalModals: React.FC<LegalModalsProps> = ({ isOpen, onClose, type 
   const current = content[type];
 
   return (
-    <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in p-4 overflow-y-auto" role="dialog" aria-modal="true" aria-label="Informação legal">
       <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl flex flex-col relative border border-orange-500/20 max-h-[85dvh] my-auto">
         
         {/* Header Fixed */}

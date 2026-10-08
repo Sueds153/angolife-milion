@@ -206,7 +206,7 @@ export const HomePage: React.FC = () => {
 
       {/* Interstitial Ad Overlay */}
       {showInterstitial && interstitialAd && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in" role="dialog" aria-modal="true" aria-label="Anúncio">
           <div className="relative w-full max-w-lg bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-2xl gold-border-subtle">
             <button 
               onClick={() => setShowInterstitial(false)}
@@ -276,7 +276,7 @@ export const HomePage: React.FC = () => {
           </button>
 
           {showRewarded && (
-            <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/95 animate-fade-in backdrop-blur-md">
+            <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/95 animate-fade-in backdrop-blur-md" role="dialog" aria-modal="true" aria-label="Oferta exclusiva">
               <div className="bg-slate-900 w-full max-w-sm rounded-[3rem] overflow-hidden border border-brand-gold/30 shadow-brand-gold/10 shadow-2xl">
                 <div className="p-8 text-center space-y-6">
                   <div className="w-20 h-20 bg-brand-gold/10 rounded-full flex items-center justify-center text-brand-gold mx-auto">

@@ -10,6 +10,7 @@ import { useVaiJaRealtime } from "../hooks/useVaiJaRealtime";
 import { formatPreco, tipoVeiculoLabel, formatExpira, buildWhatsAppShare, isLotado } from "../components/vaija/helpers";
 import type { TrajetoAtivo, MotoristaPublico, Confirmacao } from "../types";
 import { openExternal } from "../services/core/openExternal";
+import { Helmet } from "react-helmet-async";
 
 interface PassageiroRow {
   confirmacaoId: string;
@@ -99,6 +100,13 @@ export const VaiJaTrajetoPage: React.FC = () => {
 
   return (
     <div className="max-w-2xl mx-auto space-y-5 px-4 sm:px-0 pb-20">
+      <Helmet>
+        <title>Trajeto VaiJá | Boleia em Angola | Resolve.AO</title>
+        <meta name="description" content="Vê preço, lugares e horário do trajeto VaiJá, confirma a tua boleia e combina a partilha no WhatsApp." />
+        <meta name="robots" content="noindex, nofollow" />
+        <meta property="og:title" content="Trajeto VaiJá | Resolve.AO" />
+      </Helmet>
+
       <button
         onClick={() => navigate(-1)}
         className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-orange-500 transition-colors"

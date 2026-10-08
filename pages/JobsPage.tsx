@@ -237,7 +237,7 @@ export const JobsPage: React.FC<JobsPageProps> = ({
       </Helmet>
       {/* AD LOADING OVERLAY */}
       {isAdLoading && (
-        <div className="fixed inset-0 z-[180] bg-black/80 backdrop-blur-md flex flex-col items-center justify-center p-6 animate-fade-in">
+        <div className="fixed inset-0 z-[180] bg-black/80 backdrop-blur-md flex flex-col items-center justify-center p-6 animate-fade-in" role="status" aria-live="polite">
           <div className="bg-slate-900 border border-orange-500/30 p-10 rounded-[2.5rem] shadow-2xl flex flex-col items-center gap-6 max-w-xs w-full text-center">
             <div className="w-16 h-16 rounded-full border-t-2 border-orange-500 animate-spin"></div>
             <div className="space-y-2">
@@ -250,7 +250,7 @@ export const JobsPage: React.FC<JobsPageProps> = ({
 
       {/* PROCESSING OVERLAY (0.5s) */}
       {isProcessing && (
-        <div className="fixed inset-0 z-[190] bg-black/40 backdrop-blur-sm flex items-center justify-center animate-fade-in">
+        <div className="fixed inset-0 z-[190] bg-black/40 backdrop-blur-sm flex items-center justify-center animate-fade-in" role="status" aria-live="polite">
           <div className="bg-white dark:bg-slate-900 px-8 py-5 rounded-2xl shadow-2xl border border-orange-500/20 flex items-center gap-4">
             <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent animate-spin rounded-full"></div>
             <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest">A processar...</span>

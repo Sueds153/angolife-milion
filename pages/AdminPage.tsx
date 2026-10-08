@@ -31,6 +31,7 @@ import { AdminAdsSection } from '../components/admin/AdminAdsSection';
 import { AdminMulticaixaSection } from '../components/admin/AdminMulticaixaSection';
 import { AdminVaiJaSection } from '../components/admin/AdminVaiJaSection';
 import { BrandLogo } from '../components/ui/BrandLogo';
+import { Helmet } from 'react-helmet-async';
 
 export const AdminPage: React.FC = () => {
   const { user, setActiveAds: setGlobalActiveAds } = useAppStore();
@@ -650,6 +651,11 @@ export const AdminPage: React.FC = () => {
   if (!user?.isAdmin) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm border border-orange-500/30">
+        <Helmet>
+          <title>Painel Admin | Resolve.AO</title>
+          <meta name="robots" content="noindex, nofollow" />
+        </Helmet>
+
         <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-full mb-4">
           <Lock className="text-amber-500" size={32} />
         </div>
@@ -668,6 +674,14 @@ export const AdminPage: React.FC = () => {
 
   return (
     <div className="space-y-6 animate-slide-up pb-20">
+      <Helmet>
+        <title>Painel Admin | Resolve.AO</title>
+        <meta name="description" content="Área reservada à equipa Resolve.AO para gerir vagas, ofertas, câmbio, notícias e anúncios." />
+        <meta name="robots" content="noindex, nofollow" />
+        <meta property="og:title" content="Painel Admin | Resolve.AO" />
+        <meta property="og:description" content="Área reservada à equipa Resolve.AO para gerir vagas, ofertas, câmbio, notícias e anúncios." />
+      </Helmet>
+
       <div className="flex flex-col md:flex-row justify-between items-start gap-2">
         <div className="pt-safe w-full md:w-auto flex items-start gap-3">
           <BrandLogo size={40} alt="" className="mt-1" />

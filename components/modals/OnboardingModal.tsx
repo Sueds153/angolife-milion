@@ -10,15 +10,22 @@ export const OnboardingModal: React.FC = () => {
 
   useEffect(() => {
     const hasSeenOnboarding = localStorage.getItem('RESOLVEAO_onboarding_seen');
-    if (!hasSeenOnboarding) {
-      setTimeout(() => setIsOpen(true), 2000); // Show after 2 seconds
-    }
+    if (hasSeenOnboarding) return;
+    const timer = setTimeout(() => setIsOpen(true), 2000); // Show after 2 seconds
+    return () => clearTimeout(timer);
   }, []);
 
   const handleClose = () => {
     localStorage.setItem('RESOLVEAO_onboarding_seen', 'true');
     setIsOpen(false);
   };
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') handleClose(); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [isOpen]);
 
   const nextStep = () => {
     if (step < 3) setStep(step + 1);
@@ -51,7 +58,7 @@ export const OnboardingModal: React.FC = () => {
   const current = steps[step - 1];
 
   return (
-    <div className="fixed inset-0 z-[300] flex items-center justify-center p-6 bg-slate-950/60 backdrop-blur-md animate-fade-in overflow-y-auto">
+    <div className="fixed inset-0 z-[300] flex items-center justify-center p-6 bg-slate-950/60 backdrop-blur-md animate-fade-in overflow-y-auto" role="dialog" aria-modal="true" aria-label="Boas-vindas ao Resolve.AO">
       <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden border border-orange-500/20 animate-slide-up my-auto">
         {/* Header Image/Icon Area */}
         <div className={`h-48 bg-gradient-to-br ${current.color} flex items-center justify-center relative`}>
@@ -77,7 +84,7 @@ export const OnboardingModal: React.FC = () => {
           </p>
 
           {/* Step Indicators */}
-          <div className="flex justify-center gap-2 mb-8">
+          <div className="flex justify-center gap-2 mb-8" aria-hidden="true">
             {[1, 2, 3].map(i => (
               <div 
                 key={i} 
