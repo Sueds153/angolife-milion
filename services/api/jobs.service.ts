@@ -50,10 +50,18 @@ export const JobsService = {
         "status.eq.publicado,status.eq.published,status.eq.aprovado,status.eq.approved",
       );
       if (options.search && options.search.trim()) {
-        const term = options.search.trim();
-        query = query.or(
-          `title.ilike.%${term}%,company.ilike.%${term}%,location.ilike.%${term}%`,
-        );
+        // Remove caracteres estruturais do PostgREST (, ( ) ") — sem isto a
+        // busca quebra com HTTP 400 (ex: "gerente, tecnico") e devolve 0 vagas.
+        const term = options.search
+          .trim()
+          .replace(/[(),"]/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+        if (term) {
+          query = query.or(
+            `title.ilike.%${term}%,company.ilike.%${term}%,location.ilike.%${term}%`,
+          );
+        }
       }
       if (typeof options.from === "number" && typeof options.to === "number") {
         query = query.range(options.from, options.to);
@@ -162,7 +170,7 @@ export const JobsService = {
     const { error } = await supabase
       .from("jobs")
       .update({ status: "publicado" })
-      .or("status.eq.pending,status.eq.pendente");
+      .or("status.eq.pending,status.eq.pendente,status.eq.Pending,status.eq.Pendente");
     return !error;
   },
 
@@ -291,37 +299,32 @@ export const JobsService = {
     }));
   },
 
-  incrementApplicationCount: async (id: string): Promise<void> => {
-    const { data: job, error: fetchError } = await supabase
-      .from("jobs")
-      .select("application_count")
-      .eq("id", id)
-      .single();
-
-    if (fetchError || !job) return;
-
-    await supabase
-      .from("jobs")
-      .update({ application_count: (job.application_count || 0) + 1 })
-      .eq("id", id);
+  incrementApplicationCount: async (id: string): Promise<boolean> => {
+    // RPC SECURITY DEFINER (migração 20261008000003): os updates diretos em
+    // jobs eram bloqueados silenciosamente pela RLS para anon/authenticated.
+    const { error } = await supabase.rpc("bump_job_counter", {
+      p_job_id: id,
+      p_kind: "application",
+    });
+    if (error) {
+      console.error("Error incrementing application count:", error);
+      return false;
+    }
+    return true;
   },
 
-  reportJob: async (id: string): Promise<void> => {
-    const { data: job, error: fetchError } = await supabase
-      .from("jobs")
-      .select("report_count")
-      .eq("id", id)
-      .single();
-
-    if (fetchError || !job) return;
-
-    const newCount = (job.report_count || 0) + 1;
-    const updateData: Record<string, unknown> = { report_count: newCount };
-    if (newCount >= 3) {
-      updateData.status = "pendente"; // valor canónico (fase 9)
+  reportJob: async (id: string): Promise<boolean> => {
+    // A função incrementa no servidor e move a vaga para 'pendente' às 3
+    // denúncias; exige sessão iniciada (auth.uid() não nulo).
+    const { error } = await supabase.rpc("bump_job_counter", {
+      p_job_id: id,
+      p_kind: "report",
+    });
+    if (error) {
+      console.error("Error reporting job:", error);
+      return false;
     }
-
-    await supabase.from("jobs").update(updateData).eq("id", id);
+    return true;
   },
 
   toggleSaveJob: async (userId: string, currentSaved: string[], jobId: string): Promise<string[]> => {

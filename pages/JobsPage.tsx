@@ -56,6 +56,8 @@ export const JobsPage: React.FC<JobsPageProps> = ({
   }, [filter, selectedProvince]);
 
   // Pesquisa server-side com debounce (evita 1 request por tecla)
+  // Nota: este efeito já faz o load inicial (filter começa vazio), por isso
+  // não há um segundo useEffect de montagem — senão havia 2 GETs duplicados.
   useEffect(() => {
     const term = filter.trim();
     if (term.length < 2) {
@@ -67,19 +69,24 @@ export const JobsPage: React.FC<JobsPageProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
-  useEffect(() => {
-    loadJobs();
-  }, []);
-
   const loadJobs = async (searchTerm?: string) => {
     setLoading(true);
-    const data = await JobsService.getJobs(false, searchTerm ? { search: searchTerm } : {});
-    setJobs(data);
-    setLoading(false);
+    let data: Job[] = [];
+    try {
+      data = await JobsService.getJobs(false, searchTerm ? { search: searchTerm } : {});
+      setJobs(data);
+    } finally {
+      setLoading(false);
+    }
 
     // Interest-based Notification Logic
     if (data.length > 0) {
-      const savedInterests = JSON.parse(localStorage.getItem('user_interests') || '[]');
+      let savedInterests: string[] = [];
+      try {
+        savedInterests = JSON.parse(localStorage.getItem('user_interests') || '[]');
+      } catch {
+        savedInterests = [];
+      }
       if (savedInterests.length > 0) {
         // Find jobs posted in the last 2 hours that match interests
         const now = new Date();
@@ -101,7 +108,7 @@ export const JobsPage: React.FC<JobsPageProps> = ({
               `Nova vaga de ${match.category || 'Emprego'} disponível!`,
               `${match.title} @ ${match.company}. Clica para ver.`
             );
-          });
+          }).catch(() => {});
         }
       }
     }
@@ -174,9 +181,13 @@ export const JobsPage: React.FC<JobsPageProps> = ({
     }
     if (!confirm('Deseja denunciar esta vaga como falsa ou suspeita?')) return;
 
-    await JobsService.reportJob(jobId);
-    alert('Obrigado! A denúncia foi registada. Vagas com muitas denúncias são revistas pela nossa equipa.');
-    loadJobs();
+    const reported = await JobsService.reportJob(jobId);
+    if (reported) {
+      alert('Obrigado! A denúncia foi registada. Vagas com muitas denúncias são revistas pela nossa equipa.');
+      loadJobs();
+    } else {
+      alert('Não foi possível registar a denúncia. Tenta novamente.');
+    }
   };
 
   // Deduplicação + separação de vagas não confirmadas (notícias / Empresa Confidencial)
@@ -190,9 +201,15 @@ export const JobsPage: React.FC<JobsPageProps> = ({
 
   const displayJobs = showFlagged ? [...visibleJobs, ...flaggedJobs] : visibleJobs;
 
+  // Mesma sanitização do servidor (jobs.service.getJobs): sem isto, um termo
+  // com vírgula passa ao servidor (200) mas o filtro client-side nunca casa.
+  const searchTerm = filter.trim().replace(/[(),"]/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+
   const filteredJobs = displayJobs.filter(job => {
-    const matchesSearch = job.title.toLowerCase().includes(filter.toLowerCase()) ||
-      job.company.toLowerCase().includes(filter.toLowerCase());
+    const matchesSearch =
+      job.title.toLowerCase().includes(searchTerm) ||
+      job.company.toLowerCase().includes(searchTerm) ||
+      (job.location || '').toLowerCase().includes(searchTerm);
 
     // URGENCY FILTERS
     const postDate = new Date(job.postedAt);
