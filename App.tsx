@@ -38,14 +38,6 @@ const VaiJaTrajetoPage = lazy(() => import('./pages/VaiJaTrajetoPage').then(m =>
 const MulticaixaPage = lazy(() => import('./pages/MulticaixaPage').then(m => ({ default: m.MulticaixaPage })));
 type Page = 'home' | 'jobs' | 'exchange' | 'deals' | 'news' | 'admin' | 'profile' | 'cv-builder' | 'vaija' | 'multicaixa';
 
-// Emails com privilégio de admin. Configurável via VITE_ADMIN_EMAILS (separado por
-// vírgulas). Sem fallback hardcoded — sem env, só profiles.is_admin conta.
-const ADMIN_EMAILS = (import.meta.env.VITE_ADMIN_EMAILS || '')
-  .split(',')
-  .map((e: string) => e.trim().toLowerCase())
-  .filter(Boolean);
-const isAdminEmail = (email?: string | null) => !!email && ADMIN_EMAILS.includes(email.toLowerCase());
-
 const App: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -108,7 +100,7 @@ const App: React.FC = () => {
             cvCredits: profile.cv_credits,
             isPremium: profile.is_premium,
             premiumExpiry: profile.premium_expiry ? Number(profile.premium_expiry) : undefined,
-            isAdmin: profile.is_admin || isAdminEmail(sessionUser.email),
+            isAdmin: profile.is_admin,
             referralCount: profile.referral_count,
             accountType: profile.account_type,
             savedJobs: profile.saved_jobs || [],
@@ -133,7 +125,7 @@ const App: React.FC = () => {
             id: sessionUser.id,
             email: sessionUser.email,
             fullName: sessionUser.email.split('@')[0],
-            isAdmin: isAdminEmail(sessionUser.email),
+            isAdmin: false,
             isPremium: false,
             cvCredits: 0,
             referralCount: 0,

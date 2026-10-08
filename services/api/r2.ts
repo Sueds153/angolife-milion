@@ -118,15 +118,45 @@ export const r2PrivateDownloadUrl = async (key: string): Promise<string | null> 
 
 const PRIVATE_KEY_PREFIXES = ["payment-receipts/", "exchange-proofs/", "documentos-motorista/"];
 
+const supabasePublicUrlMatch = (
+  value: string,
+): { bucket: string; path: string } | null => {
+  const pathname = value.split("?")[0];
+  const m = pathname.match(
+    /\/storage\/v1\/object\/public\/(payment-receipts|exchange-proofs)\/(.+)$/,
+  );
+  return m ? { bucket: m[1], path: decodeURIComponent(m[2]) } : null;
+};
+
 /**
  * Resolve um valor guardado na DB para uma URL abrível:
- * - `data:` / `http(s):` → devolve tal como está (legado/base64)
+ * - `data:` → devolve tal como está (base64)
+ * - URL pública de bucket privado do Supabase → signed URL (1h)
  * - key R2 privada → presigned GET (300s)
  * Devolve null se não for possível resolver.
  */
 export const resolvePrivateStorageUrl = async (value: string): Promise<string | null> => {
   if (!value) return null;
-  if (value.startsWith("data:") || value.startsWith("http://") || value.startsWith("https://")) {
+  if (value.startsWith("data:")) {
+    return value;
+  }
+  const sb = supabasePublicUrlMatch(value);
+  if (sb) {
+    try {
+      const { data, error } = await supabase.storage
+        .from(sb.bucket)
+        .createSignedUrl(sb.path, 3600);
+      if (error) {
+        console.warn("[storage] sign error:", error.message);
+        return null;
+      }
+      return data?.signedUrl || null;
+    } catch (err) {
+      console.warn("[storage] sign exception:", err);
+      return null;
+    }
+  }
+  if (value.startsWith("http://") || value.startsWith("https://")) {
     return value;
   }
   if (PRIVATE_KEY_PREFIXES.some((p) => value.startsWith(p))) {
