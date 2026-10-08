@@ -557,7 +557,7 @@ export const CVBuilderPage: React.FC = () => {
                 className="bg-slate-50 dark:bg-white/5 p-3 rounded-lg w-full outline-none text-xs"
                 value={exp.startDate}
             onChange={e => updateExperience(exp.id, 'startDate', maskMonthYear(e.target.value))}
-            maxLength={2}
+            maxLength={7}
           />
           <input
             type="text"

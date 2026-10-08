@@ -13,13 +13,20 @@
 -- ============================================================
 
 -- 1a. protect_profile_sensitive_columns
+-- NOTA (2026-10-08): inclui bypass para service_role/postgres — sem ele a edge
+-- subscription-approve (service_role) tinha is_premium/account_type/cv_credits
+-- revertidos pelo trigger. Ver migration 20261008000004_fix_ai_usage_and_profile_trigger.sql.
 CREATE OR REPLACE FUNCTION public.protect_profile_sensitive_columns()
 RETURNS TRIGGER
 LANGUAGE plpgsql
-SECURITY DEFINER
+SECURITY INVOKER
 SET search_path = public, pg_catalog
 AS $$
 BEGIN
+  -- Perfis de servidor (Edge Functions via service_role / SQL directo postgres)
+  IF current_user IN ('service_role', 'postgres') THEN
+    RETURN NEW;
+  END IF;
   -- Impede que utilizadores normais alterem campos privilegiados
   IF auth.uid() IS NULL OR NOT EXISTS (
     SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true

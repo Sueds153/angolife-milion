@@ -194,7 +194,10 @@ END $$;
 DO $$
 BEGIN
   BEGIN
-    ALTER FUNCTION public.get_ai_usage(uuid, text) SECURITY INVOKER;
+    -- NOTA (2026-10-08): NÃO tornar INVOKER — quebra o cliente (403 em ai_usage).
+    -- Manter SECURITY DEFINER com guarda de ownership; ver migration
+    -- 20261008000004_fix_ai_usage_and_profile_trigger.sql.
+    -- ALTER FUNCTION public.get_ai_usage(uuid, text) SECURITY INVOKER;
   EXCEPTION WHEN undefined_function THEN NULL;
   END;
 

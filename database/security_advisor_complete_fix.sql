@@ -152,7 +152,10 @@ ALTER FUNCTION public.multicaixa_aprovar(uuid) SECURITY INVOKER;
 ALTER FUNCTION public.multicaixa_rejeitar(uuid) SECURITY INVOKER;
 ALTER FUNCTION public.is_admin() SECURITY INVOKER;
 ALTER FUNCTION public.check_is_admin() SECURITY INVOKER;
-ALTER FUNCTION public.get_ai_usage(uuid, text) SECURITY INVOKER;
+-- ALTER FUNCTION public.get_ai_usage(uuid, text) SECURITY INVOKER;
+-- NOTA (2026-10-08): NÃO tornar INVOKER — public.ai_usage tem REVOKE ALL de
+-- authenticated e o cliente recebe 403. Manter SECURITY DEFINER com guarda de
+-- ownership (ver supabase/migrations/20261008000004_fix_ai_usage_and_profile_trigger.sql).
 ALTER FUNCTION public.get_passageiros_do_trajeto(uuid) SECURITY INVOKER;
 ALTER FUNCTION public.multicaixa_adicionar(text, text, numeric, numeric, text) SECURITY INVOKER;
 ALTER FUNCTION public.multicaixa_estados(numeric, numeric, numeric) SECURITY INVOKER;
