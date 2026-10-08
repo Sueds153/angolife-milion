@@ -234,7 +234,12 @@ export const AdminAdsSection: React.FC<AdminAdsSectionProps> = ({
 
         {/* Lista de Anúncios */}
         <div className="lg:col-span-2 space-y-4">
-          <h4 className="font-black text-sm uppercase tracking-tight ml-2">Lista de Anúncios Ativos</h4>
+          <h4 className="font-black text-sm uppercase tracking-tight ml-2">
+            Lista de Anúncios
+            <span className="ml-2 text-[10px] font-bold text-slate-400 normal-case">
+              {ads.filter(a => a.is_active).length} ativo{ads.filter(a => a.is_active).length === 1 ? '' : 's'} de {ads.length}
+            </span>
+          </h4>
           
           <div className="grid grid-cols-1 gap-4">
             {ads.map((ad, adIndex) => (

@@ -176,11 +176,14 @@ const App: React.FC = () => {
       .catch((err) => console.error('[App] AdsService.getAds failed:', err));
   }, [activeAds.length, setActiveAds]);
 
-  const openInterstitial = (page: Page, callback?: () => void) => {
+  const openInterstitial = (page: Page, opts?: { callback?: () => void; navigateOnClose?: boolean }) => {
     const ad = selectAdForPlacement(activeAds, { format: 'interstitial', page });
     setOverlayCreative(creativeFromAd(ad));
     setOverlayDuration(ad?.duration_seconds || 5);
-    if (callback) setInterstitialCallback(() => callback);
+    setInterstitialCallback(opts?.callback ? () => opts.callback! : null);
+    // Só navega ao fechar quando o próprio handleNavigate pediu — nunca com
+    // um valor residual de navegações anteriores (bug: redirecionava à Home).
+    setPendingAdPage(opts?.navigateOnClose ? page : null);
     setShowInterstitial(true);
   };
 
@@ -273,7 +276,7 @@ const App: React.FC = () => {
   }, [subscribedCategories, addNotification, user?.id]);
 
   const [showRewarded, setShowRewarded] = useState(false);
-  const [pendingAdPage, setPendingAdPage] = useState<Page>('home');
+  const [pendingAdPage, setPendingAdPage] = useState<Page | null>(null);
 
   // Legal Modals State
   const [showLegalModal, setShowLegalModal] = useState<boolean>(false);
@@ -291,8 +294,7 @@ const App: React.FC = () => {
     const shouldShowAd = !(user?.isPremium || user?.isAdmin) && highValueTransitions.includes(page) && Math.random() > 0.6 && AdService.canShowInterstitial();
 
     if (shouldShowAd) {
-      setPendingAdPage(page);
-      openInterstitial(page);
+      openInterstitial(page, { navigateOnClose: true });
     } else {
       navigate(page === 'home' ? '/' : `/${page}`);
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -352,7 +354,7 @@ const App: React.FC = () => {
                     if (!AdService.canShowInterstitial()) {
                       callback();
                     } else {
-                      openInterstitial('jobs', callback);
+                      openInterstitial('jobs', { callback });
                     }
                   }}
                   subscribedCategories={subscribedCategories}
@@ -375,7 +377,7 @@ const App: React.FC = () => {
                       if (!AdService.canShowInterstitial()) {
                         callback();
                       } else {
-                        openInterstitial('deals', callback);
+                        openInterstitial('deals', { callback });
                       }
                     }}
                   />
@@ -396,7 +398,7 @@ const App: React.FC = () => {
                     if (!AdService.canShowInterstitial()) {
                       callback();
                     } else {
-                      openInterstitial('news', callback);
+                      openInterstitial('news', { callback });
                     }
                   }}
                 />
@@ -445,6 +447,7 @@ const App: React.FC = () => {
             setShowInterstitial(false);
             if (pendingAdPage) {
               navigate(pendingAdPage === 'home' ? '/' : `/${pendingAdPage}`);
+              setPendingAdPage(null);
               window.scrollTo(0, 0);
             }
             // Regista cooldown unificado (AdService 2h) sempre que o anúncio fecha

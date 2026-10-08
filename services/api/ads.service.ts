@@ -90,7 +90,25 @@ export const AdsService = {
         settings[item.key] = item.value;
       });
 
-      return { ...defaultSettings, ...(settings as Partial<SystemSettings>) } as SystemSettings;
+      // Merge profundo: um google_ads parcial na BD (ex. sem "slots") nunca
+      // pode apagar os defaults — AdBanner lê adsConfig.slots.* e rebentaria.
+      const rawGoogle = (settings.google_ads ?? {}) as Partial<SystemSettings['google_ads']>;
+      const rawContact = (settings.contact_info ?? {}) as Partial<SystemSettings['contact_info']>;
+
+      return {
+        google_ads: {
+          ...defaultSettings.google_ads,
+          ...rawGoogle,
+          slots: {
+            ...defaultSettings.google_ads.slots,
+            ...(rawGoogle.slots ?? {}),
+          },
+        },
+        contact_info: {
+          ...defaultSettings.contact_info,
+          ...rawContact,
+        },
+      };
     } catch {
       return defaultSettings;
     }
