@@ -139,7 +139,17 @@ export const ProfilePage: React.FC = () => {
       const newHistory = await JobsService.submitJobApplication(user.id || '', user.applicationHistory || [], job);
       onUpdateUser({ applicationHistory: newHistory });
     }
-    openExternal(`mailto:${job.applicationEmail}?subject=Candidatura: ${job.title}`);
+    const parsed = JobUtils.parseJobData(job);
+    const email = parsed.applyMethod === 'email'
+      ? (parsed.applyTarget.includes('@') ? parsed.applyTarget : (job.applicationEmail || ''))
+      : (job.applicationEmail || '');
+    const target = email
+      ? `mailto:${email}?subject=${encodeURIComponent(`Candidatura: ${parsed.cleanTitle || job.title}`)}`
+      : (job.sourceUrl || '');
+    const opened = target ? await openExternal(target) : false;
+    if (!opened) {
+      alert('Não foi possível abrir o canal de candidatura desta vaga.');
+    }
     setSavedJobsData(prev => prev.map(j => j.id === job.id ? { ...j, applicationCount: (j.applicationCount || 0) + 1 } : j));
   };
 

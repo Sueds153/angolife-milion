@@ -42,6 +42,8 @@ export const JobsService = {
       search?: string;
       from?: number;
       to?: number;
+      /** Lança a exceção em vez de devolver [] — para a UI mostrar erro. */
+      throwOnError?: boolean;
     } = {},
   ): Promise<Job[]> => {
     let query = supabase.from("jobs").select("*");
@@ -73,6 +75,7 @@ export const JobsService = {
     const { data, error } = await query.order("posted_at", { ascending: false });
     if (error) {
       console.error("Error fetching jobs:", error);
+      if (options.throwOnError) throw error;
       return [];
     }
 
@@ -355,7 +358,9 @@ export const JobsService = {
       .update({ application_history: newHistory })
       .eq("id", userId);
 
-    await JobsService.incrementApplicationCount(job.id);
+    // NOTA: o incremento do contador é responsabilidade de quem chama
+    // (JobsPage/ProfilePage chamam incrementApplicationCount uma única vez) —
+    // duplicá-lo aqui fazia +2 por candidatura de utilizador autenticado.
 
     return newHistory;
   },

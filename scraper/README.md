@@ -68,16 +68,24 @@ jobs:
         run: pip install -r scraper/requirements.txt
       - name: Correr scraper
         env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: python scraper/ango_job_scraper.py
 ```
 
 ## 📋 Fluxo de Trabalho
 
 ```text
-Sites Angolanos → AngoJobScraper → Supabase (status: pendente) → Admin aprova → App exibe
+Sites Angolanos → AngoJobScraper → Supabase (status: publicado) → App exibe
 ```
+
+- O scraper **publica diretamente** (`status: publicado`), 2×/dia, já com
+  deduplicação por URL **e** por título+empresa (a mesma vaga vem de várias fontes).
+- A fila de revisão (`status: pendente`) é só para vagas criadas no painel Admin
+  ou sincronizadas pelo Gemini — essas passam por aprovação antes de aparecerem.
+- Denúncias: ao chegar a 3, a vaga volta automaticamente para `pendente` (RPC
+  `bump_job_counter`) e reaparece na fila do admin.
 
 ## 🔍 Como Encontrar os Seletores CSS
 

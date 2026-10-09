@@ -38,6 +38,21 @@ const VaiJaTrajetoPage = lazy(() => import('./pages/VaiJaTrajetoPage').then(m =>
 const MulticaixaPage = lazy(() => import('./pages/MulticaixaPage').then(m => ({ default: m.MulticaixaPage })));
 type Page = 'home' | 'jobs' | 'exchange' | 'deals' | 'news' | 'admin' | 'profile' | 'cv-builder' | 'vaija' | 'multicaixa';
 
+// Rotas reais do router — `/${page}` NÃO funciona para a maioria das páginas
+// (ex.: 'jobs' → /jobs não existe e caía no wildcard → redirect para a Home).
+const PATH_FOR_PAGE: Record<Page, string> = {
+  home: '/',
+  jobs: '/vagas',
+  exchange: '/cambio',
+  deals: '/ofertas',
+  news: '/noticias',
+  admin: '/admin',
+  profile: '/perfil',
+  'cv-builder': '/cv-criador',
+  vaija: '/vaija',
+  multicaixa: '/multicaixa',
+};
+
 const App: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -288,7 +303,7 @@ const App: React.FC = () => {
     if (shouldShowAd) {
       openInterstitial(page, { navigateOnClose: true });
     } else {
-      navigate(page === 'home' ? '/' : `/${page}`);
+      navigate(PATH_FOR_PAGE[page]);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
@@ -438,7 +453,7 @@ const App: React.FC = () => {
           onClose={() => {
             setShowInterstitial(false);
             if (pendingAdPage) {
-              navigate(pendingAdPage === 'home' ? '/' : `/${pendingAdPage}`);
+              navigate(PATH_FOR_PAGE[pendingAdPage]);
               setPendingAdPage(null);
               window.scrollTo(0, 0);
             }

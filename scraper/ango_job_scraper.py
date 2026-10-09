@@ -716,6 +716,14 @@ class AngoJobScraper:
                 log.warning(f"  ⏭️  Título inválido após limpeza em {site_name}")
                 return False
 
+            # 3.6 Deduplicação composta (título + empresa) — a mesma vaga
+            # publicada em vários sites tem URLs distintas, por isso a checagem
+            # de URL não a apanha. Sem esta verificação o job era inserido uma
+            # vez por fonte (455 linhas duplicadas em 612).
+            if self._is_duplicate_composite(title, company):
+                log.debug(f"  ⏭️  Duplicado (título+empresa): {title} @ {company}")
+                return False
+
             # 4. DEEP SCRAPING (Página de Detalhe)
             description = ""
             requirements_list = []

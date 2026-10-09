@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Search, ChevronRight, AlertTriangle, ShieldCheck, Clock } from 'lucide-react';
 import { JobsService } from '../services/api/jobs.service';
 import { Job, UserProfile } from '../types';
@@ -36,11 +36,13 @@ export const JobsPage: React.FC<JobsPageProps> = ({
   
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [filter, setFilter] = useState('');
   const [selectedProvince, setSelectedProvince] = useState('Todas');
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [showFlagged, setShowFlagged] = useState(false);
+  const loadSeqRef = useRef(0);
   const JOBS_PER_PAGE = 12;
 
   const { 
@@ -70,14 +72,28 @@ export const JobsPage: React.FC<JobsPageProps> = ({
   }, [filter]);
 
   const loadJobs = async (searchTerm?: string) => {
+    // Guarda de corrida: só a resposta mais recente é aplicada (senão uma
+    // resposta lenta de um termo anterior sobreponha os resultados atuais).
+    const seq = ++loadSeqRef.current;
     setLoading(true);
+    setLoadError(false);
     let data: Job[] = [];
     try {
-      data = await JobsService.getJobs(false, searchTerm ? { search: searchTerm } : {});
+      data = await JobsService.getJobs(
+        false,
+        searchTerm ? { search: searchTerm, throwOnError: true } : { throwOnError: true },
+      );
+      if (seq !== loadSeqRef.current) return;
       setJobs(data);
-    } finally {
+    } catch {
+      if (seq !== loadSeqRef.current) return;
+      setLoadError(true);
+      setJobs([]);
       setLoading(false);
+      return;
     }
+    if (seq !== loadSeqRef.current) return;
+    setLoading(false);
 
     // Interest-based Notification Logic
     if (data.length > 0) {
@@ -157,7 +173,7 @@ export const JobsPage: React.FC<JobsPageProps> = ({
 
   const handleApplyClick = async (job: Job) => {
     const executeApply = async () => {
-      // 1. Increment global count
+      // 1. Increment global count (uma única vez — ver jobs.service)
       await JobsService.incrementApplicationCount(job.id);
 
       // 2. Save to user history if authenticated
@@ -166,7 +182,19 @@ export const JobsPage: React.FC<JobsPageProps> = ({
         onUpdateUser({ applicationHistory: newHistory });
       }
 
-      openExternal(`mailto:${job.applicationEmail}?subject=Candidatura: ${job.title}`);
+      // 3. Abrir o canal de candidatura (mailto: agora é aceite pelo safeUrl)
+      const parsed = JobUtils.parseJobData(job);
+      const email = parsed.applyMethod === 'email'
+        ? (parsed.applyTarget.includes('@') ? parsed.applyTarget : (job.applicationEmail || ''))
+        : (job.applicationEmail || '');
+      const target = email
+        ? `mailto:${email}?subject=${encodeURIComponent(`Candidatura: ${parsed.cleanTitle || job.title}`)}`
+        : (job.sourceUrl || '');
+      const opened = target ? await openExternal(target) : false;
+      if (!opened) {
+        alert('Não foi possível abrir o canal de candidatura desta vaga. Tenta novamente ou contacta a empresa pela fonte da vaga.');
+      }
+
       setJobs(prev => prev.map(j => j.id === job.id ? { ...j, applicationCount: (j.applicationCount || 0) + 1 } : j));
     };
 
@@ -234,6 +262,13 @@ export const JobsPage: React.FC<JobsPageProps> = ({
   const totalPages = Math.ceil(filteredJobs.length / JOBS_PER_PAGE);
   const paginatedJobs = filteredJobs.slice((currentPage - 1) * JOBS_PER_PAGE, currentPage * JOBS_PER_PAGE);
 
+  // A lista pode encolher (denúncia, dedupe, toggle de não-confirmadas) sem
+  // passar pelos resets de filtro — sem isto o utilizador ficava preso numa
+  // página inexistente a ver o estado vazio.
+  useEffect(() => {
+    if (totalPages > 0 && currentPage > totalPages) setCurrentPage(totalPages);
+  }, [totalPages, currentPage]);
+
   // Categorias dos alertas alinhadas às realmente presentes nas vagas
   const alertCategories = useMemo(() => {
     const counts = new Map<string, number>();
@@ -290,9 +325,14 @@ export const JobsPage: React.FC<JobsPageProps> = ({
               const val = e.target.value;
               setFilter(val);
               if (val.length > 3) {
-                const interests = JSON.parse(localStorage.getItem('user_interests') || '[]');
-                if (!interests.includes(val)) {
-                  localStorage.setItem('user_interests', JSON.stringify([...interests, val].slice(-10)));
+                try {
+                  const interests = JSON.parse(localStorage.getItem('user_interests') || '[]');
+                  if (Array.isArray(interests) && !interests.includes(val)) {
+                    localStorage.setItem('user_interests', JSON.stringify([...interests, val].slice(-10)));
+                  }
+                } catch {
+                  // localStorage corrompido — repõe com lista limpa
+                  localStorage.setItem('user_interests', JSON.stringify([val]));
                 }
               }
             }}
@@ -369,6 +409,22 @@ export const JobsPage: React.FC<JobsPageProps> = ({
           {[1, 2, 3].map(i => (
             <div key={i} className="bg-white dark:bg-slate-900 h-32 rounded-3xl animate-pulse gold-border-subtle"></div>
           ))}
+        </div>
+      ) : loadError ? (
+        <div role="alert" className="col-span-full py-20 px-6 bg-white dark:bg-slate-900 rounded-[3rem] border border-red-500/20 text-center animate-fade-in shadow-sm">
+          <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6 text-red-500">
+            <AlertTriangle size={40} />
+          </div>
+          <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight mb-2">Falha ao carregar vagas</h3>
+          <p className="text-slate-500 dark:text-slate-400 font-medium max-w-xs mx-auto text-sm leading-relaxed">
+            Não conseguimos contactar o servidor. Verifica a tua ligação e tenta novamente.
+          </p>
+          <button
+            onClick={() => loadJobs(filter.trim().length >= 2 ? filter.trim() : undefined)}
+            className="mt-8 px-8 py-3 bg-orange-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-orange-500/20 active:scale-95 transition-all"
+          >
+            TENTAR NOVAMENTE
+          </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
