@@ -15,7 +15,7 @@ Ou usar ferramentas online confiáveis.
 ## 2. Configurar Variáveis de Ambiente
 
 ### No Frontend (Vite)
-Adiciona ao teu arquivo `.env` ou nas configurações do Vercel/Netlify:
+Adiciona ao teu arquivo `.env.local` ou nas configurações do Vercel:
 - `VITE_VAPID_PUBLIC_KEY`: A chave pública gerada.
 
 ### No Supabase (Edge Functions)

@@ -36,6 +36,7 @@ dist-ssr
 
 .vercel
 .env*
+!.env.example
 
 # Android / Capacitor build output
 android/.gradle

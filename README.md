@@ -19,7 +19,7 @@ O portal definitivo para **empregos**, **câmbio informal (Kwanza/Dólar/Euro)**
    npm install
    ```
 
-2. Criar `.env.local` a partir de `.env.local.example` (ou reutilizar o existente) com:
+2. Criar `.env.local` a partir de `.env.example` (ou reutilizar o existente) com:
 
    ```
    VITE_SUPABASE_URL=https://<ref>.supabase.co
@@ -46,9 +46,8 @@ O portal definitivo para **empregos**, **câmbio informal (Kwanza/Dólar/Euro)**
 
 ## Base de dados
 
-- Schema mestre consolidado: `database/consolidated_master_schema.sql`
-- Migrações e patches: `database/*.sql`
-- Pasta `_archive/database/` guarda SQL histórico (não voltar a aplicar por inteiro)
+- **Fonte canónica**: `supabase/migrations/` — migrações novas vão sempre aqui (nunca editar migrations já aplicadas)
+- `database/` guarda apenas patches/manuais históricos, referência e schema mestre consolidado (`database/consolidated_master_schema.sql`) — **não** é aplicado automaticamente por `supabase db push`
 
 Para aplicar alterações ao banco de produção:
 
@@ -78,8 +77,13 @@ Requerem as variáveis `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` e `SUPABASE
 ## Notas de segurança
 
 - Nunca colocar `SUPABASE_SERVICE_ROLE_KEY` em código de frontend — usar apenas em Edge Functions/scripts server-side.
-- A `Content-Security-Policy` está definida em `netlify.toml` e `vercel.json` — manter os domínios externos actualizados (Supabase, Plausible, Google Fonts).
+- A `Content-Security-Policy` está definida em `vercel.json` — manter os domínios externos actualizados (Supabase, Plausible, Google Fonts).
 
 ## Deploy
 
-O projeto está configurado para **Netlify** (`netlify.toml`) e **Vercel** (`vercel.json`). Ambos publicam `dist/` com SPA fallback (`/* -> /index.html`).
+O projeto está configurado para **Vercel** (`vercel.json`), que publica `dist/` com SPA fallback (`/* -> /index.html`). Deploy automático no push a `main` → https://resolveao.vercel.app/
+
+## Utilitários
+
+- `scripts/` — utilitários manuais pontuais (logo, migrações pontuais, SQL de setup); não fazem parte do fluxo normal
+- `scraper/` — scrapers Python corridos pelos GitHub Actions (ver secção acima)

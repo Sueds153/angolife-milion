@@ -1,24 +1,18 @@
+# Resolve.AO — utilitários manuais (`scripts/`)
 
-# Resolve.AO Automation Scripts 🤖
+Scripts pontuais de manutenção/automação. **Não fazem parte do fluxo normal** da app.
 
-Este diretório contém os scripts para automação de conteúdo (Vagas de Emprego e Notícias).
+> O scraping de conteúdo (empregos/notícias) **não** vive aqui: é feito por `scraper/`
+> através dos GitHub Actions (`.github/workflows/scraper.yml` e `news_scraper.yml`).
 
-## Pré-requisitos
-- Python instalado (você já tem!)
+| Ficheiro | Para que serve |
+| --- | --- |
+| `generate-logo.mjs` | Gera o logo/identidade visual (usado com `node scripts/generate-logo.mjs`) |
+| `migrate_r2_sensitive_private.py` | Migra objetos R2 para o bucket privado `sensitive` |
+| `setup_ads_bucket.sql` | Cria/define permissões do bucket de anúncios no Storage |
+| `fix_admin_profile.py` | Corrige perfis de admin na base de dados |
+| `requirements.txt` | Dependências Python dos scripts acima |
 
-## Como Configurar (Apenas na primeira vez)
-dê duplo clique em:
-👉 **`setup_env.bat`**
-
-Isso vai instalar as bibliotecas necessárias (`requests`, `beautifulsoup4`, `feedparser`).
-
-## Como Rodar os "Robôs"
-Sempre que quiser buscar novas vagas ou notícias, dê duplo clique em:
-👉 **`run_scrapers.bat`**
-
-Isso vai:
-1.  Rodar o `scraper_jobs.py` (buscar vagas)
-2.  Rodar o `rss_news.py` (buscar notícias RSS)
-3.  Simular o envio para o banco de dados (estado `pending`)
-
-Depois, vá ao **Painel de Admin** na web app para aprovar o conteúdo.
+```bash
+pip install -r scripts/requirements.txt   # deps dos scripts Python
+```
